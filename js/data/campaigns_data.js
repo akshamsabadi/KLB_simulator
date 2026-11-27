@@ -10,7 +10,7 @@ window.KLB.CAMPAIGNS = {
     charId: 'daniel_richards',
     title: 'Fab Pyridazinedione Rebridging & AuNP Lateral-Flow Biosensor',
     manuscriptTopic: 'Fab Pyridazinedione & AuNP Lateral Flow SI',
-    paperRef: 'Richards, Szijj, Nogueira & Chudasama et al., Nanoscale 2021, 13, 11921 (DOI: 10.1039/d1nr02584h); Richards, Nogueira, Fernandez & Chudasama et al., Chem. Sci. 2018, 9, 790 (DOI: 10.1039/c7sc02747h)',
+    paperRef: 'Richards, Szijj, Nogueira & Chudasama et al., Nanoscale 2021, 13, 11921 (DOI: 10.1039/d1nr02584h); Richards, Nogueira, Fernández & Chudasama et al., Chem. Sci. 2018, 9, 790 (DOI: 10.1039/c7sc02747h)',
     overview: 'Digest Trastuzumab into Fab, rebridge with BCN-PD, and build AuNP lateral-flow strips.',
     steps: [
       {
@@ -22,7 +22,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -48,7 +48,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['balance_table'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -63,7 +63,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -78,7 +78,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -118,35 +118,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you isolate pure FabHER2 cleanly?',
+          prompt: 'Which pepsin/papain conditions yield pure FabHER2?',
           options: [
             {
               label: 'Pepsin pH 3.1, then DTT-washed papain pH 6.8',
               isOptimal: true,
-              yieldMod: 8,
-              purityMod: 10,
+              yieldMod: 9,
+              purityMod: 11,
               safetyMod: 2,
               outcomeText: 'Clean 48 kDa Fab with intact internal disulfide.'
             },
             {
-              label: 'One-step papain plus Protein A column',
+              label: 'Pepsin pH 3.1, then unwashed 5 mM Cys papain',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -14,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Trastuzumab VH3 binds Protein A and loses 80% Fab.'
+              outcomeText: 'Carryover cysteine partially cleaves Fab chains.'
             },
             {
-              label: 'Papain digest with unwashed 10 mM DTT',
+              label: 'Pepsin pH 4.2, then papain at pH 7.4 for 6 h',
               isOptimal: false,
-              yieldMod: -12,
-              purityMod: -20,
-              safetyMod: 0,
-              outcomeText: 'Leftover DTT splits Fab into 25 kDa monomers.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Incomplete Fc cleavage lowers Fab recovery.'
+            },
+            {
+              label: 'One-step papain plus Protein A capture column',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Trastuzumab VH3 binds Protein A and loses Fab.'
             }
           ],
-          askChudsHint: 'Peter: Avoid Protein A for Herceptin Fab; run pepsin pH 3.1 then DTT-free papain.',
-          antoineHint: 'Antoine: Two-step pepsin pH 3.1 then washed papain pH 6.8 keeps Fab intact.'
+          askChudsHint: 'Peter: Avoid Protein A capture on VH3 Herceptin; keep sequential digests buffered and free of soluble reductant.',
+          antoineHint: 'Antoine: Two-step cleavage at acidic pepsin pH followed by washed immobilised papain preserves the Fab disulfide.'
         },
         dataOutput: {
           type: 'gel',
@@ -159,12 +167,12 @@ window.KLB.CAMPAIGNS = {
         index: 1,
         id: 'dan_step_2',
         dayHint: 'Tue',
-        title: 'Synthesize BCN-PD Linker',
+        title: 'Synthesise BCN-PD Linker',
         desc: 'Couple diBrPD-NHS with BCN-amine, purify on column, and run NMR.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 25,
+        durationMins: 23,
         sweetSpotMins: 69,
         minigame: 'biotage',
         subTasks: [
@@ -190,7 +198,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 23,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -205,7 +213,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['biotage'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -215,12 +223,12 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'dan_2_4',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (CDCl3)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -235,7 +243,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 18,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -260,35 +268,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you couple and purify acid-sensitive BCN?',
+          prompt: 'How do you couple and purify strained BCN-PD?',
           options: [
             {
-              label: 'Dry MeCN at 21 C; neutral EtOAc/petrol column',
+              label: 'Dry MeCN at 21 °C; neutral EtOAc/petrol column',
               isOptimal: true,
               yieldMod: 8,
-              purityMod: 10,
+              purityMod: 11,
               safetyMod: 2,
               outcomeText: 'Clean coupling gives pure yellow BCN-PD linker.'
             },
             {
-              label: 'Reflux in glacial acetic acid for 3 hours',
+              label: 'Dry DMF at 21 °C; 0.1% Et3N-treated silica',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -20,
-              safetyMod: -5,
-              outcomeText: 'Hot acid ring-opens the strained alkyne.'
+              yieldMod: 3,
+              purityMod: -4,
+              safetyMod: 0,
+              outcomeText: 'Mild base trims NHS side-product but drags DMF.'
             },
             {
-              label: 'Elute Biotage column with 1% TFA in DCM',
+              label: 'Dry DCM at 40 °C; MeOH/DCM silica gradient',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -18,
-              safetyMod: -4,
-              outcomeText: 'TFA rearranges strained BCN on silica.'
+              yieldMod: -7,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Warm DCM causes partial transesterification.'
+            },
+            {
+              label: 'Dry MeCN at 21 °C; 0.5% AcOH/DCM silica run',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -16,
+              safetyMod: -5,
+              outcomeText: 'Acidic silica protonates and opens strained BCN.'
             }
           ],
-          askChudsHint: 'Joao: Keep acid away from BCN; stir in dry MeCN and run a neutral column.',
-          antoineHint: 'Antoine: Couple diBrPD-NHS at room temp in dry MeCN with zero TFA.'
+          askChudsHint: 'João: Strained cyclooctynes are acid-sensitive on silica and dislike protic solvents during coupling.',
+          antoineHint: 'Antoine: Polar aprotic MeCN at ambient temperature avoids ester loss and keeps silica neutral.'
         },
         dataOutput: {
           type: 'nmr',
@@ -306,7 +322,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['tcep_bench'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 25,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -317,7 +333,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -332,7 +348,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 25,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -347,7 +363,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -362,7 +378,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 17,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -387,7 +403,7 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you prep Fab-BCN before LG11 Q-TOF MS?',
+          prompt: 'How do you prep Fab-BCN for LG11 Q-TOF MS?',
           options: [
             {
               label: 'Desalt 6x into LC-MS water on 10 kDa spin',
@@ -398,24 +414,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Zero salt suppression and crisp 48,295 Da peak.'
             },
             {
-              label: 'Inject crude borate and NaCl buffer mix',
+              label: 'Desalt 3x into 10 mM NH4OAc on 10 kDa spin',
               isOptimal: false,
-              yieldMod: -10,
-              purityMod: -18,
-              safetyMod: -8,
-              outcomeText: 'Borate crusts cone and sodium adducts swamp MS.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Trace acetate shifts baseline and broadens tail.'
             },
             {
-              label: 'Add 10% PEG-400 and PBS before injection',
+              label: 'Desalt 2x into 5 mM PBS on 30 kDa spin',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: '30 kDa cutoff leaks Fab and sodium adducts stay.'
+            },
+            {
+              label: 'Dilute 1:5 in 0.1% FA with residual borate',
               isOptimal: false,
               yieldMod: -12,
-              purityMod: -22,
-              safetyMod: -12,
-              outcomeText: 'PEG floods spectra and Kersti shuts down LG11.'
+              purityMod: -15,
+              safetyMod: -6,
+              outcomeText: 'Borate suppresses ESI signal and crusts the cone.'
             }
           ],
-          askChudsHint: 'Richard: Always desalt 6x into LC-MS water before LG11 so borate does not suppress.',
-          antoineHint: 'Antoine: Spin-desalt into pure water to see 48,295 Da cleanly on MaxEnt1.'
+          askChudsHint: 'Richard: Match spin-filter cutoff well below 48 kDa and strip non-volatile salts thoroughly before ESI.',
+          antoineHint: 'Antoine: Six thorough water washes on a 10 kDa membrane clear borate cleanly for MaxEnt1 deconvolution.'
         },
         dataOutput: {
           type: 'lcms',
@@ -433,7 +457,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 25,
+        durationMins: 23,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -459,7 +483,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 23,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -474,7 +498,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -489,7 +513,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -517,7 +541,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you coat 40 nm gold without aggregation?',
           options: [
             {
-              label: 'EDTA-dialysed BSA-TCO in 20 mM MES pH 5.2',
+              label: 'EDTA-treated BSA-TCO in 20 mM MES pH 5.2',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 10,
@@ -525,24 +549,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Ruby salt-stable particles with clean gel shift.'
             },
             {
-              label: 'Untreated BSA-TCO in standard 1x PBS pH 7.4',
+              label: 'EDTA-treated BSA-TCO in 20 mM MES pH 5.8',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -20,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Trace Cu kills TCO and PBS aggregates gold.'
+              outcomeText: 'Slightly above pI lowers corona packing density.'
             },
             {
-              label: 'Coat in unbuffered water at pH 3.0',
+              label: 'Untreated BSA-TCO in 10 mM citrate pH 5.2',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -16,
-              safetyMod: 0,
-              outcomeText: 'Low pH strips citrate and crashes black gold.'
+              yieldMod: -7,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Trace metal ions slowly isomerise strained TCO.'
+            },
+            {
+              label: 'Untreated BSA-TCO in 1x PBS pH 7.4',
+              isOptimal: false,
+              yieldMod: -14,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'High ionic strength collapses citrate double layer.'
             }
           ],
-          askChudsHint: 'Peter: Dialyse BSA with EDTA to strip copper and coat in 20 mM MES pH 5.2.',
-          antoineHint: 'Antoine: MES pH 5.20 in LoBind tubes hits the sweet spot for BSA-TCO coating.'
+          askChudsHint: 'Peter: Coat just near BSA isoelectric pH with low ionic strength and chelate trace metals off TCO.',
+          antoineHint: 'Antoine: Low-salt MES right above pH 5 packs BSA densely while EDTA protects the trans-cyclooctene.'
         },
         dataOutput: {
           type: 'gel',
@@ -560,7 +592,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 25,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -586,7 +618,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -641,35 +673,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which running buffer do you wick down NC-95?',
+          prompt: 'Which running buffer wicks cleanly down NC-95?',
           options: [
             {
-              label: 'Serum plus 0.1% Tween 20 with blank control',
+              label: 'PBS + 0.1% Tween 20 + 1% BSA; blank strip',
               isOptimal: true,
               yieldMod: 8,
-              purityMod: 10,
+              purityMod: 11,
               safetyMod: 2,
               outcomeText: 'Sharp crimson test line with clean blank strip.'
             },
             {
-              label: 'Neat PBS without Tween 20 or blocker',
+              label: 'PBS + 0.02% Tween 20; zero-HER2 control strip',
               isOptimal: false,
-              yieldMod: -12,
-              purityMod: -18,
+              yieldMod: 2,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Conjugate stalls and smears the control strip.'
+              outcomeText: 'Low detergent slows flow and leaves faint haze.'
             },
             {
-              label: '50% MeCN / 50% DMSO organic mobile phase',
+              label: 'PBS + 1% Tween 20 without BSA blocker',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -22,
-              safetyMod: -6,
-              outcomeText: 'DMSO dissolves nitrocellulose into sticky gel.'
+              yieldMod: -6,
+              purityMod: -8,
+              safetyMod: -2,
+              outcomeText: 'Excess surfactant and no blocker raise background.'
+            },
+            {
+              label: 'Neat 1x PBS pH 7.4 with no surfactant',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -14,
+              safetyMod: -4,
+              outcomeText: 'Conjugate stalls near pad and smears test zone.'
             }
           ],
-          askChudsHint: 'Joao: Serum plus 0.1% Tween 20 keeps NC-95 flowing cleanly with a blank control.',
-          antoineHint: 'Antoine: Tween 20 surfactant and a zero-HER2 control strip give clean densitometry.'
+          askChudsHint: 'João: Pair mild non-ionic detergent with protein blocker on nitrocellulose and include a zero-analyte strip.',
+          antoineHint: 'Antoine: Around 0.1% Tween 20 plus BSA keeps nanoparticles mobile without washing off capture IgG.'
         },
         dataOutput: {
           type: 'tlc',
@@ -682,25 +722,25 @@ window.KLB.CAMPAIGNS = {
   },
 
   // =========================================================================
-  // 2. MAXIMILLIAN LEE - 25 A Bis-diBrPD Stapling & Native DAR 2.0 Herceptin
+  // 2. MAXIMILLIAN LEE - 25 Å Bis-diBrPD Stapling & Native DAR 2.0 Herceptin
   // =========================================================================
   maximillian_lee: {
     charId: 'maximillian_lee',
-    title: '25 A Bis-diBrPD Stapling & Native DAR 2.0 Herceptin ADCs',
-    manuscriptTopic: '25 A Bis-diBrPD Stapling & Native DAR 2 ADCs',
+    title: '25 Å Bis-diBrPD Stapling & Native DAR 2.0 Herceptin ADCs',
+    manuscriptTopic: '25 Å Bis-diBrPD Stapling & Native DAR 2 ADCs',
     paperRef: 'Lee, Maruani, Richards, Baker & Chudasama, Chem. Sci. 2017, 8, 2056 (DOI: 10.1039/c6sc03655d); Lee, Maruani, Baker & Chudasama, Chem. Sci. 2016, 7, 799 (DOI: 10.1039/c5sc02666k)',
-    overview: 'Build 25 A bis-PD staples and lock native Herceptin into DAR 2.0 conjugates.',
+    overview: 'Build 25 Å bis-PD staples and lock native Herceptin into DAR 2.0 conjugates.',
     steps: [
       {
         index: 0,
         id: 'max_step_1',
         dayHint: 'Mon',
-        title: 'Synthesize Bis-PD Crosslinker',
-        desc: 'Bridge two diBrPD heads across a 25 A PEG spacer and purify.',
+        title: 'Synthesise Bis-PD Crosslinker',
+        desc: 'Bridge two diBrPD heads across a 25 Å PEG spacer and purify.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 23,
         sweetSpotMins: 69,
         minigame: 'biotage',
         subTasks: [
@@ -709,7 +749,7 @@ window.KLB.CAMPAIGNS = {
             label: 'Get dry solvent',
             roomId: 'klb_2f',
             stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            cupboardHint: 'Cupboard 1 (Dry Solvents)',
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -726,7 +766,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['balance_table'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -741,7 +781,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 23,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -756,12 +796,12 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tlc_station'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
             minigame: null,
-            viewOutput: 'tlc',
+            viewOutput: null,
             requiresJobFromPrev: false
           },
           {
@@ -771,7 +811,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['buchi'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -791,40 +831,48 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'biotage',
-            viewOutput: null,
+            viewOutput: 'tlc',
             requiresJobFromPrev: false
           }
         ],
         choice: {
-          prompt: 'Which diamine builds a clean IgG1 hinge staple?',
+          prompt: 'Which spacer and base build the IgG1 hinge staple?',
           options: [
             {
-              label: '25 A trioxa-tridecanediamine PEG spacer',
+              label: '25 Å trioxa-diamine + DIPEA in dry DMF, 21 °C',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 10,
               safetyMod: 2,
-              outcomeText: 'Spans two disulfides cleanly for DAR 2.0.'
+              outcomeText: 'Spans two hinge disulfides cleanly for DAR 2.0.'
             },
             {
-              label: 'Short 1,2-ethylenediamine 3.8 A tether',
+              label: '25 Å trioxa-diamine + Et3N in dry DCM, 21 °C',
               isOptimal: false,
-              yieldMod: -14,
-              purityMod: -20,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Too short to span hinge; forms messy dimers.'
+              outcomeText: 'Lower solubility gives some mono-amide side band.'
             },
             {
-              label: 'Polydisperse 10 kDa PEG in wet DMF',
+              label: '12 Å butane-1,4-diamine + DIPEA in dry DMF',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Wet DMF hydrolyses NHS and smears on column.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Spacer too short to bridge two disulfides cleanly.'
+            },
+            {
+              label: '25 Å trioxa-diamine in reagent DMF + 2% water',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Trace water hydrolyses NHS ester before coupling.'
             }
           ],
-          askChudsHint: 'Dan: Use the 25 A trioxa-tridecanediamine PEG spacer to span two disulfides.',
-          antoineHint: 'Antoine: That 25 A PEG diamine bridges two hinge disulfides without dimerizing.'
+          askChudsHint: 'Dan: Match the diamine contour length to the IgG1 hinge spacing and keep NHS couplings strictly anhydrous.',
+          antoineHint: 'Antoine: Roughly 25 Å of flexible PEG diamine spans adjacent cysteines without intermolecular crosslinking.'
         },
         dataOutput: {
           type: 'tlc',
@@ -842,7 +890,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['argon_cyl'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -868,7 +916,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -883,7 +931,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['base_bath'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -893,12 +941,12 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'max_2_4',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (CDCl3)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -938,10 +986,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you run NMR on air-sensitive phosphines?',
+          prompt: 'How do you prep NMR for air-sensitive phosphine?',
           options: [
             {
-              label: 'Degassed CDCl3 under argon; store at -20 C',
+              label: 'Degassed CDCl3 under argon; store at -20 °C',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
@@ -949,24 +997,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Zero phosphine oxide; 98% active reagent.'
             },
             {
-              label: 'Leave CDCl3 tube uncapped overnight to dry',
+              label: 'Standard bench CDCl3 capped under N2 at 21 °C',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -20,
-              safetyMod: -4,
-              outcomeText: 'Air oxidizes 70% of phosphine and Abil fines.'
+              yieldMod: 3,
+              purityMod: -4,
+              safetyMod: 0,
+              outcomeText: 'Dissolved oxygen generates 12% phosphine oxide.'
             },
             {
-              label: 'Heat in DMSO-d6 at 110 C to sharpen peaks',
+              label: 'Dry CD3OD under argon; store at 4 °C',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -20,
-              safetyMod: 0,
-              outcomeText: 'Hot DMSO oxidizes trialkylphosphines to P=O.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Protic methanol slowly solvolyses reactive arms.'
+            },
+            {
+              label: 'Non-degassed DMSO-d6 warmed to 60 °C',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Warm aerated DMSO oxidises trialkylphosphine.'
             }
           ],
-          askChudsHint: 'Andre: Use degassed CDCl3 under argon and store the solid at -20 C.',
-          antoineHint: 'Antoine: Never heat phosphines in DMSO; run argon-blanketed CDCl3.'
+          askChudsHint: 'André: Purge the NMR solvent thoroughly to eliminate dissolved O2 and store phosphines frozen.',
+          antoineHint: 'Antoine: Freeze-pump-thawed aprotic CDCl3 under argon avoids P(III) oxidation cleanly.'
         },
         dataOutput: {
           type: 'nmr',
@@ -984,7 +1040,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 25,
+        durationMins: 21,
         sweetSpotMins: 69,
         minigame: 'syringe_cryo',
         subTasks: [
@@ -1010,7 +1066,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['syringe_pump'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 21,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -1025,9 +1081,9 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 23,
-            sweetSpotMins: 69,
-            canOvercook: true,
+            durationMins: 14,
+            sweetSpotMins: 225,
+            canOvercook: false,
             triggersChoice: false,
             minigame: null,
             viewOutput: null,
@@ -1040,7 +1096,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 10,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1055,7 +1111,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1080,10 +1136,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which reducing setup do you use on Herceptin?',
+          prompt: 'Which reducing setup yields clean 150 kDa HHLL?',
           options: [
             {
-              label: 'Fresh buffered TCEP in BBS pH 8.0 plus EDTA',
+              label: 'Fresh 10 eq TCEP in BBS pH 8.0 + EDTA, 4 °C',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -1091,24 +1147,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean rebridging with sharp 150 kDa gel band.'
             },
             {
-              label: 'Unlabelled warm bench TCEP tube at pH 2.3',
+              label: 'Fresh 10 eq TCEP in PBS pH 7.4 + EDTA, 21 °C',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -22,
-              safetyMod: -4,
-              outcomeText: 'Low pH and oxidized TCEP scramble half-mAb.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Slower PD substitution raises 75 kDa half-mAb.'
             },
             {
-              label: 'Excess 100 eq DTT at 50 C',
+              label: 'Fresh 25 eq TCEP in BBS pH 8.0 at 37 °C',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'DTT consumes all bromines before stapling.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Excess TCEP at 37 °C competes with bis-PD staple.'
+            },
+            {
+              label: 'Aged unbuffered aqueous TCEP stock at pH 3.0',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Acidic oxidised TCEP under-reduces and scrambles.'
             }
           ],
-          askChudsHint: 'Calise: Skip the mystery tube and use fresh pH 8.0 BBS-buffered TCEP.',
-          antoineHint: 'Antoine: Fresh 20 mM TCEP in BBS pH 8.0 + EDTA keeps stapling tight.'
+          askChudsHint: 'Calise: Always check TCEP stock pH and age; mild borate pH 8 with EDTA keeps stapling selective.',
+          antoineHint: 'Antoine: Neutral-to-mildly basic BBS pH 8.0 with fresh TCEP balances reduction and bis-PD ring closure.'
         },
         dataOutput: {
           type: 'gel',
@@ -1126,7 +1190,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -1152,7 +1216,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -1167,7 +1231,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1182,7 +1246,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 17,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1207,35 +1271,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you calculate accurate DAR 2.0?',
+          prompt: 'How do you calculate accurate DAR 2.0 by UV-Vis?',
           options: [
             {
-              label: 'Wash 6x on spin; subtract PD and Dox CF280',
+              label: 'Spin wash 6x; subtract PD and Dox CF280',
               isOptimal: true,
               yieldMod: 8,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
               outcomeText: 'Consistent DAR 2.0 across seven replicates.'
             },
             {
-              label: 'Divide raw A495 by raw A280 with no CF280',
+              label: 'Spin wash 6x; subtract Dox CF280 only (no PD)',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -16,
+              yieldMod: 3,
+              purityMod: -4,
               safetyMod: 0,
-              outcomeText: 'Dox bleed-through skews apparent DAR to 1.48.'
+              outcomeText: 'Uncorrected PD 345 nm bleed underestimates DAR.'
             },
             {
-              label: 'Skip spin washes to avoid membrane loss',
+              label: 'Spin wash 2x; subtract PD and Dox CF280',
               isOptimal: false,
-              yieldMod: 4,
-              purityMod: -22,
-              safetyMod: -6,
-              outcomeText: 'Free Dox gives fake DAR 19 and fouls LG11.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Residual free doxorubicin inflates apparent DAR.'
+            },
+            {
+              label: 'Divide raw A495 by raw A280 without wash',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Unwashed drug and overlapping 280 nm ruin ratio.'
             }
           ],
-          askChudsHint: 'Faiza: Wash 6x on VivaSpin and subtract PD and Dox 280 nm bleed-through.',
-          antoineHint: 'Antoine: Subtract 0.28*A345 and 0.724*A495 from A280 after 6x washing.'
+          askChudsHint: 'Faiza: Both the PD heterocycle and doxorubicin absorb at 280 nm, so wash exhaustively and correct both.',
+          antoineHint: 'Antoine: Subtract 0.28*A345 and 0.724*A495 from A280 after thorough diafiltration.'
         },
         dataOutput: {
           type: 'lcms',
@@ -1253,7 +1325,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 25,
+        durationMins: 22,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -1279,7 +1351,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 22,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -1294,7 +1366,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1309,7 +1381,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1334,10 +1406,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you confirm retained HER2 binding?',
+          prompt: 'How do you confirm retained HER2 binding on gel?',
           options: [
             {
-              label: 'Equimolar HER2 plus native mAb positive lane',
+              label: 'Equimolar HER2 + native mAb lane, non-reducing',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
@@ -1345,24 +1417,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Crisp shifted band matching native Herceptin.'
             },
             {
-              label: 'Boil HER2 complex 15 min in reducing BME',
+              label: 'Equimolar HER2, 37 °C 1 h, no native mAb lane',
               isOptimal: false,
-              yieldMod: -12,
-              purityMod: -20,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Boiling and BME denature the antigen complex.'
+              outcomeText: 'Shift visible but lacks native binding benchmark.'
             },
             {
-              label: 'Omit native Herceptin comparator control',
+              label: '0.2 eq HER2 + native mAb lane, non-reducing',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -16,
-              safetyMod: 0,
-              outcomeText: 'Vijay rejects binding data without comparator.'
+              yieldMod: -6,
+              purityMod: -8,
+              safetyMod: -2,
+              outcomeText: 'Sub-stoichiometric antigen leaves unbound ADC.'
+            },
+            {
+              label: 'Equimolar HER2 heated 75 °C in SDS buffer',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -14,
+              safetyMod: -4,
+              outcomeText: 'Heat and SDS dissociate non-covalent HER2 complex.'
             }
           ],
-          askChudsHint: 'Dan: Run non-reducing gel shift against an unmodified Herceptin control.',
-          antoineHint: 'Antoine: Keep samples non-denatured and include native Herceptin beside ADC.'
+          askChudsHint: 'Dan: Keep the antigen complex gentle without heat or reducing agents, and run native IgG alongside.',
+          antoineHint: 'Antoine: Native conditions with stoichiometric HER2 and an unmodified Herceptin lane make binding clear.'
         },
         dataOutput: {
           type: 'gel',
@@ -1388,12 +1468,12 @@ window.KLB.CAMPAIGNS = {
         index: 0,
         id: 'antoine_step_1',
         dayHint: 'Mon',
-        title: 'Synthesize Asymmetric Astra-PD',
+        title: 'Synthesise Asymmetric Astra-PD',
         desc: 'Reflux dibromomaleic acid, install dual alkynes, and check by NMR.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: 'biotage',
         subTasks: [
@@ -1419,7 +1499,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -1434,7 +1514,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['buchi'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1449,7 +1529,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['biotage'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1464,7 +1544,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 15,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1489,7 +1569,7 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you form diBrPD from £18/g diacid?',
+          prompt: 'How do you close diBrPD from dibromomaleic acid?',
           options: [
             {
               label: 'Pre-reflux diacid in AcOH 30m, then hydrazine',
@@ -1497,27 +1577,35 @@ window.KLB.CAMPAIGNS = {
               yieldMod: 10,
               purityMod: 10,
               safetyMod: 2,
-              outcomeText: 'Clean in situ anhydride gives 81% crystalline PD.'
+              outcomeText: 'Clean in situ anhydride gives 81% pure PD.'
             },
             {
-              label: 'Mix diacid and hydrazine cold at 21 C',
+              label: 'Co-reflux diacid and hydrazine directly in AcOH',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -14,
+              yieldMod: 3,
+              purityMod: -4,
               safetyMod: 0,
-              outcomeText: 'Ring closure stalls in cold acetic acid.'
+              outcomeText: 'Hydrazinium acetate salt slows ring closure.'
             },
             {
-              label: 'Reflux in concentrated 37% aqueous HCl',
+              label: 'Reflux diacid in EtOH/Et3N with hydrazine',
               isOptimal: false,
-              yieldMod: -18,
-              purityMod: -22,
-              safetyMod: -8,
-              outcomeText: 'Chloride ions scramble ring bromines.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Protic base stalls dehydration and drops yield.'
+            },
+            {
+              label: 'Stir diacid and hydrazine in AcOH at 25 °C',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Open-chain mono-hydrazide fails to cyclise.'
             }
           ],
-          askChudsHint: 'Calise: Pre-reflux dibromomaleic acid in AcOH for 30 min before hydrazine.',
-          antoineHint: 'Antoine: 30 min pre-reflux in glacial AcOH forms the anhydride cleanly.'
+          askChudsHint: 'Calise: Dehydrate the diacid into its cyclic anhydride in hot acetic acid before introducing hydrazine.',
+          antoineHint: 'Vijay: Pre-forming the maleic anhydride in refluxing AcOH drives clean condensation with hydrazine.'
         },
         dataOutput: {
           type: 'nmr',
@@ -1530,12 +1618,12 @@ window.KLB.CAMPAIGNS = {
         index: 1,
         id: 'antoine_step_2',
         dayHint: 'Tue',
-        title: 'Rebridge Herceptin at 4 C',
-        desc: 'Rebridge Herceptin with Astra-PD at 4 C and check thiols with DTNB.',
+        title: 'Rebridge Herceptin at 4 °C',
+        desc: 'Rebridge Herceptin with Astra-PD at 4 °C and check thiols with DTNB.',
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 27,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -1576,7 +1664,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 27,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -1616,10 +1704,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'What biochemical check passes before Cu click?',
+          prompt: 'What thiol check gates entry to CuAAC click?',
           options: [
             {
-              label: 'Desalt and run DTNB aliquot for zero -SH',
+              label: 'Desalt 6x, then test 5 µL with DTNB at 412 nm',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
@@ -1627,24 +1715,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Reads 0.0 free thiols; all disulfides locked.'
             },
             {
-              label: 'Skip thiol check and click with TCEP present',
+              label: 'Desalt 2x, then test 5 µL with DTNB at 412 nm',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -20,
+              yieldMod: 2,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Leftover TCEP kills azide and scrambles Cys.'
+              outcomeText: 'Trace TCEP reduces DTNB and gives false positive.'
             },
             {
-              label: 'Boil bulk antibody with 50 mM DTNB',
+              label: 'Desalt 6x, rely on 280/345 nm PDAR ratio only',
               isOptimal: false,
-              yieldMod: -26,
-              purityMod: -20,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'UV ratio alone misses unbridged free cysteines.'
+            },
+            {
+              label: 'Skip desalting; test bulk mAb with excess DTNB',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
               safetyMod: -4,
-              outcomeText: 'You denatured your entire preparative batch.'
+              outcomeText: 'Leftover TCEP reacts with DTNB and ruins aliquot.'
             }
           ],
-          askChudsHint: 'Max: Desalt first and check a 5 uL aliquot with Ellman DTNB at 412 nm.',
-          antoineHint: 'Antoine: Zero free thiols by DTNB confirms safe entry to click chemistry.'
+          askChudsHint: 'Max: Residual TCEP reduces Ellman reagent directly, so clear TCEP completely before testing a small aliquot.',
+          antoineHint: 'Richard: An analytical DTNB reading of zero after thorough desalting proves every hinge thiol is rebridged.'
         },
         dataOutput: {
           type: 'tlc',
@@ -1658,11 +1754,11 @@ window.KLB.CAMPAIGNS = {
         id: 'antoine_step_3',
         dayHint: 'Wed',
         title: 'Run Copper-Free Dox Click',
-        desc: 'Click doxorubicin azide via SPAAC at 37 C and verify DAR 4 by MS.',
+        desc: 'Click doxorubicin azide via SPAAC at 37 °C and verify DAR 4 by MS.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 26,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -1688,7 +1784,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 26,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -1703,7 +1799,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1718,7 +1814,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 17,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1743,39 +1839,47 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which click order preserves dual selectivity?',
+          prompt: 'Which click sequence preserves orthogonal DAR 4+4?',
           options: [
             {
               label: 'Copper-free SPAAC first, then CuAAC second',
               isOptimal: true,
               yieldMod: 10,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Terminal alkynes wait cleanly; clean DAR 4.0.'
+              outcomeText: 'Terminal alkynes wait cleanly; crisp DAR 4.0.'
             },
             {
-              label: 'CuAAC Cy5 first, then SPAAC Dox second',
+              label: 'SPAAC with 1.05 eq Dox-N3, 1 h at 21 °C',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Copper triggers clicking on both alkynes.'
+              outcomeText: 'Short ambient SPAAC leaves incomplete DAR 3.3.'
             },
             {
-              label: 'Mix both azides and CuSO4 in one pot',
+              label: 'CuAAC Cy5 first at 0.2 eq Cu, then SPAAC Dox',
               isOptimal: false,
-              yieldMod: -14,
-              purityMod: -24,
-              safetyMod: 0,
-              outcomeText: 'Produces statistical DAR 0 to 8 mixture.'
+              yieldMod: -7,
+              purityMod: -10,
+              safetyMod: -2,
+              outcomeText: 'Azide cross-reacts with both strained and terminal.'
+            },
+            {
+              label: 'One-pot both azides with CuSO4/ascorbate',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -16,
+              safetyMod: -4,
+              outcomeText: 'Produces broad statistical DAR 0 to 8 mixture.'
             }
           ],
-          askChudsHint: 'Dan: Always run copper-free SPAAC first so terminal alkynes stay untouched.',
-          antoineHint: 'Antoine: Catalyst-free SPAAC first leaves terminal alkynes 100% intact.'
+          askChudsHint: 'Dan: Strained alkynes react rapidly without catalyst, leaving terminal alkynes dormant until copper arrives.',
+          antoineHint: 'Vijay: Run catalyst-free SPAAC to completion before introducing any Cu(I) for the second payload.'
         },
         dataOutput: {
           type: 'lcms',
-          label: 'Waters uPLC-SQD MS: SPAAC Herceptin-Dox4 Intermediate',
+          label: 'Waters UPLC-SQD MS: SPAAC Herceptin-Dox4 Intermediate',
           productPeak: '149,820 Da intact conjugate (DAR = 4.0, terminal alkyne free)',
           metricLabel: 'DAR(Dox) = 4.0, 100% SPAAC selectivity'
         }
@@ -1789,7 +1893,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 26,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -1815,7 +1919,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 26,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -1830,7 +1934,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1845,7 +1949,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 17,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -1870,10 +1974,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you protect antibody from Cu ROS?',
+          prompt: 'How do you protect antibody during CuAAC?',
           options: [
             {
-              label: '5:1 THPTA:Cu in PBS, then 2 mM EDTA wash',
+              label: '5:1 THPTA:Cu in PBS, then 2 mM EDTA spin wash',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -1881,24 +1985,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean DAR 4 + FAR 4 with zero Met oxidation.'
             },
             {
-              label: 'Run CuAAC in buffer with 10 mM EDTA',
+              label: '2:1 THPTA:Cu in PBS, then plain PBS spin wash',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -14,
+              yieldMod: 3,
+              purityMod: -4,
               safetyMod: 0,
-              outcomeText: 'EDTA chelates all copper and gives 0% click.'
+              outcomeText: 'Sub-optimal ligand and no EDTA trace-bind Cu.'
             },
             {
-              label: 'Use 20 mM CuSO4 with no THPTA ligand',
+              label: '5:1 THPTA:Cu in PBS containing 1 mM EDTA',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -22,
-              safetyMod: -4,
-              outcomeText: 'Fenton ROS oxidizes Met and turns mAb brown.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'EDTA during click sequesters copper and stalls.'
+            },
+            {
+              label: 'CuSO4 + Na ascorbate in PBS with zero THPTA',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Unchelated Cu(I) generates ROS and fragments mAb.'
             }
           ],
-          askChudsHint: 'Peter: Use 5:1 THPTA:CuSO4 in EDTA-free PBS, then wash with 2 mM EDTA.',
-          antoineHint: 'Antoine: THPTA shields His/Met during click; EDTA strips copper afterward.'
+          askChudsHint: 'Peter: Excess THPTA ligand traps reactive oxygen species during CuAAC, whereas EDTA belongs strictly in the wash.',
+          antoineHint: 'Richard: Use 5:1 THPTA:Cu in EDTA-free PBS, then strip residual copper afterwards with an EDTA spin.'
         },
         dataOutput: {
           type: 'lcms',
@@ -1982,10 +2094,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you denature and image the gel?',
+          prompt: 'How do you prep and image the dual-dye gel?',
           options: [
             {
-              label: 'Heat 75 C 3m; fluorescence before Coomassie',
+              label: '75 °C 3 min LDS; scan fluorescence pre-stain',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
@@ -1993,24 +2105,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: '150 kDa band glows in both Dox and Cy5 lanes.'
             },
             {
-              label: 'Boil 15m in BME and stain Coomassie first',
+              label: '95 °C 10 min LDS; scan fluorescence pre-stain',
               isOptimal: false,
-              yieldMod: -10,
-              purityMod: -20,
-              safetyMod: -2,
-              outcomeText: 'Coomassie quenches dye and boiling aggregates.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Prolonged 95 °C causes faint high-MW aggregates.'
             },
             {
-              label: 'Load sample without SDS in 20% glycerol',
+              label: '75 °C 3 min + 10 mM DTT; scan fluorescence',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Basic Herceptin runs backwards out of wells.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'DTT cleaves residual unbridged chains and fades.'
+            },
+            {
+              label: 'Stain Coomassie Blue first, then scan Cy5/Dox',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Coomassie dye quenches and masks payload signal.'
             }
           ],
-          askChudsHint: 'Max: Heat 75 C for 3 min non-reducing and scan fluorescence before Coomassie.',
-          antoineHint: 'Antoine: Image fluorescence before Coomassie staining; 75 C avoids aggregation.'
+          askChudsHint: 'Max: Always capture in-gel fluorescence images before immersing the gel in Coomassie stain.',
+          antoineHint: 'Vijay: Gentle 75 °C non-reducing denaturation avoids aggregation, and fluorescence scanning must precede Coomassie.'
         },
         dataOutput: {
           type: 'gel',
@@ -2023,7 +2143,7 @@ window.KLB.CAMPAIGNS = {
   },
 
   // =========================================================================
-  // 4. ANDRE SHAMSABADI - On-Water Hydrazides, Arynes & Phenazepam Route
+  // 4. ANDRÉ SHAMSABADI - On-Water Hydrazides, Arynes & Phenazepam Route
   // =========================================================================
   andre_shamsabadi: {
     charId: 'andre_shamsabadi',
@@ -2041,7 +2161,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 29,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -2082,7 +2202,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 29,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -2133,24 +2253,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean radical propagation gives 86% crystals.'
             },
             {
-              label: 'Degas 3x under argon in dry THF with BHT',
+              label: 'Stir in 1:1 THF/water under air for 4 h',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -14,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Removing O2 and adding BHT kills radical chain.'
+              outcomeText: 'Co-solvent homogenises emulsion and slows rate.'
             },
             {
-              label: 'Heat neat DIAD at 160 C in sealed vial',
+              label: 'Stir on 1 mL water under strict argon balloon',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -20,
-              safetyMod: -18,
-              outcomeText: 'Azodicarboxylate decomposes and pops septum.'
+              yieldMod: -7,
+              purityMod: -8,
+              safetyMod: -2,
+              outcomeText: 'Oxygen exclusion suppresses radical initiation.'
+            },
+            {
+              label: 'Stir in dry THF under argon with 10 mol% BHT',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -14,
+              safetyMod: -4,
+              outcomeText: 'No hydrophobic effect and BHT traps radicals.'
             }
           ],
-          askChudsHint: 'Marcos: Keep it in open air with 1 mL water and brisk stirring.',
-          antoineHint: 'Antoine: Trace O2 initiates the radical on water; never degas this step.'
+          askChudsHint: 'Marcos: This acyl-radical chain needs trace air initiation and vigorous stirring as an emulsion on pure water.',
+          antoineHint: 'Antoine: Keep organic co-solvents and radical scavengers out; trace O2 on water drives hydroacylation.'
         },
         dataOutput: {
           type: 'tlc',
@@ -2192,7 +2320,7 @@ window.KLB.CAMPAIGNS = {
             label: 'Get dry toluene solvent',
             roomId: 'klb_2f',
             stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            cupboardHint: 'Cupboard 1 (Dry Solvents)',
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -2219,7 +2347,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'and_2_4',
-            label: 'Remove toluene on buchi',
+            label: 'Remove toluene on Büchi',
             roomId: 'klb_2f',
             stationTypes: ['buchi'],
             cupboardHint: null,
@@ -2264,10 +2392,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which fluoride source generates benzyne cleanly?',
+          prompt: 'Which fluoride source drives benzyne cleanly?',
           options: [
             {
-              label: 'Anhydrous TBAT in dry toluene under argon',
+              label: 'Anhydrous TBAT in dry toluene under argon, 55 °C',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -2275,24 +2403,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Zero water; 84% rearranged hydrazobenzophenone.'
             },
             {
-              label: 'Wet commercial 1 M TBAF in THF on bench',
+              label: 'Anhydrous CsF in dry MeCN at 80 °C under argon',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -18,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Water quenches benzyne to phenol at 28% yield.'
+              outcomeText: 'Elevated heat promotes minor N-methylene attack.'
             },
             {
-              label: '48% aqueous HF in a borosilicate flask',
+              label: 'Anhydrous TBAT in dry THF at 21 °C under argon',
               isOptimal: false,
-              yieldMod: -26,
-              purityMod: -22,
-              safetyMod: -24,
-              outcomeText: 'HF etches glass and triggers a safety alarm.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Slow aryne release at 21 °C leaves unreacted SM.'
+            },
+            {
+              label: 'Commercial 1 M TBAF in THF under argon, 55 °C',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Hygroscopic TBAF water protonates aryl anion.'
             }
           ],
-          askChudsHint: 'Richard: Use solid anhydrous TBAT in dry toluene under an argon balloon.',
-          antoineHint: 'Antoine: Oven-dried flask, argon, and anhydrous TBAT at 55 C give clean benzyne.'
+          askChudsHint: 'Richard: Commercial TBAF solutions hold ~5% water; solid anhydrous silicate fluoride in warm toluene stays dry.',
+          antoineHint: 'Antoine: Oven-dried glassware and solid anhydrous TBAT at 55 °C prevent water quenching the aryne.'
         },
         dataOutput: {
           type: 'lcms',
@@ -2310,7 +2446,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['argon_cyl'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 30,
         sweetSpotMins: 69,
         minigame: 'syringe_cryo',
         subTasks: [
@@ -2351,7 +2487,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['syringe_pump'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 30,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -2394,7 +2530,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you add diethyl bromomalonate to NaH?',
           options: [
             {
-              label: 'Infuse 5.7 uL/min over 30m via syringe pump',
+              label: 'Infuse 5.7 µL/min over 30m via syringe pump',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -2402,24 +2538,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean N-alkylation and E1cB N-N cleavage (82%).'
             },
             {
-              label: 'Squirt all 2.5 eq in 3 seconds by hand',
+              label: 'Dropwise addition by hand over 5 min at 0 °C',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -14,
-              safetyMod: -4,
-              outcomeText: 'Violent H2 fizzing and self-condensation (53%).'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Local bromomalonate excess gives 18% dimer.'
             },
             {
-              label: 'Quench excess NaH with MeOH before addition',
+              label: 'Add 1.0 eq bromomalonate at once at 21 °C',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -18,
-              safetyMod: -8,
-              outcomeText: 'Methoxide destroys bromomalonate ester.'
+              yieldMod: -7,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Incomplete E1cB cleavage and competing bis-alkyl.'
+            },
+            {
+              label: 'Rapid bolus of 2.5 eq into warm NaH at 40 °C',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -14,
+              safetyMod: -6,
+              outcomeText: 'Brisk H2 evolution and heavy self-condensation.'
             }
           ],
-          askChudsHint: 'Marcos: Infuse at 5.7 uL/min on the syringe pump to avoid dimerization.',
-          antoineHint: 'Antoine: Slow syringe-pump infusion keeps bromomalonate concentration low.'
+          askChudsHint: 'Marcos: Keep instantaneous bromomalonate concentration tiny so NaH deprotonates cleanly without self-condensation.',
+          antoineHint: 'Antoine: Metered syringe-pump infusion prevents bromomalonate dimerisation during E1cB N-N cleavage.'
         },
         dataOutput: {
           type: 'tlc',
@@ -2432,7 +2576,7 @@ window.KLB.CAMPAIGNS = {
         index: 3,
         id: 'andre_step_4',
         dayHint: 'Thu',
-        title: 'Cyclize and Purify Phenazepam',
+        title: 'Cyclise and Purify Phenazepam',
         desc: 'Deprotect, brominate, close Phenazepam ring, and purify on column.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
@@ -2446,7 +2590,7 @@ window.KLB.CAMPAIGNS = {
             label: 'Get dry DCM solvent',
             roomId: 'klb_2f',
             stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            cupboardHint: 'Cupboard 1 (Dry Solvents)',
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -2458,7 +2602,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'and_4_2',
-            label: 'Run ring cyclization',
+            label: 'Run ring cyclisation',
             roomId: 'klb_2f',
             stationTypes: ['fumehood'],
             cupboardHint: null,
@@ -2521,7 +2665,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you unmask aniline and close the ring?',
           options: [
             {
-              label: 'AlCl3/DCM, NBS at 0 C, then NH4OH cyclization',
+              label: 'AlCl3/DCM, NBS at 0 °C, then NH4OH cyclise',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -2529,30 +2673,38 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Crisp white Phenazepam crystals in 85% yield.'
             },
             {
-              label: 'Autoclave in 40% KOH glycol at 195 C',
+              label: 'AlCl3/DCM, NBS at 21 °C, then NH4OH cyclise',
               isOptimal: false,
-              yieldMod: -18,
-              purityMod: -20,
-              safetyMod: -10,
-              outcomeText: 'Harsh base chews aryl chloride into black tar.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Ambient bromination raises ortho/dibromo traces.'
             },
             {
-              label: 'Add 3 eq NBS at reflux before deprotection',
+              label: 'TFA/DCM, NBS at 0 °C, then NaHCO3 cyclise',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -22,
+              yieldMod: -6,
+              purityMod: -10,
+              safetyMod: -2,
+              outcomeText: 'Incomplete carbamate cleavage stalls cyclisation.'
+            },
+            {
+              label: '1.5 eq NBS at 50 °C prior to AlCl3 deprotection',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -16,
               safetyMod: -4,
-              outcomeText: 'Brominates wrong ring into wrong regioisomer.'
+              outcomeText: 'Carbamate directs bromination to wrong position.'
             }
           ],
-          askChudsHint: 'Calise: AlCl3 in dry DCM cleaves the carbamate cleanly at room temp in 45 min.',
-          antoineHint: 'Antoine: Mild AlCl3 deprotection then 1 eq NBS at 0 C hits para selectively.'
+          askChudsHint: 'Calise: Unmask the free aniline first with Lewis acid so it directs NBS cleanly to the para carbon at 0 °C.',
+          antoineHint: 'Antoine: Mild AlCl3 deprotection followed by chilled 0 °C NBS hits para selectivity before NH4OH ring closure.'
         },
         dataOutput: {
           type: 'lcms',
           label: 'Biotage UV & HRMS: Crystalline Phenazepam',
           productPeak: '348.97 m/z [M+H]+ (79Br35Cl / 81Br35Cl cluster)',
-          metricLabel: '85% cyclization yield, 98% purity'
+          metricLabel: '85% cyclisation yield, 98% purity'
         }
       },
       {
@@ -2560,20 +2712,20 @@ window.KLB.CAMPAIGNS = {
         id: 'andre_step_5',
         dayHint: 'Thu/Fri',
         title: 'Run 700 MHz VT-NMR',
-        desc: 'Prepare high-boiling DMSO-d6 tube and verify rotamer coalescence.',
+        desc: 'Dissolve product in DMSO-d6 and verify rotamer coalescence on 700 MHz VT-NMR.',
         locationRoom: 'klb_2f',
-        stationTypes: ['chem_cupboard'],
+        stationTypes: ['balance_table'],
         prepRequired: [],
-        durationMins: 20,
+        durationMins: 21,
         sweetSpotMins: 225,
         minigame: null,
         subTasks: [
           {
             id: 'and_5_1',
-            label: 'Get dry DMSO solvent',
+            label: 'Weigh Phenazepam for NMR',
             roomId: 'klb_2f',
-            stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            stationTypes: ['balance_table'],
+            cupboardHint: null,
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -2585,7 +2737,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'and_5_2',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (DMSO-d6)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
@@ -2605,7 +2757,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 21,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: true,
@@ -2630,40 +2782,48 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which solvent runs safely at +120 C VT-NMR?',
+          prompt: 'Which tube setup resolves +120 °C VT-NMR?',
           options: [
             {
-              label: 'High-boiling DMSO-d6 at 4.5 cm; collect prompt',
+              label: 'DMSO-d6 at 4.5 cm depth; collect promptly',
               isOptimal: true,
               yieldMod: 8,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Rotamers coalesce cleanly at 120 C on 700 MHz.'
+              outcomeText: 'Rotamers coalesce cleanly at 120 °C on 700 MHz.'
             },
             {
-              label: 'CDCl3 at 2 cm in a chipped NMR tube',
+              label: 'DMSO-d6 at 3.5 cm depth; collect next morning',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Short column needs reshim; overnight fridge fine.'
+            },
+            {
+              label: 'Toluene-d8 at 4.5 cm depth; run at 105 °C',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Borderline solubility near reflux broadens lines.'
+            },
+            {
+              label: 'CDCl3 at 4.5 cm depth; ramp probe to 90 °C',
               isOptimal: false,
               yieldMod: -12,
-              purityMod: -24,
-              safetyMod: -18,
-              outcomeText: 'CDCl3 boils at 61 C and pops cap inside probe.'
-            },
-            {
-              label: 'Call split 25 C rotamers diastereomers',
-              isOptimal: false,
-              yieldMod: 0,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Vijay notes achiral hydrazides show rotamers.'
+              purityMod: -16,
+              safetyMod: -6,
+              outcomeText: 'Exceeds CDCl3 boiling point (61 °C) in probe.'
             }
           ],
-          askChudsHint: 'Antoine: DMSO-d6 only for +120 C VT-NMR, 4.5 cm depth, and grab your tube back.',
-          antoineHint: 'Antoine: DMSO-d6 boils at 189 C for safe coalescence, and grab your 3F clicker.'
+          askChudsHint: 'Antoine: Pick a polar deuterated solvent boiling well above 120 °C and gauge column height for 700 MHz shims.',
+          antoineHint: 'Antoine: DMSO-d6 (bp 189 °C) at 4.5 cm dissolves Phenazepam and prevents boiling at coalescence temperature.'
         },
         dataOutput: {
           type: 'nmr',
           label: 'Bruker 700 MHz VT-NMR (DMSO-d6): Phenazepam & Rotamers',
-          productPeak: 'Coalesced 120 C singlets; Phenazepam 10.74 (NH), 4.18 (CH2)',
+          productPeak: 'Coalesced 120 °C singlets; Phenazepam 10.74 (NH), 4.18 (CH2)',
           metricLabel: '700 MHz VT-NMR, clean coalescence'
         }
       }
@@ -2689,7 +2849,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 30,
+        durationMins: 25,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -2715,7 +2875,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 30,
+            durationMins: 25,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -2725,12 +2885,12 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'pet_1_3',
-            label: 'Neutralize Protein A eluate',
+            label: 'Neutralise Protein A eluate',
             roomId: 'klb_2f',
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -2745,7 +2905,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -2760,7 +2920,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -2793,27 +2953,35 @@ window.KLB.CAMPAIGNS = {
               yieldMod: 10,
               purityMod: 10,
               safetyMod: 2,
-              outcomeText: 'Instant neutralization keeps FcCD20 soluble.'
+              outcomeText: 'Instant neutralisation keeps FcCD20 soluble.'
             },
             {
-              label: 'Leave FcCD20 in pH 2.5 glycine for 3 hours',
+              label: 'Neutralise eluate with 1 M Tris after 20 min',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -18,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Acid unfolds CH2 domains into white curds.'
+              outcomeText: 'Delayed neutralisation induces partial Fc cloud.'
+            },
+            {
+              label: 'Elute Protein A with pH 3.5 citrate; no Tris',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Prolonged acidic elution unfolds CH2 domains.'
             },
             {
               label: 'Purify Trastuzumab Fc on Protein A column',
               isOptimal: false,
-              yieldMod: -18,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'VH3 Fab co-binds Protein A and ruins purity.'
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'VH3 Fab co-binds Protein A and mixes fragments.'
             }
           ],
-          askChudsHint: 'Dan: Use Rituximab for Fc and spike 1 M Tris pH 8.8 into collection tubes.',
-          antoineHint: 'Antoine: 10% 1 M Tris pH 8.8 in receiver tubes saves Fc from acid unfolding.'
+          askChudsHint: 'Dan: Rituximab avoids VH3 Protein A co-binding, and buffering the receiver tube stops acid-induced CH2 unfolding.',
+          antoineHint: 'Antoine: Pre-aliquoting 1 M Tris pH 8.8 into collection tubes neutralises the acidic Fc eluate immediately.'
         },
         dataOutput: {
           type: 'gel',
@@ -2826,12 +2994,12 @@ window.KLB.CAMPAIGNS = {
         index: 1,
         id: 'peter_step_2',
         dayHint: 'Tue',
-        title: 'Synthesize Pink Tetrazine Hub',
-        desc: 'Build and oxidize pink Br2PD-Tz-N3 hub, purify, and check by NMR.',
+        title: 'Synthesise Pink Tetrazine Hub',
+        desc: 'Build and oxidise pink Br2PD-Tz-N3 hub, purify, and check by NMR.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 23,
         sweetSpotMins: 69,
         minigame: 'biotage',
         subTasks: [
@@ -2852,12 +3020,12 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'pet_2_2',
-            label: 'Oxidize hub in hood',
+            label: 'Oxidise hub in hood',
             roomId: 'klb_2f',
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 23,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -2872,7 +3040,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['biotage'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -2882,12 +3050,12 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'pet_2_4',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (CDCl3)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -2902,7 +3070,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 18,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -2930,7 +3098,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'Why does pink Br2PD-Tz bleach on reduced Fab?',
           options: [
             {
-              label: 'Oxidize in hood; desalt TCEP off before Tz',
+              label: 'Oxidise in hood; Zeba-desalt TCEP before Tz',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -2938,24 +3106,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Vivid pink tetrazine survives cleanly on Fab.'
             },
             {
-              label: 'Run NaNO2 oxidation on open bench not hood',
+              label: 'Oxidise in hood; 1x spin desalt before Tz',
               isOptimal: false,
-              yieldMod: -12,
-              purityMod: -14,
-              safetyMod: -22,
-              outcomeText: 'Toxic NOx gas floods Lab 230 as safety drops.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Residual TCEP partially bleaches pink tetrazine.'
             },
             {
-              label: 'Add pink Br2PD-Tz directly into 10 eq TCEP',
+              label: 'Add 1.2 eq Br2PD-Tz before full oxidation',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'TCEP reduces tetrazine to dead dihydro-Tz.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Incomplete dihydro-Tz oxidation drops click rate.'
+            },
+            {
+              label: 'Add Br2PD-Tz directly into 10 eq TCEP mix',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -16,
+              safetyMod: -4,
+              outcomeText: 'Phosphine reduces tetrazine to dead dihydro-Tz.'
             }
           ],
-          askChudsHint: 'Calise: Zeba-desalt TCEP off before adding tetrazine-PD or TCEP bleaches it.',
-          antoineHint: 'Antoine: Oxidize in the hood and desalt reduced Fab before adding Br2PD-Tz-N3.'
+          askChudsHint: 'Calise: Phosphines reduce tetrazines to colourless dihydrotetrazines, so remove TCEP completely before introducing Tz.',
+          antoineHint: 'Antoine: Exhaustive Zeba desalting after Fab reduction prevents TCEP from bleaching the Br2PD-Tz-N3 hub.'
         },
         dataOutput: {
           type: 'nmr',
@@ -2973,7 +3149,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['tcep_bench'],
         prepRequired: [],
-        durationMins: 30,
+        durationMins: 28,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -2984,7 +3160,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -2999,7 +3175,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 30,
+            durationMins: 28,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -3029,7 +3205,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['maldi_unit', 'lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 17,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3065,24 +3241,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Fast SPIEDAC click with 100% live sialidase.'
             },
             {
-              label: 'Run SPIEDAC in pH 4.5 acetate for speed',
+              label: '2-day-old BCN-Fab clicked in PBS pH 7.0',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Bacterial sialidase unfolds below pH 5.5.'
+              outcomeText: 'Aged BCN partially degrades, lowering trimer.'
             },
             {
-              label: 'Use 3-week-old Fab-BCN plus 10 eq BCN dimer',
+              label: 'Fresh BCN conjugates clicked in PBS pH 5.0',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Aged BCN is dead and dimer precipitates out.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Low pH destabilises bacterial sialidase enzyme.'
+            },
+            {
+              label: 'Fresh BCN clicked with 1 mM CuSO4 at pH 7.0',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Copper ions poison sialidase and cross-react.'
             }
           ],
-          askChudsHint: 'Dan: Make Fab-BCN fresh on the day and click strictly at pH 7.0 PBS.',
-          antoineHint: 'Antoine: pH 7.0 PBS keeps sialidase active while fresh BCN + Tz clicks cleanly.'
+          askChudsHint: 'Dan: Strained BCN slowly degrades on storage and sialidase hates acid or copper, so click fresh at neutral pH.',
+          antoineHint: 'Antoine: Catalyst-free SPIEDAC in pH 7.0 PBS using freshly prepared BCN-Fab preserves full enzyme activity.'
         },
         dataOutput: {
           type: 'lcms',
@@ -3100,7 +3284,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 23,
+        durationMins: 20,
         sweetSpotMins: 63,
         minigame: 'gel_load',
         subTasks: [
@@ -3126,7 +3310,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 13,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3141,7 +3325,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 23,
+            durationMins: 20,
             sweetSpotMins: 63,
             canOvercook: true,
             triggersChoice: true,
@@ -3156,7 +3340,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3184,7 +3368,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'Pure SynAb sits beside blue dye. Your protocol?',
           options: [
             {
-              label: 'Aliquot 8 uL, fridge stock, then heat 95 C',
+              label: 'Aliquot 8 µL, fridge stock, then heat 95 °C',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
@@ -3192,24 +3376,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Master stock safe; crisp 147 kDa gel band.'
             },
             {
-              label: 'Leave master stock open beside dye and phone',
+              label: 'Aliquot 8 µL on bench, heat 75 °C in LDS',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -4,
               safetyMod: 0,
-              outcomeText: 'Pipetted 2 uL blue dye right into master stock.'
+              outcomeText: 'Master stock left on warm bench loses a bit.'
             },
             {
-              label: 'Pool all SEC fractions without running a gel',
+              label: 'Pool SEC shoulder fractions without gel QC',
               isOptimal: false,
-              yieldMod: 4,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'Mixes pure 147 kDa SynAb back with 48 kDa Fab.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Mixes pure 147 kDa trimer back with 98 kDa dimer.'
+            },
+            {
+              label: 'Pipette LDS directly near uncapped master tube',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Blue dye cross-contaminates the master stock.'
             }
           ],
-          askChudsHint: 'Max: Cap your pure SynAb stock and fridge it before touching blue loading dye.',
-          antoineHint: 'Antoine: Aliquot first, fridge master stock, then denature 95 C 5 min in LDS.'
+          askChudsHint: 'Max: Always aliquot analytical samples and return capped master protein to 4 °C before opening LDS dye.',
+          antoineHint: 'Antoine: Separate and refrigerate your purified 147 kDa stock first, then denature only the gel aliquot.'
         },
         dataOutput: {
           type: 'gel',
@@ -3227,7 +3419,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 25,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -3253,7 +3445,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 25,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -3268,7 +3460,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3283,7 +3475,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 16,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3308,10 +3500,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which control proves sialidase activity?',
+          prompt: 'Which assay design proves sialidase activity?',
           options: [
             {
-              label: 'Compare CiTE vs BiTE lacking sialidase',
+              label: 'Compare CiTE vs BiTE lacking sialidase, pH 7',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
@@ -3319,24 +3511,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Shows clean sialic acid cleavage at pH 7.0.'
             },
             {
-              label: 'Test CiTE with no sialoside substrate',
+              label: 'Compare CiTE vs free buffer at pH 7.0 (no BiTE)',
               isOptimal: false,
-              yieldMod: -14,
-              purityMod: -20,
+              yieldMod: 2,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Nothing to cleave; flat baseline MS signal.'
+              outcomeText: 'Cleavage seen but lacks isogenic BiTE control.'
             },
             {
-              label: 'Denature CiTE in 4% PFA before assay',
+              label: 'Compare CiTE vs BiTE in PBS at pH 5.2',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -24,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Suboptimal pH slows turnover and blurs kinetic.'
+            },
+            {
+              label: 'Assay CiTE at pH 7.0 with 10 mM EDTA + SDS',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
               safetyMod: -4,
-              outcomeText: 'PFA crosslinks and kills sialidase enzyme.'
+              outcomeText: 'SDS unfolds sialidase and stops Neu5Ac release.'
             }
           ],
-          askChudsHint: 'Faiza: Always compare your CiTE directly against the BiTE lacking sialidase.',
-          antoineHint: 'Antoine: CiTE vs unsialylated BiTE comparator proves enzymatic desialylation.'
+          askChudsHint: 'Faiza: Run the exact bispecific scaffold lacking the enzyme domain at physiological pH as your negative control.',
+          antoineHint: 'Antoine: Direct head-to-head CiTE vs BiTE at pH 7.0 isolates true enzymatic desialylation.'
         },
         dataOutput: {
           type: 'lcms',
@@ -3349,7 +3549,7 @@ window.KLB.CAMPAIGNS = {
   },
 
   // =========================================================================
-  // 6. JOAO NOGUEIRA - Shark VNARs & Targeted PLGA-PEG Nanoparticles
+  // 6. JOÃO NOGUEIRA - Shark VNARs & Targeted PLGA-PEG Nanoparticles
   // =========================================================================
   joao_nogueira: {
     charId: 'joao_nogueira',
@@ -3362,12 +3562,12 @@ window.KLB.CAMPAIGNS = {
         index: 0,
         id: 'joao_step_1',
         dayHint: 'Mon',
-        title: 'Synthesize monoBrPD-BCN Linker',
+        title: 'Synthesise monoBrPD-BCN Linker',
         desc: 'Couple bromomaleic propanoate to BCN-amine, purify, and run NMR.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 23,
         sweetSpotMins: 69,
         minigame: 'biotage',
         subTasks: [
@@ -3393,7 +3593,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 23,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -3408,7 +3608,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['biotage'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3418,12 +3618,12 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'joa_1_4',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (CDCl3)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3438,7 +3638,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 17,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3463,10 +3663,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which hydrazine tether avoids NHS breakdown?',
+          prompt: 'Which tether avoids NHS ester breakdown?',
           options: [
             {
-              label: '2-carbon propionic tether plus DCC/NHS',
+              label: '2-carbon propionic tether + DCC/NHS, 21 °C',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 10,
@@ -3474,24 +3674,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean monoBrPD-BCN isolated without breakdown.'
             },
             {
-              label: '1-carbon ethanoic tether plus DCC/NHS',
+              label: '2-carbon propionic tether + EDC/NHS in DMF',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -20,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Self-destructs via 6-membered cyclization.'
+              outcomeText: 'Urea byproduct traces lower NHS ester purity.'
             },
             {
-              label: 'Use diBrPD leaving second bromine free',
+              label: '1-carbon ethanoic tether + DCC/NHS, 21 °C',
+              isOptimal: false,
+              yieldMod: -7,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Degrades via 6-membered intramolecular attack.'
+            },
+            {
+              label: 'Use diBrPD-NHS leaving second bromine free',
               isOptimal: false,
               yieldMod: -12,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Second bromine forms 22 kDa VNAR homodimers.'
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Second bromine crosslinks VNAR into homodimers.'
             }
           ],
-          askChudsHint: 'Calise: Use the 2-carbon propionic tether; the 1-carbon ethanoic tether degrades.',
-          antoineHint: 'Antoine: Propanoate tether prevents intramolecular breakdown during NHS activation.'
+          askChudsHint: 'Calise: Use the 2-carbon spacer to suppress intramolecular cyclisation, and monobromo PD for single-Cys selectivity.',
+          antoineHint: 'Antoine: Propanoate spacing avoids 6-membered NHS decomposition while one bromine prevents dimerisation.'
         },
         dataOutput: {
           type: 'nmr',
@@ -3509,7 +3717,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['freezer_20c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 25,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -3535,7 +3743,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 25,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -3550,7 +3758,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3565,7 +3773,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 16,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3590,10 +3798,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you uncap VNAR without hurting core S-S?',
+          prompt: 'How do you uncap VNAR Cys without core cleavage?',
           options: [
             {
-              label: 'Mild 10 eq TCEP at pH 7.4 and 21 C',
+              label: 'Mild 10 eq TCEP in PBS pH 7.4 at 21 °C',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -3601,24 +3809,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Uncaps C-terminal Cys cleanly for PAR 1.0.'
             },
             {
-              label: 'Add monoBrPD-BCN straight with no TCEP',
+              label: 'Mild 20 eq TCEP in PBS pH 7.4 at 37 °C',
               isOptimal: false,
-              yieldMod: -26,
-              purityMod: -16,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: '0% reaction because Cys is GSH-capped.'
+              outcomeText: 'Warm TCEP nicks 15% of internal framework bond.'
             },
             {
-              label: 'Boil VNAR 95 C in 6 M urea and 50 mM TCEP',
+              label: '2 eq TCEP at pH 6.5 on ice for 15 min',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -24,
-              safetyMod: 0,
-              outcomeText: 'Unfolds VNAR and labels all buried cysteines.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Leaves GSH disulfide cap partially intact.'
+            },
+            {
+              label: '50 eq TCEP in 4 M guanidine at 37 °C',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Unfolds VNAR and labels conserved core cysteines.'
             }
           ],
-          askChudsHint: 'Dan: Mild 10 eq TCEP at 21 C uncaps the C-terminal Cys without unfolding.',
-          antoineHint: 'Antoine: Room-temp TCEP in pH 7.4 phosphate removes GSH cap cleanly.'
+          askChudsHint: 'Dan: Mild ambient TCEP selectively cleaves the solvent-exposed C-terminal cap while sparing the buried scaffold S-S.',
+          antoineHint: 'Antoine: Around 10 eq TCEP at neutral pH and room temperature decaps without denaturing the immunoglobulin fold.'
         },
         dataOutput: {
           type: 'lcms',
@@ -3636,7 +3852,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['balance_table'],
         prepRequired: [],
-        durationMins: 25,
+        durationMins: 22,
         sweetSpotMins: 69,
         minigame: 'syringe_cryo',
         subTasks: [
@@ -3647,7 +3863,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['balance_table'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3662,7 +3878,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['syringe_pump'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 22,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -3677,7 +3893,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['buchi'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3692,7 +3908,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3720,7 +3936,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you make monodisperse azide NPs?',
           options: [
             {
-              label: 'Dropwise 75:25 PLGA:PLGA-PEG-N3, mild rotavap',
+              label: 'Dropwise 75:25 PLGA:PLGA-PEG-N3; 30 °C vac',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -3728,29 +3944,37 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean 194 nm spheres with low PDI 0.09.'
             },
             {
-              label: 'Dump 100% unmodified PLGA into water',
+              label: 'Dropwise 50:50 PLGA:PLGA-PEG-N3; 30 °C vac',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Aggregates crash and zero azide handles exist.'
+              outcomeText: 'High PEG fraction swells core slightly (PDI 0.18).'
             },
             {
-              label: 'Evaporate on rotavap at 85 C and 15 mbar',
+              label: 'Rapid bolus 75:25 PLGA:PLGA-PEG-N3; 30 °C vac',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -20,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Fast addition widens particle size distribution.'
+            },
+            {
+              label: 'Dropwise 75:25 PLGA:PLGA-PEG-N3; 60 °C vac',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
               safetyMod: -4,
-              outcomeText: 'Above PLGA Tg particles melt into gum.'
+              outcomeText: 'Exceeding PLGA Tg coalesces particles into film.'
             }
           ],
-          askChudsHint: 'Dan: Use 75:25 PLGA:PLGA-PEG-azide and keep rotavap bath below 45 C.',
-          antoineHint: 'Antoine: Dropwise addition plus gentle RT rotavap stays below PLGA Tg.'
+          askChudsHint: 'Dan: Keep nanoprecipitation steady via syringe pump and evaporate acetone well below the PLGA glass transition.',
+          antoineHint: 'Antoine: Blending 25% PEG-azide polymer with gentle ~30 °C evaporation locks PDI below 0.10.'
         },
         dataOutput: {
           type: 'tlc',
           label: 'Nile-Red Encapsulation TLC Check: PLGA-PEG-N3 NPs',
-          productPeak: 'Encapsulated Nile Red (Rf = 0.55) with minimal free dye',
+          productPeak: 'PLGA-Nile Red baseline (Rf = 0.00), trace free dye (Rf = 0.62)',
           metricLabel: '194.0 nm core, PDI = 0.09'
         }
       },
@@ -3763,7 +3987,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -3789,7 +4013,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -3804,7 +4028,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3819,7 +4043,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3844,35 +4068,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you orient VNARs on hydrophobic pores?',
+          prompt: 'How do you orient VNARs on PLGA-PEG-N3 NPs?',
           options: [
             {
-              label: 'Catalyst-free SPAAC in PBS with Tween 80',
+              label: 'SPAAC in PBS + 0.05% Tween 80 at 21 °C',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Tween 80 wets pores; CDR3 loops point outward.'
+              outcomeText: 'Tween 80 wets surface; CDR3 loops face outward.'
             },
             {
-              label: 'Random EDC/NHS coupling in neat PBS',
+              label: 'SPAAC in neat PBS without surfactant, 21 °C',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -20,
+              yieldMod: 3,
+              purityMod: -4,
               safetyMod: 0,
-              outcomeText: 'Blocks CDR3 loop and dry pores float like cork.'
+              outcomeText: 'Poor wetting lowers VNAR surface density.'
             },
             {
-              label: 'Dissolve PLGA particles in acetone first',
+              label: 'SPAAC in PBS + 2% Tween 80 at 37 °C',
               isOptimal: false,
-              yieldMod: -26,
-              purityMod: -24,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Excess detergent leaches Nile Red from core.'
+            },
+            {
+              label: 'Random EDC/NHS coupling on PLGA-COOH in PBS',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
               safetyMod: -4,
-              outcomeText: 'Acetone destroys NPs and precipitates VNAR.'
+              outcomeText: 'Amide coupling scrambles orientation and CDR3.'
             }
           ],
-          askChudsHint: 'Dan: Tween 80 wets hydrophobic pores and SPAAC keeps CDR3 facing out.',
-          antoineHint: 'Antoine: PBS + Tween 80 wets pores while C-terminal SPAAC orients VNAR.'
+          askChudsHint: 'Dan: Use site-specific C-terminal click so binding loops point outward, with trace surfactant to wet the corona.',
+          antoineHint: 'Antoine: Trace Tween 80 aids wetting without extracting encapsulated dye, and SPAAC preserves CDR3 orientation.'
         },
         dataOutput: {
           type: 'gel',
@@ -3890,7 +4122,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 25,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -3916,7 +4148,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 25,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -3931,7 +4163,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3946,7 +4178,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 16,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3971,7 +4203,7 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which control proves oriented VNAR binding?',
+          prompt: 'Which controls prove oriented VNAR capture?',
           options: [
             {
               label: 'Compare SPAAC NPs vs random NHS and N3 blank',
@@ -3982,24 +4214,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: '3.8x higher DLL4 capture than random NHS.'
             },
             {
-              label: 'Run assay in unfiltered 50% serum with air',
+              label: 'Compare SPAAC NPs vs N3 blank only (no NHS)',
               isOptimal: false,
-              yieldMod: -10,
-              purityMod: -20,
+              yieldMod: 2,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Serum debris and bubbles ruin target signal.'
+              outcomeText: 'Shows specific binding but misses orientation gain.'
             },
             {
-              label: 'Skip random NHS and blank NP comparators',
+              label: 'Compare SPAAC NPs vs soluble VNAR without NPs',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Vijay rejects claims lacking control groups.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Cannot rule out non-specific PLGA adsorption.'
+            },
+            {
+              label: 'Assay SPAAC NPs alone in unfiltered 50% serum',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -14,
+              safetyMod: -4,
+              outcomeText: 'Protein corona debris obscures target capture.'
             }
           ],
-          askChudsHint: 'Richard: Always plot oriented SPAAC NPs beside equimolar random-NHS controls.',
-          antoineHint: 'Antoine: Azide-blank and random-NHS comparators prove true oriented capture.'
+          askChudsHint: 'Richard: Benchmarking against both unmodified azide particles and randomly coupled NHS particles isolates orientation gains.',
+          antoineHint: 'Antoine: Dual controls (azide-blank plus random-NHS NPs) demonstrate both specificity and 3.8x orientation advantage.'
         },
         dataOutput: {
           type: 'lcms',
@@ -4026,13 +4266,13 @@ window.KLB.CAMPAIGNS = {
         id: 'faiza_step_1',
         dayHint: 'Mon',
         title: 'Pre-Click diBrPD with MMAE',
-        desc: 'Click diBrPD-BCN and MMAE-azide in dry DMSO and verify by TLC.',
+        desc: 'Click diBrPD-BCN and MMAE-azide in dry DMSO, check RP-TLC, and purify.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 24,
         sweetSpotMins: 69,
-        minigame: null,
+        minigame: 'biotage',
         subTasks: [
           {
             id: 'fai_1_1',
@@ -4054,7 +4294,7 @@ window.KLB.CAMPAIGNS = {
             label: 'Get dry DMSO',
             roomId: 'klb_2f',
             stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            cupboardHint: 'Cupboard 1 (Dry Solvents)',
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -4071,7 +4311,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -4091,12 +4331,27 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'fai_1_5',
+            label: 'Purify PD-MMAE on C18',
+            roomId: 'klb_2f',
+            stationTypes: ['biotage'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 15,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: 'biotage',
             viewOutput: 'tlc',
             requiresJobFromPrev: false
           }
         ],
         choice: {
-          prompt: 'How do you handle greasy MMAE linker-drug?',
+          prompt: 'How do you handle hydrophobic MMAE conjugation?',
           options: [
             {
               label: 'Pre-click 1 eq diBrPD-BCN + 1.1 eq MMAE-N3',
@@ -4104,27 +4359,35 @@ window.KLB.CAMPAIGNS = {
               yieldMod: 10,
               purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Clean 2015 Da PD-MMAE stock in dry DMSO.'
+              outcomeText: 'Clean 2015 Da PD-MMAE stock after C18 workup.'
             },
             {
-              label: 'Rebridge IgG4 first, then add MMAE in PBS',
+              label: 'Pre-click 1 eq diBrPD-BCN + 0.85 eq MMAE-N3',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -20,
-              safetyMod: -4,
-              outcomeText: 'MMAE oils out in PBS, stalling at DAR 1.5.'
-            },
-            {
-              label: 'Pre-click 3 eq diBrPD-BCN + 1 eq MMAE-N3',
-              isOptimal: false,
-              yieldMod: -10,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Excess empty diBrPD steals IgG4 disulfides.'
+              outcomeText: '15% empty diBrPD competes for antibody cysteines.'
+            },
+            {
+              label: 'Pre-click 1.5 eq diBrPD-BCN + 1 eq MMAE-N3',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Leftover empty diBrPD caps hinge without drug.'
+            },
+            {
+              label: 'Rebridge IgG4 first, then SPAAC MMAE in PBS',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Lipophilic MMAE precipitates in aqueous buffer.'
             }
           ],
-          askChudsHint: 'Calise: Pre-click in DMSO with 1.1 eq MMAE-azide so zero empty diBrPD remains.',
-          antoineHint: 'Antoine: 1.0 eq diBrPD-BCN plus 1.1 eq MMAE-N3 ensures every head carries drug.'
+          askChudsHint: 'Calise: Keep MMAE-azide slightly in excess over diBrPD-BCN in organic solvent so zero empty linker steals Cys.',
+          antoineHint: 'Antoine: Slight excess of MMAE-azide during DMSO pre-click ensures every rebridging head carries payload.'
         },
         dataOutput: {
           type: 'tlc',
@@ -4142,8 +4405,8 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 18,
-        sweetSpotMins: 225,
+        durationMins: 24,
+        sweetSpotMins: 69,
         minigame: null,
         subTasks: [
           {
@@ -4168,10 +4431,10 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
-            triggersChoice: false,
+            triggersChoice: true,
             minigame: null,
             viewOutput: null,
             requiresJobFromPrev: false
@@ -4183,7 +4446,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 12,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4201,7 +4464,7 @@ window.KLB.CAMPAIGNS = {
             durationMins: 18,
             sweetSpotMins: 225,
             canOvercook: false,
-            triggersChoice: true,
+            triggersChoice: false,
             minigame: null,
             viewOutput: null,
             requiresJobFromPrev: false
@@ -4226,7 +4489,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you prep PD-MMAE and MagaFab for LG11?',
           options: [
             {
-              label: 'Papain pH 7.2, Protein A flow, 6x desalt',
+              label: 'Papain pH 7.2, Protein A flow, 6x water desalt',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
@@ -4234,24 +4497,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Shows 2015 Da Br2 triplet and 47.4 kDa Fab.'
             },
             {
-              label: 'Inject crude 80 mM cysteine digest directly',
+              label: 'Papain pH 7.2, 3x spin desalt in 10 mM NH4OAc',
               isOptimal: false,
-              yieldMod: -12,
-              purityMod: -20,
-              safetyMod: -8,
-              outcomeText: 'Cysteine fouls ESI source and angers Kersti.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Trace acetate broadens charge-state envelope.'
             },
             {
-              label: 'Skip LG11 MS verification of intermediates',
+              label: 'Papain pH 5.5, Protein A flow, 6x water desalt',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'Missing 2015 Da proof fails Friday rigor.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Suboptimal papain pH lowers Fab cleavage yield.'
+            },
+            {
+              label: 'Papain pH 7.2 + 20 mM Cys; inject 1x desalt',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -6,
+              outcomeText: 'Residual cysteine and buffer salt suppress ESI.'
             }
           ],
-          askChudsHint: 'Marcos: Desalt off cysteine first and check the 1:2:1 Br2 triplet at 2015 Da.',
-          antoineHint: 'Antoine: Confirm both bromines survived DMSO by checking the 2015 Da Br2 pattern.'
+          askChudsHint: 'Marcos: Confirm the 1:2:1 bromine isotope pattern survives DMSO and clear digestion reductants completely before MS.',
+          antoineHint: 'Antoine: Neutral papain cleavage and six pure-water desalting spins give razor-sharp MagaFab and Br2 spectra.'
         },
         dataOutput: {
           type: 'lcms',
@@ -4269,7 +4540,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['tcep_bench'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -4280,7 +4551,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -4295,7 +4566,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4310,9 +4581,9 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
-            sweetSpotMins: 69,
-            canOvercook: true,
+            durationMins: 21,
+            sweetSpotMins: 225,
+            canOvercook: false,
             triggersChoice: false,
             minigame: null,
             viewOutput: null,
@@ -4325,7 +4596,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 10,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4340,7 +4611,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4368,7 +4639,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'Which protocol hits DAR 4.0 on IgG4 S228P?',
           options: [
             {
-              label: '100 eq TCEP 37 C, spin wash, 10 eq PD-MMAE',
+              label: '100 eq TCEP 37 °C, spin wash, 10 eq PD-MMAE',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -4376,24 +4647,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'TCEP-resistant 150 kDa DAR 4.0 Maga-MMAE.'
             },
             {
-              label: 'Use 4 eq TCEP at 4 C without wash',
+              label: '50 eq TCEP 37 °C, spin wash, 10 eq PD-MMAE',
               isOptimal: false,
-              yieldMod: -18,
-              purityMod: -18,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'IgG4 resists 4 eq TCEP and stalls at DAR 1.6.'
+              outcomeText: 'Hindered IgG4 disulfides stop short at DAR 3.1.'
             },
             {
-              label: 'Add PD-MMAE in 30% DMSO straight into TCEP',
+              label: '10 eq TCEP 4 °C, spin wash, 10 eq PD-MMAE',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'TCEP kills PD-MMAE and 30% DMSO crashes IgG4.'
+              yieldMod: -7,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Mild reduction fails to open IgG4 hinge bonds.'
+            },
+            {
+              label: '100 eq TCEP 37 °C, no wash, 10 eq PD-MMAE',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Residual TCEP cleaves PD-MMAE disubstituted ring.'
             }
           ],
-          askChudsHint: 'Calise: IgG4 needs 100 eq TCEP at 37 C, then spin-wash before adding PD-MMAE.',
-          antoineHint: 'Antoine: Reduce with 100 eq TCEP, wash clean, then rebridge in 6% DMSO.'
+          askChudsHint: 'Calise: IgG4 hinges are harder to reduce than IgG1, yet residual reductant still ruins PD addition unless washed.',
+          antoineHint: 'Antoine: Vigorous 100 eq TCEP at 37 °C followed by spin removal unlocks full DAR 4.0 IgG4 rebridging.'
         },
         dataOutput: {
           type: 'gel',
@@ -4407,9 +4686,9 @@ window.KLB.CAMPAIGNS = {
         id: 'faiza_step_4',
         dayHint: 'Thu',
         title: 'Verify Spacer Integrity by NMR',
-        desc: 'Prepare DMSO-d6 sample of vc-PABC linker and check 600 MHz NMR.',
+        desc: 'Dissolve product in DMSO-d6 and verify spacer integrity by 600 MHz NMR.',
         locationRoom: 'klb_2f',
-        stationTypes: ['chem_cupboard'],
+        stationTypes: ['balance_table'],
         prepRequired: [],
         durationMins: 20,
         sweetSpotMins: 225,
@@ -4417,10 +4696,10 @@ window.KLB.CAMPAIGNS = {
         subTasks: [
           {
             id: 'fai_4_1',
-            label: 'Get dry DMSO solvent',
+            label: 'Weigh vc-PABC sample',
             roomId: 'klb_2f',
-            stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            stationTypes: ['balance_table'],
+            cupboardHint: null,
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -4432,7 +4711,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'fai_4_2',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (DMSO-d6)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
@@ -4477,35 +4756,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you confirm intact vc-PABC and DAR 4?',
+          prompt: 'How do you verify intact vc-PABC and DAR 4?',
           options: [
             {
-              label: 'Full DMSO-d6 1H NMR plus DAR 0/2/4 control',
+              label: 'DMSO-d6 1H NMR + HIC DAR 0/2/4 control',
               isOptimal: true,
               yieldMod: 8,
               purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Clean PABC signal at 5.01 ppm and DAR 3.9.'
+              outcomeText: 'Clean PABC signal at 5.01 ppm and DAR 3.92.'
             },
             {
-              label: 'Skip NMR and rely only on raw A280 reading',
+              label: 'DMSO-d6 1H NMR + UV A280/A252 ratio only',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -18,
+              yieldMod: 3,
+              purityMod: -4,
               safetyMod: 0,
-              outcomeText: 'Raw A280 hides DAR 0+8 heterogeneity.'
+              outcomeText: 'Average UV DAR hides minor DAR 2 and 6 species.'
             },
             {
-              label: 'Dissolve ADC in CDCl3 for NMR acquisition',
+              label: 'MeOD-d4 1H NMR (NH exchanged) + HIC check',
               isOptimal: false,
-              yieldMod: -14,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'Protein crashes out as an insoluble pellet.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Deuterium exchange erases diagnostic Cit NH.'
+            },
+            {
+              label: 'CDCl3 1H NMR of polar vc-PABC linker stock',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -14,
+              safetyMod: -4,
+              outcomeText: 'Citrulline peptide precipitates in neat CDCl3.'
             }
           ],
-          askChudsHint: 'Richard: Confirm intact PABC ArCH2O in DMSO-d6 alongside isotype controls.',
-          antoineHint: 'Antoine: DMSO-d6 resolves the vc-PABC spacer cleanly for SI characterization.'
+          askChudsHint: 'Richard: Aprotic polar NMR keeps exchangeable val-cit amide protons visible while HIC resolves DAR distribution.',
+          antoineHint: 'Antoine: DMSO-d6 dissolves polar vc-PABC cleanly without losing NH signals, paired with HIC DAR controls.'
         },
         dataOutput: {
           type: 'nmr',
@@ -4610,29 +4897,37 @@ window.KLB.CAMPAIGNS = {
               label: 'DTT-activated cathepsin B in pH 6.5 buffer',
               isOptimal: true,
               yieldMod: 10,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Quantitative free MMAE release at tumor pH.'
+              outcomeText: 'Quantitative free MMAE release at tumour pH.'
             },
             {
-              label: 'Assay ADC in pH 7.8 buffer with no protease',
+              label: 'Unactivated cathepsin B in pH 6.5 buffer',
               isOptimal: false,
-              yieldMod: -16,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Cathepsin B is inactive at pH 7.8; zero release.'
+              outcomeText: 'Partially oxidised enzyme gives sluggish release.'
             },
             {
-              label: 'Add 1% Triton X-100 without cathepsin B',
+              label: 'DTT-activated cathepsin B in pH 7.4 PBS',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -24,
-              safetyMod: 0,
-              outcomeText: 'Detergent does not cleave vc-PABC dipeptide.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Near-neutral pH drops cathepsin B turnover rate.'
+            },
+            {
+              label: 'DTT-activated cathepsin B + 5 mM EDTA, pH 8',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Alkaline pH inactivates the cysteine protease.'
             }
           ],
-          askChudsHint: 'Marcos: Pre-activate cathepsin B with DTT and run cleavage at pH 6.5.',
-          antoineHint: 'Antoine: pH 6.5 tumor-mimic buffer keeps cathepsin B active for clean MMAE release.'
+          askChudsHint: 'Marcos: Cathepsin B requires mild pre-reduction of its active-site Cys and acidic tumour-microenvironment pH.',
+          antoineHint: 'Antoine: Pre-activate cathepsin B with DTT and assay at pH 6.5 to mirror extracellular tumour LRG1 biology.'
         },
         dataOutput: {
           type: 'lcms',
@@ -4652,18 +4947,18 @@ window.KLB.CAMPAIGNS = {
     title: 'Gram-Scale p-TsOH diBrPD-NHS, 95% HHLL & Trifunctional GFP',
     manuscriptTopic: 'p-TsOH diBrPD-NHS, 95% HHLL & Trifunctional GFP',
     paperRef: 'Bahou, Richards, Maruani, Javaid, Baker & Chudasama, Org. Biomol. Chem. 2018, 16, 1359 (DOI: 10.1039/c7ob03138f); Bioconjugate Chem. 2021, 32, 672',
-    overview: 'Scale p-TsOH diBrPD-NHS, hit 95% HHLL at 4 C, and build serum-stable GFP.',
+    overview: 'Scale p-TsOH diBrPD-NHS, hit 95% HHLL at 4 °C, and build serum-stable GFP.',
     steps: [
       {
         index: 0,
         id: 'calise_step_1',
         dayHint: 'Mon',
-        title: 'Synthesize Gram-Scale diBrPD-NHS',
+        title: 'Synthesise Gram-Scale diBrPD-NHS',
         desc: 'Cleave ester with p-TsOH, activate with DCC/NHS, purify, and run NMR.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
-        durationMins: 30,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: 'biotage',
         subTasks: [
@@ -4689,7 +4984,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 30,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -4704,7 +4999,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['buchi'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4719,7 +5014,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['biotage'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4734,7 +5029,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 15,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4762,7 +5057,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you cleave the diBrPD t-Bu ester safely?',
           options: [
             {
-              label: 'Reflux with p-TsOH in toluene with zero TFA',
+              label: 'Reflux p-TsOH in dry toluene; zero TFA',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -4770,24 +5065,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean white crystals with 100% Br2 intact.'
             },
             {
-              label: 'Stir in 1:1 TFA/DCM at room temperature',
+              label: 'Reflux 10 mol% CSA in toluene, 110 °C',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -24,
-              safetyMod: -4,
-              outcomeText: 'TFA swaps ring bromines to dead monobromo-PD.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Slower cleavage leaves ~12% residual t-Bu ester.'
             },
             {
-              label: 'Saponify with 2 M LiOH at 50 C',
+              label: 'Stir 20% TFA/DCM at 21 °C for 4 h',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'Hydroxide displaces bromide off the PD ring.'
+              yieldMod: -7,
+              purityMod: -10,
+              safetyMod: -2,
+              outcomeText: 'Trace trifluoroacetate exchanges ring bromines.'
+            },
+            {
+              label: 'Stir 1:1 TFA/DCM at 21 °C for 2 h',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -16,
+              safetyMod: -4,
+              outcomeText: 'Heavy halogen exchange yields monobromo-PD.'
             }
           ],
-          askChudsHint: 'Dan: Never touch TFA on a diBrPD t-Bu ester; use p-TsOH in toluene.',
-          antoineHint: 'Antoine: p-TsOH in refluxing toluene keeps both bromines 100% intact.'
+          askChudsHint: 'Dan: Non-nucleophilic sulfonic acid in refluxing toluene removes t-Bu cleanly without displacing ring bromines.',
+          antoineHint: 'Antoine: Catalytic-to-stoichiometric p-TsOH in toluene preserves both bromines 100%, unlike TFA.'
         },
         dataOutput: {
           type: 'nmr',
@@ -4800,12 +5103,12 @@ window.KLB.CAMPAIGNS = {
         index: 1,
         id: 'calise_step_2',
         dayHint: 'Tue',
-        title: 'Rebridge Trastuzumab at 4 C',
-        desc: 'Pre-chill antibody with diBrPD at 4 C, add TCEP, and check HHLL gel.',
+        title: 'Rebridge Trastuzumab at 4 °C',
+        desc: 'Pre-chill antibody with diBrPD at 4 °C, add TCEP, and check HHLL gel.',
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 23,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -4846,7 +5149,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 23,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -4861,7 +5164,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4876,7 +5179,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -4904,36 +5207,44 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you push 150 kDa HHLL past 95%?',
           options: [
             {
-              label: 'Pre-chill mAb + 20 eq diBrPD at 4 C, then TCEP',
+              label: '4 °C mAb + 20 eq diBrPD, then 10 eq TCEP',
               isOptimal: true,
               yieldMod: 10,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
               outcomeText: 'Locks interchain hinge cleanly to 95.4% HHLL.'
             },
             {
-              label: 'Reduce with 10 eq TCEP at 37 C, then diBrPD',
+              label: '21 °C mAb + 20 eq diBrPD, then 10 eq TCEP',
               isOptimal: false,
-              yieldMod: -10,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Forms 42% intrachain 75 kDa half-antibody.'
+              outcomeText: 'Ambient in situ gives 84% HHLL and 12% half-mAb.'
             },
             {
-              label: 'Add 50 eq diBrPD at 4 C for faster reaction',
+              label: '37 °C 10 eq TCEP first, then 20 eq diBrPD',
               isOptimal: false,
-              yieldMod: -18,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Excess diBrPD crashes out and drops PDAR.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Pre-reduction promotes intrachain 75 kDa loops.'
+            },
+            {
+              label: '4 °C mAb + 40 eq diBrPD in 15% DMF, then TCEP',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'High co-solvent and excess PD precipitate mAb.'
             }
           ],
-          askChudsHint: 'Max: Chill mAb with 20 eq diBrPD at 4 C before adding 10 eq TCEP.',
-          antoineHint: 'Antoine: 4 C in situ rebridging suppresses 75 kDa half-mAb scrambling.'
+          askChudsHint: 'Max: Chill the antibody with linker already present before adding reductant so disulfides bridge before scrambling.',
+          antoineHint: 'Antoine: Cold 4 °C in situ rebridging suppresses heavy-light chain slippage into 75 kDa half-antibody.'
         },
         dataOutput: {
           type: 'gel',
-          label: '10% Non-Reducing SDS-PAGE: 4 C In Situ Rebridging',
+          label: '10% Non-Reducing SDS-PAGE: 4 °C In Situ Rebridging',
           productPeak: '95.4% intact 150 kDa HHLL Trastuzumab band (PDAR 4.0)',
           metricLabel: '95.4% HHLL homogeneity, PDAR = 4.0'
         }
@@ -4947,7 +5258,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['freezer_20c'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 23,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -4973,7 +5284,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 23,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -4988,7 +5299,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['base_bath'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5003,7 +5314,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5018,7 +5329,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 15,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5043,10 +5354,10 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you lock C-N vs C-S cleavability on GFP?',
+          prompt: 'How do you tune GFP S147C C-N vs C-S lock?',
           options: [
             {
-              label: 'p-Anisidine lock vs FEKGC thiol; measure uL',
+              label: 'p-Anisidine lock vs thiol; measure final µL',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -5054,24 +5365,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'C-N resists GSH cleanly; true 89% recovery.'
             },
             {
-              label: 'Use starting 500 uL volume after spin down',
+              label: 'p-Anisidine lock; assume 500 µL start volume',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -18,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Fake 125% yield meme gets roasted on Friday.'
+              outcomeText: 'Chemistry works but spin loss skews yield calc.'
             },
             {
-              label: 'Hydrolyse second bromine with 50 mM NaOH',
+              label: 'Steric t-butylamine vs thiol at pH 7.4',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -20,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Hindered amine reacts slowly and hydrolyses.'
+            },
+            {
+              label: '50 mM NaOH hydrolysis instead of p-anisidine',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
               safetyMod: -4,
-              outcomeText: 'High pH cleaves GFP thioether and PD ring.'
+              outcomeText: 'High pH opens ring and risks protein unfolding.'
             }
           ],
-          askChudsHint: 'Richard: p-Anisidine installs the stable C-N lock; always measure final uL.',
-          antoineHint: 'Antoine: Aniline substitution stops retro-addition; thiol stays GSH-cleavable.'
+          askChudsHint: 'Richard: Aniline substitution turns the second position into an irreversible C-N bond; check true post-spin µL.',
+          antoineHint: 'Antoine: Electron-rich p-anisidine locks against GSH retro-addition while accurate final volume prevents fake yields.'
         },
         dataOutput: {
           type: 'lcms',
@@ -5085,11 +5404,11 @@ window.KLB.CAMPAIGNS = {
         id: 'calise_step_4',
         dayHint: 'Thu',
         title: 'Test Serum Stability by MS',
-        desc: 'Incubate PD-AF488 vs maleimide in human serum and analyze in LG11.',
+        desc: 'Incubate PD-AF488 vs maleimide in human serum and analyse in LG11.',
         locationRoom: 'klb_2f',
         stationTypes: ['freezer_20c'],
         prepRequired: [],
-        durationMins: 30,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -5115,7 +5434,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 30,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -5130,7 +5449,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5145,7 +5464,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['lcms_unit'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 15,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5173,32 +5492,40 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you detect payload transfer in serum?',
           options: [
             {
-              label: 'Track intact mass shift vs maleimide over 7d',
+              label: '37 °C serum vs maleimide-AF488 over 7d, LC-MS',
               isOptimal: true,
               yieldMod: 8,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
               outcomeText: 'Maleimide loses 44% to HSA; PD loses under 2%.'
             },
             {
-              label: 'Incubate in cold 4 C PBS and claim stability',
+              label: '37 °C serum PD-AF488 only over 7d (no Mal)',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Maleimide survives thiol-free PBS; invalid.'
+              outcomeText: 'Shows PD stability but lacks maleimide benchmark.'
             },
             {
-              label: 'Inject raw 600 uM serum with no dilution',
+              label: '37 °C 50 µM GSH in PBS vs maleimide over 24 h',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Short PBS assay understates HSA Cys34 competition.'
+            },
+            {
+              label: '4 °C serum vs maleimide over 7d; raw injection',
               isOptimal: false,
               yieldMod: -12,
-              purityMod: -20,
-              safetyMod: -8,
-              outcomeText: 'Albumin clogs LC-MS and hides 3.3 uM ADC.'
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Chilled serum hides retro-Michael and clogs C18.'
             }
           ],
-          askChudsHint: 'Peter: Always run a maleimide-AF488 positive control in 37 C human serum.',
-          antoineHint: 'Antoine: Compare PD vs maleimide at 37 C to prove zero HSA transfer.'
+          askChudsHint: 'Peter: Include a maleimide comparator in warm human serum at physiological 37 °C to reveal retro-Michael HSA transfer.',
+          antoineHint: 'Antoine: Running PD beside maleimide in 37 °C serum over a full week proves stability against HSA Cys34.'
         },
         dataOutput: {
           type: 'lcms',
@@ -5216,7 +5543,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
-        durationMins: 25,
+        durationMins: 21,
         sweetSpotMins: 69,
         minigame: 'gel_load',
         subTasks: [
@@ -5242,7 +5569,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['heatblock'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 25,
+            durationMins: 21,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -5257,7 +5584,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['centrifuge'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 13,
+            durationMins: 11,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5272,7 +5599,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['gel_tank'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5308,28 +5635,36 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Matches native IgG1 pH-switch binding profile.'
             },
             {
-              label: 'Test FcRn binding solely in pH 7.4 PBS',
+              label: 'Bind FcRn at pH 6.0; no pH 7.4 elution lane',
               isOptimal: false,
-              yieldMod: -12,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'IgG1 does not bind FcRn at pH 7.4; flat line.'
+              outcomeText: 'Shows binding but omits physiological release.'
             },
             {
-              label: 'Strip FcRn complex in 2 M NaOH before gel',
+              label: 'Bind FcRn at pH 6.5 and release at pH 7.0',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -22,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Narrow pH step yields weak partial shift contrast.'
+            },
+            {
+              label: 'Bind FcRn solely in pH 7.4 PBS on native gel',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
               safetyMod: -4,
-              outcomeText: 'Strong base denatures both FcRn and antibody.'
+              outcomeText: 'IgG1 Fc lacks FcRn affinity at neutral blood pH.'
             }
           ],
-          askChudsHint: 'Richard: IgG1 binds FcRn at endosomal pH 6.0 and releases at blood pH 7.4.',
-          antoineHint: 'Antoine: Show pH 6.0 association plus pH 7.4 release to prove intact Fc.'
+          askChudsHint: 'Richard: Endosomal IgG1 salvage relies on His protonation near pH 6.0 and clean release at neutral blood pH.',
+          antoineHint: 'Antoine: Pair pH 6.0 association with pH 7.4 dissociation on native gel to prove unaltered Fc recycling.'
         },
         dataOutput: {
           type: 'gel',
-          label: 'pH 6.0 vs 7.4 FcRn Complex Shift SDS-PAGE',
+          label: 'pH 6.0 vs 7.4 FcRn Native Shift Gel',
           productPeak: 'Intact pH 6.0 FcRn complex and full pH 7.4 dissociation',
           metricLabel: 'Full pH-dependent FcRn retention'
         }
@@ -5344,24 +5679,39 @@ window.KLB.CAMPAIGNS = {
     charId: 'richard_spears',
     title: 'Thioaryl-PD Kinetics, PEG Hydrogels & Safe CDMP Dha',
     manuscriptTopic: 'Thioaryl-PD Kinetics, Star-PEG Gels & CDMP Dha',
-    paperRef: 'Bahou, Spears, Aliev, Maruani, Fernandez, Javaid, Szijj, Baker & Chudasama, Chem. Commun. 2019, 55, 14829; Biomacromolecules 2023, 24, 4646; Chem. Sci. 2024, 15, 4797',
-    overview: 'Synthesize twisted N-phenyl PDs, measure GSH kinetics, and cast PEG gels.',
+    paperRef: 'Bahou, Spears, Aliev, Maruani, Fernández, Javaid, Szijj, Baker & Chudasama, Chem. Commun. 2019, 55, 14829; Biomacromolecules 2023, 24, 4646; Chem. Sci. 2024, 15, 4797',
+    overview: 'Synthesise twisted N-phenyl PDs, measure GSH kinetics, and cast PEG gels.',
     steps: [
       {
         index: 0,
         id: 'richard_step_1',
         dayHint: 'Mon',
-        title: 'Synthesize Soluble Bis-PD Linkers',
-        desc: 'Prepare PEG-spaced bis-PD crosslinkers, quench thiols, and purify.',
+        title: 'Synthesise Soluble Bis-PD Linkers',
+        desc: 'Prep bleach bath, prepare PEG-spaced bis-PD crosslinkers, quench thiols, and purify.',
         locationRoom: 'klb_2f',
-        stationTypes: ['chem_cupboard'],
+        stationTypes: ['base_bath'],
         prepRequired: [],
-        durationMins: 28,
+        durationMins: 26,
         sweetSpotMins: 69,
         minigame: 'biotage',
         subTasks: [
           {
             id: 'ric_1_1',
+            label: 'Prep bleach bath in Chudasama hood',
+            roomId: 'klb_2f',
+            stationTypes: ['base_bath'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'ric_1_2',
             label: 'Get thiol reagents',
             roomId: 'klb_2f',
             stationTypes: ['chem_cupboard'],
@@ -5376,13 +5726,13 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'ric_1_2',
+            id: 'ric_1_3',
             label: 'Run bis-PD reaction',
             roomId: 'klb_2f',
             stationTypes: ['fumehood'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 28,
+            durationMins: 26,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -5391,13 +5741,13 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'ric_1_3',
+            id: 'ric_1_4',
             label: 'Quench in bleach bath',
             roomId: 'klb_2f',
             stationTypes: ['base_bath'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5406,28 +5756,13 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'ric_1_4',
+            id: 'ric_1_5',
             label: 'Check TLC under UV',
             roomId: 'klb_2f',
             stationTypes: ['tlc_station'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
-            sweetSpotMins: 225,
-            canOvercook: false,
-            triggersChoice: false,
-            minigame: null,
-            viewOutput: 'tlc',
-            requiresJobFromPrev: false
-          },
-          {
-            id: 'ric_1_5',
-            label: 'Remove solvent on buchi',
-            roomId: 'klb_2f',
-            stationTypes: ['buchi'],
-            cupboardHint: null,
-            mode: 'wait',
-            durationMins: 13,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -5437,17 +5772,32 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'ric_1_6',
+            label: 'Remove solvent on Büchi',
+            roomId: 'klb_2f',
+            stationTypes: ['buchi'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 12,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'ric_1_7',
             label: 'Purify on column',
             roomId: 'klb_2f',
             stationTypes: ['biotage'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
             minigame: 'biotage',
-            viewOutput: null,
+            viewOutput: 'tlc',
             requiresJobFromPrev: false
           }
         ],
@@ -5455,32 +5805,40 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you keep 400 mM bis-PD stocks soluble?',
           options: [
             {
-              label: 'Hydrophilic PEG spacer, 5% DMSO, bleach bath',
+              label: 'PEG3 spacer, 5% DMSO, hood + bleach bath',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
-              safetyMod: 4,
-              outcomeText: 'Clear 400 mM stock with zero thiol odor.'
+              safetyMod: 2,
+              outcomeText: 'Clear 400 mM stock with zero thiol odour.'
             },
             {
-              label: 'Bridge diBrPD across greasy biphenyl core',
+              label: 'Short C3 alkyl spacer, 10% DMSO, hood + bleach',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -20,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Crashes out instantly in aqueous buffer.'
+              outcomeText: 'Slightly cloudy near 200 mM; precipitates cold.'
             },
             {
-              label: 'Rinse thiophenol pipettes in hot open sink',
+              label: 'PEG3 spacer in 1% DMSO at 4 °C without warming',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -10,
-              safetyMod: -24,
-              outcomeText: 'Arylthiol vapor clears Lab 230 immediately.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Insufficient co-solvent leaves solid suspension.'
+            },
+            {
+              label: 'Lipophilic biphenyl spacer in 5% DMSO buffer',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Aromatic bis-PD crashes immediately in water.'
             }
           ],
-          askChudsHint: 'Marcos: Use a PEG spacer for water solubility and dunk thiols in bleach.',
-          antoineHint: 'Antoine: PEG3/PEG4 core solves solubility cleanly up to 400 mM stock.'
+          askChudsHint: 'Marcos: Ethoxy repeats break hydrophobic stacking for aqueous stock solubility while bleach neutralises residual thiols.',
+          antoineHint: 'Antoine: A hydrophilic PEG3/PEG4 bridge plus 5% DMSO keeps bis-PD homogeneous even at high stock molarity.'
         },
         dataOutput: {
           type: 'tlc',
@@ -5494,20 +5852,20 @@ window.KLB.CAMPAIGNS = {
         id: 'richard_step_2',
         dayHint: 'Tue',
         title: 'Audit N-Phenyl Twist by NMR',
-        desc: 'Prepare CDCl3 NMR tube and quantify residual solvent integrals.',
+        desc: 'Dissolve product in CDCl3 and quantify residual solvent integrals by NMR.',
         locationRoom: 'klb_2f',
-        stationTypes: ['chem_cupboard'],
+        stationTypes: ['balance_table'],
         prepRequired: [],
-        durationMins: 20,
+        durationMins: 21,
         sweetSpotMins: 225,
         minigame: null,
         subTasks: [
           {
             id: 'ric_2_1',
-            label: 'Get dry solvent',
+            label: 'Weigh N-Ph PD oil',
             roomId: 'klb_2f',
-            stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            stationTypes: ['balance_table'],
+            cupboardHint: null,
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -5519,7 +5877,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'ric_2_2',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (CDCl3)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
@@ -5539,7 +5897,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 21,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: true,
@@ -5570,35 +5928,43 @@ window.KLB.CAMPAIGNS = {
               label: 'Disclose 0.08 eq EtOAc and adjust molar wt',
               isOptimal: true,
               yieldMod: 8,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Exact stoichiometry and peak Richard rigor.'
+              outcomeText: 'Exact stoichiometry and peak Richard rigour.'
+            },
+            {
+              label: 'Disclose 0.08 eq EtOAc, ignore molar wt shift',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Honest spectrum, though kinetic eq drift ~2%.'
+            },
+            {
+              label: 'High-vac at 65 °C 12 h without NMR recheck',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Unknown residual solvent and minor thermal loss.'
             },
             {
               label: 'Crop NMR plot to 4.5-8.5 ppm to hide EtOAc',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -20,
-              safetyMod: 0,
-              outcomeText: 'Vijay demands 0-4.5 ppm and docks Rigor.'
-            },
-            {
-              label: 'Blast oil with a 250 C heat gun in open air',
-              isOptimal: false,
-              yieldMod: -24,
-              purityMod: -22,
-              safetyMod: -6,
-              outcomeText: 'PEG chars black and HBr eliminates off PD.'
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Vijay spots cropped aliphatic axis immediately.'
             }
           ],
-          askChudsHint: 'Dan: Never crop an NMR for Vijay; disclose trace EtOAc and correct molarity.',
-          antoineHint: 'Antoine: Full 0-10 ppm spectrum plus molar purity correction earns respect.'
+          askChudsHint: 'Dan: Always show the full 0-10 ppm spectrum and fold residual solvent equivalents into your stock molecular weight.',
+          antoineHint: 'Antoine: Full spectral disclosure plus gravimetric solvent-correction keeps kinetic stoichiometry exact.'
         },
         dataOutput: {
           type: 'nmr',
           label: 'Bruker 600 MHz 1H/13C NMR (CDCl3): N-Et,N-Ph PD',
           productPeak: 'C4/C5 at 136.8, 134.9 ppm; 0.08 eq EtOAc disclosed',
-          metricLabel: '98.9 wt% molar-corrected, rigor verified'
+          metricLabel: '98.9 wt% molar-corrected, rigour verified'
         }
       },
       {
@@ -5694,7 +6060,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you freeze kinetic competition vials?',
           options: [
             {
-              label: 'Quench with excess maleimide and pH 5, desalt',
+              label: 'Quench excess maleimide, drop pH 5, desalt',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -5702,24 +6068,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Frozen 4:1 preference for twisted N-Ph PD.'
             },
             {
-              label: 'Leave unquenched vials in 22 C autosampler',
+              label: 'Drop pH 5.0 only (no maleimide), quick desalt',
               isOptimal: false,
-              yieldMod: -10,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'All timepoints equilibrate while waiting.'
+              outcomeText: 'Slow residual reaction shifts ratio during spin.'
             },
             {
-              label: 'Quench kinetic timepoints with 10% bleach',
+              label: 'Flash-freeze in liquid N2, thaw on warm rack',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -24,
-              safetyMod: -14,
-              outcomeText: 'Bleach shreds Fab and ruins the LC-MS column.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Reactants resume equilibrating once thawed.'
+            },
+            {
+              label: 'Leave unquenched vials in 22 °C autosampler',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Timepoints converge before LC-MS injection.'
             }
           ],
-          askChudsHint: 'Peter: Cap free thiols with maleimide and drop to pH 5 to freeze kinetics.',
-          antoineHint: 'Antoine: Maleimide quench plus pH 5 arrest locks the exact 4:1 kinetic ratio.'
+          askChudsHint: 'Peter: Cap any unreacted cysteine irreversibly while acidifying so the competition ratio freezes at the exact timepoint.',
+          antoineHint: 'Antoine: Rapid maleimide thiol-trapping plus pH 5 arrest locks the 4:1 kinetic selectivity cleanly.'
         },
         dataOutput: {
           type: 'lcms',
@@ -5833,35 +6207,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'MSH is banned explosive. Which Dha reagent?',
+          prompt: 'Which safe reagent forms heavy-chain Dha?',
           options: [
             {
-              label: 'Bench-stable CDMP plus in situ TCEP at pH 8',
+              label: 'Bench-stable CDMP + in situ TCEP, pH 8.0',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
-              safetyMod: 4,
-              outcomeText: 'Safe crystalline Dha gives clean HC-selective.'
+              safetyMod: 2,
+              outcomeText: 'Safe crystalline Dha gives clean HC selectivity.'
             },
             {
-              label: 'Synthesize 2 g banned explosive MSH reagent',
+              label: 'Bench-stable CDMP + pre-washed TCEP, pH 7.4',
               isOptimal: false,
-              yieldMod: -18,
-              purityMod: -16,
-              safetyMod: -32,
-              outcomeText: 'Major COSHH alert almost closes Lab 230.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Slower elimination at pH 7.4 leaves bis-adduct.'
             },
             {
-              label: 'Boil Trastuzumab in 0.5 M Ba(OH)2 at pH 13',
+              label: 'Dibromoadipamide (DBAA) 50 eq at pH 8.0, 37 °C',
               isOptimal: false,
-              yieldMod: -26,
-              purityMod: -24,
+              yieldMod: -7,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Non-selective over-elimination hits light chains.'
+            },
+            {
+              label: 'Excess 100 eq CDMP at pH 9.5 and 50 °C',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
               safetyMod: -6,
-              outcomeText: 'Hydrolyses antibody peptide backbone to smear.'
+              outcomeText: 'Harsh pH and heat cause off-target fragmentation.'
             }
           ],
-          askChudsHint: 'Antoine: Use Cupboard 11 CDMP plus in situ TCEP; never go near MSH.',
-          antoineHint: 'Antoine: CDMP is bench-stable, COSHH-cleared, and selective for HC Cys.'
+          askChudsHint: 'Antoine: Cupboard 11 CDMP eliminates selectively at mildly basic pH 8.0 without thermal degradation.',
+          antoineHint: 'Antoine: Mild pH 8.0 CDMP with controlled TCEP delivers HC-selective dehydroalanine cleanly.'
         },
         dataOutput: {
           type: 'gel',
@@ -5879,7 +6261,7 @@ window.KLB.CAMPAIGNS = {
         locationRoom: 'klb_2f',
         stationTypes: ['balance_table'],
         prepRequired: [],
-        durationMins: 23,
+        durationMins: 24,
         sweetSpotMins: 69,
         minigame: null,
         subTasks: [
@@ -5905,7 +6287,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 23,
+            durationMins: 24,
             sweetSpotMins: 69,
             canOvercook: true,
             triggersChoice: true,
@@ -5963,7 +6345,7 @@ window.KLB.CAMPAIGNS = {
           prompt: '5DiBr gels in 8 s at pH 8. How do you mix it?',
           options: [
             {
-              label: '2 s rapid mix at pH 7.4-8.0; cysteamine test',
+              label: '2 s rapid mix pH 7.4-8.0; cysteamine lysis',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -5971,24 +6353,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Sets cleanly in 8 s; cysteamine dissolves gel.'
             },
             {
-              label: 'Pipette slowly for 45 s at pH 8.0',
+              label: '2 s rapid mix pH 7.4; omit cysteamine test',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -18,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Hydrogel cures solid inside your pipette tip.'
+              outcomeText: 'Clean gel forms, though thiol lysis unproven.'
             },
             {
-              label: 'Formulate hydrogel in pH 2.5 citrate buffer',
+              label: 'Mix slowly over 30 s at pH 8.0 by pipette',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -20,
-              safetyMod: 0,
-              outcomeText: 'Zero thiolate at pH 2.5; mixture never gels.'
+              yieldMod: -7,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Network cures mid-pipetting with trapped voids.'
+            },
+            {
+              label: 'Cast hydrogel in pH 5.0 MES buffer (8-arm SH)',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -14,
+              safetyMod: -4,
+              outcomeText: 'Low thiolate population stalls crosslinking rate.'
             }
           ],
-          askChudsHint: 'Calise: Rapid 2 s mixing only at pH 8; 5DiBr sets in under 10 seconds.',
-          antoineHint: 'Antoine: Mix fast at pH 7.4-8.0 and show thiol-triggered 5DiH lysis.'
+          askChudsHint: 'Calise: Deprotonated thiolate drives sub-10-second gelation at pH 8, so pipette rapidly and verify thiol triggers.',
+          antoineHint: 'Antoine: Fast 2 s vortex/mix at pH 7.4-8.0 beats the 8 s gel point, and cysteamine proves 5DiH reversibility.'
         },
         dataOutput: {
           type: 'lcms',
@@ -6001,13 +6391,13 @@ window.KLB.CAMPAIGNS = {
   },
 
   // =========================================================================
-  // 10. MARCOS FERNANDEZ - Thio-PD SMDC Scaffolds & GSH vs HSA Turn-On
+  // 10. MARCOS FERNÁNDEZ - Thio-PD SMDC Scaffolds & GSH vs HSA Turn-On
   // =========================================================================
   marcos_fernandez: {
     charId: 'marcos_fernandez',
     title: 'Self-Immolative Thio-PD SMDCs & Intracellular GSH Turn-On',
     manuscriptTopic: 'Thio-PD Self-Immolative SMDCs & GSH Turn-On',
-    paperRef: 'Fernandez, Shamsabadi & Chudasama, Chem. Commun. 2020, 56, 1125 (DOI: 10.1039/C9CC08744C); Chem. Sci. 2018, 9, 790',
+    paperRef: 'Fernández, Shamsabadi & Chudasama, Chem. Commun. 2020, 56, 1125 (DOI: 10.1039/C9CC08744C); Chem. Sci. 2018, 9, 790',
     overview: 'Build thio-PD coumarin SMDCs and prove selective intracellular GSH release.',
     steps: [
       {
@@ -6015,9 +6405,9 @@ window.KLB.CAMPAIGNS = {
         id: 'marcos_step_1',
         dayHint: 'Mon',
         title: 'Make Cupboard 5 Thio-PD Cores',
-        desc: 'Substitute diBrPD with thiols in hood, bleach waste, and check TLC.',
+        desc: 'Prep bleach bath, substitute diBrPD with thiols in hood, quench waste, and check TLC.',
         locationRoom: 'klb_2f',
-        stationTypes: ['chem_cupboard'],
+        stationTypes: ['base_bath'],
         prepRequired: [],
         durationMins: 28,
         sweetSpotMins: 69,
@@ -6025,6 +6415,21 @@ window.KLB.CAMPAIGNS = {
         subTasks: [
           {
             id: 'mar_1_1',
+            label: 'Prep bleach bath in Chudasama hood',
+            roomId: 'klb_2f',
+            stationTypes: ['base_bath'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'mar_1_2',
             label: 'Get Cupboard 5 thiols',
             roomId: 'klb_2f',
             stationTypes: ['chem_cupboard'],
@@ -6039,7 +6444,7 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'mar_1_2',
+            id: 'mar_1_3',
             label: 'Run thiol substitution',
             roomId: 'klb_2f',
             stationTypes: ['fumehood'],
@@ -6054,13 +6459,13 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'mar_1_3',
+            id: 'mar_1_4',
             label: 'Quench in bleach bath',
             roomId: 'klb_2f',
             stationTypes: ['base_bath'],
             cupboardHint: null,
             mode: 'action',
-            durationMins: 5,
+            durationMins: 4,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -6069,7 +6474,7 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'mar_1_4',
+            id: 'mar_1_5',
             label: 'Remove reaction solvent',
             roomId: 'klb_2f',
             stationTypes: ['buchi'],
@@ -6084,7 +6489,7 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'mar_1_5',
+            id: 'mar_1_6',
             label: 'Check TLC under UV',
             roomId: 'klb_2f',
             stationTypes: ['tlc_station'],
@@ -6100,35 +6505,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Opening Cupboard 5 thiols: what is the rule?',
+          prompt: 'How do you handle volatile Cupboard 5 thiols?',
           options: [
             {
-              label: 'Work in hood; dunk tips in bleach bath after',
+              label: '21 °C in hood; bleach bath tips & workup waste',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
-              safetyMod: 4,
-              outcomeText: 'Zero odor escapes; six thio-PDs form cleanly.'
+              safetyMod: 2,
+              outcomeText: 'Zero odour escapes; six thio-PDs form cleanly.'
             },
             {
-              label: 'Weigh uncapped thiophenol on open balance',
+              label: '21 °C in hood; Et3N quench then delayed bleach',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Product clean, though trace smell lingers briefly.'
+            },
+            {
+              label: '40 °C in hood; EtOAc extract without bleach',
               isOptimal: false,
               yieldMod: -6,
-              purityMod: -10,
-              safetyMod: -28,
-              outcomeText: 'Skunk stench floods Lab 230; safety craters.'
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Volatile arylthiol escapes during workup transfer.'
             },
             {
-              label: 'Pour bleach straight into reaction flask',
+              label: 'Weigh arylthiol on open bench balance first',
               isOptimal: false,
-              yieldMod: -26,
-              purityMod: -24,
-              safetyMod: -4,
-              outcomeText: 'Bleach oxidizes all thio-PD product to tar.'
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -6,
+              outcomeText: 'Arylthiol vapour drifts; Lab Condition drops.'
             }
           ],
-          askChudsHint: 'Andre: Keep thiols in the Chudasama hood and use the bleach bath after extracting.',
-          antoineHint: 'Antoine: Extract inside hood first, then dunk dirty glassware in bleach bath.'
+          askChudsHint: 'André: Keep thiols strictly behind the sash until quenched, and oxidise glassware promptly in bleach.',
+          antoineHint: 'Antoine: Dispense inside the Chudasama hood with bleach bath prepped, then oxidise all tips after workup.'
         },
         dataOutput: {
           type: 'tlc',
@@ -6207,12 +6620,12 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: null,
-            viewOutput: 'tlc',
+            viewOutput: null,
             requiresJobFromPrev: false
           },
           {
             id: 'mar_2_5',
-            label: 'Remove DMSO on buchi',
+            label: 'Concentrate EtOAc extract on Büchi',
             roomId: 'klb_2f',
             stationTypes: ['buchi'],
             cupboardHint: null,
@@ -6232,20 +6645,20 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['biotage'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 15,
+            durationMins: 14,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
             minigame: 'biotage',
-            viewOutput: null,
+            viewOutput: 'tlc',
             requiresJobFromPrev: false
           }
         ],
         choice: {
-          prompt: 'How do you couple gamma-folate cleanly?',
+          prompt: 'How do you couple and purify gamma-folate?',
           options: [
             {
-              label: 'Gamma-folate + PyBOP in DMSO; DCM/MeOH + AcOH',
+              label: 'Gamma-folate + PyBOP/DMSO; DCM/MeOH + 1% AcOH',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
@@ -6253,24 +6666,32 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Clean gamma-SMDC with fluorescence fully caged.'
             },
             {
-              label: 'Suspend folic acid in hexanes with DCC',
+              label: 'Gamma-folate + EDC/HOBt in DMSO; 1% AcOH col',
               isOptimal: false,
-              yieldMod: -24,
-              purityMod: -18,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Folic acid stays sand and sticks to silica.'
+              outcomeText: 'Sluggish EDC gives lower yield and urea traces.'
             },
             {
-              label: 'Reflux folic acid in neat SOCl2 at 80 C',
+              label: 'Gamma-folate + PyBOP/DMSO; neutral DCM/MeOH',
               isOptimal: false,
-              yieldMod: -22,
-              purityMod: -24,
-              safetyMod: -10,
-              outcomeText: 'SOCl2 scrambles alpha/gamma and breaks carbamate.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Alpha-carboxylate streaks badly across silica.'
+            },
+            {
+              label: 'Unprotected folic acid + PyBOP/DMF at 60 °C',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Alpha/gamma mixture forms insoluble regioisomers.'
             }
           ],
-          askChudsHint: 'Faiza: Couple at the gamma position in dry DMSO with PyBOP and 1% AcOH.',
-          antoineHint: 'Antoine: Dry DMSO/DCM + PyBOP preserves alpha-COOH; 1% AcOH stops streaking.'
+          askChudsHint: 'Faiza: Protect alpha vs gamma selectivity with dry DMSO/PyBOP, and add mild acid on silica to stop carboxylate streaking.',
+          antoineHint: 'Antoine: PyBOP in dry DMSO couples selectively while 1% AcOH keeps the free acid sharp on Biotage.'
         },
         dataOutput: {
           type: 'tlc',
@@ -6284,20 +6705,20 @@ window.KLB.CAMPAIGNS = {
         id: 'marcos_step_3',
         dayHint: 'Wed',
         title: 'Verify SMDC Structure by NMR',
-        desc: 'Dissolve folate SMDC in DMSO-d6 and run 700 MHz 1H/13C NMR.',
+        desc: 'Dissolve product in DMSO-d6 and run 700 MHz 1H/13C NMR.',
         locationRoom: 'klb_2f',
-        stationTypes: ['chem_cupboard'],
+        stationTypes: ['balance_table'],
         prepRequired: [],
-        durationMins: 20,
+        durationMins: 21,
         sweetSpotMins: 225,
         minigame: null,
         subTasks: [
           {
             id: 'mar_3_1',
-            label: 'Get dry DMSO solvent',
+            label: 'Weigh SMDC for NMR',
             roomId: 'klb_2f',
-            stationTypes: ['chem_cupboard'],
-            cupboardHint: 'Cupboard 1',
+            stationTypes: ['balance_table'],
+            cupboardHint: null,
             mode: 'action',
             durationMins: 4,
             sweetSpotMins: 225,
@@ -6309,7 +6730,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'mar_3_2',
-            label: 'Dissolve and prep tube',
+            label: 'Prepare NMR tube (DMSO-d6)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
             cupboardHint: null,
@@ -6329,7 +6750,7 @@ window.KLB.CAMPAIGNS = {
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 20,
+            durationMins: 21,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: true,
@@ -6357,32 +6778,40 @@ window.KLB.CAMPAIGNS = {
           prompt: 'Which NMR solvent resolves folate SMDC?',
           options: [
             {
-              label: 'DMSO-d6 at 4.5 cm for 1H and DEPT-13C',
+              label: 'DMSO-d6 at 4.5 cm for 1H and 13C NMR',
               isOptimal: true,
               yieldMod: 8,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
               outcomeText: 'Full solubility and clean 154.2 ppm carbamate.'
             },
             {
-              label: 'CDCl3 quick 16-scan 1H NMR',
+              label: 'DMSO-d6 + 10% D2O at 4.5 cm for 1H NMR',
               isOptimal: false,
-              yieldMod: -10,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -4,
               safetyMod: 0,
-              outcomeText: 'Polar folate SMDC sits insoluble at bottom.'
+              outcomeText: 'Water suppresses pteridine NH and broadens peak.'
             },
             {
-              label: 'D2O plus 100 mM NaOD strong base',
+              label: 'MeOD-d4 at 4.5 cm; warm to 40 °C to dissolve',
               isOptimal: false,
-              yieldMod: -20,
-              purityMod: -20,
-              safetyMod: 0,
-              outcomeText: 'Base cleaves carbamate to free blue coumarin.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Partial folate suspension leaves weak 13C SNR.'
+            },
+            {
+              label: 'CDCl3 with 5% CD3OD at 25 °C for 1H NMR',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -14,
+              safetyMod: -4,
+              outcomeText: 'Polar folate SMDC remains largely insoluble.'
             }
           ],
-          askChudsHint: 'Andre: DMSO-d6 is the only solvent that dissolves folate and coumarin cleanly.',
-          antoineHint: 'Antoine: DMSO-d6 at 700 MHz resolves both pteridine and carbamate carbons.'
+          askChudsHint: 'André: Polar pteridine rings resist chloroform or methanol, whereas neat aprotic polar solvent preserves every NH.',
+          antoineHint: 'Antoine: Neat DMSO-d6 at 4.5 cm dissolves the folate-coumarin SMDC and reveals the diagnostic carbamate.'
         },
         dataOutput: {
           type: 'nmr',
@@ -6484,32 +6913,40 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you prep 40 mg/mL HSA for C18 LC-MS?',
           options: [
             {
-              label: 'Cold MeCN crash, spin 14,000g, then inject',
+              label: '3x ice-cold MeCN crash, 14,000g spin, inject',
               isOptimal: true,
               yieldMod: 10,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
               outcomeText: '96% intact in HSA; fast cleavage in 5 mM GSH.'
             },
             {
-              label: 'Inject undiluted 40 mg/mL HSA on C18 column',
+              label: '1x RT MeCN crash, 6,000g spin, inject',
               isOptimal: false,
-              yieldMod: -12,
-              purityMod: -24,
-              safetyMod: -14,
-              outcomeText: 'Albumin bricks column; Kersti shuts down LG11.'
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Incomplete albumin precipitation raises baseline.'
             },
             {
-              label: 'Skip HSA and test cleavage in 100 mM DTT',
+              label: '3x ice-cold MeCN crash; test 0.5 mM GSH only',
               isOptimal: false,
-              yieldMod: 0,
-              purityMod: -18,
-              safetyMod: 0,
-              outcomeText: 'Anything cleaves in DTT; fails blood test.'
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Below intracellular 5 mM GSH slows release kinetics.'
+            },
+            {
+              label: 'Dilute 1:2 in water and inject HSA straight',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -6,
+              outcomeText: 'Albumin fouls C18 guard column and suppresses MS.'
             }
           ],
-          askChudsHint: 'Richard: Crash HSA aliquots with 3x ice-cold MeCN and spin hard before LC-MS.',
-          antoineHint: 'Antoine: Cold MeCN protein crash saves C18 and proves blood HSA stability.'
+          askChudsHint: 'Richard: Precipitate 40 mg/mL albumin cleanly with excess cold organic solvent before injecting onto reversed-phase.',
+          antoineHint: 'Antoine: Three volumes of ice-cold MeCN plus high-speed spin protect the C18 column while keeping coumarin soluble.'
         },
         dataOutput: {
           type: 'lcms',
@@ -6608,35 +7045,43 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'Which control proves zero off-target HSA?',
+          prompt: 'Which gel controls prove zero off-target HSA?',
           options: [
             {
-              label: '5 mM GSH vs 40 mg/mL HSA non-reducing gel',
+              label: '5 mM GSH vs 40 mg/mL HSA + 10 µM GSH, non-red',
               isOptimal: true,
               yieldMod: 10,
-              purityMod: 14,
+              purityMod: 12,
               safetyMod: 2,
               outcomeText: '42x GSH turn-on with dark 66.5 kDa HSA lane.'
             },
             {
-              label: 'Boil HSA control 15m in reducing BME',
+              label: '5 mM GSH vs thiol-free HSA only, non-reducing',
               isOptimal: false,
-              yieldMod: -14,
-              purityMod: -22,
+              yieldMod: 3,
+              purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Boiling in BME strips adduct and spoils test.'
+              outcomeText: 'Clean contrast, though omits 10 µM blood GSH.'
             },
             {
-              label: 'Spike 5 mM GSH into the blood HSA control',
+              label: '5 mM GSH vs 40 mg/mL HSA + 5 mM GSH, non-red',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'High GSH cleaves the blood control and blurs gap.'
+            },
+            {
+              label: '5 mM GSH vs 40 mg/mL HSA boiled in BME',
               isOptimal: false,
               yieldMod: -12,
-              purityMod: -22,
-              safetyMod: 0,
-              outcomeText: 'Blood has 10 uM GSH; 5 mM ruins the contrast.'
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Reducing boil strips probe and masks transfer.'
             }
           ],
-          askChudsHint: 'Calise: Compare 5 mM GSH against 40 mg/mL HSA + 10 uM GSH on a non-reducing gel.',
-          antoineHint: 'Antoine: Dark 66.5 kDa HSA lane vs bright 5 mM GSH release makes it watertight.'
+          askChudsHint: 'Calise: Blood plasma carries ~10 µM GSH alongside abundant albumin, whereas tumour cytosol holds millimolar GSH.',
+          antoineHint: 'Antoine: Contrast 5 mM intracellular GSH against 40 mg/mL HSA + 10 µM plasma GSH on a non-reducing gel.'
         },
         dataOutput: {
           type: 'gel',

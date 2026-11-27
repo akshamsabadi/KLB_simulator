@@ -17,9 +17,9 @@ window.KLB.CAST = [
     lunchHour: 12.0,
     lunchRoom: 'gordons_cafe',
     perkTitle: '07:45 Dawn Patrol & MS Whisperer',
-    perkDesc: 'Quiet early bench start from 07:45 with zero equipment contention; +25% chance to sweet-talk Kersti or revive a stalled LC-MS.',
+    perkDesc: 'Quiet 07:45 bench start with pre-known CIB keypad codes; 50% faster LG11 LC-MS flush (10m) and fewer Kersti Q-TOF stalls.',
     flawTitle: '18:00 Curfew & Side-Cheek Scissors',
-    flawDesc: 'Steep Energy drain after 18:00; rare bench fumble with sharp scissors if Energy drops below 25.',
+    flawDesc: '2x Energy drain after 18:00 curfew; rare bench fumble with sharp scissors and loud lab laugh lore below 25 Energy.',
     waColor: '#60a5fa',
     quotes: [
       "Morning team — been in since 07:45, Büchi 1 is already warmed up #BCN4Life",
@@ -44,7 +44,7 @@ window.KLB.CAST = [
     lunchHour: 12.85,
     lunchRoom: 'gordons_cafe',
     perkTitle: '160 kg Silverback & Blue Party Mix',
-    perkDesc: 'Forces stuck KLB doors/drawers effortlessly; 2× faster Coomassie SDS-PAGE staining & destaining.',
+    perkDesc: '160 kg silverback lab presence and Blue Party Mix magic for 2x faster Coomassie SDS-PAGE gel runs.',
     flawTitle: 'Never Weighs TCEP',
     flawDesc: 'Refuses to weigh fresh TCEP at the balance — must ask a labmate for buffered TCEP or gamble on unlabelled bench TCEP!',
     waColor: '#38bdf8',
@@ -71,12 +71,12 @@ window.KLB.CAST = [
     lunchHour: 12.75,
     lunchRoom: 'klb_3f',
     perkTitle: '#Hackerman & P2-Tip SEC MacGyver',
-    perkDesc: 'Knows all CIB keypad/PC/remote-NMR codes from Day 1; can pack a P2-tip mini-SEC column to bypass busy purification gear.',
+    perkDesc: 'Pre-known CIB keypad/PC codes from Day 1, plus #Hackerman P2-tip mini-SEC (25% faster centrifuge and Biotage runs).',
     flawTitle: '#French&Proud & Sliced-Croissant Trauma',
     flawDesc: 'Spawns 15 mins later in the morning; loses 15 Morale if exposed to British sliced ham-and-cheese croissants or Meal Deals.',
     waColor: '#f87171',
     quotes: [
-      "Mon dieu, who sliced a croissant horizontally like bread?! This is a war crime.",
+      "Mon Dieu, who sliced a croissant horizontally like bread?! This is a war crime.",
       "Check 128.40.76.1 remotely from upstairs — saves walking to LG1b before Abil's done.",
       "Sequential SPAAC first, THEN CuAAC with THPTA/aminoguanidine so copper never touches free thiols.",
       "#AskAntoine clinic is open — bring me your weird LC-MS adducts."
@@ -98,7 +98,7 @@ window.KLB.CAST = [
     lunchHour: 12.8,
     lunchRoom: 'klb_3f',
     perkTitle: 'Waistcoat Confidence & Poll Sparkplug',
-    perkDesc: 'Dropping a spicy WhatsApp poll rallies lab Morale (+12); +20% faster Biotage flash chromatography & organic workups.',
+    perkDesc: '20% faster Biotage flash runs (+5 Quality / +4 Yield polish) and +10 Morale from spicy WhatsApp lab polls.',
     flawTitle: 'Forgotten Clicker & -78 °C Dry-Ice Hazard',
     flawDesc: 'Must grab laser clicker upstairs on 3F before Friday Audit; vulnerable to -78 °C acetone/dry-ice splashes & Abil NMR tube fines.',
     waColor: '#818cf8',
@@ -125,7 +125,7 @@ window.KLB.CAST = [
     lunchHour: 12.65,
     lunchRoom: 'gordons_cafe',
     perkTitle: 'Night-Owl LotR Second Wind',
-    perkDesc: '+30% bench speed and 50% slower Energy drain after 18:00 when the Lord of the Rings synth plays on the Lab Speakers!',
+    perkDesc: 'Playing LotR on the Lab Speakers after 18:00 grants +20% walk speed and 55% slower Energy drain for late-shift runs.',
     flawTitle: 'The 2 µL Blue Loading-Dye Misclick',
     flawDesc: 'If Energy drops below 30, risks accidentally pipetting blue SDS loading dye into pure Fab stock instead of the gel PCR tube!',
     waColor: '#34d399',
@@ -133,7 +133,7 @@ window.KLB.CAST = [
       "6 PM in KLB 230 — lab's finally quiet, putting Howard Shore's Shire theme on the speakers.",
       "Running parallel Trastuzumab, Rituximab and OKT3 digests like a one-man antibody factory.",
       "Please tell me I didn't just pipette 2 µL of blue LDS sample buffer into my pure Fab Eppendorf!",
-      "SPIEDDA tetrazine click goes in minutes — cleanest 147 kDa band you'll ever see."
+      "SPIEDAC tetrazine click goes in minutes — cleanest 147 kDa band you'll ever see."
     ],
     hintSpecialty: 'bioconj',
     hintLine: "Peter nods over the gel tank: 'Keep sialidase CiTE clicks gentle at pH 7.0, and never pipette near pure Fab stocks when your Energy is below 30!'"
@@ -151,16 +151,16 @@ window.KLB.CAST = [
     preferences: { pref: 'coffee', requiresCaffeine: true, label: 'Coffee' },
     lunchHour: 12.45,
     lunchRoom: 'gordons_cafe',
-    perkTitle: "10:27 Gordon's Coffee Captain",
-    perkDesc: "Triggering a Gordon's Café run between 10:15–11:00 rallies 3+ Chuds, granting 2× Morale & +2 Lab Favours.",
-    flawTitle: 'Culinary Purist & 20:02 Flash Columns',
-    flawDesc: 'Refuses cold triangle Meal Deals & Dr Pepper; starting Biotage columns after 19:30 costs extra Energy.',
+    perkTitle: "10:30 Gordon's Coffee Captain",
+    perkDesc: "10:30 Coffee Quartet Captain: leading the morning run at Gordon's Café grants 2x Morale and +2 Lab Favours.",
+    flawTitle: 'Culinary Purist & 17:30 Late Flash Columns',
+    flawDesc: 'Refuses cold triangle Meal Deals & Dr Pepper; starting Biotage flash columns after 17:30 drains extra Energy.',
     waColor: '#fbbf24',
     quotes: [
       "10:27 — Gordon's coffee run? Anyone coming?",
       "How do British people call cold wet triangle bread + crisps + Dr Pepper 'lunch'?!",
       "11 kDa shark VNAR E4 clicked onto PLGA–PEG–N3 nanoparticles — polydispersity < 0.12!",
-      "20:02 and I'm just loading a silica column, pray for me."
+      "17:30 and I'm just loading a silica column before lockup, pray for me."
     ],
     hintSpecialty: 'nano',
     hintLine: "João gestures with his espresso: 'Dropwise nanoprecipitation needs steady mixing and clean monoBrPD-PEG2-BCN — check DLS PDI before Friday!'"
@@ -179,7 +179,7 @@ window.KLB.CAST = [
     lunchHour: 12.5,
     lunchRoom: 'gordons_cafe',
     perkTitle: 'Bio-Assay Precision & PI Charm',
-    perkDesc: 'Runs clean A280 UV-Vis antibody checks on KLB 2F benches (zero Favour needed) and charms Kersti/Vijay in meetings.',
+    perkDesc: '2F A280 bench checks add +4 Quality to bioconjugations, plus a +0.5 Friday Audit rescue when Vijay scores are tight.',
     flawTitle: '#HalfDayDaiza Morning Commute',
     flawDesc: 'Spawns at 10:15 after morning commute delays and starts without CIB 1965/2145 keypad codes memorised.',
     waColor: '#f472b6',
@@ -206,7 +206,7 @@ window.KLB.CAST = [
     lunchHour: 12.35,
     lunchRoom: 'gordons_cafe',
     perkTitle: 'Samwise Resilience & Steak Pie Morale',
-    perkDesc: 'Takes 50% less Morale damage from lab disasters/roasts; sharing lunch buffs nearby Chuds.',
+    perkDesc: 'Takes 50% reduced Morale loss from lab disasters and lifts colleagues’ Morale during shared lunches.',
     flawTitle: 'Pocket Lemons & Spin-Filter Dilution Math',
     flawDesc: 'Starts with lucky lemons in pockets; rushing VivaSpin concentration risks comical "125% yield" math errors on slides!',
     waColor: '#2dd4bf',
@@ -233,9 +233,9 @@ window.KLB.CAST = [
     lunchHour: 12.15,
     lunchRoom: 'klb_3f',
     perkTitle: "Richard's Kettle & Meticulous Auditor's Eye",
-    perkDesc: "Brewing Yorkshire/Betty's tea at Richard's kettle upstairs restores +22 Energy; honest flaw disclosure on Friday slides earns +1.5 Rigor bonus!",
+    perkDesc: "Brewing Yorkshire or Bettys tea at the 3F Kettle restores +36 Energy; honest Friday slide disclosure earns a +0.65 Honest Disclosure Rigor bonus.",
     flawTitle: 'Soluble-or-Not-Soluble DMSO Crash-Out',
-    flawDesc: 'Bis-thioaryl PD stocks risk crashing out of aqueous buffer if co-solvent % isn’t carefully balanced; strict pre-midnight curfew.',
+    flawDesc: 'Bis-thioaryl PD stocks risk crashing out of aqueous buffer if co-solvent % isn’t balanced; strict 18:00 curfew ahead of 19:30 lockup.',
     waColor: '#c084fc',
     quotes: [
       "Welcome to today's episode of 'Soluble or Not Soluble' — spoiler: there's white precipitate.",
@@ -260,7 +260,7 @@ window.KLB.CAST = [
     lunchHour: 12.25,
     lunchRoom: 'gordons_cafe',
     perkTitle: '08:45 Master Doorman & #Headsup Scout',
-    perkDesc: 'Early 08:45 arrival, all CIB codes known, and receives early 90s #headsup alerts before Vijay or Safety sweeps!',
+    perkDesc: 'Early 08:45 arrival with pre-known CIB keypad codes and 90s early #headsup Safety Sweep warnings.',
     flawTitle: 'Cupboard 5 Thiol Stench & Dry-Ice Duty',
     flawDesc: 'Must quench thiol glassware in the bleach bath in the Chudasama hood immediately or trigger lab-wide stench; covers urgent 2F prep sweeps.',
     waColor: '#fb923c',
@@ -271,7 +271,7 @@ window.KLB.CAST = [
       "5 mM GSH cleaved the self-immolative coumarin linker cleanly while 40 mg/mL HSA stayed dark!"
     ],
     hintSpecialty: 'thiols',
-    hintLine: "Marcos whispers: 'Any reaction using Cupboard 5 thiols MUST be quenched in the bleach bath in the Chudasama hood right after workup, or Safety & Morale tank!'"
+    hintLine: "Marcos whispers: 'Any reaction using Cupboard 5 thiols MUST be quenched in the bleach bath in the Chudasama hood right after workup, or Lab Condition & Morale tank!'"
   },
 
   // ==================== B. PIs & 3-GROUP LAB NEIGHBOURS ====================
@@ -336,7 +336,7 @@ window.KLB.CAST = [
     playable: false,
     group: 'baker',
     arriveHour: 9.5,
-    departHour: 19.75,
+    departHour: 19.25,
     habit: null,
     preferences: { pref: 'balanced', requiresCaffeine: false, label: 'Balanced' },
     lunchHour: 12.4,
@@ -344,7 +344,7 @@ window.KLB.CAST = [
     role: 'Baker Group Researcher • Official KLB First Aider & Late-Night Rescuer',
     waColor: '#10b981',
     quotes: [
-      "Still in Lab 230 until 19:45 — shout if you're stuck in CIB and need your flask pulled off heat!",
+      "Still in Lab 230 until 19:15 — shout if you're stuck in CIB and need your flask pulled off heat!",
       "First-aid kit is stocked if anyone gets a dry-ice burn or glass nick.",
       "Need emergency anhydrous DMF or a tiny aliquot of Herceptin Fab? Cash in a Favour!"
     ]
@@ -361,12 +361,12 @@ window.KLB.CAST = [
     preferences: { pref: 'balanced', requiresCaffeine: false, label: 'Balanced' },
     lunchHour: 12.2,
     lunchRoom: 'klb_3f',
-    role: 'Baker Group Researcher • Maleimide & Albumin Bioconjugation',
+    role: 'Baker Group Researcher • Maleimide Conjugates & Balanced-Rotor Purist',
     waColor: '#34d399',
     quotes: [
-      "Just spinning down my albumin conjugates — centrifuge is free in 5!",
-      "Anyone using the SDS-PAGE tank next? Got two spare wells on the right.",
-      "Büchi vacuum is pulling nicely today."
+      "Spinning down my albumin-maleimide conjugates — leave that rotor off-balance by 0.2 g and I will find you.",
+      "Baker bay rule: human serum albumin foams if you whisper near it, keep the pipette tip submerged!",
+      "Büchi vacuum is pulling cleanly below 20 mbar today — shout if you want two spare lanes on my gel."
     ]
   },
   {
@@ -382,6 +382,7 @@ window.KLB.CAST = [
     lunchHour: 12.7,
     lunchRoom: 'gordons_cafe',
     role: 'Sheppard Group Researcher • Borate Amidations & Style Icon',
+    bio: 'Italian borate-amidation chemist who completed a postdoc stint in Paris and Lyon — swaps fluent French lab banter with Antoine while upholding Milanese standards in KLB.',
     waColor: '#f59e0b',
     quotes: [
       "A tiny spritz of 'Sabatini by Sabatini' and even Kersti & Abil will smile at your vials!",
@@ -458,9 +459,9 @@ window.KLB.CAST = [
     role: 'Head of UCL Chemistry • Departmental Safety Sweep',
     waColor: '#ec4899',
     quotes: [
-      "Afternoon everyone — conducting a quick Departmental Safety walkthrough of KLB 2nd Floor.",
-      "Good to see safety specs worn properly and fume hood sashes down.",
-      "Please ensure waste Winchesters and fire extinguishers are in their designated bays immediately."
+      "Afternoon KLB — thirty seconds to inspect your sashes, specs, and bench discipline before my next committee.",
+      "Love seeing three groups sharing Lab 230 smoothly, as long as nobody blocks my fire doors.",
+      "Winchesters capped, extinguishers home, smiles on — make Chemistry proud on Friday."
     ]
   },
   {
@@ -474,9 +475,9 @@ window.KLB.CAST = [
     role: 'Departmental Safety Officer',
     waColor: '#eab308',
     quotes: [
-      "*Clicks pen on clipboard* Checking eye protection, the left fire exit clearance, and COSHH cupboards.",
-      "Unattended uncapped silica waste or missing safety specs incurs an immediate Safety deduction.",
-      "Keep the Fire Exit corridor completely clear at all times."
+      "*Clicks pen on clipboard* Item one: eye protection. Item two: left fire exit clearance. Item three: COSHH cupboards.",
+      "Unattended uncapped silica waste or missing safety specs incurs an immediate Lab Condition deduction.",
+      "Section 4.2: the Fire Exit corridor and extinguisher bay must remain unobstructed at all hours."
     ]
   },
   {
@@ -490,9 +491,10 @@ window.KLB.CAST = [
     role: '17:18 Corridor Pursuer',
     waColor: '#22c55e',
     quotes: [
-      "Hi there, have we met?",
-      "Are you guys heading to Gordon's Café later?",
-      "*Stares silently into the back of your head while you pipette*"
+      "Excuse me, is this the corridor to Gordon's Café or the upstairs tea room?",
+      "Wait, does everyone in white coats get priority at the Gordon Street espresso bar?",
+      "Sorry to hover by your hood — someone told me the coffee group meets here at 17:18!",
+      "*Peers earnestly over your shoulder at a swirling flask* Oh, is that matcha or reaction mix?"
     ]
   }
 ];
@@ -540,8 +542,8 @@ window.KLB.COFFEE_QUARTET = {
       "Best twenty minutes of the day, flat whites away from rotavaps.",
       "How is everyone looking for Friday? Shout if you need a hand.",
       "Gordon's almond croissants beat Lab 230 tap water any hour.",
-      "I am in Lab 230 till ten tonight, happy to watch your Buchi.",
-      "Skip noisy resorts, find a quiet Greek island with good tavernas.",
+      "I am in Lab 230 till 19:15 tonight, happy to watch your Büchi.",
+      "Nothing resets the brain like twenty minutes away from hoods.",
       "Relax João, we ordered warm toasted paninis, zero soggy bread.",
       "Need anhydrous DMF or Fab aliquots later? Just ask after coffee.",
       "Did anyone actually switch the 2F sonicator off before leaving?"
@@ -562,9 +564,9 @@ window.KLB.COFFEE_QUARTET = {
       "Quick pastry debrief beats staring at a blank slide deck!",
       "Still pretending I understand what a Football Manager striker is.",
       "Wait did someone bring chocolate cake or am I hallucinating?",
-      "My morning train stalled outside Euston again, not late by choice!",
-      "Pure artistic expression on that hernia card boss, zero regrets.",
-      "Enough work talk at the coffee table pls, pass the napkins!"
+      "Ten-fifteen arrival is basically early on the West Coast line!",
+      "Peak artistic expression on that hernia card boss, zero regrets.",
+      "Enough work talk at the coffee table, pass the napkins!"
     ]
   }
 };
@@ -577,7 +579,7 @@ window.KLB.SPEECH_LINES = {
   daniel_richards: {
     casual: [
       "Past nine pm is officially past my bedtime, lads.",
-      "Egg and cress triangle and tea, four fifty total.",
+      "Left my lunch in the 3F fridge, praying Max didn't spot it.",
       "Burnley fans are just as miserable when we actually win.",
       "Watery beans swimming on toast should be a criminal offence.",
       "Revisionist history from Lemon Boy, the court record stands.",
@@ -587,10 +589,10 @@ window.KLB.SPEECH_LINES = {
     ],
     bench: [
       "TLC or it didn't happen, show me the plate.",
-      "Ninety-nine percent yield plus some mysterious white powder.",
+      "Spot at Rf 0.45 is glowing under 254 nm, thank goodness.",
       "Buffer drifted and my gold nanoparticles turned Ribena purple.",
       "Is the Waters mass spec still sulking downstairs today?",
-      "Please behave, column, this grandad wants bed by nine."
+      "Clean flash separation, please don't stall on me now column."
     ]
   },
 
@@ -600,7 +602,7 @@ window.KLB.SPEECH_LINES = {
       "Only football match I ever saw was Barnsley versus Leeds.",
       "A spider claimed my office chair, duel at noon tomorrow.",
       "Are we playing Age of Empires at five or what?",
-      "Sharp waistcoat Andrè, nationalising the railways before lunch?",
+      "Andrè rocking up in tailoring while I am in hoodie number four.",
       "Evening AoE2 lobby at six, no mercy, brace yourselves.",
       "Northern Line died at Finchley, rode a bus like a mug.",
       "Calise walks like his legs are controlled by remote."
@@ -616,11 +618,11 @@ window.KLB.SPEECH_LINES = {
 
   antoine_maruani: {
     casual: [
-      "Who sliced a croissant like bread? Call the French embassy.",
+      "No true Frenchman survives British supermarket viennoiserie.",
       "British giraffe bread is the worst invention of mankind.",
       "Three kilos of birthday chicken nuggets, don't judge me.",
       "One ninja-rope turn in Worms and you are all finished.",
-      "Arrived fifteen minutes late, French and proud mon ami.",
+      "Arrived fifteen minutes late, French and proud, mec.",
       "Stuck on the Eurostar since five thirty, entertain me please.",
       "Yes I smuggled Maldon sea salt back to Paris, quiet.",
       "We can't play FarmVille tonight unless Faiza joins us."
@@ -636,10 +638,10 @@ window.KLB.SPEECH_LINES = {
 
   andre_shamsabadi: {
     casual: [
-      "Quick poll: Gordon's coffee now or suffer another hour?",
+      "Vote on second espresso now or power through till noon?",
       "My dismantling of capitalism would be completely intentional.",
       "Northern Line is immensely cursed again, send help.",
-      "When in doubt, bring the waistcoat out to lab.",
+      "Ironed shirt and waistcoat today, feeling suspiciously neat.",
       "Reset the timer, Richard just mentioned Yorkshire again.",
       "My dad's wedding tux was genuinely made in Yugoslavia.",
       "I would rather fast than eat a soggy microwave breakfast.",
@@ -658,26 +660,26 @@ window.KLB.SPEECH_LINES = {
     casual: [
       "That is not a croissant, that is glorious Hungarian sóskifli!",
       "Twenty spicy nuggets and two large fries, zero regrets!",
-      "How do ppl pay London rent without selling a kidney?!",
-      "Lab is quiet, putting the Shire theme on the speakers!",
+      "How do people pay London rent without selling a kidney?!",
+      "Rain outside, Fellowship soundtrack on, leave me be till six!",
       "Gordon's pastry run before the espresso machine shuts?",
-      "Played Hearts of Iron till two am, prolly fine!",
+      "Played Hearts of Iron till two am, probably fine!",
       "Walking out of KLB tonight to Intro by The xx!",
       "Beat Antoine twice at AoE2, check on his blood pressure!"
     ],
     bench: [
       "No Max, I am not weighing fresh TCEP for you!",
-      "Please say I didn't pipette blue dye into pure Fab!",
+      "Keeping the SDS loading dye on the far side of the bay!",
       "My reaction actually worked, thought y'all should know!",
       "Never be ashamed of a wonky gel, own those bands!",
-      "Please behave Superdex column, I wanna leave before midnight!"
+      "Please behave Superdex column, beat the 19:30 lockup!"
     ]
   },
 
   joao_nogueira: {
     casual: [
-      "Ten twenty-seven, Gordon's espresso run, who is coming with me?",
-      "Cold wet triangle bread and baby carrots is not lunch!",
+      "Portuguese espresso hits twice as hard as instant granules.",
+      "Real lunch means hot food on a plate, not chilled plastic.",
       "Dr Pepper is genuinely the worst drink on this planet.",
       "Brought bacalhau com natas upstairs if anyone wants proper food!",
       "Coffee at Gordon's, never instant granules, I beg you mates.",
@@ -686,7 +688,7 @@ window.KLB.SPEECH_LINES = {
       "Food is a privilege irmão, abolish sad desk meal deals!"
     ],
     bench: [
-      "Eight pm and I am just starting a Biotage column.",
+      "17:30 and I am just starting a Biotage column before lockup.",
       "Bad TCEP is going to ruin my whole reputation mate!",
       "Why are my nanoparticles floating on top of the PBS?",
       "Thirty degrees in Lab 230, nothing rebridges cleanly in this!",
@@ -697,20 +699,20 @@ window.KLB.SPEECH_LINES = {
   faiza_javaid: {
     casual: [
       "Are the coffeebois heading over to Gordon's soon or what?",
-      "Still have zero clue why u lot obsess over football.",
+      "Still have zero clue why you lot obsess over football.",
       "My peaceful AoE2 village is thriving, leave my farms alone!",
       "Why is nobody walking like a gorilla or buying chocolate?",
-      "Half this chat is just beans, croissants, or pure chaos.",
+      "Half this chat is just beans, croissants, or sheer chaos.",
       "Grabbing lunch at Gordon's today, try not to miss me.",
-      "Dan is gona say something snarky, I can feel it.",
-      "Why did u show us hummus when im starving?"
+      "Dan is going to say something snarky, I can feel it.",
+      "Why did you show us hummus when I'm starving?"
     ],
     bench: [
-      "Who took the P20 from the TCEP bench, peasants pls?",
-      "Guys what is the mass spec door code again?!",
+      "Own up, who pinched the P20 off the TCEP bench?",
+      "Did I pre-click the linker or add MMAE straight to IgG4?",
       "Is it weird if I carry my gel upstairs?",
       "Enzymes are so dramatic about half a pH unit, honestly.",
-      "Need help checking your A280 ratio on 2F? Ask nicely!"
+      "Grabbing the 2F A280 spectrophotometer for two quick reads!"
     ]
   },
 
@@ -726,9 +728,9 @@ window.KLB.SPEECH_LINES = {
       "Bought a dodgy second-hand bike, didn't die, pretty chuffed."
     ],
     bench: [
-      "Forgot dilution math, my sheet says 125% protein yield!",
-      "Kneeling by the four degree fridge for twenty minutes mate.",
-      "Never use TFA on dibromo PD, learned the hard way.",
+      "Wait, did I forget the dilution factor on this VivaSpin tube?",
+      "Checking the 4 °C cold reaction every ten mins, fingers numb.",
+      "Refluxing p-TsOH cleanly in toluene, zero bromide exchange.",
       "Who left the fridge door resting open on a rack?",
       "Spinning my tubes five more minutes, save me a coffee!"
     ]
@@ -737,15 +739,13 @@ window.KLB.SPEECH_LINES = {
   richard_spears: {
     casual: [
       "Cooking baked beans in a saucepan genuinely unsettles me.",
-      "Three and a half minutes microwaved gives optimal bean texture.",
       "How do you spot a Yorkshireman? Don't worry, he'll say.",
       "Two grades of Bettys tea upstairs, plus emergency posh biscuits.",
       "Quiet supper at eight and fast asleep before ten.",
       "No free biscuits at that conference, writing a stern letter.",
       "So many England goals lately, it is definitely coming home.",
-      "Dread to think what a soggy meal deal costs nowadays.",
       "Flew business class to Australia once, frankly it ruins economy.",
-      "Bettys tearoom and business class snob, guilty as charged."
+      "Dread to think what a soggy meal deal costs nowadays."
     ],
     bench: [
       "Welcome to Soluble or Not Soluble, there are no winners.",
@@ -760,19 +760,19 @@ window.KLB.SPEECH_LINES = {
     casual: [
       "My bus is so slow pedestrians are overtaking us outside.",
       "Five of us turned up with identical Monday haircuts again.",
-      "This group chat deserves more citations than half our papers.",
-      "Muted the main chat, couldn't handle forty stickers a day.",
+      "Half our WhatsApp polls belong in an Angewandte perspective.",
+      "Waiting for a bus in the rain builds character, allegedly.",
       "Fëanor did plenty wrong, don't get me started on Silmarillion.",
-      "Yes I own an actual broadsword, purely for home aesthetics.",
+      "Nothing clears a rough week like Thursday fencing practice.",
       "Northern Line is suspended again, walking from Euston.",
       "Pretty sure Cupboard 19 has been haunted since twenty seventeen."
     ],
     bench: [
       "That compound is riding straight up the TLC solvent front.",
-      "Opening Cupboard 5 for thirty seconds, bleach bath is ready.",
+      "Thiol flasks straight into the Chudasama bleach bath after use!",
       "Dry ice dewar is nearly empty, top up before four!",
       "Count me out for pints, got six NMRs queued downstairs.",
-      "Another half hour wasted on pure RiskNET bureaucracy bollox."
+      "Another half hour wasted on peak RiskNET bureaucracy bollox."
     ]
   },
 
@@ -781,7 +781,7 @@ window.KLB.SPEECH_LINES = {
     casual: [
       "Gordon's flat white and pastry run with João, anyone else?",
       "Skip Santorini, pick a quiet Greek island with proper tavernas.",
-      "Still here at ten pm, powered entirely by double espressos.",
+      "Still here till 19:15, powered entirely by double espressos.",
       "Peter left the Lord of the Rings soundtrack playing again.",
       "Bloomsbury drizzle has ruined my hair before ten am.",
       "How do you boys argue about beans for three days?",
@@ -789,10 +789,10 @@ window.KLB.SPEECH_LINES = {
       "Night buses into central test every ounce of patience."
     ],
     bench: [
-      "Pulled someone's dry flask out of the Buchi bath again.",
+      "Pulled someone's dry flask out of the Büchi bath again.",
       "First-aid plasters are in my drawer if glass bites anyone.",
       "Emergency dry DMF in my bay, bring it straight back!",
-      "Lab 230 at eleven pm is honestly peak column peace.",
+      "Lab 230 around 19:15 is honestly peak column peace.",
       "Just clicked the four degree fridge door shut properly."
     ]
   },
@@ -800,27 +800,27 @@ window.KLB.SPEECH_LINES = {
   archie_wall: {
     casual: [
       "Small parcel waiting in the CIB pigeonholes for someone here.",
-      "Who is watching the Champions League later tonight?",
+      "Champions League knockout night, nobody disturb my sofa later.",
       "Central Line felt like a tin of sardines this morning.",
       "Someone raided the 3F biscuit tin and left only crumbs.",
-      "Gordon's toasted focaccia wrap is elite tier lab fuel.",
+      "Gordon's toasted focaccia wrap is elite Baker-bay fuel.",
       "Friday five pm wrap cannot arrive fast enough this week.",
-      "London rent went up again, living in Lab 230 soon.",
-      "Swear Dan has been in here since six thirty am."
+      "Checking my rotor weight to 0.01 g, habits die hard.",
+      "Swear Dan has been at his bench since six thirty am."
     ],
     bench: [
-      "Who left an unbalanced centrifuge rattling across the bay?",
+      "Who left an unbalanced centrifuge rattling across Baker bay?",
       "Got two spare lanes on my gel if anyone's quick.",
-      "Buchi vacuum is finally pulling below twenty millibar today.",
-      "Why does serum albumin froth if you look at it?",
-      "Done on the spin filters in five, rotor is balanced."
+      "Büchi vacuum is finally pulling below twenty millibar today.",
+      "Why does serum albumin froth if you even whisper near it?",
+      "Done on the spin filters in five, rotor balanced to the gram."
     ]
   },
 
   marco_sabatini: {
     casual: [
       "British instant coffee is a crime against the human soul.",
-      "One spritz of Sabatini by Sabatini fixes Monday morning gloom.",
+      "Three years postdoc in France, still loyal to Italian espresso.",
       "Never snap spaghetti in half while an Italian is watching.",
       "London rain has zero respect for good leather loafers.",
       "Proper espresso at Gordon's is non-negotiable before noon.",
@@ -840,9 +840,9 @@ window.KLB.SPEECH_LINES = {
   charlotte_coomber: {
     casual: [
       "Wait till you hear where we ended up Saturday night!",
-      "Doing a leaving card collection, anyone got two pound coins?",
+      "Booked a big booth at the pub for Friday pints!",
       "Why did half the lab suddenly put big headphones on?",
-      "Gordon's almond croissant secured, five mins peace pls.",
+      "Gordon's almond croissant secured, five minutes peace please.",
       "We need two more people for departmental trivia Thursday!",
       "Took three buses from South London because the Tube died.",
       "Is it too early on Wednesday for Gordon's pastries?",
@@ -852,7 +852,7 @@ window.KLB.SPEECH_LINES = {
       "Whose bench timer has been beeping for ten solid minutes?!",
       "Got three working whiteboard markers, guard them with your life!",
       "Just snapped three TLC capillaries in a row, send patience.",
-      "Bagging the Sheppard Buchi next, five minutes left right?",
+      "Bagging the Sheppard Büchi next, five minutes left right?",
       "Please separate cleanly column, I have dinner plans at seven!"
     ]
   },
@@ -860,12 +860,12 @@ window.KLB.SPEECH_LINES = {
   vijay_chudasama: {
     casual: [
       "Walking to Gordon's for a quick coffee, anyone joining?",
-      "Signed two wonderkids on Football Manager on the train in.",
-      "Quick coffee at Gordon's at three, don't take hours!",
-      "Weather looks decent enough for nine holes of golf Sunday.",
+      "Morning train ran on time, read three whole manuscripts.",
+      "Half the department vanishes the second the sun peeks out.",
+      "Managed eighteen holes without losing one golf ball Sunday.",
       "Did Faiza write nonsense on the group card again?",
-      "Arsenal midfield needs serious surgery before August, honestly.",
-      "Ten minutes for espresso, then straight back to it team.",
+      "North London derby this weekend, try not to look smug Jamie.",
+      "Need two double espressos before Monday admin emails.",
       "Summer group barbecue is on if British weather behaves itself."
     ],
     bench: [
@@ -882,7 +882,7 @@ window.KLB.SPEECH_LINES = {
       "Saw three people sprint for safety specs hearing my footsteps.",
       "Gordon Street coffee queue is halfway down the pavement today.",
       "Cycled in through horizontal Bloomsbury rain, marvellous start.",
-      "Friday afternoon coffee break sounds thoroughly earned.",
+      "Late afternoon coffee break sounds thoroughly earned.",
       "Good buzz in Lab 230 today, suspiciously cheerful even.",
       "Who keeps playing Hobbit music on the lab speakers?",
       "Spurs will break your heart every spring like clockwork.",
@@ -909,7 +909,7 @@ window.KLB.SPEECH_LINES = {
       "Gordon's ran out of warm paninis by twelve fifteen."
     ],
     bench: [
-      "Flame-dry the glassware properly, London air is pure soup.",
+      "Flame-dry the glassware properly, London air is sheer soup.",
       "Looks like the Biotage solvent waste needs swapping out.",
       "Clean spot-to-spot TLC beats staring at crude NMR all day.",
       "Someone opened the thiol cupboard, unmistakable aroma in here.",
@@ -929,9 +929,9 @@ window.KLB.SPEECH_LINES = {
       "At least Dan says good morning before breaking my column."
     ],
     bench: [
-      "LCMS is out of the operation, somebody injected PEG again.",
+      "Flushing the Q-TOF line again, somebody forgot to desalt.",
       "No PBS salt in my Q-TOF source, this not good.",
-      "Desalt ten times on spin filter before queuing protein!",
+      "Buffer salts clog my spray needle faster than Monday coffee.",
       "Why you click Run when red error light is flashing?",
       "Write your sample code properly in the uplc2011 logbook."
     ]
@@ -949,9 +949,9 @@ window.KLB.SPEECH_LINES = {
       "Good weekend to everyone who collected their samples on time."
     ],
     bench: [
-      "Look at 3.8 ppm, where is your CH2 peak?",
-      "Uncollected tubes go in my fridge, hundred thirty pound fine.",
-      "Four centimetres solvent height minimum, not two millimetres!",
+      "Check your shimming before blaming the magnet for broad peaks.",
+      "Three uncollected tubes already sitting in my sample fridge.",
+      "Top up deuterated solvent to four centimetres, not a drop less.",
       "Your baseline rolls like waves because shimming was rushed.",
       "Check 128.40.76.1 from upstairs instead of hovering at my door."
     ]
@@ -959,48 +959,48 @@ window.KLB.SPEECH_LINES = {
 
   claire_carmalt: {
     casual: [
-      "Good morning KLB, keeping corridors clear today?",
-      "Coffee on Gordon Street keeps the department moving.",
-      "Three meetings before noon, glad labs are humming.",
-      "Remember Friday seminar starts promptly at four.",
-      "Good cross-group energy on the second floor today.",
-      "Please keep shared write-up desks tidy upstairs.",
-      "Checking in with all groups before Friday audits.",
-      "Hope everyone gets a proper lunch break at noon."
+      "Three committee meetings before lunch, glad KLB is humming.",
+      "Grabbing an espresso on Gordon Street between Dean calls.",
+      "Remember Friday departmental seminar kicks off sharp at four.",
+      "Always impressed when Lab 230 stays spotless mid-week.",
+      "Tell Vijay and Jamie I expect glowing grant updates soon.",
+      "Write-up desks upstairs look suspiciously tidy today.",
+      "Zero alarms pulled this morning, small department victories.",
+      "Take a proper lunch break at noon, even synthetic chemists."
     ],
     bench: [
-      "Safety specs on before stepping past the lab door.",
-      "Please cap silica waste Winchesters after weighing.",
-      "Keep the Left Fire Exit lane completely clear.",
-      "Lower fume hood sashes when leaving your bay.",
-      "Great COSHH compliance across Lab 230 today."
+      "Specs on before the threshold — yes, I saw you reach just now.",
+      "Cap that Winchester cleanly, we like our solvents inside glass.",
+      "Sash down to the arrow please, energy bills aren't imaginary.",
+      "Sharp lab discipline today, keep Vijay and Jamie on their toes.",
+      "Tidy bay, clear corridor — five stars from the Head of Dept."
     ]
   },
 
   safety_inspector: {
     casual: [
-      "Doing a routine walkthrough across KLB today.",
-      "Clipboard ready, just checking standard signage.",
-      "Quiet tea break upstairs beats an incident report.",
-      "Always appreciate a tidy lab coat hook by the door.",
-      "Good to see groups sharing bays responsibly.",
-      "Make sure visitor specs stay stocked at the door.",
-      "Zero near-misses this week, let us keep it up.",
-      "Remember fire marshal rules if the alarm sounds."
+      "Routine walkthrough logged at zero-nine-thirty on clipboard.",
+      "Checking laminated hazard posters are straight on every door.",
+      "Even tea breaks on 3F require tidy mug-rack compliance.",
+      "Lab coat hooks aligned alphabetically? A person can dream.",
+      "Visitor safety specs counted and returned to tray fourteen.",
+      "Zero incident forms filed this week, thrilling paperwork.",
+      "Testing fire marshal stopwatch in case an alarm sounds.",
+      "Please initial the monthly eyewash logbook by five pm."
     ],
     bench: [
-      "Eye protection is mandatory inside Lab 230.",
-      "Keep the fire extinguisher in its marked bay.",
-      "Uncapped silica waste earns an instant deduction.",
-      "Fire Exit corridor must remain unobstructed.",
-      "Label every reagent vial with date and initials."
+      "Regulation 12B: eye protection mandatory beyond the blue line.",
+      "Extinguisher offset by twelve centimetres; returning to bay.",
+      "Uncapped silica container logged as an immediate infraction.",
+      "Fire Exit route width checked; zero crates permitted here.",
+      "Every sample vial requires date, compound ID, and initials."
     ]
   },
 
   alex_king: {
     casual: [
-      "Hi there, have we met?",
-      "Are you guys heading to Gordon's Café later?",
+      "Excuse me, do these stairs go to 3F or Gordon Street?",
+      "Wait, is Gordon's Café still serving warm pastries at five?",
       "What time do people usually wrap up on 3F?",
       "Is everyone still around after five today?",
       "Oh, I was just passing down this corridor.",
@@ -1019,10 +1019,10 @@ window.KLB.SPEECH_LINES = {
 };
 
 // ============================================================================
-// 117 MULTI-TURN GROUP HUDDLE EXCHANGES (klb_2f, klb_3f, gordons_cafe, meeting_room)
+// 143 MULTI-TURN GROUP HUDDLE EXCHANGES (klb_2f, klb_3f, gordons_cafe, meeting_room)
 // ============================================================================
 window.KLB.GROUP_HUDDLES = [
-  // ==================== 1. KLB 2F WET LAB (49 HUDDLES) ====================
+  // ==================== 1. KLB 2F WET LAB (57 HUDDLES) ====================
   // --- Dan & Max ---
   {
     id: 'huddle_2f_dan_max_tcep',
@@ -1039,7 +1039,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Dan & Max',
     turns: [
-      { speakerId: 'daniel_richards', text: "Delicate marker symmetry on that hood doodle, Max." },
+      { speakerId: 'daniel_richards', text: "Delicate marker symmetry on that fume hood doodle today." },
       { speakerId: 'maximillian_lee', text: "Classic late-2015 silverback realism, belongs in the Tate." },
       { speakerId: 'daniel_richards', text: "Wipe it off with acetone before Prof. Carmalt walks in." }
     ]
@@ -1059,8 +1059,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Dan & Max',
     turns: [
-      { speakerId: 'maximillian_lee', text: "Dan, remember falling on bed scissors? Rub yogurt on it!" },
-      { speakerId: 'daniel_richards', text: "The nurse gave me a look when I mentioned your yogurt tip." },
+      { speakerId: 'maximillian_lee', text: "Dan, remember falling on bed scissors? Rub yoghurt on it!" },
+      { speakerId: 'daniel_richards', text: "The nurse gave me a look when I mentioned your yoghurt tip." },
       { speakerId: 'calise_bahou', text: "Proper medical wisdom from Dr Maxito as usual bois." }
     ]
   },
@@ -1093,9 +1093,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Max & Antoine',
     turns: [
-      { speakerId: 'maximillian_lee', text: "Great reaction work today Andrè, pure organic finesse." },
+      { speakerId: 'maximillian_lee', text: "Great reaction work today Andrè, clean organic finesse." },
       { speakerId: 'andre_shamsabadi', text: "Ten years Max and you still spell it with a grave accent." },
-      { speakerId: 'antoine_maruani', text: "My French soul dies a little every time Max types Andrè." }
+      { speakerId: 'antoine_maruani', text: "My French soul dies a little every time Max uses that grave!" }
     ]
   },
   {
@@ -1105,17 +1105,17 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'maximillian_lee', text: "Antoine, watch a silverback open this jammed cap easily." },
       { speakerId: 'antoine_maruani', text: "You grunted for thirty seconds and barely moved the lid." },
-      { speakerId: 'faiza_javaid', text: "Give it to me pls, one rubber grip pad and done." }
+      { speakerId: 'faiza_javaid', text: "Hand it over please, one rubber grip pad and done." }
     ]
   },
 
-  // --- Andre, Dan, Calise & Marcos ---
+  // --- André, Dan, Calise & Marcos ---
   {
     id: 'huddle_2f_andre_dan_gcse',
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "Dan, Richard, how much life was wasted over GCSE grades?" },
+      { speakerId: 'andre_shamsabadi', text: "How much of our lives was wasted worrying over GCSE grades?" },
       { speakerId: 'daniel_richards', text: "Peak life achievement remains my Pool Frog 1 badge." },
       { speakerId: 'richard_spears', text: "Wait till someone asks for my English Literature A level." }
     ]
@@ -1125,7 +1125,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "How many reduced bargain lemons are in your coat Calise?" },
+      { speakerId: 'andre_shamsabadi', text: "How many reduced bargain lemons are stuffed in that coat?" },
       { speakerId: 'calise_bahou', text: "For the hundredth time, Dan bought them, I carried them!" },
       { speakerId: 'daniel_richards', text: "Fake news Lemon Boy, history has already rendered its verdict." }
     ]
@@ -1135,7 +1135,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'calise_bahou', text: "Faiza, forgot dilution math, my sheet says 125% yield!" },
+      { speakerId: 'calise_bahou', text: "Forgot dilution math, my sheet says 125% yield!" },
       { speakerId: 'faiza_javaid', text: "Move over Vijay, Big C just broke thermodynamics again!" },
       { speakerId: 'daniel_richards', text: "Conservation of mass remains purely optional in this bay." }
     ]
@@ -1155,7 +1155,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "Max, when in doubt, bring the waistcoat out under the coat." },
+      { speakerId: 'andre_shamsabadi', text: "When in doubt, bring the waistcoat out under the lab coat." },
       { speakerId: 'maximillian_lee', text: "Sharp look Andrè, nationalising the railways after TLC?" },
       { speakerId: 'andre_shamsabadi', text: "My dismantling of capitalism will be wholly intentional." }
     ]
@@ -1167,8 +1167,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Lab 230 Benches',
     turns: [
-      { speakerId: 'peter_szijj', text: "Max, nearly pipetted blue SDS dye into pure Fab stock!" },
-      { speakerId: 'maximillian_lee', text: "Keep your eyes peeled Peeetah, blue Fab is tragic stuff!" },
+      { speakerId: 'peter_szijj', text: "Nearly pipetted blue SDS dye into clean Fab stock!" },
+      { speakerId: 'maximillian_lee', text: "Keep your eyes peeled Peetah, blue Fab is tragic stuff!" },
       { speakerId: 'richard_spears', text: "Step away for a quick tea before touching the pipette." }
     ]
   },
@@ -1177,19 +1177,19 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Evening Shift',
     turns: [
-      { speakerId: 'peter_szijj', text: "Nafsika, past six, putting Howard Shore Shire theme on!" },
+      { speakerId: 'peter_szijj', text: "Past six at last, putting Howard Shore's Shire theme on!" },
       { speakerId: 'nafsika_forte', text: "Honestly helps while I babysit this overnight DMF step." },
       { speakerId: 'daniel_richards', text: "Heading out before Frodo even leaves Bag End, good night." }
     ]
   },
 
-  // --- Faiza, Calise, Joao, Dan & Nafsika ---
+  // --- Faiza, Calise, João, Dan & Nafsika ---
   {
     id: 'huddle_2f_faiza_fitbit',
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'calise_bahou', text: "Faiza, thinking of buying a Fitbit, reckon it is worth it?" },
+      { speakerId: 'calise_bahou', text: "Thinking of buying a Fitbit, reckon it is actually worth it?" },
       { speakerId: 'faiza_javaid', text: "Honestly Calise, you should just get a bit fit." },
       { speakerId: 'daniel_richards', text: "Call the paramedics, someone just got flattened in bay two." }
     ]
@@ -1200,7 +1200,7 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Big-Chuds Banter',
     turns: [
       { speakerId: 'andre_shamsabadi', text: "Antoine, happy Friday Laboys, let us survive the day!" },
-      { speakerId: 'faiza_javaid', text: "Laboys & girl* thank u very much, show respect!" },
+      { speakerId: 'faiza_javaid', text: "Laboys & girl* thank you very much, show respect!" },
       { speakerId: 'antoine_maruani', text: "You are an honorary boi Faiza, stop pretending otherwise." }
     ]
   },
@@ -1209,8 +1209,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Coffee Quartet',
     turns: [
-      { speakerId: 'joao_nogueira', text: "Faiza, Nafsika, 10:27 coffeebois and girl, Gordon's now!" },
-      { speakerId: 'faiza_javaid', text: "Wait two seconds pls, taking my purple gloves off!" },
+      { speakerId: 'joao_nogueira', text: "Ten twenty-seven coffeebois and girl, Gordon's right now!" },
+      { speakerId: 'faiza_javaid', text: "Give me two seconds, taking my purple gloves off!" },
       { speakerId: 'nafsika_forte', text: "Count me in, I need a flat white badly." }
     ]
   },
@@ -1231,9 +1231,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: '#Headsup',
     turns: [
-      { speakerId: 'marcos_fernandez', text: "André, Faiza, Safety Inspector by the stairs, specs on!" },
-      { speakerId: 'andre_shamsabadi', text: "Legend Marcos, capping the Winchester and hiding my dry ice." },
-      { speakerId: 'faiza_javaid', text: "Quick someone tell me if my lab coat looks respectable!" }
+      { speakerId: 'marcos_fernandez', text: "Safety Inspector just stepped onto the stairs, specs on!" },
+      { speakerId: 'andre_shamsabadi', text: "Legend, capping the Winchester and hiding my dry ice." },
+      { speakerId: 'faiza_javaid', text: "Quick, someone tell me if my lab coat looks respectable!" }
     ]
   },
   {
@@ -1241,7 +1241,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Early Shift',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "Marcos, forgot my UCL card downstairs, buzz me in pls?" },
+      { speakerId: 'andre_shamsabadi', text: "Marcos, forgot my UCL card downstairs, can you buzz me in?" },
       { speakerId: 'marcos_fernandez', text: "Door buzzed. Next time bring your pass before nine am." },
       { speakerId: 'daniel_richards', text: "Marcos keeping half of KLB employed since quarter to nine." }
     ]
@@ -1263,9 +1263,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Lab 230 Cross-Group',
     turns: [
-      { speakerId: 'charlotte_coomber', text: "MARCOS, ARCHIE, SATURDAY WE MISSED THE LAST TRAIN AND-" },
+      { speakerId: 'charlotte_coomber', text: "SATURDAY WE MISSED THE LAST TRAIN AND WALKED HOME-" },
       { speakerId: 'marcos_fernandez', text: "Noise-cancelling headphones going on, see you on Monday." },
-      { speakerId: 'archie_wall', text: "Save me a two-pound slot on that card collection Charlotte!" }
+      { speakerId: 'archie_wall', text: "Save me a two-pound slot on that leaving card collection!" }
     ]
   },
   {
@@ -1273,8 +1273,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Lab 230 Cross-Group',
     turns: [
-      { speakerId: 'nafsika_forte', text: "Calise, specs on and who dusted the balance table today?" },
-      { speakerId: 'calise_bahou', text: "Wasn't me Nafsika, I haven't weighed anything today!" },
+      { speakerId: 'nafsika_forte', text: "Specs on everyone, and who dusted the balance table today?" },
+      { speakerId: 'calise_bahou', text: "Wasn't me, I haven't weighed a single thing today!" },
       { speakerId: 'charlotte_coomber', text: "Sweeping it now, also hiding three working whiteboard markers." }
     ]
   },
@@ -1285,8 +1285,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'French Lab Banter',
     turns: [
-      { speakerId: 'antoine_maruani', text: "Salut Marco, tu as vu ma cuve CCM sur la paillasse?" },
-      { speakerId: 'marco_sabatini', text: "Oui chef, couvercle remis après ton flash, pas de soucis." },
+      { speakerId: 'antoine_maruani', text: "T'as vu ma cuve à CCM sur la paillasse?" },
+      { speakerId: 'marco_sabatini', text: "Oui chef, couvercle remis après ta flash, pas de souci." },
       { speakerId: 'antoine_maruani', text: "Merci mon gars, tu me sauves encore une plaque aujourd'hui." }
     ]
   },
@@ -1295,7 +1295,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'French Lab Banter',
     turns: [
-      { speakerId: 'marco_sabatini', text: "Antoine, ton Biotage tourne encore ou je peux lancer?" },
+      { speakerId: 'marco_sabatini', text: "Antoine, le Biotage tourne encore ou je peux lancer ma colonne?" },
       { speakerId: 'antoine_maruani', text: "Encore cinq minutes et il est tout à toi, promis." },
       { speakerId: 'marco_sabatini', text: "Parfait, je prépare mes tubes au calme en attendant." }
     ]
@@ -1305,19 +1305,19 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'French Lab Banter',
     turns: [
-      { speakerId: 'marco_sabatini', text: "Antoine, prêt pour la réunion vendredi avec Vijay?" },
-      { speakerId: 'antoine_maruani', text: "Trois diapositives et deux beaux spectres, ça passe largement." },
-      { speakerId: 'marco_sabatini', text: "Toujours serein, un vrai chef français au milieu du chaos." }
+      { speakerId: 'marco_sabatini', text: "Prêt pour la réunion de vendredi avec Vijay?" },
+      { speakerId: 'antoine_maruani', text: "Trois slides et deux beaux spectres, ça passe largement." },
+      { speakerId: 'marco_sabatini', text: "Toujours aussi zen, un vrai patron au milieu du chaos." }
     ]
   },
 
-  // --- New Casual 2F Lore & Pair Banter ---
+  // --- Casual 2F Lore & Pair Banter ---
   {
     id: 'huddle_2f_defcon1_gyoza_chillioil',
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'maximillian_lee', text: "Calise, João, Def Con 1 alert: freezer is out of gyoza!" },
+      { speakerId: 'maximillian_lee', text: "Def Con 1 alert: the freezer is completely out of gyoza!" },
       { speakerId: 'calise_bahou', text: "Panic over mate, my chilli oil smuggling ring delivers Friday." },
       { speakerId: 'joao_nogueira', text: "Guard that chilli jar like bullion, half the floor wants some!" }
     ]
@@ -1328,7 +1328,7 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Commute Chaos',
     turns: [
       { speakerId: 'maximillian_lee', text: "Calise, escaped Mill Hill East before the signal meltdown?" },
-      { speakerId: 'calise_bahou', text: "Pure nuclear blockade on the Northern Line, hopped three buses!" },
+      { speakerId: 'calise_bahou', text: "Full nuclear blockade on the Northern Line, hopped three buses!" },
       { speakerId: 'maximillian_lee', text: "Zone 4 commute builds silverback calves, respect mate." }
     ]
   },
@@ -1337,7 +1337,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "Calise, Dan, locked myself out with the rice cooker still on!" },
+      { speakerId: 'andre_shamsabadi', text: "Just locked myself out with the rice cooker still on!" },
       { speakerId: 'calise_bahou', text: "Forget the keys mate, is the jasmine rice actually OK?!" },
       { speakerId: 'daniel_richards', text: "Priorities crystal clear, rescue the rice before the flat." }
     ]
@@ -1347,7 +1347,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "João, Dan, heard a guy at Brent Cross bragging over £280 jeans." },
+      { speakerId: 'andre_shamsabadi', text: "Heard a guy at Brent Cross bragging over £280 jeans." },
       { speakerId: 'joao_nogueira', text: "Two hundred eighty pounds for denim on a PhD stipend?!" },
       { speakerId: 'daniel_richards', text: "For £280 those jeans better file my thesis and cook dinner." }
     ]
@@ -1357,7 +1357,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'daniel_richards', text: "João, Max, growing up we only had one shared stick to play." },
+      { speakerId: 'daniel_richards', text: "Growing up we only had one shared stick to play outside." },
       { speakerId: 'joao_nogueira', text: "Luxury! We kicked an inflated pig bladder down a cobbled lane!" },
       { speakerId: 'maximillian_lee', text: "Calm down lads, my only pet was a feral pigeon named Dog." }
     ]
@@ -1377,7 +1377,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'calise_bahou', text: "Marcos, Peter, wait are we all Marco or just Marco Lite?" },
+      { speakerId: 'calise_bahou', text: "Wait, are we all Marco in here or just Marco Lite?" },
       { speakerId: 'marcos_fernandez', text: "There is Marco Sabatini, Marcos with an s, and sheer chaos." },
       { speakerId: 'peter_szijj', text: "Whenever someone yells Marco in Lab 230, three heads turn!" }
     ]
@@ -1387,9 +1387,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'faiza_javaid', text: "Antoine, Marcos, what is the official Big-Chuds entry test?" },
-      { speakerId: 'antoine_maruani', text: "Simple: beat me at AoE2 or go ten rounds fighting Marcos." },
-      { speakerId: 'marcos_fernandez', text: "And survive Calise's bargain lemon bag without flinching." }
+      { speakerId: 'faiza_javaid', text: "What even is the official Big-Chuds entry exam these days?" },
+      { speakerId: 'antoine_maruani', text: "Simple: beat me at AoE2 or survive a Worms deathmatch." },
+      { speakerId: 'marcos_fernandez', text: "And carry the bargain lemon bag upstairs without flinching." }
     ]
   },
   {
@@ -1397,8 +1397,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'daniel_richards', text: "Max, Peter, who prescribes olive tapenade on a paper cut?!" },
-      { speakerId: 'maximillian_lee', text: "Wait, probiotic yoghurt and tapenade cure everything mate!" },
+      { speakerId: 'daniel_richards', text: "Wait, who actually prescribes olive tapenade on a paper cut?!" },
+      { speakerId: 'maximillian_lee', text: "Probiotic yoghurt and tapenade cure everything mate!" },
       { speakerId: 'peter_szijj', text: "Stick to Nafsika's first-aid plasters before Infection City." }
     ]
   },
@@ -1408,7 +1408,7 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Gaming Crew',
     turns: [
       { speakerId: 'peter_szijj', text: "Faiza, spare my peaceful farms in tonight's AoE lobby?" },
-      { speakerId: 'faiza_javaid', text: "Only if ur Hungarian knights stay miles from my sheep!" },
+      { speakerId: 'faiza_javaid', text: "Only if your Hungarian knights stay miles from my sheep!" },
       { speakerId: 'peter_szijj', text: "Truce signed, neither of us needs Antoine rushing early." }
     ]
   },
@@ -1417,9 +1417,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_2f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'faiza_javaid', text: "Marcos, did u actually mute the main chat again today?" },
+      { speakerId: 'faiza_javaid', text: "Marcos, did you actually mute the main chat again today?" },
       { speakerId: 'marcos_fernandez', text: "Forty chicken stickers before ten am broke my spirit Faiza." },
-      { speakerId: 'faiza_javaid', text: "Fair tbh, wait till u see my cake close-up later though!" }
+      { speakerId: 'faiza_javaid', text: "Fair enough, wait until you see my cake close-up later!" }
     ]
   },
   {
@@ -1448,8 +1448,8 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Lab Neighbours',
     turns: [
       { speakerId: 'nafsika_forte', text: "Dan, how are you functioning since quarter to eight today?" },
-      { speakerId: 'daniel_richards', text: "Pure stubborn Yorkshire grit Nafsika, bedtime by nine sharp." },
-      { speakerId: 'nafsika_forte', text: "Respect the curfew, I am guarding Lab 230 till late." }
+      { speakerId: 'daniel_richards', text: "Sheer stubborn Yorkshire grit Nafsika, bedtime by nine sharp." },
+      { speakerId: 'nafsika_forte', text: "Respect the curfew, I am guarding Lab 230 till 19:15." }
     ]
   },
   {
@@ -1477,7 +1477,7 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Lab Neighbours',
     turns: [
       { speakerId: 'andre_shamsabadi', text: "Charlotte, horizontal Bloomsbury rain ruin your coat too?" },
-      { speakerId: 'charlotte_coomber', text: "Two umbrellas broken this week André, pure wind tunnel!" }
+      { speakerId: 'charlotte_coomber', text: "Two umbrellas broken this week André, a proper wind tunnel!" }
     ]
   },
   {
@@ -1498,8 +1498,118 @@ window.KLB.GROUP_HUDDLES = [
       { speakerId: 'faiza_javaid', text: "Always yes André, half the lab needs the mid-afternoon laugh!" }
     ]
   },
+  {
+    id: 'huddle_2f_peter_joao_piri',
+    roomId: 'klb_2f',
+    tag: 'Gordon Food Wars',
+    turns: [
+      { speakerId: 'joao_nogueira', text: "Have you ever actually survived proper Portuguese piri-piri?" },
+      { speakerId: 'peter_szijj', text: "Mate, Hungarian paprika forged me, bring the chillies on!" },
+      { speakerId: 'joao_nogueira', text: "Deal, bringing homemade piri-piri oil to lunch tomorrow." }
+    ]
+  },
+  {
+    id: 'huddle_2f_max_marcos_gym',
+    roomId: 'klb_2f',
+    tag: 'Big-Chuds Banter',
+    turns: [
+      { speakerId: 'maximillian_lee', text: "Marcos, fencing footwork tonight or heavy deadlifts?" },
+      { speakerId: 'marcos_fernandez', text: "Fencing drills first, then defending my broadsword honour." },
+      { speakerId: 'maximillian_lee', text: "Respect, silverback power versus Spanish steel at seven." }
+    ]
+  },
+  {
+    id: 'huddle_2f_antoine_marcos_cheese',
+    roomId: 'klb_2f',
+    tag: 'Big-Chuds Banter',
+    turns: [
+      { speakerId: 'antoine_maruani', text: "Marcos, Spanish Manchego versus French Comté, choose wisely." },
+      { speakerId: 'marcos_fernandez', text: "Manchego with crusty bread wins every evening, sorry!" },
+      { speakerId: 'antoine_maruani', text: "Wait till I smuggle cave-aged Comté back next Monday." }
+    ]
+  },
+  {
+    id: 'huddle_2f_richard_marcos_rain',
+    roomId: 'klb_2f',
+    tag: 'Commute Chaos',
+    turns: [
+      { speakerId: 'richard_spears', text: "Marcos, bus gridlock on Gower Street again this morning?" },
+      { speakerId: 'marcos_fernandez', text: "Got off two stops early and speed-walked through drizzle." },
+      { speakerId: 'richard_spears', text: "Put the kettle on upstairs, that earns an extra biscuit." }
+    ]
+  },
+  {
+    id: 'huddle_2f_max_faiza_cake',
+    roomId: 'klb_2f',
+    tag: 'Big-Chuds Banter',
+    turns: [
+      { speakerId: 'maximillian_lee', text: "Faiza, tell me there is still leftover chocolate cake up top." },
+      { speakerId: 'faiza_javaid', text: "Guard it with your silverback frame, Dan circled twice!" },
+      { speakerId: 'maximillian_lee', text: "Saving you the biggest corner slice right by the kettle." }
+    ]
+  },
+  {
+    id: 'huddle_2f_archie_nafsika_rotor',
+    roomId: 'klb_2f',
+    tag: 'Lab Neighbours',
+    turns: [
+      { speakerId: 'archie_wall', text: "Nafsika, who left the microcentrifuge off-balance by 0.4 g?" },
+      { speakerId: 'nafsika_forte', text: "Not Baker group Archie, check the Chudasama bench!" },
+      { speakerId: 'archie_wall', text: "Saving that rotor bearing before Jamie hears it rattle." }
+    ]
+  },
+  {
+    id: 'huddle_2f_archie_dan_albumin',
+    roomId: 'klb_2f',
+    tag: 'Lab Neighbours',
+    turns: [
+      { speakerId: 'archie_wall', text: "Swear human serum albumin foams just from breathing near it." },
+      { speakerId: 'daniel_richards', text: "Wait till 40 nm gold turns purple on you mid-pipette." },
+      { speakerId: 'archie_wall', text: "Fair, Baker and Chudasama suffering in quiet solidarity." }
+    ]
+  },
+  {
+    id: 'huddle_2f_jamie_nafsika_archie_specs',
+    roomId: 'klb_2f',
+    tag: 'Lab 230 Cross-Group',
+    turns: [
+      { speakerId: 'jamie_baker', text: "Heard someone drop a spatula, good to see specs firmly on." },
+      { speakerId: 'nafsika_forte', text: "Always compliant in Baker bay, zero near-misses today!" },
+      { speakerId: 'archie_wall', text: "Even the central balance table is completely spotless today!" }
+    ]
+  },
+  {
+    id: 'huddle_2f_jamie_dan_music',
+    roomId: 'klb_2f',
+    tag: 'Lab 230 Cross-Group',
+    turns: [
+      { speakerId: 'jamie_baker', text: "Dan, who put Hobbit flute solos back on the lab speakers?" },
+      { speakerId: 'daniel_richards', text: "Peter's evening productivity fuel Jamie, keeps him awake." },
+      { speakerId: 'jamie_baker', text: "Fair enough, just keep specs on before entering Isengard." }
+    ]
+  },
+  {
+    id: 'huddle_2f_tom_marco_oven',
+    roomId: 'klb_2f',
+    tag: 'Lab 230 Cross-Group',
+    turns: [
+      { speakerId: 'tom_sheppard', text: "Marco, drying oven stocked with enough round-bottoms today?" },
+      { speakerId: 'marco_sabatini', text: "All dry and ready Tom, flame-dried mine twice in this mist." },
+      { speakerId: 'tom_sheppard', text: "Splendid, borate ester yields thank you for the diligence." }
+    ]
+  },
+  {
+    id: 'huddle_2f_tom_charlotte_tlc',
+    roomId: 'klb_2f',
+    tag: 'Lab 230 Cross-Group',
+    turns: [
+      { speakerId: 'charlotte_coomber', text: "Tom, finally got clean spot-to-spot separation on the amide!" },
+      { speakerId: 'tom_sheppard', text: "Lovely work Charlotte, saves staring at crude NMR all day." },
+      { speakerId: 'charlotte_coomber', text: "Wait till I brag about it at Thursday pub trivia tonight!" }
+    ]
+  },
 
-  // ==================== 2. KLB 3F WRITE-UP & TEA ROOM (32 HUDDLES) ====================
+  // ==================== 2. KLB 3F WRITE-UP & TEA ROOM (36 HUDDLES) ====================
   {
     id: 'huddle_3f_bettys_yorkshire',
     roomId: 'klb_3f',
@@ -1535,8 +1645,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_3f',
     tag: 'Gaming Crew',
     turns: [
-      { speakerId: 'maximillian_lee', text: "Peter, Antoine, five pm klaxon, boot up Age of Empires!" },
-      { speakerId: 'peter_szijj', text: "Ready for my Hungarian hussars again? Sorry Antoine!" },
+      { speakerId: 'maximillian_lee', text: "Five pm klaxon just hit, who is booting up Age of Empires?" },
+      { speakerId: 'peter_szijj', text: "Ready for my Hungarian hussars again? Look out!" },
       { speakerId: 'antoine_maruani', text: "Say one more word and I wall your berries in." }
     ]
   },
@@ -1547,7 +1657,7 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'andre_shamsabadi', text: "Quick poll: should Antoine's ninja rope be banned under Geneva?" },
       { speakerId: 'maximillian_lee', text: "Hard yes bro, man swings across the map like Tarzan." },
-      { speakerId: 'antoine_maruani', text: "Windows 95 Worms Armageddon forged me in pure fire." }
+      { speakerId: 'antoine_maruani', text: "Windows 95 Worms Armageddon forged me in total fire." }
     ]
   },
   {
@@ -1556,8 +1666,8 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Gaming Crew',
     turns: [
       { speakerId: 'antoine_maruani', text: "Is Faiza joining AoE tonight or are we warring properly?" },
-      { speakerId: 'faiza_javaid', text: "Touch my peaceful windmills and I delete ur NanoDrop data!" },
-      { speakerId: 'peter_szijj', text: "FarmVille neutral zone agreed, nobody raid Faiza's sheep!" }
+      { speakerId: 'faiza_javaid', text: "Touch my peaceful windmills and I delete your NanoDrop data!" },
+      { speakerId: 'peter_szijj', text: "FarmVille neutral zone agreed, nobody raid the sheep!" }
     ]
   },
   {
@@ -1566,8 +1676,8 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Gaming Crew',
     turns: [
       { speakerId: 'andre_shamsabadi', text: "Peter, played CK3 and Stellaris till two am, barely alive." },
-      { speakerId: 'peter_szijj', text: "Worth it tho, our galactic federation crushed the whole map!" },
-      { speakerId: 'maximillian_lee', text: "Nerd behaviour, real scholars just spam longbowmen until victory." }
+      { speakerId: 'peter_szijj', text: "Worth it though, our galactic empire crushed the whole map!" },
+      { speakerId: 'maximillian_lee', text: "Nerd behaviour, real scholars spam longbowmen until victory." }
     ]
   },
   {
@@ -1607,7 +1717,7 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'maximillian_lee', text: "Wait why do both Peter and Marcos actually own swords?" },
       { speakerId: 'peter_szijj', text: "Mine is Tolkien-inspired, never bring less to a gunfight!" },
-      { speakerId: 'marcos_fernandez', text: "Purely for home decor and keeping RiskNET forms away." }
+      { speakerId: 'marcos_fernandez', text: "Mostly for home decor and keeping RiskNET forms away." }
     ]
   },
   {
@@ -1645,7 +1755,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_3f',
     tag: 'Write-Up Procrastination',
     turns: [
-      { speakerId: 'daniel_richards', text: "Richard, Max, four real figures ready for Friday audit?" },
+      { speakerId: 'daniel_richards', text: "Are four real figures actually ready for Friday audit yet?" },
       { speakerId: 'richard_spears', text: "Yes, and remember to disclose trace EtOAc honestly on Slide 4." },
       { speakerId: 'maximillian_lee', text: "Still negotiating desk custody with the Bloomsbury spider." }
     ]
@@ -1665,19 +1775,17 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_3f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'antoine_maruani', text: "Richard, got moved up to train business class in French!" },
+      { speakerId: 'antoine_maruani', text: "Richard, got moved up to train business class in France!" },
       { speakerId: 'richard_spears', text: "Delighted for you. I flew business class to Australia once." },
       { speakerId: 'daniel_richards', text: "Of course you did, Richard. Bettys biscuits at 38,000 feet." }
     ]
   },
-
-  // --- New Casual 3F Lore & Pair Banter ---
   {
     id: 'huddle_3f_buttered_toast_reviewer2',
     roomId: 'klb_3f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'antoine_maruani', text: "Richard, Dan, Reviewer 2 rejected my paper for nonsense." },
+      { speakerId: 'antoine_maruani', text: "Reviewer 2 just rejected my manuscript for total nonsense." },
       { speakerId: 'richard_spears', text: "Like buttering toast on the wrong side and blaming gravity." },
       { speakerId: 'daniel_richards', text: "Drop the toast upside down, still cleaner than Reviewer 2." }
     ]
@@ -1687,7 +1795,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_3f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'maximillian_lee', text: "Antoine, João, clicked that Group Breakfast YouTube link?" },
+      { speakerId: 'maximillian_lee', text: "Did anyone else click that Group Breakfast YouTube link?" },
       { speakerId: 'antoine_maruani', text: "Classic clickbait prank, thought we actually booked pancakes." },
       { speakerId: 'joao_nogueira', text: "Heartless tease bro, my stomach was ready for real breakfast!" }
     ]
@@ -1699,7 +1807,7 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'antoine_maruani', text: "Peter, Eurostar stuck in Kent, only got cheese and bread!" },
       { speakerId: 'peter_szijj', text: "Honestly sounds like a luxury picnic compared to Tube delays!" },
-      { speakerId: 'antoine_maruani', text: "Not when you run out of comté two hours outside Folkestone." }
+      { speakerId: 'antoine_maruani', text: "Not when you run out of Comté two hours outside Folkestone." }
     ]
   },
   {
@@ -1719,7 +1827,7 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'maximillian_lee', text: "Antoine, accidentally spent eight hundred quid on Prime Day!" },
       { speakerId: 'antoine_maruani', text: "Please tell me half of it was giant tubs of whey protein." },
-      { speakerId: 'maximillian_lee', text: "Five kilos of vanilla whey plus a kettlebell, pure gains!" }
+      { speakerId: 'maximillian_lee', text: "Five kilos of vanilla whey plus a kettlebell, sheer gains!" }
     ]
   },
   {
@@ -1727,9 +1835,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_3f',
     tag: 'Kettle & Tea',
     turns: [
-      { speakerId: 'richard_spears', text: "Dan, Faiza, someone slipped Fortnum tea near my Bettys tin." },
+      { speakerId: 'richard_spears', text: "Someone slipped Fortnum tea bags right next to my Bettys tin." },
       { speakerId: 'daniel_richards', text: "Luxury tea arms race on 3F, Yorkshire gold watches in silence." },
-      { speakerId: 'faiza_javaid', text: "Pass me whichever tin comes with fancy shortbread, pls!" }
+      { speakerId: 'faiza_javaid', text: "Pass me whichever tin comes with fancy shortbread!" }
     ]
   },
   {
@@ -1737,8 +1845,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_3f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "Richard, Max, tried that two-hour low-dopamine bedtime routine." },
-      { speakerId: 'richard_spears', text: "Two hours winding down? Pure Low Dopamine Dolphin energy." },
+      { speakerId: 'andre_shamsabadi', text: "Tried that two-hour low-dopamine bedtime routine last night." },
+      { speakerId: 'richard_spears', text: "Two hours winding down? Peak Low Dopamine Dolphin energy." },
       { speakerId: 'maximillian_lee', text: "I just stare at my ceiling for five minutes and black out." }
     ]
   },
@@ -1747,7 +1855,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'klb_3f',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "João, Dan, 101 Dalmatians is the greatest Christmas heist film." },
+      { speakerId: 'andre_shamsabadi', text: "Unpopular opinion: 101 Dalmatians is peak Christmas heist." },
       { speakerId: 'joao_nogueira', text: "Die Hard and Home Alone exist mate, wait what?! Dalmatians?!" },
       { speakerId: 'daniel_richards', text: "Snowy London streets, spotted puppies, unbeatable festive plot." }
     ]
@@ -1810,17 +1918,67 @@ window.KLB.GROUP_HUDDLES = [
       { speakerId: 'calise_bahou', text: "Finest cherry-flavoured fuel in London mate, try a sip!" }
     ]
   },
+  {
+    id: 'huddle_3f_peter_joao_music',
+    roomId: 'klb_3f',
+    tag: 'Evening Shift',
+    turns: [
+      { speakerId: 'joao_nogueira', text: "Peter, still blasting Howard Shore upstairs after six tonight?" },
+      { speakerId: 'peter_szijj', text: "Only way to survive late runs, join me at the speakers!" },
+      { speakerId: 'joao_nogueira', text: "Swap one track for Portuguese indie rock and it's a deal." }
+    ]
+  },
+  {
+    id: 'huddle_3f_max_marcos_tolkien',
+    roomId: 'klb_3f',
+    tag: 'Tolkien & Lore',
+    turns: [
+      { speakerId: 'marcos_fernandez', text: "Anyone else feel like Sauron wrote UCL's RiskNET portal?" },
+      { speakerId: 'maximillian_lee', text: "Even Mordor had fewer pop-up boxes than RiskNET bro." },
+      { speakerId: 'marcos_fernandez', text: "One does not simply click Save without three crashes." }
+    ]
+  },
+  {
+    id: 'huddle_3f_joao_richard_kettle',
+    roomId: 'klb_3f',
+    tag: 'Kettle & Tea',
+    turns: [
+      { speakerId: 'richard_spears', text: "João, Yorkshire gold or sneaking an espresso down the road?" },
+      { speakerId: 'joao_nogueira', text: "Always espresso Richard, though your posh biscuits tempt me." },
+      { speakerId: 'richard_spears', text: "Help yourself to a dark chocolate one, don't tell Dan." }
+    ]
+  },
+  {
+    id: 'huddle_3f_richard_marcos_quiet',
+    roomId: 'klb_3f',
+    tag: 'Kettle & Tea',
+    turns: [
+      { speakerId: 'marcos_fernandez', text: "Quiet evening on the third floor, rare peace before Friday." },
+      { speakerId: 'richard_spears', text: "Best hour of the day, tea steeped and zero group stickers." },
+      { speakerId: 'marcos_fernandez', text: "Do not speak too soon, someone will unmute the chat." }
+    ]
+  },
+  {
+    id: 'huddle_3f_archie_max_bench',
+    roomId: 'klb_3f',
+    tag: 'Big-Chuds Banter',
+    turns: [
+      { speakerId: 'maximillian_lee', text: "Archie, still pretending you didn't finish the custard creams?" },
+      { speakerId: 'archie_wall', text: "Check Richard's emergency tin Max, my hands are spotless." },
+      { speakerId: 'maximillian_lee', text: "Sure mate, crumbs on your Baker lab coat say otherwise." }
+    ]
+  },
 
-  // ==================== 3. GORDON'S CAFE (28 HUDDLES) ====================
+  // ==================== 3. GORDON'S CAFE (42 HUDDLES) ====================
   // --- Coffee Quartet / Lunch Hours ---
   {
     id: 'huddle_cafe_joao_abolish_deals',
     roomId: 'gordons_cafe',
     tag: 'Gordon Food Wars',
     turns: [
-      { speakerId: 'joao_nogueira', text: "Calise, Dan, meal deals and 0% yoghurt must be abolished!" },
+      { speakerId: 'joao_nogueira', text: "Meal deals and zero percent yoghurt must be abolished at once!" },
       { speakerId: 'calise_bahou', text: "Mate, meal deals give you almost infinite sandwich choice." },
-      { speakerId: 'daniel_richards', text: "Food is fuel lads, egg and cress wins every single time." }
+      { speakerId: 'daniel_richards', text: "Food is fuel lads, warm toastie wins every single time." }
     ]
   },
   {
@@ -1828,7 +1986,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Gordon Food Wars',
     turns: [
-      { speakerId: 'joao_nogueira', text: "Faiza, Antoine, brought warm pastéis de nata and bacalhau!" },
+      { speakerId: 'joao_nogueira', text: "Brought warm pastéis de nata and bacalhau down to the table!" },
       { speakerId: 'faiza_javaid', text: "Say less irmão, saving myself a pastel right now!" },
       { speakerId: 'antoine_maruani', text: "Finally, real pastry inside a British university building." }
     ]
@@ -1848,8 +2006,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Coffee Quartet',
     turns: [
-      { speakerId: 'joao_nogueira', text: "Nafsika, promise nobody here buys cold triangle sandwiches." },
-      { speakerId: 'nafsika_forte', text: "Relax João, we ordered warm paninis like civilised Europeans." },
+      { speakerId: 'joao_nogueira', text: "Promise nobody at this table buys cold triangle sandwiches." },
+      { speakerId: 'nafsika_forte', text: "Relax, we ordered warm paninis like civilised Europeans." },
       { speakerId: 'vijay_chudasama', text: "Good call, cold soggy bread is suboptimal, one word." }
     ]
   },
@@ -1859,7 +2017,7 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'Coffee Quartet',
     turns: [
       { speakerId: 'vijay_chudasama', text: "Still haven't forgotten what Faiza wrote on my get-well card." },
-      { speakerId: 'faiza_javaid', text: "Pure artistic expression boss, honestly it brought great morale!" },
+      { speakerId: 'faiza_javaid', text: "Peak artistic expression boss, honestly it brought great morale!" },
       { speakerId: 'joao_nogueira', text: "Nafsika and I nearly choked on our espressos reading it!" }
     ]
   },
@@ -1868,8 +2026,8 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'faiza_javaid', text: "Antoine, João, no funsies today, only thick chocolate cake!" },
-      { speakerId: 'antoine_maruani', text: "Only Faiza posts close-ups like a true serial shitposter." },
+      { speakerId: 'faiza_javaid', text: "No nonsense today, only thick dark chocolate cake!" },
+      { speakerId: 'antoine_maruani', text: "Close-up dessert photos at ten am belong in a gallery." },
       { speakerId: 'joao_nogueira', text: "Chantilli on top! Have a rippa afternoon everyone!" }
     ]
   },
@@ -1922,7 +2080,7 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'peter_szijj', text: "André, ordered twenty nuggets and got only one large fries!" },
       { speakerId: 'andre_shamsabadi', text: "Seriously? That is genuinely heartbreaking news, Peter." },
-      { speakerId: 'calise_bahou', text: "Only noticed back in Clapham as well, pure pain mate." }
+      { speakerId: 'calise_bahou', text: "Only noticed back in Clapham as well, sheer pain mate." }
     ]
   },
   {
@@ -1950,7 +2108,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Big-Chuds Banter',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "Dan, Max, quick poll: second espresso or suffer Lab 230?" },
+      { speakerId: 'andre_shamsabadi', text: "Quick poll: second espresso or suffer back in Lab 230?" },
       { speakerId: 'daniel_richards', text: "We faff for ten minutes, then end up ordering anyway." },
       { speakerId: 'maximillian_lee', text: "Get me a pain au chocolat while you are up there pal." }
     ]
@@ -1970,7 +2128,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Lab Neighbours',
     turns: [
-      { speakerId: 'charlotte_coomber', text: "Peter, Dan, need two more players for Thursday trivia!" },
+      { speakerId: 'charlotte_coomber', text: "Still need two more players for Thursday pub trivia!" },
       { speakerId: 'peter_szijj', text: "Count me in for all Lord of the Rings and history rounds!" },
       { speakerId: 'daniel_richards', text: "Only if there is a round on Pool Frog swimming badges." }
     ]
@@ -1982,7 +2140,7 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'peter_szijj', text: "Richard, still cannot picture a chemist in a flatbed seat!" },
       { speakerId: 'richard_spears', text: "Proper tea in porcelain mid-flight changes a man, honestly." },
-      { speakerId: 'maximillian_lee', text: "Cartoon bear eating smoked salmon in pajamas above Singapore." }
+      { speakerId: 'maximillian_lee', text: "Cartoon bear eating smoked salmon in pyjamas above Singapore." }
     ]
   },
   {
@@ -1990,7 +2148,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'French Coffee Banter',
     turns: [
-      { speakerId: 'antoine_maruani', text: "Dis-moi Marco, un croissant coupé avec du fromage, c'est légal?" },
+      { speakerId: 'antoine_maruani', text: "Un croissant coupé en deux avec du fromage, c'est légal?" },
       { speakerId: 'marco_sabatini', text: "En France non, à Londres ils appellent ça un petit déjeuner." },
       { speakerId: 'antoine_maruani', text: "Je garde ma baguette et mon espresso, merci bien." }
     ]
@@ -2001,18 +2159,16 @@ window.KLB.GROUP_HUDDLES = [
     tag: 'French Coffee Banter',
     turns: [
       { speakerId: 'marco_sabatini', text: "Antoine, un double espresso avant de retourner aux hottes?" },
-      { speakerId: 'antoine_maruani', text: "Obligé, sinon je fais encore du TCEP à l'oeil." },
-      { speakerId: 'marco_sabatini', text: "Allez, santé fréro, on finit cette manip avant ce soir." }
+      { speakerId: 'antoine_maruani', text: "Obligé, sinon je fais encore du TCEP à l'œil." },
+      { speakerId: 'marco_sabatini', text: "Allez, santé frérot, on finit cette manip avant ce soir." }
     ]
   },
-
-  // --- New Casual Cafe Lore & Pair Banter ---
   {
     id: 'huddle_cafe_lidl_kayak_croissant',
     roomId: 'gordons_cafe',
     tag: 'French Outrage',
     turns: [
-      { speakerId: 'daniel_richards', text: "Antoine, Peter, Lidl is selling an inflatable kayak today!" },
+      { speakerId: 'daniel_richards', text: "Heads up: Lidl is actually selling an inflatable kayak today!" },
       { speakerId: 'antoine_maruani', text: "Forget kayaks while ham-and-cheese croissants walk free here." },
       { speakerId: 'peter_szijj', text: "Paddle down the Regent's Canal eating warm pastry, elite!" }
     ]
@@ -2022,7 +2178,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Gordon Food Wars',
     turns: [
-      { speakerId: 'joao_nogueira', text: "Calise, Dan, steak pie and souvlaki crush every meal deal!" },
+      { speakerId: 'joao_nogueira', text: "Steak pie and proper souvlaki crush every sad meal deal!" },
       { speakerId: 'calise_bahou', text: "Steak and ale pie elite mate, though meal deals save fivers." },
       { speakerId: 'daniel_richards', text: "Cypriot souvlaki wins Sunday, egg and cress wins Tuesday." }
     ]
@@ -2042,9 +2198,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Gordon Food Wars',
     turns: [
-      { speakerId: 'calise_bahou', text: "André, Faiza, quick McDonald's breakfast hash brown run?" },
-      { speakerId: 'andre_shamsabadi', text: "Pure acid reflux in paper wrapping, pass with extreme speed." },
-      { speakerId: 'faiza_javaid', text: "Save ur stomach pls, grab a real pastry at Gordon's instead." }
+      { speakerId: 'calise_bahou', text: "Anyone fancy a quick McDonald's hash brown run right now?" },
+      { speakerId: 'andre_shamsabadi', text: "Instant acid reflux in paper wrapping, pass with extreme speed." },
+      { speakerId: 'faiza_javaid', text: "Save your stomach, grab a real pastry at Gordon's instead." }
     ]
   },
   {
@@ -2052,9 +2208,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Gordon Food Wars',
     turns: [
-      { speakerId: 'calise_bahou', text: "Faiza, Peter, thought I bought chicken, turns out it is tofu." },
-      { speakerId: 'faiza_javaid', text: "Classic Big C blind buy, still eating post-gym Pringles too?" },
-      { speakerId: 'peter_szijj', text: "Pringles count as post-workout carbs, pure sports science!" }
+      { speakerId: 'calise_bahou', text: "Thought I bought roast chicken, turns out it is plain tofu." },
+      { speakerId: 'faiza_javaid', text: "Classic blind buy, still eating post-gym Pringles too?" },
+      { speakerId: 'peter_szijj', text: "Pringles count as post-workout carbs, peak sports science!" }
     ]
   },
   {
@@ -2062,7 +2218,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'gordons_cafe',
     tag: 'Football Banter',
     turns: [
-      { speakerId: 'daniel_richards', text: "André, Max, reckon Barbara from Bolton could take penalties?" },
+      { speakerId: 'daniel_richards', text: "Reckon Barbara from Bolton could step up and take penalties?" },
       { speakerId: 'andre_shamsabadi', text: "Barbara bangs it top bins past half the Premier League!" },
       { speakerId: 'maximillian_lee', text: "Sign Barbara immediately, better composure than England lads." }
     ]
@@ -2133,6 +2289,105 @@ window.KLB.GROUP_HUDDLES = [
       { speakerId: 'marco_sabatini', text: "Every single morning Nafsika, only espresso keeps me alive!" }
     ]
   },
+  {
+    id: 'huddle_cafe_peter_joao_nata',
+    roomId: 'gordons_cafe',
+    tag: 'Gordon Food Wars',
+    turns: [
+      { speakerId: 'peter_szijj', text: "João, tell me Gordon's actually still has pastéis de nata." },
+      { speakerId: 'joao_nogueira', text: "Warm out of the tray five minutes ago, grab two fast!" },
+      { speakerId: 'peter_szijj', text: "That officially beats twenty nuggets on a rough Thursday." }
+    ]
+  },
+  {
+    id: 'huddle_cafe_antoine_marcos_coffee',
+    roomId: 'gordons_cafe',
+    tag: 'Commute Chaos',
+    turns: [
+      { speakerId: 'marcos_fernandez', text: "Antoine, walked from Euston again because the Tube died." },
+      { speakerId: 'antoine_maruani', text: "Still beats waiting forty minutes on a rainy Eurostar." },
+      { speakerId: 'marcos_fernandez', text: "True, Gordon's double espresso rescues both of us today." }
+    ]
+  },
+  {
+    id: 'huddle_cafe_joao_richard_weather',
+    roomId: 'gordons_cafe',
+    tag: 'Gordon Food Wars',
+    turns: [
+      { speakerId: 'joao_nogueira', text: "How do you survive horizontal London drizzle without crying?" },
+      { speakerId: 'richard_spears', text: "Born in Yorkshire João, this counts as mild spring mist." },
+      { speakerId: 'joao_nogueira', text: "Madness, give me Lisbon sunshine and warm custard tarts!" }
+    ]
+  },
+  {
+    id: 'huddle_cafe_max_faiza_aoe',
+    roomId: 'gordons_cafe',
+    tag: 'Gaming Crew',
+    turns: [
+      { speakerId: 'faiza_javaid', text: "Max, promise not to send trebuchets at my AoE2 windmills." },
+      { speakerId: 'maximillian_lee', text: "Only if you leave my gold mines alone during tea breaks!" },
+      { speakerId: 'faiza_javaid', text: "Deal, peaceful berry picking and Gordon's brownies today." }
+    ]
+  },
+  {
+    id: 'huddle_cafe_andre_joao_lunch',
+    roomId: 'gordons_cafe',
+    tag: 'Gordon Food Wars',
+    turns: [
+      { speakerId: 'andre_shamsabadi', text: "João, warm panini downstairs or testing our luck on 3F?" },
+      { speakerId: 'joao_nogueira', text: "Always warm panini André, never chilled supermarket plastic!" },
+      { speakerId: 'andre_shamsabadi', text: "Lead the way coffee captain, my stomach agrees completely." }
+    ]
+  },
+  {
+    id: 'huddle_cafe_joao_marcos_pastry',
+    roomId: 'gordons_cafe',
+    tag: 'Gordon Food Wars',
+    turns: [
+      { speakerId: 'marcos_fernandez', text: "Two espressos down and it is not even eleven o'clock yet." },
+      { speakerId: 'joao_nogueira', text: "That is standard Iberian pacing Marcos, keep going!" }
+    ]
+  },
+  {
+    id: 'huddle_cafe_archie_joao_football',
+    roomId: 'gordons_cafe',
+    tag: 'Football Banter',
+    turns: [
+      { speakerId: 'archie_wall', text: "João, Champions League knockout round tonight, fancy our odds?" },
+      { speakerId: 'joao_nogueira', text: "Always back Portuguese flair under floodlights Archie!" },
+      { speakerId: 'archie_wall', text: "Grabbing an espresso first so I stay awake past nine." }
+    ]
+  },
+  {
+    id: 'huddle_cafe_jamie_nafsika_coffee',
+    roomId: 'gordons_cafe',
+    tag: 'Lab Neighbours',
+    turns: [
+      { speakerId: 'jamie_baker', text: "Nafsika, flat white queue finally shorter than Gower Street?" },
+      { speakerId: 'nafsika_forte', text: "Just beat the afternoon rush Jamie, pastry tray looks good." },
+      { speakerId: 'jamie_baker', text: "Marvellous, straight back up before Spurs break my heart." }
+    ]
+  },
+  {
+    id: 'huddle_cafe_tom_marco_charlotte',
+    roomId: 'gordons_cafe',
+    tag: 'Lab Neighbours',
+    turns: [
+      { speakerId: 'tom_sheppard', text: "Feels like half of KLB migrated down to Gordon's Café today." },
+      { speakerId: 'charlotte_coomber', text: "Escape from admin emails and warm pastries, unbeatable!" },
+      { speakerId: 'marco_sabatini', text: "And real espresso downstairs, a small mercy in London rain." }
+    ]
+  },
+  {
+    id: 'huddle_cafe_dan_faiza_cake',
+    roomId: 'gordons_cafe',
+    tag: 'Big-Chuds Banter',
+    turns: [
+      { speakerId: 'daniel_richards', text: "Did someone finish the entire chocolate cake upstairs already?" },
+      { speakerId: 'faiza_javaid', text: "Look innocent Dan, saw you lurking by the kettle twice!" },
+      { speakerId: 'daniel_richards', text: "Strictly checking the structural integrity of the icing." }
+    ]
+  },
 
   // ==================== 4. MEETING ROOM (8 HUDDLES) ====================
   {
@@ -2140,7 +2395,7 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'meeting_room',
     tag: 'Friday Audit',
     turns: [
-      { speakerId: 'andre_shamsabadi', text: "Calise, left my clicker upstairs and Vijay is walking in!" },
+      { speakerId: 'andre_shamsabadi', text: "Left my clicker upstairs and Vijay is already walking in!" },
       { speakerId: 'calise_bahou', text: "Spacebar works fine mate, relax before you melt!" },
       { speakerId: 'daniel_richards', text: "Nothing says calm authority like sprinting before Slide 1." }
     ]
@@ -2162,7 +2417,7 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: 'antoine_maruani', text: "André, think I only have three real data slides ready." },
       { speakerId: 'andre_shamsabadi', text: "Hold on, is that including title and acknowledgements?" },
-      { speakerId: 'daniel_richards', text: "Uh oh, four with title, time to talk slowly mon ami." }
+      { speakerId: 'daniel_richards', text: "Uh oh, four with title, time to talk slowly, vieux." }
     ]
   },
   {
@@ -2210,9 +2465,9 @@ window.KLB.GROUP_HUDDLES = [
     roomId: 'meeting_room',
     tag: 'Friday Audit',
     turns: [
-      { speakerId: 'vijay_chudasama', text: "Max, Dan, compare your HIC trace to Faiza's PAR 4.0." },
-      { speakerId: 'maximillian_lee', text: "Nobody uses mass spec anymore Vijay, flame tests only!" },
-      { speakerId: 'daniel_richards', text: "Please revoke Max's microphone before Slide 3 starts." }
+      { speakerId: 'vijay_chudasama', text: "Compare those HIC traces to Faiza's clean PAR 4.0 deck." },
+      { speakerId: 'maximillian_lee', text: "Nobody uses mass spec anymore boss, flame tests only!" },
+      { speakerId: 'daniel_richards', text: "Please mute the back row before Slide 3 starts." }
     ]
   }
 ];
@@ -2276,12 +2531,12 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
     variants: [
       [
         { speakerId: 'daniel_richards', text: "Antoine, have you seen that Polish vodka bottle anywhere?" },
-        { speakerId: 'antoine_maruani', text: "Still stashed away, pure Caprice de Dieux of vodka mon ami." },
+        { speakerId: 'antoine_maruani', text: "Still stashed away, the Caprice des Dieux of vodka, mon gars." },
         { speakerId: 'daniel_richards', text: "Polish wedding bottles hit different, guard it with your life." }
       ],
       [
         { speakerId: 'antoine_maruani', text: "Dan, have you seen the Polish wedding vodka I brought back?" },
-        { speakerId: 'daniel_richards', text: "Last saw that Caprice de Dieux bottle safely tucked upstairs." },
+        { speakerId: 'daniel_richards', text: "Last saw that Caprice des Dieux bottle safely tucked upstairs." },
         { speakerId: 'antoine_maruani', text: "Bon, nobody drinks my Polish wedding reserve without #Dantoine!" }
       ]
     ]
@@ -2357,7 +2612,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
     variants: [
       [
         { speakerId: 'nafsika_forte', text: "Marco, João, quick smoke break outside before our next step?" },
-        { speakerId: 'marco_sabatini', text: "Sì cara, five minutes outside beats staring at the Buchi." },
+        { speakerId: 'marco_sabatini', text: "Sì cara, five minutes outside beats staring at the Büchi." },
         { speakerId: 'joao_nogueira', text: "Grabbing my coat now, badly need fresh air off Gordon Street." }
       ],
       [
@@ -2371,7 +2626,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
         { speakerId: 'joao_nogueira', text: "Five minutes outside, then straight back to the Biotage." }
       ],
       [
-        { speakerId: 'marco_sabatini', text: "João fréro, stepping out for a smoke break right now?" },
+        { speakerId: 'marco_sabatini', text: "João fratello, stepping out for a smoke break right now?" },
         { speakerId: 'joao_nogueira', text: "Right behind you Marco, finishing this espresso and coming!" },
         { speakerId: 'marco_sabatini', text: "Perfetto, five minutes in the Bloomsbury breeze." }
       ]
@@ -2417,13 +2672,13 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
     variants: [
       [
         { speakerId: 'marco_sabatini', text: "Peter, Max, still at the bench? Look at Little baby Peetah!" },
-        { speakerId: 'maximillian_lee', text: "Look at Little baby Peetah clutching his pure Fab stock!" },
+        { speakerId: 'maximillian_lee', text: "Look at Little baby Peetah clutching his clean Fab stock!" },
         { speakerId: 'peter_szijj', text: "Wait till my LotR synth kicks in, laugh at your own risk!" }
       ],
       [
         { speakerId: 'marco_sabatini', text: "Peter mio caro, need a hand? Look at Little baby Peetah go!" },
-        { speakerId: 'peter_szijj', text: "Stop calling me Little baby Peetah across the whole floor Marco!" },
-        { speakerId: 'marco_sabatini', text: "Impossible fréro, it rolls off the tongue too nicely!" }
+        { speakerId: 'peter_szijj', text: "Stop calling me Little baby Peetah across the floor Marco!" },
+        { speakerId: 'marco_sabatini', text: "Impossible amico, it rolls off the tongue too nicely!" }
       ],
       [
         { speakerId: 'maximillian_lee', text: "Peter, dropped another pipette tip? Little baby Peetah energy!" },
@@ -2496,7 +2751,7 @@ window.KLB.BIRTHDAY_GREETINGS = {
     ],
     antoine_maruani: [
       "Joyeux anniversaire {target}, hope there is cake upstairs!",
-      "Happy birthday {target} mon ami, real croissants today!"
+      "Happy birthday {target}, mec — real croissants today!"
     ],
     andre_shamsabadi: [
       "Happy birthday {target}! Waistcoat out in your honour!",
@@ -2539,7 +2794,7 @@ window.KLB.BIRTHDAY_GREETINGS = {
     "Cheers {greeter}! Saving you a cake slice on 3F.",
     "Thanks {greeter}, pints after five are on me!",
     "Legend {greeter}, thank you so much!",
-    "Merci {greeter}! Coffee run later?",
+    "Nice one {greeter}! Coffee run later?",
     "Cheers {greeter}, zero RiskNET forms today I hope!",
     "Thank you {greeter}, hope Vijay goes easy on slides!",
     "Much appreciated {greeter}, grab a pastry upstairs!",

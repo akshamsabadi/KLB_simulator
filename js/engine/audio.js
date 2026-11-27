@@ -1,10 +1,16 @@
 // KLB Simulator — Pure Procedural WebAudio Soundscape & Retro Lab Synth Engine
 // Classic browser script attaching to window.KLB.Audio (zero external audio files, zero build step)
-window.KLB = window.KLB || {};
-
 (() => {
+  const root = typeof window !== 'undefined' ? window : globalThis;
+  root.KLB = root.KLB || {};
+
+  const AUDIO_PREFS_KEY = 'klb_audio_prefs_v1';
+  const WA_PING_COOLDOWN_MS = 120;
+  const UNLOCK_EVENTS = ['pointerdown', 'keydown', 'mousedown', 'touchstart'];
+
   let ctx = null;
   let masterGain = null;
+  let masterCompressor = null;
   let noiseBuffer = null;
 
   // Master settings
@@ -14,7 +20,42 @@ window.KLB = window.KLB || {};
   let stopped = false;
   let initialized = false;
   let unlockBound = false;
+  let unlocked = false;
+  let unlockHandler = null;
   let visibilityBound = false;
+  let lastWaPingAtMs = -Infinity;
+
+  function loadAudioPrefs() {
+    try {
+      const storage = typeof localStorage !== 'undefined'
+        ? localStorage
+        : (typeof window !== 'undefined' ? window.localStorage : null);
+      if (!storage || typeof storage.getItem !== 'function') return;
+      const raw = storage.getItem(AUDIO_PREFS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        if (typeof parsed.muted === 'boolean') {
+          muted = parsed.muted;
+        }
+        if (typeof parsed.volume === 'number' && Number.isFinite(parsed.volume)) {
+          volume = Math.max(0, Math.min(1, parsed.volume));
+        }
+      }
+    } catch (_) {}
+  }
+
+  function saveAudioPrefs() {
+    try {
+      const storage = typeof localStorage !== 'undefined'
+        ? localStorage
+        : (typeof window !== 'undefined' ? window.localStorage : null);
+      if (!storage || typeof storage.setItem !== 'function') return;
+      storage.setItem(AUDIO_PREFS_KEY, JSON.stringify({ muted, volume }));
+    } catch (_) {}
+  }
+
+  loadAudioPrefs();
 
   // Current room / hazard / music ambience state
   const ambienceState = {
@@ -77,23 +118,57 @@ window.KLB = window.KLB || {};
     return buffer;
   }
 
+  function detachUnlockListeners() {
+    if (unlockHandler && typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
+      UNLOCK_EVENTS.forEach(evt => {
+        window.removeEventListener(evt, unlockHandler);
+      });
+    }
+    unlockBound = false;
+  }
+
+  function markUnlocked() {
+    if (unlocked) return false;
+    unlocked = true;
+    detachUnlockListeners();
+    return true;
+  }
+
   function ensureContext() {
     if (!ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const audioScope = typeof window !== 'undefined' ? window : globalThis;
+      const AudioCtx = audioScope.AudioContext || audioScope.webkitAudioContext;
       if (!AudioCtx) return null;
       ctx = new AudioCtx();
       masterGain = ctx.createGain();
       masterGain.gain.value = muted ? 0 : volume;
-      masterGain.connect(ctx.destination);
+      if (typeof ctx.createDynamicsCompressor === 'function') {
+        masterCompressor = ctx.createDynamicsCompressor();
+        if (masterCompressor.threshold) masterCompressor.threshold.value = -14;
+        if (masterCompressor.knee) masterCompressor.knee.value = 18;
+        if (masterCompressor.ratio) masterCompressor.ratio.value = 4;
+        if (masterCompressor.attack) masterCompressor.attack.value = 0.005;
+        if (masterCompressor.release) masterCompressor.release.value = 0.15;
+        masterGain.connect(masterCompressor);
+        masterCompressor.connect(ctx.destination);
+      } else {
+        masterGain.connect(ctx.destination);
+      }
       noiseBuffer = createLabNoiseBuffer(ctx);
     }
-    if (ctx.state === 'suspended') {
-      ctx.resume().catch(() => {});
+    if (ctx.state === 'running') {
+      markUnlocked();
+    } else if (ctx.state === 'suspended' && typeof ctx.resume === 'function') {
+      ctx.resume().then(() => {
+        if (ctx && ctx.state === 'running' && markUnlocked() && !stopped) {
+          syncAllAmbienceLayers();
+        }
+      }).catch(() => {});
     }
     return ctx;
   }
 
-  function clearAmbientTimers() {
+  function clearNonUrgentTimers() {
     clearTimeout(chatterTimer);
     chatterTimer = null;
     clearInterval(lotrTimer);
@@ -102,10 +177,18 @@ window.KLB = window.KLB || {};
     cafeTimer = null;
     clearTimeout(steamTimer);
     steamTimer = null;
+  }
+
+  function clearUrgentTimers() {
     clearInterval(alarmTimer);
     alarmTimer = null;
     clearInterval(pursuitTimer);
     pursuitTimer = null;
+  }
+
+  function clearAmbientTimers() {
+    clearNonUrgentTimers();
+    clearUrgentTimers();
   }
 
   function onVisibilityChange() {
@@ -117,7 +200,7 @@ window.KLB = window.KLB || {};
     } else if (!muted && !stopped) {
       if (ctx.state === 'suspended' && typeof ctx.resume === 'function') {
         ctx.resume().then(() => {
-          if (!paused && !stopped && !muted) {
+          if (!stopped && !muted) {
             syncAllAmbienceLayers();
           }
         }).catch(() => {});
@@ -126,30 +209,41 @@ window.KLB = window.KLB || {};
   }
 
   function bindVisibilityListener() {
-    if (visibilityBound || typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+    if (visibilityBound || typeof document === 'undefined' || !document || typeof document.addEventListener !== 'function') return;
     visibilityBound = true;
     document.addEventListener('visibilitychange', onVisibilityChange);
   }
 
   function bindAutoUnlock() {
     bindVisibilityListener();
-    if (unlockBound || typeof window === 'undefined') return;
+    if (unlocked || (ctx && ctx.state === 'running')) {
+      markUnlocked();
+      return;
+    }
+    if (unlockBound || typeof window === 'undefined' || !window || typeof window.addEventListener !== 'function') return;
     unlockBound = true;
 
-    const unlock = () => {
+    unlockHandler = () => {
+      if (unlocked || (ctx && ctx.state === 'running')) {
+        markUnlocked();
+        return;
+      }
       const audioCtx = ensureContext();
       if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') {
+      if (audioCtx.state === 'running') {
+        markUnlocked();
+        if (!stopped) syncAllAmbienceLayers();
+      } else if (audioCtx.state === 'suspended' && typeof audioCtx.resume === 'function') {
         audioCtx.resume().then(() => {
-          if (!stopped) syncAllAmbienceLayers();
+          if (audioCtx.state === 'running' && markUnlocked() && !stopped) {
+            syncAllAmbienceLayers();
+          }
         }).catch(() => {});
-      } else if (!stopped) {
-        syncAllAmbienceLayers();
       }
     };
 
-    ['pointerdown', 'keydown', 'mousedown', 'touchstart'].forEach(evt => {
-      window.addEventListener(evt, unlock, { passive: true });
+    UNLOCK_EVENTS.forEach(evt => {
+      window.addEventListener(evt, unlockHandler, { passive: true });
     });
   }
 
@@ -158,8 +252,9 @@ window.KLB = window.KLB || {};
     bindAutoUnlock();
     bindVisibilityListener();
     const audioCtx = ensureContext();
-    if (!stopped && audioCtx && audioCtx.state === 'running') {
-      syncAllAmbienceLayers();
+    if (audioCtx && audioCtx.state === 'running') {
+      markUnlocked();
+      if (!stopped) syncAllAmbienceLayers();
     }
   }
 
@@ -476,7 +571,7 @@ window.KLB = window.KLB || {};
 
   // ==================== 5. UK LAB TWIN-TONE FIRE ALARM (800 / 970 Hz) ====================
   function playFireAlarmPulse() {
-    if (!ctx || ctx.state !== 'running' || muted || paused || stopped || !ambienceState.fireAlarmOn) return;
+    if (!ctx || ctx.state !== 'running' || muted || stopped || !ambienceState.fireAlarmOn) return;
 
     const now = ctx.currentTime + 0.01;
     // Intermittent twin-tone burst: 4 alternating pulses (800 Hz / 970 Hz) then brief gap
@@ -522,7 +617,7 @@ window.KLB = window.KLB || {};
   const PURSUIT_BASS = [82.41, 82.41, 87.31, 82.41, 98.00, 87.31, 82.41, 77.78]; // E2 minor-second stealth pulse
 
   function playPursuitStep() {
-    if (!ctx || ctx.state !== 'running' || muted || paused || stopped || !ambienceState.alexPursuitOn) return;
+    if (!ctx || ctx.state !== 'running' || muted || stopped || !ambienceState.alexPursuitOn) return;
 
     const now = ctx.currentTime + 0.01;
     const freq = PURSUIT_BASS[pursuitStep % PURSUIT_BASS.length];
@@ -555,7 +650,7 @@ window.KLB = window.KLB || {};
   // ==================== SYNC ALL AMBIENCE LAYERS ====================
   function getTargetExtractorGain() {
     if (ambienceState.roomId === 'klb_2f') {
-      return ambienceState.headphonesOn ? 0.095 : 0.145;
+      return ambienceState.headphonesOn ? 0.055 : 0.085;
     }
     if (ambienceState.roomId === 'cib_lg11_ms' || ambienceState.roomId === 'cib_lg1b_nmr') {
       return ambienceState.headphonesOn ? 0.025 : 0.048;
@@ -578,6 +673,7 @@ window.KLB = window.KLB || {};
       return;
     }
     const now = ctx.currentTime;
+    const activeAudio = !muted && ctx.state === 'running';
 
     // 1. Extractor roar & Headphone 2800 Hz -> 340 Hz smooth filter ramp
     const ext = ensureExtractorGraph();
@@ -587,7 +683,7 @@ window.KLB = window.KLB || {};
       ext.lpFilter.frequency.setTargetAtTime(targetCutoff, now, 0.14);
 
       const baseNoiseGain = getTargetExtractorGain();
-      const targetNoiseGain = paused ? baseNoiseGain * 0.2 : baseNoiseGain;
+      const targetNoiseGain = paused ? 0 : baseNoiseGain;
       ext.gain.gain.cancelScheduledValues(now);
       ext.gain.gain.setTargetAtTime(targetNoiseGain, now, 0.16);
     }
@@ -596,56 +692,57 @@ window.KLB = window.KLB || {};
     const fac = ensureFacilityHumGraph();
     if (fac) {
       const baseFacGain = getTargetFacilityGain();
-      const targetFacGain = paused ? baseFacGain * 0.2 : baseFacGain;
+      const targetFacGain = paused ? 0 : baseFacGain;
       fac.osc.frequency.setTargetAtTime(ambienceState.roomId === 'cib_lg11_ms' ? 92 : 68, now, 0.2);
       fac.gain.gain.cancelScheduledValues(now);
       fac.gain.gain.setTargetAtTime(targetFacGain, now, 0.2);
     }
 
-    if (paused) {
-      clearAmbientTimers();
-      return;
-    }
-
-    // 2. Charlotte's Bench Chatter scheduler
-    if (ambienceState.roomId === 'klb_2f' && !ambienceState.fireAlarmOn) {
-      if (!chatterTimer) scheduleNextChatter();
+    if (paused || !activeAudio) {
+      // Fade/stop normal room chatter, music & kettle/cafe loops while paused
+      clearNonUrgentTimers();
     } else {
-      clearTimeout(chatterTimer);
-      chatterTimer = null;
+      // 2. Charlotte's Bench Chatter scheduler
+      if (ambienceState.roomId === 'klb_2f' && !ambienceState.fireAlarmOn) {
+        if (!chatterTimer) scheduleNextChatter();
+      } else {
+        clearTimeout(chatterTimer);
+        chatterTimer = null;
+      }
+
+      // 3. Shire / Rivendell Lab Speakers synth loop
+      if (ambienceState.lotrOn && !ambienceState.fireAlarmOn) {
+        if (!lotrTimer) {
+          playLotrStep();
+          lotrTimer = setInterval(playLotrStep, 340);
+        }
+      } else if (lotrTimer) {
+        clearInterval(lotrTimer);
+        lotrTimer = null;
+      }
+
+      // 4. Gordon's Café Jazz Chords + Espresso Steam
+      if (ambienceState.roomId === 'gordons_cafe' && !ambienceState.fireAlarmOn) {
+        if (!cafeTimer) {
+          playCafeChordStep();
+          cafeTimer = setInterval(playCafeChordStep, 2500);
+        }
+        if (!steamTimer) scheduleEspressoSteam();
+      } else {
+        if (cafeTimer) {
+          clearInterval(cafeTimer);
+          cafeTimer = null;
+        }
+        clearTimeout(steamTimer);
+        steamTimer = null;
+      }
     }
 
-    // 3. Shire / Rivendell Lab Speakers synth loop
-    if (ambienceState.lotrOn && !ambienceState.fireAlarmOn) {
-      if (!lotrTimer) {
-        playLotrStep();
-        lotrTimer = setInterval(playLotrStep, 340);
-      }
-    } else if (lotrTimer) {
-      clearInterval(lotrTimer);
-      lotrTimer = null;
-    }
-
-    // 4. Gordon's Café Jazz Chords + Espresso Steam
-    if (ambienceState.roomId === 'gordons_cafe' && !ambienceState.fireAlarmOn) {
-      if (!cafeTimer) {
-        playCafeChordStep();
-        cafeTimer = setInterval(playCafeChordStep, 2500);
-      }
-      if (!steamTimer) scheduleEspressoSteam();
-    } else {
-      if (cafeTimer) {
-        clearInterval(cafeTimer);
-        cafeTimer = null;
-      }
-      clearTimeout(steamTimer);
-      steamTimer = null;
-    }
-
-    // 5. UK Lab Twin-Tone Fire Alarm
-    if (ambienceState.fireAlarmOn) {
+    // 5. UK Lab Twin-Tone Fire Alarm (active urgent alert — stays running when paused)
+    if (activeAudio && ambienceState.fireAlarmOn) {
       if (!alarmTimer) {
         let tickCount = 0;
+        playFireAlarmPulse();
         alarmTimer = setInterval(() => {
           tickCount = (tickCount + 1) % 8;
           // 5 alternating twin-tone pulses followed by a brief breathing pause
@@ -657,8 +754,8 @@ window.KLB = window.KLB || {};
       alarmTimer = null;
     }
 
-    // 6. Alex King 17:18 Stealth Bass Ostinato
-    if (ambienceState.alexPursuitOn) {
+    // 6. Alex King 17:18 Stealth Bass Ostinato (active urgent alert — stays running when paused)
+    if (activeAudio && ambienceState.alexPursuitOn) {
       if (!pursuitTimer) {
         playPursuitStep();
         pursuitTimer = setInterval(playPursuitStep, 225);
@@ -708,22 +805,20 @@ window.KLB = window.KLB || {};
   function setPaused(isPaused) {
     paused = Boolean(isPaused);
     if (paused) {
-      clearAmbientTimers();
-      if (ctx) {
-        const now = ctx.currentTime;
-        if (extractorNodes && extractorNodes.gain) {
-          const targetNoiseGain = stopped ? 0 : getTargetExtractorGain() * 0.2;
-          extractorNodes.gain.gain.cancelScheduledValues(now);
-          extractorNodes.gain.gain.setTargetAtTime(targetNoiseGain, now, 0.08);
-        }
-        if (facilityNodes && facilityNodes.gain) {
-          const targetFacGain = stopped ? 0 : getTargetFacilityGain() * 0.2;
-          facilityNodes.gain.gain.cancelScheduledValues(now);
-          facilityNodes.gain.gain.setTargetAtTime(targetFacGain, now, 0.08);
-        }
-      }
-    } else if (!stopped && ctx && ctx.state === 'running') {
+      clearNonUrgentTimers();
+    }
+    if (!stopped && ctx && ctx.state === 'running') {
       syncAllAmbienceLayers();
+    } else if (paused && ctx) {
+      const now = ctx.currentTime;
+      if (extractorNodes && extractorNodes.gain) {
+        extractorNodes.gain.gain.cancelScheduledValues(now);
+        extractorNodes.gain.gain.setTargetAtTime(0, now, 0.08);
+      }
+      if (facilityNodes && facilityNodes.gain) {
+        facilityNodes.gain.gain.cancelScheduledValues(now);
+        facilityNodes.gain.gain.setTargetAtTime(0, now, 0.08);
+      }
     }
     return paused;
   }
@@ -787,7 +882,7 @@ window.KLB = window.KLB || {};
       }
       case 'bump': {
         // Classic retro Pokémon wall-bump thud
-        playTone('triangle', 145, 52, now, 0.095, 0.16);
+        playTone('triangle', 145, 52, now, 0.095, 0.10);
         playTone('square', 92, 44, now, 0.075, 0.045);
         break;
       }
@@ -798,6 +893,9 @@ window.KLB = window.KLB || {};
         break;
       }
       case 'whatsapp': {
+        const nowMs = Date.now();
+        if (nowMs - lastWaPingAtMs < WA_PING_COOLDOWN_MS) return;
+        lastWaPingAtMs = nowMs;
         // Signature two-note chat ping
         playTone('sine', 587.33, 620, now, 0.07, 0.11);
         playTone('sine', 880.0, 1174.66, now + 0.065, 0.13, 0.13);
@@ -809,6 +907,54 @@ window.KLB = window.KLB || {};
         notes.forEach((n, i) => {
           playTone('triangle', n, n, now + i * 0.065, i === 3 ? 0.24 : 0.085, 0.12);
         });
+        break;
+      }
+      case 'birthday': {
+        // Warm cheerful 3-note ascending chime (C5 -> E5 -> G5)
+        const notes = [523.25, 659.25, 783.99];
+        notes.forEach((n, i) => {
+          const t = now + i * 0.085;
+          const dur = i === 2 ? 0.24 : 0.11;
+          playTone('triangle', n, n, t, dur, 0.10);
+          playTone('sine', n * 2, n * 2, t, dur * 0.65, 0.028);
+        });
+        break;
+      }
+      case 'chat_pop': {
+        // Soft short speech-bubble pop (520 -> 780 Hz tiny marimba blip)
+        playTone('sine', 520, 780, now, 0.045, 0.06);
+        break;
+      }
+      case 'modal_open': {
+        // Subtle crisp UI tick
+        playTone('triangle', 1046.5, 1318.5, now, 0.032, 0.05);
+        break;
+      }
+      case 'audit_pass': {
+        // Bright triumphant 4-note chord arpeggio (D5 -> F#5 -> A5 -> D6)
+        const notes = [587.33, 739.99, 880.00, 1174.66];
+        notes.forEach((n, i) => {
+          const t = now + i * 0.06;
+          const dur = i === 3 ? 0.30 : 0.16;
+          playTone('triangle', n, n, t, dur, 0.095);
+          if (i === 3) {
+            playTone('sine', n * 0.5, n * 0.5, t, 0.28, 0.05);
+          }
+        });
+        break;
+      }
+      case 'audit_fail': {
+        // Low two-tone warning cadence (F3 -> C3)
+        playTone('triangle', 174.61, 174.61, now, 0.15, 0.09);
+        playTone('sawtooth', 174.61, 174.61, now, 0.15, 0.035);
+        playTone('triangle', 130.81, 123.47, now + 0.17, 0.26, 0.095);
+        playTone('sawtooth', 130.81, 123.47, now + 0.17, 0.26, 0.04);
+        break;
+      }
+      case 'sweep_alert': {
+        // Brisk double-chirp inspection alert (980 Hz)
+        playTone('triangle', 980, 980, now, 0.065, 0.08);
+        playTone('triangle', 980, 1080, now + 0.095, 0.08, 0.08);
         break;
       }
       case 'warning': {
@@ -886,15 +1032,18 @@ window.KLB = window.KLB || {};
 
   function setMuted(bool) {
     muted = Boolean(bool);
+    saveAudioPrefs();
     syncMasterGain();
     if (!muted && ctx && !stopped) {
       if (ctx.state === 'suspended' && (typeof document === 'undefined' || !document.hidden) && typeof ctx.resume === 'function') {
         ctx.resume().then(() => {
-          if (!paused && !stopped && !muted) syncAllAmbienceLayers();
+          if (!stopped && !muted) syncAllAmbienceLayers();
         }).catch(() => {});
-      } else if (ctx.state === 'running' && !paused) {
+      } else if (ctx.state === 'running') {
         syncAllAmbienceLayers();
       }
+    } else if (muted && ctx && !stopped) {
+      syncAllAmbienceLayers();
     }
     return muted;
   }
@@ -905,8 +1054,9 @@ window.KLB = window.KLB || {};
 
   function setVolume(val) {
     const num = Number(val);
-    if (!Number.isNaN(num)) {
+    if (!Number.isNaN(num) && Number.isFinite(num)) {
       volume = Math.max(0, Math.min(1, num));
+      saveAudioPrefs();
       syncMasterGain();
     }
     return volume;
@@ -920,7 +1070,7 @@ window.KLB = window.KLB || {};
   bindAutoUnlock();
   bindVisibilityListener();
 
-  window.KLB.Audio = {
+  root.KLB.Audio = {
     init,
     setRoomAmbience,
     stopAllAmbience,

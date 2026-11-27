@@ -112,6 +112,7 @@ window.KLB.RANDOM_EVENTS = [
     minDay: 0,
     validRooms: ['klb_2f'],
     actorId: 'vijay_chudasama',
+    spawnActorOnTrigger: true,
     whatsappSender: 'marcos_fernandez',
     whatsappMsg: 'Vijay just walked into KLB 2nd Floor #headsup!',
     bannerText: 'Vijay is doing hood-to-hood rounds in Lab 230 checking reactions, lab books, and Friday momentum.',
@@ -158,6 +159,7 @@ window.KLB.RANDOM_EVENTS = [
     minDay: 0,
     validRooms: ['klb_2f'],
     actorId: 'jamie_baker',
+    spawnActorOnTrigger: true,
     whatsappSender: 'marcos_fernandez',
     whatsappMsg: 'Jamie Baker is walking through the bays checking eye protection and the central balance table #headsup!',
     bannerText: 'Prof. Jamie Baker is patrolling Lab 230 — keep your specs on (G) past the door.',
@@ -259,11 +261,11 @@ window.KLB.RANDOM_EVENTS = [
       },
       {
         label: "Dash to Gordon's for iced espressos",
-        moraleDelta: 14,
+        moraleDelta: 6,
         safetyDelta: 0,
-        energyDelta: 18,
-        socialDelta: 6,
-        favourDelta: 2,
+        energyDelta: 6,
+        socialDelta: 4,
+        favourDelta: 1,
         timeCostMins: 0,
         resultText: 'Iced caffeine revives Lab 230 and restores Energy despite the heat.'
       },
@@ -287,7 +289,7 @@ window.KLB.RANDOM_EVENTS = [
     validRooms: ['cib_lg11_ms'],
     actorId: 'kersti_karu',
     whatsappSender: 'antoine_maruani',
-    whatsappMsg: 'Heads up, Kersti in LG11 just flagged the Q-TOF: "LCMS is out of the operation — PLRP-S column needs conditioning and mobile-phase flushing to clear PEG and salt. Desalt 10x before queuing."',
+    whatsappMsg: 'Heads up, Kersti in LG11 just flagged the Q-TOF: "LCMS is out of the operation — PLRP-S column needs conditioning and mobile-phase flushing to clear PEG and salt. Desalt 10× before queuing."',
     bannerText: 'Kersti in CIB LG11 reports the LC-MS needs column conditioning and mobile-phase flushing.',
     durationMins: 60,
     effectType: 'lcms_offline',
@@ -301,6 +303,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 4,
         favourDelta: 2,
         timeCostMins: 0,
+        clearsLcmsBroken: true,
         resultText: 'You flush and condition the LG11 column with Kersti, restoring clean baselines and earning two Favours.'
       },
       {
@@ -313,6 +316,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 5,
         favourDelta: 0,
         timeCostMins: 0,
+        clearsLcmsBroken: true,
         resultText: 'Kersti routes your desalted sample onto the conditioned LG11 bypass loop ahead of the backlog.'
       },
       {
@@ -394,6 +398,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: -12,
         favourDelta: -1,
         timeCostMins: 0,
+        setsAbilFine: true,
         resultText: 'Vijay gets copied on the £130 invoice and his Patience drops hard.'
       }
     ]
@@ -405,7 +410,8 @@ window.KLB.RANDOM_EVENTS = [
     weight: 11,
     minDay: 0,
     validRooms: ['klb_2f'],
-    actorId: 'faiza_javaid',
+    actorId: null,
+    spawnActorOnTrigger: true,
     whatsappSender: 'faiza_javaid',
     whatsappMsg: 'Door pls!! Hands full with ice box outside KLB 2F!',
     bannerText: 'A labmate pinged "Door pls!" — unlatch the main exit door for them.',
@@ -450,11 +456,10 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Walk to Gordon\'s Café with the squad',
-        moraleDelta: 16,
+        moraleDelta: 8,
         safetyDelta: 0,
-        energyDelta: 26,
+        energyDelta: 8,
         socialDelta: 8,
-        patienceDelta: 2,
         favourDelta: 1,
         timeCostMins: 0,
         resultText: 'Flat whites and pastries at Gordon\'s recharge Energy, Morale, and Social.'
@@ -462,9 +467,9 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Ask João for a takeaway espresso (1 Favour)',
         favourCost: 1,
-        moraleDelta: 7,
+        moraleDelta: 6,
         safetyDelta: 2,
-        energyDelta: 16,
+        energyDelta: 10,
         socialDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
@@ -539,7 +544,7 @@ window.KLB.RANDOM_EVENTS = [
     validRooms: ['klb_2f'],
     actorId: 'antoine_maruani',
     whatsappSender: 'antoine_maruani',
-    whatsappMsg: 'Mon dieu who opened Cupboard 5 without bleaching their pipette?! It smells like a leaking gas main in Paris!',
+    whatsappMsg: 'Mon Dieu, who opened Cupboard 5 without bleaching their pipette?! It smells like a leaking gas main in Paris!',
     bannerText: 'Unquenched thiophenol and dodecanethiol fumes are wafting out of Cupboard 5 across Lab 230.',
     durationMins: 30,
     effectType: 'thiol_stench',
@@ -715,23 +720,23 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Ask Nafsika to watch timer and lend DMF (1 Favour)',
         favourCost: 1,
-        moraleDelta: 12,
-        safetyDelta: 5,
-        energyDelta: 8,
-        socialDelta: 4,
+        moraleDelta: 7,
+        safetyDelta: 3,
+        energyDelta: 6,
+        socialDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'Nafsika catches your reaction window and slides over pristine dry DMF.'
       },
       {
         label: 'Bring Nafsika tea for holding down 230',
-        moraleDelta: 9,
-        safetyDelta: 3,
-        energyDelta: -4,
-        socialDelta: 8,
-        favourDelta: 2,
+        moraleDelta: 6,
+        safetyDelta: 2,
+        energyDelta: -5,
+        socialDelta: 6,
+        favourDelta: 1,
         timeCostMins: 0,
-        resultText: 'Nafsika thanks you warmly and backs you up with two Lab Favours.'
+        resultText: 'Nafsika thanks you warmly and backs you up with a Lab Favour.'
       }
     ]
   },
@@ -866,15 +871,15 @@ window.KLB.RANDOM_EVENTS = [
   },
   {
     id: 'calise_lemons_spill',
-    title: '14 Bargain Lemons Loose Near KLB 2F Fridge!',
+    title: '14 Bargain Lemons Loose Near the Central Balance Bay!',
     category: 'social',
     weight: 7,
     minDay: 0,
     validRooms: ['klb_2f'],
     actorId: 'calise_bahou',
     whatsappSender: 'calise_bahou',
-    whatsappMsg: 'FFS the net bag split near the 2F fridge and spiral stairs — 14 lemons are rolling past the Biotage (DAN BOUGHT THEM I JUST CARRIED THEM)',
-    bannerText: 'Fourteen lemons burst from Calise\'s bag across the KLB 2F fridge and spiral stairs aisle.',
+    whatsappMsg: 'FFS the net bag split near the central balance bay — 14 lemons are rolling across Lab 230! (DAN BOUGHT THEM I JUST CARRIED THEM)',
+    bannerText: 'Fourteen lemons burst from Calise\'s bag near the central balance bay and are rolling across Lab 230.',
     durationMins: 15,
     effectType: 'lemon_spill',
     choices: [
@@ -886,7 +891,8 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 6,
         favourDelta: 1,
         timeCostMins: 0,
-        resultText: 'Zero slip hazards near the fridge and Calise gifts you a lucky lemon.'
+        triggersMinigame: 'lemons',
+        resultText: 'Zero slip hazards near the central balance bay and Calise gifts you a lucky lemon.'
       },
       {
         label: 'Tease Lemon Boy in the lab chat',
@@ -909,7 +915,7 @@ window.KLB.RANDOM_EVENTS = [
     validRooms: ['klb_3f'],
     actorId: 'maximillian_lee',
     whatsappSender: 'maximillian_lee',
-    whatsappMsg: 'EMERGENCY ON 3F. Eight-legged Shelob the size of a coaster on the Chud write-up chair. Burn Office 349 down immediately.',
+    whatsappMsg: 'EMERGENCY ON 3F. Eight-legged Shelob the size of a coaster on the Chud write-up chair. Burn the 3F office down immediately.',
     bannerText: 'A coaster-sized Bloomsbury house spider has claimed Max\'s write-up chair upstairs in 3F.',
     durationMins: 15,
     effectType: 'office_spider',
@@ -990,19 +996,19 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Ride the Fellowship evening bench groove',
-        moraleDelta: 12,
+        moraleDelta: 8,
         safetyDelta: 0,
-        energyDelta: 14,
-        socialDelta: 5,
+        energyDelta: 4,
+        socialDelta: 4,
         favourDelta: 1,
         timeCostMins: 0,
         resultText: 'Tin whistles carry your evening Biotage fractions cleanly home.'
       },
       {
         label: 'Queue Bridge of Khazad-dûm for centrifugation',
-        moraleDelta: 10,
+        moraleDelta: 7,
         safetyDelta: 0,
-        energyDelta: 10,
+        energyDelta: 3,
         socialDelta: 6,
         favourDelta: 1,
         timeCostMins: 0,
@@ -1026,20 +1032,21 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Head to 3F desks for the 1-hour AoE2 / Worms lobby',
-        moraleDelta: 24,
+        moraleDelta: 10,
         safetyDelta: 0,
-        energyDelta: 10,
-        socialDelta: 10,
+        energyDelta: 4,
+        socialDelta: 8,
+        patienceDelta: -3,
         favourDelta: 1,
         timeCostMins: 0,
         resultText: 'Faiza walls berry bushes while Antoine lands a crazy ninja-rope shot.'
       },
       {
         label: 'Spectate one round from 3F with a biscuit',
-        moraleDelta: 9,
+        moraleDelta: 6,
         safetyDelta: 0,
-        energyDelta: 5,
-        socialDelta: 5,
+        energyDelta: 3,
+        socialDelta: 4,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'A quick laugh and Yorkshire biscuit brighten the afternoon without leaving timers.'
@@ -1147,20 +1154,20 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Bin pastry and share pastéis de nata',
-        moraleDelta: 12,
+        moraleDelta: 8,
         safetyDelta: 0,
-        energyDelta: 12,
-        socialDelta: 8,
+        energyDelta: 6,
+        socialDelta: 6,
         favourDelta: 1,
         timeCostMins: 0,
         resultText: 'French-Portuguese pastry diplomacy restores peace at Gordon\'s Café.'
       },
       {
         label: 'Defend the toasted cheese croissant',
-        moraleDelta: 8,
+        moraleDelta: 5,
         safetyDelta: 0,
-        energyDelta: 8,
-        socialDelta: 4,
+        energyDelta: 4,
+        socialDelta: 2,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'João fires off a lively manifesto abolishing flat pressed pastries.'
@@ -1183,10 +1190,10 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Load clean LDS sample, thank Archie',
-        moraleDelta: 8,
+        moraleDelta: 6,
         safetyDelta: 2,
-        energyDelta: 4,
-        socialDelta: 6,
+        energyDelta: 2,
+        socialDelta: 5,
         patienceDelta: 2,
         favourDelta: 1,
         timeCostMins: 0,
@@ -1195,11 +1202,11 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Ask Archie to prep and run your Lanes 9–10 sample (1 Favour)',
         favourCost: 1,
-        moraleDelta: 10,
-        safetyDelta: 3,
-        energyDelta: 8,
-        socialDelta: 4,
-        patienceDelta: 4,
+        moraleDelta: 7,
+        safetyDelta: 2,
+        energyDelta: 6,
+        socialDelta: 3,
+        patienceDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'Archie loads and runs your clean LDS sample in Lanes 9–10 while you keep working.'
@@ -1232,10 +1239,10 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Pop to 3F kettle for Bettys tea',
-        moraleDelta: 11,
+        moraleDelta: 7,
         safetyDelta: 0,
-        energyDelta: 18,
-        socialDelta: 6,
+        energyDelta: 10,
+        socialDelta: 5,
         favourDelta: 1,
         timeCostMins: 0,
         resultText: 'Yorkshire tea restores Energy while Richard shares a stoichiometry tip.'
@@ -1340,15 +1347,15 @@ window.KLB.RANDOM_EVENTS = [
   },
   {
     id: 'north_bench_ether_smell',
-    title: 'North Bench Ether Smell in Lab 230!',
+    title: 'South-East Baker Bay Ether Smell in Lab 230!',
     category: 'facility',
     weight: 6,
     minDay: 1,
     validRooms: ['klb_2f'],
     actorId: 'marcos_fernandez',
     whatsappSender: 'marcos_fernandez',
-    whatsappMsg: 'Strong diethyl ether fumes wafting from the north bench near Cupboard 20 — somebody left a rinse flask uncapped!',
-    bannerText: 'Diethyl ether fumes are building up along the north bench inside Lab 230.',
+    whatsappMsg: 'Strong diethyl ether fumes wafting from the south-east Baker bay near Cupboard 20 — somebody left a rinse flask uncapped!',
+    bannerText: 'Diethyl ether fumes are building up in the south-east Baker bay near Cupboard 20 inside Lab 230.',
     durationMins: 25,
     effectType: 'north_bench_ether',
     choices: [
@@ -1372,7 +1379,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: -4,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Solvent haze lingers across the north bench until Marcos caps it.'
+        resultText: 'Solvent haze lingers across the south-east Baker bay near Cupboard 20 until Marcos caps it.'
       }
     ]
   },
@@ -1457,7 +1464,7 @@ window.KLB.WHATSAPP_BANTER = [
   },
   {
     senderId: 'antoine_maruani',
-    text: 'Someone put a sliced ham-and-cheese croissant in the 3F microwave. I am calling the French embassy.',
+    text: 'Someone left a sliced ham-and-cheese croissant by the 3F kettle corner. I am calling the French embassy.',
     replySenderId: 'calise_bahou',
     replyText: 'Elite tier scran mate, pairs nicely with a £3 meal deal',
     hourHint: 12
@@ -1508,7 +1515,7 @@ window.KLB.WHATSAPP_BANTER = [
     senderId: 'andre_shamsabadi',
     text: 'Quick poll: is "on-water" green chemistry profound hydrophobic catalysis or just an excuse not to dry THF?',
     replySenderId: 'antoine_maruani',
-    replyText: '86% yield in 1 mL tap water says both, mon ami.',
+    replyText: '86% yield in 1 mL tap water says both, mon gars.',
     hourHint: 13
   },
   {
@@ -1548,7 +1555,7 @@ window.KLB.WHATSAPP_BANTER = [
   },
   {
     senderId: 'richard_spears',
-    text: 'Just microwaved beans for 3.5 minutes upstairs — the idea of cooking them in a saucepan genuinely unsettles me.',
+    text: 'Just brought warm beans in a sandwich box to the 3F kettle corner — the idea of cooking them in a saucepan genuinely unsettles me.',
     replySenderId: 'daniel_richards',
     replyText: 'As long as they aren\'t swimming in watery bean juice I will allow it on Northern solidarity grounds.',
     hourHint: 13
@@ -1569,7 +1576,7 @@ window.KLB.WHATSAPP_BANTER = [
   },
   {
     senderId: 'antoine_maruani',
-    text: '#AskAntoine clinic is open at Desk 3 — bring me your cursed +69 Da acetonitrile adducts and scrambled gels.',
+    text: '#AskAntoine clinic is open at my 3F desk — bring me your cursed +69 Da acetonitrile adducts and scrambled gels.',
     replySenderId: 'daniel_richards',
     replyText: '#Dantoine4life (strictly scientific, no homo).',
     hourHint: 15
@@ -1578,7 +1585,7 @@ window.KLB.WHATSAPP_BANTER = [
     senderId: 'peter_szijj',
     text: 'Just had a mini heart attack thinking I pipetted 2 µL of 6× blue LDS dye into my pure SynAb stock instead of the PCR tube, crisis averted!',
     replySenderId: 'maximillian_lee',
-    replyText: 'CLOSE THE LID ON THE MASTER STOCK FIRST PEEETAH',
+    replyText: 'CLOSE THE LID ON THE MASTER STOCK FIRST PEETAH',
     hourHint: 18
   },
   {
@@ -1634,7 +1641,7 @@ window.KLB.WHATSAPP_BANTER = [
     senderId: 'peter_szijj',
     text: '19:15 in Lab 230 — just me, Nafsika in the Baker bay until 19:45, Superdex 200 dripping at 0.4 mL/min, and Rivendell on the speakers.',
     replySenderId: 'joao_nogueira',
-    replyText: 'Hold the fort Peeetah — Nafsika is an absolute legend for holding down the Baker bay till 19:45!',
+    replyText: 'Hold the fort Peetah — Nafsika is an absolute legend for holding down the Baker bay till 19:45!',
     hourHint: 19
   },
   {
@@ -1821,9 +1828,9 @@ window.KLB.WHATSAPP_BANTER = [
   },
   {
     senderId: 'peter_szijj',
-    text: '19:25 — locking up the Chudasama hoods, checking Argon cylinders & walking out of KLB to Intro by The XX. Night Chuds!!',
+    text: '19:25 — locking up the Chudasama hoods, checking Argon cylinders & walking out of KLB to Intro by The xx. Night Chuds!!',
     replySenderId: 'antoine_maruani',
-    replyText: 'Bonne nuit Peeetah! Smash Friday Group Meeting tomorrow.',
+    replyText: 'Bonne nuit Peetah! Smash Friday Group Meeting tomorrow.',
     hourHint: 19
   },
   {
@@ -1849,7 +1856,7 @@ window.KLB.WHATSAPP_BANTER = [
   },
   {
     senderId: 'faiza_javaid',
-    text: 'honestly nobody compares to the big-chuds, even when Lab 230 is 16 degrees and the LC-MS is broken',
+    text: 'honestly nobody compares to the big-chuds, even when Lab 230 is 16 °C and the LC-MS is broken',
     replySenderId: 'daniel_richards',
     replyText: 'Sentiment noted and approved (no homo). Now go finish Slide 4.',
     hourHint: 17
@@ -1863,9 +1870,9 @@ window.KLB.WHATSAPP_BANTER = [
   },
   {
     senderId: 'antoine_maruani',
-    text: 'Bonjour les chuds, café à Gordon dans cinq minutes?',
+    text: 'Salut les Chuds, café chez Gordon dans cinq minutes ?',
     replySenderId: 'daniel_richards',
-    replyText: 'Oui mon ami, save me an almond croissant and an espresso.',
+    replyText: 'Oui vieux, save me an almond croissant and an espresso.',
     hourHint: 10
   }
 ];
@@ -1878,61 +1885,54 @@ window.KLB.MUTATORS = [
     id: 'vijays_not_in',
     name: "#VijaysNotIn (Conference Week)",
     tag: '#VijaysNotIn',
-    desc: 'Prof. Vijay Chudasama is away at an international bioconjugation conference Mon–Thu: zero surprise bench rounds in Lab 230 and +20% Morale from Gordon\'s/3F breaks, but Friday\'s solo 0–10 Audit demands +1.0 stricter Analytical Rigor!',
+    desc: 'Prof. Vijay Chudasama is away at an international bioconjugation conference: zero surprise Vijay bench rounds or Lab 230 walkthroughs before Friday\'s 0–10 Audit.',
     unlockHint: 'Pass Friday\'s Solo Vijay Audit with ≥ 6.5 / 10.0 on any Big-Chud.',
     modifiers: {
-      disableVijayBenchRounds: true,
-      socialMoraleMult: 1.2,
-      fridayRigorThresholdBonus: 1.0
+      disableVijayBenchRounds: true
     }
   },
   {
     id: 'lcms_chaos',
     name: '50% LC-MS Chaos ("Out of the Operation")',
     tag: 'uplc2011 Chaos',
-    desc: 'Someone keeps injecting PEG-400 into CIB LG11: 50% higher chance of "LCMS is out of the operation" downtime, but every successfully desalted LG11 run grants +15% Purity & +0.75 bonus Analytical Rigor!',
+    desc: 'Someone keeps injecting PEG-400 into CIB LG11: 50% chance the Q-TOF starts the week offline, 50% higher chance of daily "LCMS is out of the operation" downtime, and 2.5× NPC submission glitches.',
     unlockHint: 'Survive a Kersti LG11 downtime event and still score ≥ 7.0 on Friday.',
     modifiers: {
       lcmsFailureChance: 0.5,
-      lcmsPurityBonus: 15,
-      auditRigorBonus: 0.75
+      lcmsHazardRateMult: 1.5
     }
   },
   {
     id: 'eternal_heatwave',
     name: 'Eternal 30 °C May Heatwave',
     tag: '30 °C Lab 230',
-    desc: 'KLB 2nd Floor HVAC is jammed in full Bloomsbury summer greenhouse mode (30 °C all week): sweet-spot reaction windows shrink by 20% and 4 °C fridges need attentive doors, but Gordon\'s iced coffees restore 2× Energy!',
+    desc: 'KLB 2nd Floor HVAC is jammed in full Bloomsbury summer greenhouse mode (30 °C all week): sweet-spot reaction windows shrink by 20% and 4 °C fridge steps risk thermal drift.',
     unlockHint: 'Complete Calise Bahou\'s or Daniel Richards\'s campaign with >90% homogeneity.',
     modifiers: {
       forcedLabTempC: 30,
-      sweetSpotMult: 0.8,
-      gordonsEnergyMult: 2.0
+      sweetSpotMult: 0.8
     }
   },
   {
     id: 'infinite_espresso',
     name: "Infinite Gordon's Double Espresso",
     tag: '25 Gordon St VIP',
-    desc: 'João has negotiated an unlimited Big-Chuds espresso tab at Gordon\'s Café: +25% walking & bench reaction speed and immunity to low-Energy fumbles, though jittery hands narrow minigame timing zones by 15%!',
+    desc: 'João has negotiated an unlimited Big-Chuds espresso tab at Gordon\'s Café: 45% slower Energy drain across every shift and brisker Big-Chuds walking pace around KLB.',
     unlockHint: 'Rally 3+ Gordon\'s Café 10:27 coffee runs in a single week.',
     modifiers: {
-      walkSpeedMult: 1.25,
-      reactionSpeedMult: 1.25,
-      minigameZoneMult: 0.85,
-      preventLowEnergyFumbles: true
+      energyDrainMult: 0.55,
+      npcWalkSpeed: 3.4
     }
   },
   {
     id: 'strict_coshh',
     name: 'Zero-Tolerance Departmental COSHH',
     tag: 'Strict COSHH',
-    desc: 'Prof. Claire Carmalt & the Safety Inspector run daily walkthroughs (Specs ON, Headphones OFF, Lab Condition ≥ 40) and infractions cost 2× Lab Condition points — maintaining ≥ 85 Lab Condition through Friday awards an automatic full 1.0/1.0 KLB Citizenship + +1.0 Rigor bonus!',
+    desc: 'Prof. Claire Carmalt & the Safety Inspector run 2× more frequent walkthroughs (Specs ON, Headphones OFF, Lab Condition ≥ 40) with 2× sweep fines, and unsafe protocol or event choices inflict a 1.5× Lab Condition penalty.',
     unlockHint: 'Finish a 5-day week with ≥ 90 Lab Condition and zero COSHH infractions.',
     modifiers: {
       inspectionWeightMult: 2.0,
-      safetyPenaltyMult: 2.0,
-      highSafetyAuditBonus: 1.0
+      safetyPenaltyMult: 1.5
     }
   }
 ];

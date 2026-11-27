@@ -18,8 +18,8 @@ window.KLB = window.KLB || {};
 
   const PERMADEATH_MESSAGES = {
     MORALE_ZERO: 'Stepped out onto Gordon Street after morale hit zero.',
-    CONDITION_ZERO: 'Lab Condition hit 0% -- KLB Lab 230 closed for emergency cleanup and formal review.',
-    SAFETY_ZERO: 'Lab Condition hit 0% -- KLB Lab 230 closed for emergency cleanup and formal review.',
+    CONDITION_ZERO: 'Lab Condition hit 0% — KLB Lab 230 closed for emergency cleanup and formal review.',
+    SAFETY_ZERO: 'Lab Condition hit 0% — KLB Lab 230 closed for emergency cleanup and formal review.',
     PATIENCE_ZERO: "Vijay's patience hit zero after missed deadlines and poor group-meeting data."
   };
 
@@ -64,7 +64,6 @@ window.KLB = window.KLB || {};
       { x: 15, y: 2 },
       { x: 21, y: 2 },
       { x: 15, y: 6 },
-      { x: 15, y: 11 },
       { x: 18, y: 17 },
       { x: 15, y: 22 }
     ],
@@ -93,19 +92,19 @@ window.KLB = window.KLB || {};
       casual: [
         'In since 07:45 and nobody has asked me to fix the LC-MS yet.',
         'Nothing beats a quiet egg and cress triangle at lunch.',
-        'Packing up sharp at 17:45 -- anything after 18:00 is Peter territory.',
+        'Packing up sharp at 17:45 — anything after 18:00 is Peter territory.',
         'Is that Max marker artwork still on Cupboard 6?'
       ],
       bench: [
         'Keeping MES buffer strictly at pH 5.20 so the 40 nm AuNPs stay ruby red.',
         'Pepsin at pH 3.1 first, then thoroughly washed Papain resin.',
-        'Never put Trastuzumab Fab on Protein A -- VH3 binds straight to resin.',
+        'Never put Trastuzumab Fab on Protein A — VH3 binds straight to resin.',
         'Desalting 6x into LC-MS water before taking this down to LG11.'
       ]
     },
     maximillian_lee: {
       casual: [
-        'Anyone got 50 uL of buffered TCEP? Asking for a lazy silverback.',
+        'Anyone got 50 µL of buffered TCEP? Asking for a lazy silverback.',
         'Slow-reduced beans in chorizo fat is genuine Michelin cuisine.',
         'If there is a spider on my 3F chair again I am working from Gordon Street.',
         'Remember when Lemon Boy dropped 14 reduced lemons by the Biotage?'
@@ -121,8 +120,8 @@ window.KLB = window.KLB || {};
       casual: [
         'Who sliced a croissant horizontally like bread?! Calling the French embassy.',
         'Mount 128.40.76.1 remotely before walking three flights to LG1b.',
-        '#AskAntoine clinic is open -- bring me your cursed LC-MS adducts.',
-        'Bonne journee team, let us keep the spectra baseline-resolved.'
+        '#AskAntoine clinic is open — bring me your cursed LC-MS adducts.',
+        'Bonne journée team, let us keep the spectra baseline-resolved.'
       ],
       bench: [
         'Sequential SPAAC first, then CuAAC with 5:1 THPTA to protect thiols.',
@@ -139,10 +138,10 @@ window.KLB = window.KLB || {};
         'Please tell me Abil did not lock my 700 MHz tube in the fridge again.'
       ],
       bench: [
-        '5.7 uL/min on the syringe pump -- nobody breathe near the Chudasama hood.',
+        '5.7 µL/min on the syringe pump — nobody breathe near the Chudasama hood.',
         'On-water aldehyde plus DIAD hydroacylation ticking along nicely.',
-        'Need oven-dried glassware and TBAT under Argon for this -78 C step.',
-        'Waiting for 120 C VT-NMR to coalesce those hydrazide rotamer humps.'
+        'Need oven-dried glassware and TBAT under Argon for this -78 °C step.',
+        'Waiting for 120 °C VT-NMR to coalesce those hydrazide rotamer humps.'
       ]
     },
     peter_szijj: {
@@ -161,13 +160,13 @@ window.KLB = window.KLB || {};
     },
     joao_nogueira: {
       casual: [
-        '10:27 -- Gordon coffee run? Cold triangle sandwiches should be illegal.',
+        '10:27 — Gordon coffee run? Cold triangle sandwiches should be illegal.',
         'Pastel de nata and double espresso solves half the PhD.',
-        '20:02 and loading a silica column -- pray for my Biotage cartridges.',
+        '20:02 and loading a silica column — pray for my Biotage cartridges.',
         'Vamos Big-Chuds, big Friday audit energy this week.'
       ],
       bench: [
-        'Checking Malvern Zetasizer DLS -- aiming for PDI under 0.12.',
+        'Checking Malvern Zetasizer DLS — aiming for PDI under 0.12.',
         'Coupling monoBrPD-PEG2-BCN(endo) onto 11 kDa shark VNAR E4.',
         'Formulating Nile-Red PLGA-PEG-azide nanoparticles dropwise.',
         'Adding 0.05% Tween 80 so TIPS microparticles disperse cleanly.'
@@ -189,27 +188,27 @@ window.KLB = window.KLB || {};
     },
     calise_bahou: {
       casual: [
-        'Look, those reduced bags of lemons were a bargain -- Dan bought them!',
+        'Look, those reduced bags of lemons were a bargain — Dan bought them!',
         'Just demolished a steak pie, Morale is at 110% right now.',
         'Why does my VivaSpin dilution spreadsheet claim 125% yield again?',
-        'Remember to shut the 4 C fridge in the cold room properly so the seal clicks.'
+        'Remember to shut the 4 °C fridge in the cold room properly so the seal clicks.'
       ],
       bench: [
-        'Reflux with p-TsOH in toluene -- never TFA or bromide exchanges out!',
-        'Kneeling by the 4 C fridge for 95% HHLL Trastuzumab homogeneity.',
+        'Reflux with p-TsOH in toluene — never TFA or bromide exchanges out!',
+        'Kneeling by the 4 °C fridge for 95% HHLL Trastuzumab homogeneity.',
         'Checking GFP S147C C-S vs C-N cleavability switch on Q-TOF.',
-        'Logging 7-day 37 C human serum stability vs maleimide control.'
+        'Logging 7-day 37 °C human serum stability vs maleimide control.'
       ]
     },
     richard_spears: {
       casual: [
-        'Put the kettle on upstairs on 3F -- Bettys biscuits in the tin.',
+        'Put the kettle on upstairs on 3F — Bettys biscuits in the tin.',
         'Welcome back to Soluble or Not Soluble: spoiler, white precipitate.',
         'Microwaved beans for 3.5 mins; cooking them in a pan unsettles me.',
         'Always disclose 0.08 eq EtOAc honestly on Slide 4 rather than cropping.'
       ],
       bench: [
-        'Using bench-stable CDMP at pH 8.0 for Dha -- never touch explosive MSH.',
+        'Using bench-stable CDMP at pH 8.0 for Dha — never touch explosive MSH.',
         'Monitoring 4:1 Fab competition and reversible GSH exchange by LC-MS.',
         '8-arm star PEG-SH + 5DiBr hydrogel gelled in under 8 seconds.',
         'Checking clean 600 MHz integration and residual solvent wt%.'
@@ -217,13 +216,13 @@ window.KLB = window.KLB || {};
     },
     marcos_fernandez: {
       casual: [
-        'Claire and the Safety Inspector are in KLB #headsup -- specs on!',
+        'Claire and the Safety Inspector are in KLB #headsup — specs on!',
         'Five out of six of us turned up with identical haircuts again.',
         'Door buzzed. Next time carry your UCL card.',
-        'Just smelled diethyl ether fumes along the north bench near Cupboard 20.'
+        'Just smelled diethyl ether fumes along the south-east Baker bay near Cupboard 20.'
       ],
       bench: [
-        'Opening Cupboard 5 for 30s -- the bleach bath in the Chudasama hood is fresh.',
+        'Opening Cupboard 5 for 30s — the bleach bath in the Chudasama hood is fresh.',
         'PyBOP self-immolative coumarin and folate SMDC coupling underway.',
         '40 mg/mL HSA stays dark while 5 mM GSH triggers coumarin turn-on.',
         'Quenching all thiol glassware in aqueous hypochlorite immediately.'
@@ -231,7 +230,7 @@ window.KLB = window.KLB || {};
     },
     nafsika_forte: {
       casual: [
-        'In Lab 230 until 19:15 -- shout if anyone needs a flask pulled off heat.',
+        'In Lab 230 until 19:15 — shout if anyone needs a flask pulled off heat.',
         'First-aid kit is stocked if anyone gets a dry-ice nick.',
         'Best twenty minutes of the day is away from the rotavaps at Gordon.'
       ],
@@ -245,12 +244,12 @@ window.KLB = window.KLB || {};
       casual: [
         'The shared centrifuge is balanced and free in five minutes.',
         'Got two spare lanes on the right side of my 12% gel if anyone needs them.',
-        'Buchi vacuum is pulling strong today.'
+        'Büchi vacuum is pulling strong today.'
       ],
       bench: [
         'Spinning down albumin-maleimide conjugates in the microcentrifuge.',
         'Staining non-reducing SDS-PAGE bands on the Baker bench.',
-        'Evaporating volatile organic fractions cleanly on Buchi 2.'
+        'Evaporating volatile organic fractions cleanly on Büchi 2.'
       ]
     },
     marco_sabatini: {
@@ -267,7 +266,7 @@ window.KLB = window.KLB || {};
     },
     charlotte_coomber: {
       casual: [
-        'SO AT THE WEEKEND WE WALKED ALL THE WAY ACROSS LONDON AND--',
+        'SO AT THE WEEKEND WE WALKED ALL THE WAY ACROSS LONDON AND—',
         'Doing a £2 card collection at the Sheppard desks if anyone has coins!',
         'Need a working black whiteboard marker or fresh TLC capillary?'
       ],
@@ -280,13 +279,13 @@ window.KLB = window.KLB || {};
     vijay_chudasama: {
       casual: [
         'Ten minutes of proper coffee clears the head for sharper science.',
-        'Good energy across Lab 230 today -- keep Friday 16:00 in sight.',
+        'Good energy across Lab 230 today — keep Friday 09:00 in sight.',
         'How is the 4-slide storyline shaping up this week?'
       ],
       bench: [
         'Where is the unreduced control lane on that SDS-PAGE gel?',
         'Make sure the HRMS and NMR controls are completely watertight.',
-        'Good momentum -- crisp data beats hand-waving every time.'
+        'Good momentum — crisp data beats hand-waving every time.'
       ]
     },
     jamie_baker: {
@@ -302,7 +301,7 @@ window.KLB = window.KLB || {};
     },
     tom_sheppard: {
       casual: [
-        'Checking in on the Sheppard hoods -- hope the Biotage queue is clear.',
+        'Checking in on the Sheppard hoods — hope the Biotage queue is clear.',
         "Bumped into half of KLB in the Gordon's coffee queue earlier."
       ],
       bench: [
@@ -316,13 +315,13 @@ window.KLB = window.KLB || {};
         'Please do not inject PEG or PBS buffer into my Q-TOF source.'
       ],
       bench: [
-        'Flushing PLRP-S column mobile phase -- keep samples 10x desalted.',
+        'Flushing PLRP-S column mobile phase — keep samples 10x desalted.',
         'Deconvoluting protein charge envelopes on Agilent MassHunter.'
       ]
     },
     abil_aliev: {
       casual: [
-        'Collect NMR tubes promptly or they go in the Sample Fridge -- £130 fine!',
+        'Collect NMR tubes promptly or they go in the Sample Fridge — £130 fine!',
         'Check 128.40.76.1 remotely before walking down to LG1b.'
       ],
       bench: [
@@ -352,7 +351,7 @@ window.KLB = window.KLB || {};
     },
     alex_king: {
       casual: [
-        "Hi there, are you guys heading to Gordon's Cafe later? Where is everyone?",
+        "Hi there, are you guys heading to Gordon's Café later? Where is everyone?",
         'I was just passing the second floor corridor around 17:18.'
       ],
       bench: [
@@ -368,7 +367,7 @@ window.KLB = window.KLB || {};
       roomId: 'klb_2f',
       lines: [
         { speakerId: 'daniel_richards', text: 'Got a weird +69 Da peak on the Waters Xevo trace again.' },
-        { speakerId: 'antoine_maruani', text: 'Classic acetonitrile adduct -- wash once more with water on VivaSpin.' },
+        { speakerId: 'antoine_maruani', text: 'Classic acetonitrile adduct — wash once more with water on VivaSpin.' },
         { speakerId: 'marcos_fernandez', text: 'And do not tell Kersti until it is 10x desalted.' }
       ]
     },
@@ -376,7 +375,7 @@ window.KLB = window.KLB || {};
       id: 'huddle_2f_fridge',
       roomId: 'klb_2f',
       lines: [
-        { speakerId: 'calise_bahou', text: 'Running my Herceptin rebridging right at 4 C for 95% HHLL.' },
+        { speakerId: 'calise_bahou', text: 'Running my Herceptin rebridging right at 4 °C for 95% HHLL.' },
         { speakerId: 'maximillian_lee', text: 'Compare that with my 25 A bis-PD linker on Blue Party Mix!' },
         { speakerId: 'peter_szijj', text: 'Keep both gels on the lightbox so we can check the 150 kDa band.' }
       ]
@@ -385,7 +384,7 @@ window.KLB = window.KLB || {};
       id: 'huddle_2f_cupboard5',
       roomId: 'klb_2f',
       lines: [
-        { speakerId: 'marcos_fernandez', text: 'Cracking Cupboard 5 for 20s -- bleach bath is fresh and ready.' },
+        { speakerId: 'marcos_fernandez', text: 'Cracking Cupboard 5 for 20s — bleach bath is fresh and ready.' },
         { speakerId: 'richard_spears', text: 'Appreciate the warning, my aryl-thiol controls are capped tight.' },
         { speakerId: 'andre_shamsabadi', text: 'Syringe pump is humming, keeping the sash pulled right down.' }
       ]
@@ -395,7 +394,7 @@ window.KLB = window.KLB || {};
       roomId: 'klb_2f',
       lines: [
         { speakerId: 'archie_wall', text: 'Got two empty wells on my 12% gel if anyone wants a quick QC lane.' },
-        { speakerId: 'calise_bahou', text: 'Yes please Archie -- got a fresh 4 C Herceptin aliquot ready.' },
+        { speakerId: 'calise_bahou', text: 'Yes please Archie — got a fresh 4 °C Herceptin aliquot ready.' },
         { speakerId: 'nafsika_forte', text: 'Just keep the salt low so the bands do not smile into lane 8!' }
       ]
     },
@@ -414,7 +413,7 @@ window.KLB = window.KLB || {};
       lines: [
         { speakerId: 'maximillian_lee', text: 'Anyone weighed fresh 10 mM TCEP at pH 8.0 yet?' },
         { speakerId: 'antoine_maruani', text: 'Top shelf of my rack in BBS + EDTA. Never use unbuffered water.' },
-        { speakerId: 'faiza_javaid', text: 'Grabbing 30 uL for my IgG4 reduction too, legends!' }
+        { speakerId: 'faiza_javaid', text: 'Grabbing 30 µL for my IgG4 reduction too, legends!' }
       ]
     },
     {
@@ -431,7 +430,7 @@ window.KLB = window.KLB || {};
       roomId: 'klb_3f',
       lines: [
         { speakerId: 'richard_spears', text: 'Kettle is boiled upstairs and I opened the Bettys biscuit tin.' },
-        { speakerId: 'andre_shamsabadi', text: 'Legend Rich -- also spotted my laser clicker behind the tea caddy.' },
+        { speakerId: 'andre_shamsabadi', text: 'Legend Rich — also spotted my laser clicker behind the tea caddy.' },
         { speakerId: 'peter_szijj', text: 'Quick tea break then back to finishing Supporting Information schemes.' }
       ]
     },
@@ -492,12 +491,12 @@ window.KLB = window.KLB || {};
   const DEFAULT_SAMPLE_RUN_LINES = {
     nmr: {
       ask: [
-        'Heading down to LG1b NMR -- {target}, got any tubes you need dropped on the 600 MHz?',
-        'Walking down to Abil in LG1b now, {target} -- want me to submit an NMR tube for you?'
+        'Heading down to LG1b NMR — {target}, got any tubes you need dropped on the 600 MHz?',
+        'Walking down to Abil in LG1b now, {target} — want me to submit an NMR tube for you?'
       ],
       yes: [
-        'Legend {sender}, yes please -- grab the CDCl3 tube in the rack by my hood!',
-        'Yes please {sender}, tube is labelled in my rack -- watch out for Abil!'
+        'Legend {sender}, yes please — grab the CDCl3 tube in the rack by my hood!',
+        'Yes please {sender}, tube is labelled in my rack — watch out for Abil!'
       ],
       no: [
         'All sorted for now {sender}, cheers for asking though!',
@@ -506,12 +505,12 @@ window.KLB = window.KLB || {};
     },
     ms: {
       ask: [
-        'Heading down to LG11 Mass Spec -- {target}, want me to drop a desalted vial on the Q-TOF?',
-        'Nipping down to Kersti in LG11, {target} -- got any LC-MS vials ready?'
+        'Heading down to LG11 Mass Spec — {target}, want me to drop a desalted vial on the Q-TOF?',
+        'Nipping down to Kersti in LG11, {target} — got any LC-MS vials ready?'
       ],
       yes: [
-        'Lifesaver {sender} -- 10x desalted vial is right here on the bench, cheers!',
-        'Yes please {sender}, already logged on uplc2011 -- grab it off my rack!'
+        'Lifesaver {sender} — 10x desalted vial is right here on the bench, cheers!',
+        'Yes please {sender}, already logged on uplc2011 — grab it off my rack!'
       ],
       no: [
         'Still desalting on VivaSpin {sender}, thanks for checking though!',
@@ -533,7 +532,7 @@ window.KLB = window.KLB || {};
       { title: 'Bromomaleimide Albumin Rxn', roomId: 'klb_2f', stationTypes: ['fumehood'], group: 'baker', mins: 30 },
       { title: 'VivaSpin Desalting', roomId: 'klb_2f', stationTypes: ['centrifuge'], group: 'baker', mins: 20 },
       { title: '12% Non-Reducing Gel', roomId: 'klb_2f', stationTypes: ['gel_tank'], group: 'baker', mins: 25 },
-      { title: 'Buchi Solvent Evaporation', roomId: 'klb_2f', stationTypes: ['buchi'], group: 'none', mins: 22 },
+      { title: 'Büchi Solvent Evaporation', roomId: 'klb_2f', stationTypes: ['buchi'], group: 'none', mins: 22 },
       { title: 'Baker Desk Data Review', roomId: 'klb_2f', stationTypes: ['writeup_desk'], group: 'baker', mins: 22 }
     ],
     marco_sabatini: [
@@ -760,17 +759,26 @@ window.KLB = window.KLB || {};
 
   function findFreeAdjacentWalkable(state, roomId, obj, ignoreId = null) {
     if (!obj) return null;
+    const rm = window.KLB.WORLD_MAPS?.rooms?.[roomId];
     const cardinalCands = [];
     const diagCands = [];
+    const doorCardinalCands = [];
+    const doorDiagCands = [];
     for (let y = obj.y - 1; y <= obj.y + obj.h; y++) {
       for (let x = obj.x - 1; x <= obj.x + obj.w; x++) {
         const inside = x >= obj.x && x < obj.x + obj.w && y >= obj.y && y < obj.y + obj.h;
         if (inside) continue;
         if (!isCellWalkable(roomId, x, y, false)) continue;
         if (isOccupiedByCharacter(state, roomId, x, y, ignoreId, 0.50)) continue;
+        const isDoorway = rm?.tiles?.[y]?.[x] === 7;
         const cardinal = (x >= obj.x && x < obj.x + obj.w) || (y >= obj.y && y < obj.y + obj.h);
-        if (cardinal) cardinalCands.push({ x, y, cardinal: true });
-        else diagCands.push({ x, y, cardinal: false });
+        if (isDoorway) {
+          if (cardinal) doorCardinalCands.push({ x, y, cardinal: true });
+          else doorDiagCands.push({ x, y, cardinal: false });
+        } else {
+          if (cardinal) cardinalCands.push({ x, y, cardinal: true });
+          else diagCands.push({ x, y, cardinal: false });
+        }
       }
     }
     if (cardinalCands.length) {
@@ -778,6 +786,12 @@ window.KLB = window.KLB || {};
     }
     if (diagCands.length) {
       return diagCands[Math.floor(Math.random() * diagCands.length)];
+    }
+    if (doorCardinalCands.length) {
+      return doorCardinalCands[Math.floor(Math.random() * doorCardinalCands.length)];
+    }
+    if (doorDiagCands.length) {
+      return doorDiagCands[Math.floor(Math.random() * doorDiagCands.length)];
     }
     return null;
   }
@@ -881,6 +895,63 @@ window.KLB = window.KLB || {};
     faceTowards(npc, obj.x + (obj.w - 1) * 0.5, obj.y + (obj.h - 1) * 0.5);
   }
 
+  function faceNpcsTowardNearbyPartners(state, npcIds, partnerIds, roomId, maxDist = 3.5) {
+    if (!state || !Array.isArray(npcIds) || !Array.isArray(partnerIds) || !roomId) return;
+    const playerId = state.spectatorMode ? null : state.player?.id;
+    const resolvedPartners = partnerIds
+      .map(id => (playerId && id === playerId) ? state.player : state.npcs?.[id])
+      .filter(p => p && p.roomId === roomId);
+    if (resolvedPartners.length < 2) return;
+
+    for (const npcId of npcIds) {
+      if (playerId && npcId === playerId) continue;
+      const npc = state.npcs?.[npcId];
+      if (!npc || npc.roomId !== roomId) continue;
+      let sumX = 0;
+      let sumY = 0;
+      let cnt = 0;
+      for (const other of resolvedPartners) {
+        if (other === npc || other.id === npc.id) continue;
+        if (Math.hypot(other.x - npc.x, other.y - npc.y) <= maxDist) {
+          sumX += other.x;
+          sumY += other.y;
+          cnt++;
+        }
+      }
+      if (cnt > 0) faceTowards(npc, sumX / cnt, sumY / cnt);
+    }
+  }
+
+  function distToActionTarget(npc, target) {
+    if (!npc || !target) return Infinity;
+    if (target.roomId && target.roomId !== npc.roomId) return Infinity;
+    if (target.objId) {
+      const rm = window.KLB.WORLD_MAPS?.rooms?.[npc.roomId];
+      const obj = rm?.objects?.find(o => o.id === target.objId);
+      if (obj) {
+        const cx = clamp(npc.x, obj.x, obj.x + Math.max(0, (obj.w || 1) - 1));
+        const cy = clamp(npc.y, obj.y, obj.y + Math.max(0, (obj.h || 1) - 1));
+        return Math.hypot(npc.x - cx, npc.y - cy);
+      }
+    }
+    if (target.x != null && target.y != null) {
+      return Math.hypot(npc.x - target.x, npc.y - target.y);
+    }
+    return 0;
+  }
+
+  function matchesCupboardHint(label, hint) {
+    const lbl = String(label || '');
+    const h = String(hint || '').trim();
+    if (!h) return true;
+    const m = h.match(/^cupboard\s+(\d+)$/i);
+    if (m) {
+      const re = new RegExp(`\\bcupboard\\s+${m[1]}\\b(?!\\d)`, 'i');
+      return re.test(lbl);
+    }
+    return lbl.toLowerCase().includes(h.toLowerCase());
+  }
+
   // ==================== 2. METER HELPERS (ENERGY, MORALE, SOCIAL, PATIENCE) ====================
   function getCravingText(prefOrTarget) {
     const pref = typeof prefOrTarget === 'string'
@@ -888,7 +959,7 @@ window.KLB = window.KLB || {};
       : (prefOrTarget?.preferences?.pref || prefOrTarget?.pref || prefOrTarget?.key || prefOrTarget?.type || 'balanced');
     if (pref === 'coffee') return 'Need a proper Gordon espresso soon.';
     if (pref === 'tea') return 'Could really use a mug of Yorkshire tea upstairs.';
-    if (pref === 'gaming') return 'Brain fried -- itching for an AoE2 or Worms match on 3F.';
+    if (pref === 'gaming') return 'Brain fried — itching for an AoE2 or Worms match on 3F.';
     return 'Need a quick breather.';
   }
 
@@ -1007,13 +1078,16 @@ window.KLB = window.KLB || {};
       t.npcChatCooldowns[npcId] = 20;
     }
 
-    const add = Number.isFinite(Number(amount)) ? Number(amount) : 7;
+    let add = Number.isFinite(Number(amount)) ? Number(amount) : 7;
+    if (add > 0 && !t.spectatorMode && t.player?.headphonesOn) {
+      add = Math.max(1, Math.round(add * 0.8));
+    }
     t.social = clamp((t.social != null ? Number(t.social) : 84) + add, 0, 100);
     t.morale = clamp((t.morale != null ? Number(t.morale) : 50) + 3, 0, 100);
     return { applied: true, social: t.social, morale: t.morale };
   }
 
-  function applyBreakEffects(target, breakKind, withColleagues = false, nowMins = null) {
+  function applyBreakEffects(target, breakKind, withColleagues = false, nowMins = null, calisePresent = false) {
     const t = resolveMeterTarget(target);
     if (!t) return { energyDelta: 0, moraleDelta: 0, socialDelta: 0, isPreferred: false };
 
@@ -1057,6 +1131,22 @@ window.KLB = window.KLB || {};
       t.hadLunchToday = true;
     }
 
+    if (breakKind === 'lunch' || breakKind === 'packed_lunch') {
+      const pRoom = !t.spectatorMode ? t.player?.roomId : null;
+      const caliseNpcHere = Boolean(pRoom && t.npcs?.calise_bahou?.roomId === pRoom);
+      const isCalisePlayer = Boolean(!t.spectatorMode && t.player?.id === 'calise_bahou');
+      if (calisePresent || caliseNpcHere || (isCalisePlayer && withColleagues)) {
+        mDelta += 3;
+      }
+      if (isCalisePlayer && pRoom && withColleagues && t.npcs) {
+        for (const n of Object.values(t.npcs)) {
+          if (n && n.roomId === pRoom && n.sim) {
+            n.sim.morale = clamp((n.sim.morale ?? 50) + 3, 0, 100);
+          }
+        }
+      }
+    }
+
     t.energy = clamp((t.energy != null ? Number(t.energy) : 80) + eDelta, 0, 100);
     t.morale = clamp((t.morale != null ? Number(t.morale) : 50) + mDelta, 0, 100);
     t.social = clamp((t.social != null ? Number(t.social) : 84) + sDelta, 0, 100);
@@ -1075,6 +1165,11 @@ window.KLB = window.KLB || {};
     else if (perf >= 78) delta = 6;
     else if (perf >= 65) delta = -5;
     else delta = -12;
+
+    const charId = (!t.spectatorMode ? t.player?.id : null) || target?.id || t.charId || t.id;
+    if (delta < 0 && charId === 'calise_bahou') {
+      delta = Math.round(delta * 0.5);
+    }
 
     t.morale = clamp((t.morale != null ? Number(t.morale) : 50) + delta, 0, 100);
     return delta;
@@ -1111,6 +1206,7 @@ window.KLB = window.KLB || {};
     const prefs = getPreferencesSpec(charMeta);
     const arriveMins = Math.round((charMeta.arriveHour || 9.0) * 60);
     return {
+      charId: id,
       stepIdx: 0,
       subTaskIdx: 0,
       completedSteps: [],
@@ -1288,6 +1384,8 @@ window.KLB = window.KLB || {};
         honestDisclosure: true
       },
       fridayAuditDone: false,
+      fridayFinalAuditDone: false,
+      abilFineOwed: false,
       lastAuditResult: null,
 
       npcs: {},
@@ -1377,11 +1475,12 @@ window.KLB = window.KLB || {};
       _eveningToastToday: false,
       _playerCravingCooldownMins: 0,
       _playerSocialBubbleCooldownMins: 0,
+      _lastPlayerRoomId: spectatorMode ? null : 'klb_2f',
       marcosBombUsed: false
     };
 
     initNPCs(state);
-    rollDailyBirthday(state);
+    rollDailyBirthday(state, options?.callbacks || options);
     seedOpeningWhatsApp(state);
     syncVisibleReactionsCache(state);
     return state;
@@ -1464,6 +1563,14 @@ window.KLB = window.KLB || {};
   }
 
   // ==================== 4. WHATSAPP (STRICTLY 10 BIG-CHUDS) & BUBBLES ====================
+  function pickNonPlayerBigChud(state, preferredId, fallbackId = 'daniel_richards') {
+    const chuds = getBigChudsIds();
+    const playerId = state?.spectatorMode ? null : state?.player?.id;
+    if (preferredId && preferredId !== playerId && chuds.includes(preferredId)) return preferredId;
+    if (fallbackId && fallbackId !== playerId && chuds.includes(fallbackId)) return fallbackId;
+    return chuds.find(id => id !== playerId) || preferredId || 'marcos_fernandez';
+  }
+
   function resolveBigChudsSender(state, senderId) {
     const chuds = getBigChudsIds();
     if (chuds.includes(senderId)) return senderId;
@@ -1476,7 +1583,7 @@ window.KLB = window.KLB || {};
     return chuds.find(id => id !== playerId) || 'marcos_fernandez';
   }
 
-  function pushWhatsApp(state, senderId, text) {
+  function pushWhatsApp(state, senderId, text, callbacks = null) {
     if (!state) return;
     const resolvedId = resolveBigChudsSender(state, senderId);
     const c = window.KLB.CAST_BY_ID?.[resolvedId] || { shortName: resolvedId, waColor: '#93c5fd', id: resolvedId };
@@ -1493,6 +1600,8 @@ window.KLB = window.KLB || {};
     if (typeof window !== 'undefined' && window.KLB.Audio && !state.spectatorMode && resolvedId !== state.player?.id) {
       window.KLB.Audio.playSfx('whatsapp');
     }
+    const cb = callbacks || state._activeCallbacks;
+    cb?.onWhatsApp?.(resolvedId, text);
   }
 
   function calcBubbleTtl(text) {
@@ -1549,16 +1658,22 @@ window.KLB = window.KLB || {};
   }
 
   function seedOpeningWhatsApp(state) {
-    pushWhatsApp(state, 'daniel_richards', 'Morning Chuds! Lab 230 ovens are hot and Buchi 1 water bath is topped up.');
-    pushWhatsApp(state, 'marcos_fernandez', 'Reminder: Weekly Report due Thu 18:00, Manuscript Draft due Fri 18:00, and Group Meeting Friday at 16:00.');
+    const danSender = pickNonPlayerBigChud(state, 'daniel_richards', 'peter_szijj');
+    const marcosSender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
+    const antoineSender = pickNonPlayerBigChud(state, 'antoine_maruani', 'daniel_richards');
+    pushWhatsApp(state, danSender, 'Morning Chuds! Lab 230 ovens are hot and Büchi 1 water bath is topped up.');
+    pushWhatsApp(state, marcosSender, 'Reminder: Thu 18:00 Weekly Report, Fri 09:00 Group Meeting & Fri 18:00 Manuscript Draft.');
     if (!state.spectatorMode && state.player?.id) {
       const camp = window.KLB.CAMPAIGNS?.[state.player.id];
       const playerShort = window.KLB.CAST_BY_ID?.[state.player.id]?.shortName || 'team';
       if (camp) {
-        pushWhatsApp(state, 'antoine_maruani', `Good luck on "${camp.title}" this week @${playerShort}! Shout #AskAntoine or /AskBigChuds if a protocol gets spicy.`);
+        const askHint = state.player.id === 'antoine_maruani'
+          ? 'Shout /AskBigChuds if a protocol gets spicy.'
+          : 'Shout #AskAntoine or /AskBigChuds if a protocol gets spicy.';
+        pushWhatsApp(state, antoineSender, `Good luck on "${camp.title}" this week @${playerShort}! ${askHint}`);
       }
     } else {
-      pushWhatsApp(state, 'antoine_maruani', 'Full bench lineup in KLB today. Keep glassware dry and flasks under Argon.');
+      pushWhatsApp(state, antoineSender, 'Full bench lineup in KLB today. Keep glassware dry and flasks under Argon.');
     }
   }
 
@@ -1609,7 +1724,13 @@ window.KLB = window.KLB || {};
       npc.busyObjId = null;
       npc.huddleLockTimer = 0;
       npc.specsOn = false;
-      npc.currentTaskText = `${win.label} at Gordon's Cafe`;
+      npc.currentTaskText = `${win.label} at Gordon's Café`;
+      if (memberId === 'vijay_chudasama') {
+        const winEndMins = win.endMins || Math.round((win.endHour ?? 11.17) * 60);
+        if (!npc.departAtMins || npc.departAtMins < state.timeMins) {
+          npc.departAtMins = winEndMins;
+        }
+      }
       if (npc.sim) {
         npc.sim.currentAction = null;
         npc.sim.pendingJobStart = null;
@@ -1672,6 +1793,7 @@ window.KLB = window.KLB || {};
   function allocateHuddleClusterSlots(state, roomId, spkIds) {
     const clusters = HUDDLE_CLUSTERS[roomId];
     if (!clusters || !clusters.length) return null;
+    const rm = window.KLB.WORLD_MAPS?.rooms?.[roomId];
 
     const activeHuddlers = Object.values(state.npcs || {}).filter(
       n => n && n.roomId === roomId && (n.huddleLockTimer || 0) > 0
@@ -1685,7 +1807,7 @@ window.KLB = window.KLB || {};
         { x: c.x, y: c.y + 1 },
         { x: c.x - 1, y: c.y },
         { x: c.x, y: c.y - 1 }
-      ].filter(s => isCellWalkable(roomId, s.x, s.y, false));
+      ].filter(s => isCellWalkable(roomId, s.x, s.y, false) && rm?.tiles?.[s.y]?.[s.x] !== 7);
 
       const freeSlots = [];
       for (const s of rawSlots) {
@@ -1707,6 +1829,60 @@ window.KLB = window.KLB || {};
       }
     }
     return null;
+  }
+
+  function endPlayerConversations(state, keepNpcId = null, opts = {}) {
+    if (!state || state.spectatorMode || !state.player?.id) return { unlockedIds: [] };
+    const playerId = state.player.id;
+    const unlockedIds = new Set();
+
+    for (const npc of Object.values(state.npcs || {})) {
+      if (!npc || npc.id === keepNpcId) continue;
+      if (npc.huddleTarget?.partnerIds?.includes(playerId)) {
+        unlockedIds.add(npc.id);
+        npc.huddleLockTimer = 0;
+        npc.huddleTarget = null;
+      }
+    }
+
+    if (Array.isArray(state._queuedBubbles) && state._queuedBubbles.length) {
+      state._queuedBubbles = state._queuedBubbles.filter(qb => {
+        if (!qb) return false;
+        const involvesKeep = Boolean(
+          keepNpcId &&
+          (qb.entityId === keepNpcId || (Array.isArray(qb.partnerIds) && qb.partnerIds.includes(keepNpcId)))
+        );
+        if (involvesKeep) return true;
+        const involvesPlayer = qb.entityId === playerId ||
+          (Array.isArray(qb.partnerIds) && qb.partnerIds.includes(playerId));
+        const involvesUnlocked = unlockedIds.has(qb.entityId) ||
+          (Array.isArray(qb.partnerIds) && qb.partnerIds.some(id => unlockedIds.has(id)));
+        if (involvesPlayer || involvesUnlocked) return false;
+        return true;
+      });
+    }
+
+    const roomChanged = opts === true || Boolean(opts?.changingRooms || opts?.roomChanged);
+    if (Array.isArray(state.speechBubbles) && state.speechBubbles.length) {
+      state.speechBubbles = state.speechBubbles.filter(b => {
+        if (!b) return false;
+        const involvesKeep = Boolean(
+          keepNpcId &&
+          (b.entityId === keepNpcId || (Array.isArray(b.partnerIds) && b.partnerIds.includes(keepNpcId)))
+        );
+        if (involvesKeep) return true;
+        const involvesPlayer = b.entityId === playerId ||
+          (Array.isArray(b.partnerIds) && b.partnerIds.includes(playerId));
+        const involvesUnlocked = unlockedIds.has(b.entityId) ||
+          (Array.isArray(b.partnerIds) && b.partnerIds.some(id => unlockedIds.has(id)));
+        if (!involvesPlayer && !involvesUnlocked) return true;
+        const diffRoom = Boolean(state.player.roomId && b.roomId && b.roomId !== state.player.roomId);
+        if (roomChanged || diffRoom) return false;
+        return true;
+      });
+    }
+
+    return { unlockedIds: Array.from(unlockedIds) };
   }
 
   function scheduleMultiTurnConversation(state, roomId, speakers, turns, convoId, opts = {}) {
@@ -1757,7 +1933,10 @@ window.KLB = window.KLB || {};
       }
     }
 
-    faceEachOther(validSpeakers);
+    const npcSpeakerIds = validSpeakers
+      .filter(s => state.spectatorMode || (s !== state.player && s.id !== state.player?.id))
+      .map(s => s.id);
+    faceNpcsTowardNearbyPartners(state, npcSpeakerIds, partnerIds, roomId, 3.5);
 
     state._queuedBubbles = state._queuedBubbles || [];
     for (let i = 0; i < validTurns.length; i++) {
@@ -1787,7 +1966,7 @@ window.KLB = window.KLB || {};
     return { convoId, partnerIds, turns: validTurns, lockDur };
   }
 
-  function rollDailyBirthday(state) {
+  function rollDailyBirthday(state, callbacks = {}) {
     if (!state) return null;
     state.birthday = null;
     state._birthdayStats = state._birthdayStats || { days: 0, greetings: 0 };
@@ -1833,10 +2012,11 @@ window.KLB = window.KLB || {};
           .replace(/\{shortName\}/g, state.birthday.shortName)
           .replace(/\{name\}/g, state.birthday.name)
           .replace(/\{initials\}/g, state.birthday.initials);
-        pushWhatsApp(state, friendId, waText);
+        pushWhatsApp(state, friendId, waText, callbacks);
       }
     }
 
+    callbacks?.onBirthday?.(state.birthday);
     return state.birthday;
   }
 
@@ -1853,6 +2033,15 @@ window.KLB = window.KLB || {};
     const targetEnt = resolveEntityById(state, targetId);
     if (!greeterEnt || !targetEnt || greeterEnt.roomId !== roomId || targetEnt.roomId !== roomId) {
       return { triggered: false };
+    }
+
+    if (!opts.force && !state.spectatorMode && state.player && (greeterEnt === state.player || targetEnt === state.player)) {
+      if (state.player.isMoving || state.activePlayerAction) {
+        return { triggered: false };
+      }
+      if (Math.hypot(greeterEnt.x - targetEnt.x, greeterEnt.y - targetEnt.y) > 4.2) {
+        return { triggered: false };
+      }
     }
 
     state.birthday.greetedBy[greeterId] = true;
@@ -1938,7 +2127,13 @@ window.KLB = window.KLB || {};
       if (actKind === 'quench' || actKind === 'smoke_break') continue;
       freeMap[n.id] = n;
     }
-    if (!state.spectatorMode && state.player?.roomId === roomId && !busySpeakerIds.has(state.player.id)) {
+    if (
+      !state.spectatorMode &&
+      state.player?.roomId === roomId &&
+      !busySpeakerIds.has(state.player.id) &&
+      !state.player.isMoving &&
+      !state.activePlayerAction
+    ) {
       freeMap[state.player.id] = state.player;
     }
 
@@ -1973,9 +2168,26 @@ window.KLB = window.KLB || {};
           if (sid && !spkIds.includes(sid)) spkIds.push(sid);
         }
         if (spkIds.length < 2) continue;
-        if (spkIds.every(id => Boolean(freeMap[id]))) {
-          validVariants.push({ turns: vTurns, spkIds });
+        if (!spkIds.every(id => Boolean(freeMap[id]))) continue;
+        if (sig.postAction === 'smoke_break') {
+          const smokeReady = spkIds.every(id => {
+            const ent = freeMap[id];
+            if (!ent?.sim) return true;
+            if (ent.sim.activeJob?.canOvercook) return false;
+            const k = ent.sim.currentAction?.kind;
+            return !k || k === 'tidy_bench' || k === 'socialize';
+          });
+          if (!smokeReady) continue;
         }
+        if (!opts.force && !state.spectatorMode && state.player && spkIds.includes(state.player.id)) {
+          const allNearPlayer = spkIds.every(id => {
+            if (id === state.player.id) return true;
+            const ent = freeMap[id];
+            return Boolean(ent && Math.hypot(ent.x - state.player.x, ent.y - state.player.y) <= 4.2);
+          });
+          if (!allNearPlayer) continue;
+        }
+        validVariants.push({ turns: vTurns, spkIds });
       }
       if (!validVariants.length) continue;
       const maxCount = Math.max(...validVariants.map(v => v.spkIds.length));
@@ -1988,8 +2200,10 @@ window.KLB = window.KLB || {};
     }
     if (!pickedSig || !pickedTurns || !pickedSpkIds) return null;
 
+    const hasPlayer = !state.spectatorMode && state.player && pickedSpkIds.includes(state.player.id);
+    const useInPlace = Boolean(opts.inPlace || hasPlayer);
     let assignedSlots = null;
-    if (!opts.inPlace) {
+    if (!useInPlace) {
       assignedSlots = allocateHuddleClusterSlots(state, roomId, pickedSpkIds);
       if (!assignedSlots) return null;
     }
@@ -2010,7 +2224,7 @@ window.KLB = window.KLB || {};
       slots: assignedSlots,
       postAction: pickedSig.postAction || null,
       immediateFirst: Boolean(opts.immediateFirst),
-      inPlace: Boolean(opts.inPlace),
+      inPlace: useInPlace,
       applyNpcSocial: true
     });
 
@@ -2047,7 +2261,16 @@ window.KLB = window.KLB || {};
     if (!player || !npc) return null;
     const convRoomId = roomId || player.roomId || npc.roomId;
 
-    faceEachOther([player, npc]);
+    if (!state.spectatorMode && state.player && pId === state.player.id) {
+      endPlayerConversations(state, npcId);
+    }
+
+    if (npc.roomId === convRoomId && player.roomId === convRoomId && Math.hypot(player.x - npc.x, player.y - npc.y) <= 3.5) {
+      faceTowards(npc, player.x, player.y);
+      if (state.spectatorMode || player !== state.player || !player.isMoving) {
+        faceTowards(player, npc.x, npc.y);
+      }
+    }
     if (!npc.pendingRoomTravel?.isFireEvac) {
       npc.path = [];
     }
@@ -2100,9 +2323,17 @@ window.KLB = window.KLB || {};
         }
         if (!spkIds.includes(pId) || !spkIds.includes(npcId)) continue;
         const allPresent = spkIds.every(id => {
-          if (id === pId) return true;
+          if (id === pId || id === npcId) {
+            if (id === pId) return true;
+            return Boolean(npc && npc.roomId === convRoomId && !npc.pendingRoomTravel?.isFireEvac);
+          }
           const ent = state.npcs?.[id];
-          return Boolean(ent && ent.roomId === convRoomId && !ent.pendingRoomTravel?.isFireEvac);
+          return Boolean(
+            ent &&
+            ent.roomId === convRoomId &&
+            !ent.pendingRoomTravel?.isFireEvac &&
+            Math.hypot(ent.x - player.x, ent.y - player.y) <= 4.2
+          );
         });
         if (allPresent) matchingVars.push({ turns: vTurns, spkIds });
       }
@@ -2141,6 +2372,8 @@ window.KLB = window.KLB || {};
     }
 
     // Priority 3: Pair-matched GROUP_HUDDLES
+    const normalizeAccents = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const escapeRx = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const huddlePool = (Array.isArray(window.KLB.GROUP_HUDDLES) && window.KLB.GROUP_HUDDLES.length)
       ? window.KLB.GROUP_HUDDLES
       : DEFAULT_GROUP_HUDDLES;
@@ -2159,7 +2392,12 @@ window.KLB = window.KLB || {};
       const thirdIds = rawSpkIds.filter(id => id !== pId && id !== npcId);
       const allThirdPresent = thirdIds.every(id => {
         const ent = state.npcs?.[id];
-        return Boolean(ent && ent.roomId === convRoomId && !ent.pendingRoomTravel?.isFireEvac);
+        return Boolean(
+          ent &&
+          ent.roomId === convRoomId &&
+          !ent.pendingRoomTravel?.isFireEvac &&
+          Math.hypot(ent.x - player.x, ent.y - player.y) <= 4.2
+        );
       });
 
       if (allThirdPresent) {
@@ -2175,7 +2413,13 @@ window.KLB = window.KLB || {};
             return sid === pId || sid === npcId;
           })
           .map(t => ({ speakerId: t.speakerId || t.id || t.charId, text: t.text }));
-        if (areTurnsAlternatingPair(kept, pId, npcId)) {
+        const mentionsAbsentThird = thirdIds.some(tid => {
+          const shortNorm = normalizeAccents(window.KLB.CAST_BY_ID?.[tid]?.shortName || '').trim();
+          if (!shortNorm) return false;
+          const re = new RegExp(`\\b${escapeRx(shortNorm)}\\b`, 'i');
+          return kept.some(k => re.test(normalizeAccents(k.text)));
+        });
+        if (!mentionsAbsentThird && areTurnsAlternatingPair(kept, pId, npcId)) {
           huddleMatches.push({ huddle: h, turns: kept, spkIds: [pId, npcId] });
         }
       }
@@ -2232,7 +2476,7 @@ window.KLB = window.KLB || {};
     const rawReply = getSpeechLineForNpc(npc).text;
     const replyText = rawReply.includes(playerShort)
       ? rawReply
-      : `${playerShort} -- ${rawReply}`;
+      : `${playerShort} — ${rawReply}`;
 
     const turns = [
       { speakerId: pId, text: openText },
@@ -2271,7 +2515,13 @@ window.KLB = window.KLB || {};
     const colleagues = Object.values(state.npcs || {}).filter(
       n => n && n.roomId === roomId && n.id !== senderId && !excludedIds.has(n.id)
     );
-    if (!state.spectatorMode && state.player && state.player.roomId === roomId && senderId !== state.player.id) {
+    if (
+      !state.spectatorMode &&
+      state.player &&
+      state.player.roomId === roomId &&
+      senderId !== state.player.id &&
+      (opts.force || (!state.player.isMoving && !state.activePlayerAction && Math.hypot(senderEnt.x - state.player.x, senderEnt.y - state.player.y) <= 4.2))
+    ) {
       colleagues.push(state.player);
     }
     if (!colleagues.length) return { asked: false };
@@ -2358,7 +2608,9 @@ window.KLB = window.KLB || {};
       const targetEnt = resolveEntityById(state, targetId);
       const isPlayerTarget = !state.spectatorMode && targetEnt === state.player;
       const targetFree = targetEnt && targetEnt.roomId === viewRoom && !busySpeakerIds.has(targetId) &&
-        (isPlayerTarget || (!targetEnt.pendingRoomTravel && (!targetEnt.path || targetEnt.path.length === 0) && (targetEnt.huddleLockTimer || 0) <= 0));
+        (isPlayerTarget
+          ? (!state.player.isMoving && !state.activePlayerAction)
+          : (!targetEnt.pendingRoomTravel && (!targetEnt.path || targetEnt.path.length === 0) && (targetEnt.huddleLockTimer || 0) <= 0));
       if (targetFree && Math.random() < 0.45) {
         const greeters = Object.values(state.npcs || {}).filter(n =>
           n &&
@@ -2370,7 +2622,8 @@ window.KLB = window.KLB || {};
           !n.pendingRoomTravel &&
           (!n.path || n.path.length === 0) &&
           (n.huddleLockTimer || 0) <= 0 &&
-          n.sim?.currentAction?.kind !== 'quench'
+          n.sim?.currentAction?.kind !== 'quench' &&
+          (!isPlayerTarget || Math.hypot(n.x - state.player.x, n.y - state.player.y) <= 4.2)
         );
         if (greeters.length > 0) {
           const g = greeters[Math.floor(Math.random() * greeters.length)];
@@ -2410,10 +2663,11 @@ window.KLB = window.KLB || {};
         const npc = state.npcs?.[sid];
         if (!npc || npc.roomId !== viewRoom || npc.pendingRoomTravel) return false;
         if ((npc.huddleLockTimer || 0) > 0) return false;
+        if (npc.sim?.pendingJobStart) return false;
         if (cqActive && viewRoom === 'gordons_cafe' && cqMembers.has(sid)) return false;
         const job = npc.sim?.activeJob;
         if (job && job.canOvercook && job.status !== 'running') return false;
-        if (npc.sim?.currentAction && ['quench', 'lunch', 'packed_lunch', 'aoe2_event', 'clean_workspace', 'smoke_break'].includes(npc.sim.currentAction.kind)) {
+        if (npc.sim?.currentAction && ['quench', 'subtask_action', 'lunch', 'packed_lunch', 'aoe2_event', 'clean_workspace', 'smoke_break'].includes(npc.sim.currentAction.kind)) {
           return false;
         }
       }
@@ -2527,7 +2781,7 @@ window.KLB = window.KLB || {};
       const candidates = [];
       for (const o of rm.objects || []) {
         if (!allowedTypes.includes(o.type)) continue;
-        if (respectHint && cupboardHint && o.type === 'chem_cupboard' && !(o.label || '').includes(cupboardHint)) {
+        if (respectHint && cupboardHint && o.type === 'chem_cupboard' && !matchesCupboardHint(o.label, cupboardHint)) {
           continue;
         }
         if (enforceGroup && o.group && o.group !== 'none' && groupPref && o.group !== groupPref) continue;
@@ -2615,7 +2869,7 @@ window.KLB = window.KLB || {};
     if (!rm) return null;
     const list = (rm.objects || []).filter(o => {
       if (o.type !== type) return false;
-      if (labelSub && !(o.label || '').includes(labelSub)) return false;
+      if (labelSub && !matchesCupboardHint(o.label, labelSub)) return false;
       return true;
     });
     if (!list.length) return null;
@@ -2855,6 +3109,9 @@ window.KLB = window.KLB || {};
       npc.y = freeSpawn.y;
       npc.specsOn = targetRoom === 'klb_2f';
       npc.path = findPathBFS(targetRoom, npc.x, npc.y, adj.x, adj.y, 65, state, npc.id);
+      if (npc.path.length === 0 && (Math.round(npc.x) !== adj.x || Math.round(npc.y) !== adj.y)) {
+        npc.path = findPathBFS(targetRoom, npc.x, npc.y, adj.x, adj.y, 65, null, null);
+      }
       if (npc.path.length === 0 && obj) faceObject(npc, obj);
       return true;
     }
@@ -2866,6 +3123,9 @@ window.KLB = window.KLB || {};
 
     npc.pendingRoomTravel = null;
     npc.path = findPathBFS(targetRoom, npc.x, npc.y, adj.x, adj.y, 65, state, npc.id);
+    if (npc.path.length === 0 && (Math.round(npc.x) !== adj.x || Math.round(npc.y) !== adj.y)) {
+      npc.path = findPathBFS(targetRoom, npc.x, npc.y, adj.x, adj.y, 65, null, null);
+    }
     if (npc.path.length === 0 && obj) faceObject(npc, obj);
     return true;
   }
@@ -3060,16 +3320,17 @@ window.KLB = window.KLB || {};
     if (!state) return;
     if (!state.spectatorMode && !state.weeklyReportChecked) {
       const pct = clamp(Number(state.weeklyReportProgress) || 0, 0, 100);
+      const sender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
       if (pct >= 100) {
         state.patience = clamp((state.patience ?? 82) + 6, 0, 100);
-        pushWhatsApp(state, 'marcos_fernandez', 'Vijay clocked your Thursday Weekly Report at 100% before 18:00 -- solid.');
+        pushWhatsApp(state, sender, 'Vijay clocked your Thursday Weekly Report at 100% before 18:00 — solid.', callbacks);
         callbacks.onToast?.('Thursday Weekly Report submitted on time! (+6 Vijay Patience)');
       } else {
         const missingRatio = (100 - pct) / 100;
         const drop = Math.max(6, Math.round(18 * missingRatio));
         state.patience = clamp((state.patience ?? 82) - drop, 0, 100);
-        pushWhatsApp(state, 'marcos_fernandez', `Vijay emailed asking why your Thursday Weekly Report was only ${Math.round(pct)}% at 18:00 (-${drop} Patience).`);
-        callbacks.onToast?.(`Missed Thu 18:00 Weekly Report (${Math.round(pct)}%) -- -${drop} Vijay Patience!`);
+        pushWhatsApp(state, sender, `Vijay emailed asking why your Thursday Weekly Report was only ${Math.round(pct)}% at 18:00 (-${drop} Patience).`, callbacks);
+        callbacks.onToast?.(`Missed Thu 18:00 Weekly Report (${Math.round(pct)}%) — -${drop} Vijay Patience!`);
       }
       state.weeklyReportChecked = true;
     }
@@ -3106,16 +3367,17 @@ window.KLB = window.KLB || {};
     if (!state) return;
     if (!state.spectatorMode && !state.manuscriptChecked) {
       const pct = clamp(Number(state.manuscriptProgress) || 0, 0, 100);
+      const sender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
       if (pct >= 100) {
         state.patience = clamp((state.patience ?? 82) + 6, 0, 100);
-        pushWhatsApp(state, 'marcos_fernandez', 'Vijay approved your Friday Manuscript Draft at 100% before 18:00.');
+        pushWhatsApp(state, sender, 'Vijay approved your Friday Manuscript Draft at 100% before 18:00.', callbacks);
         callbacks.onToast?.('Friday Manuscript Draft complete on time! (+6 Vijay Patience)');
       } else {
         const missingRatio = (100 - pct) / 100;
         const drop = Math.max(1, Math.round(24 * missingRatio));
         state.patience = clamp((state.patience ?? 82) - drop, 0, 100);
-        pushWhatsApp(state, 'marcos_fernandez', `Vijay flagged your Friday Manuscript Draft at ${Math.round(pct)}% at 18:00 (-${drop} Patience).`);
-        callbacks.onToast?.(`Incomplete Fri 18:00 Manuscript Draft (${Math.round(pct)}%) -- -${drop} Vijay Patience!`);
+        pushWhatsApp(state, sender, `Vijay flagged your Friday Manuscript Draft at ${Math.round(pct)}% at 18:00 (-${drop} Patience).`, callbacks);
+        callbacks.onToast?.(`Incomplete Fri 18:00 Manuscript Draft (${Math.round(pct)}%) — -${drop} Vijay Patience!`);
       }
       state.manuscriptChecked = true;
     }
@@ -3174,10 +3436,14 @@ window.KLB = window.KLB || {};
 
     if (nextStatus !== prevStatus) {
       job.status = nextStatus;
+      if (nextStatus === 'ready') {
+        job.readyMins = (job.readyMins || 0) + Math.max(0, job.elapsedMins - targetMins);
+      }
       callbacks?.onJobStatusChange?.(job, prevStatus, nextStatus);
       if (nextStatus === 'overcooked') {
         const pShort = window.KLB.CAST_BY_ID?.[state.player?.id]?.shortName || 'team';
-        pushWhatsApp(state, 'marcos_fernandez', `Heads up @${pShort} -- Nafsika spotted your "${job.title || job.label || 'reaction'}" going past its sweet-spot window!`);
+        const sender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
+        pushWhatsApp(state, sender, `Heads up @${pShort} — Nafsika spotted your "${job.title || job.label || 'reaction'}" going past its sweet-spot window!`, callbacks);
         if (typeof window !== 'undefined' && window.KLB.Audio) window.KLB.Audio.playSfx('warning');
       } else if (nextStatus === 'sweet' || nextStatus === 'ready') {
         if (typeof window !== 'undefined' && window.KLB.Audio) window.KLB.Audio.playSfx('success');
@@ -3189,6 +3455,26 @@ window.KLB = window.KLB || {};
           );
         }
       }
+    } else if (nextStatus === 'ready') {
+      job.readyMins = (job.readyMins || 0) + deltaMins;
+    }
+
+    if (
+      !state.spectatorMode &&
+      job.roomId === 'cib_lg1b_nmr' &&
+      job.status === 'ready' &&
+      (job.readyMins || 0) > 45 &&
+      !job._abilFineApplied
+    ) {
+      job._abilFineApplied = true;
+      state.abilFineOwed = true;
+      pushWhatsApp(
+        state,
+        'abil_aliev',
+        'Abil (LG1b NMR): "Your NMR tube stayed uncollected >45 mins and is now in the Sample Fridge (£130 fine). Collect your NMR tube or settle the fine!"',
+        callbacks
+      );
+      callbacks?.onToast?.('Dr Abil Aliev locked your uncollected NMR tube in the Sample Fridge! Collect your NMR tube or settle the fine.');
     }
   }
 
@@ -3257,9 +3543,9 @@ window.KLB = window.KLB || {};
     if (
       !state.spectatorMode &&
       (state.player?.roomId === 'klb_2f' || state.player?.roomId === 'klb_3f') &&
-      state.fireAlarm.elapsedMins > 5
+      state.fireAlarm.elapsedMins > 15
     ) {
-      const overdueMins = Math.max(0, state.fireAlarm.elapsedMins - Math.max(5, prevElapsed));
+      const overdueMins = Math.max(0, state.fireAlarm.elapsedMins - Math.max(15, prevElapsed));
       if (overdueMins > 0) {
         setLabCondition(state, getLabCondition(state) - 0.75 * overdueMins);
       }
@@ -3269,9 +3555,16 @@ window.KLB = window.KLB || {};
     if (state.fireAlarm.remainingMins <= 1e-9) {
       state.fireAlarm.remainingMins = 0;
       state.fireAlarm.active = false;
-      pushWhatsApp(state, 'marcos_fernandez', 'All clear! Fire alarm test finished -- everyone back into Lab 230 (check your reactions).');
+      for (const npc of Object.values(state.npcs || {})) {
+        if (npc?.pendingRoomTravel?.isFireEvac) {
+          npc.pendingRoomTravel = null;
+          npc.path = [];
+        }
+      }
+      const sender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
+      pushWhatsApp(state, sender, 'All clear! Fire alarm test finished — everyone back into Lab 230 (check your reactions).', callbacks);
       if (callbacks?.onAlertClear) callbacks.onAlertClear();
-      syncNPCSchedules(state, false);
+      syncNPCSchedules(state, false, callbacks);
     }
   }
 
@@ -3311,7 +3604,10 @@ window.KLB = window.KLB || {};
       }
 
       const act = sim.currentAction;
-      if (act && !npc.pendingRoomTravel && (!npc.path || npc.path.length === 0)) {
+      const atActionStation = Boolean(
+        act && (act.kind === 'smoke_break' || (!npc._retryTarget && distToActionTarget(npc, act) <= 2.4))
+      );
+      if (act && atActionStation && !npc.pendingRoomTravel && (!npc.path || npc.path.length === 0)) {
         act.elapsedMins = (act.elapsedMins || 0) + deltaMins;
         if (act.kind === 'weekly_report') {
           const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 0.75;
@@ -3492,7 +3788,7 @@ window.KLB = window.KLB || {};
               elapsedMins: 0,
               targetMins: npc.id === 'daniel_richards' ? 10 : 18
             };
-            npc.currentTaskText = 'LG11 LC-MS down -- flushing source';
+            npc.currentTaskText = 'LG11 LC-MS down — flushing source';
             return true;
           }
         }
@@ -3676,7 +3972,21 @@ window.KLB = window.KLB || {};
 
     if (act.kind === 'lunch' || act.kind === 'packed_lunch') {
       const withColleagues = hasColleaguesInRoom(state, npc.roomId, npc.id);
-      applyBreakEffects(sim, act.kind, withColleagues, state.timeMins);
+      const calisePresent = Boolean(
+        (npc.id !== 'calise_bahou' && state.npcs?.calise_bahou?.roomId === npc.roomId) ||
+        (!state.spectatorMode && state.player?.id === 'calise_bahou' && state.player?.roomId === npc.roomId)
+      );
+      applyBreakEffects(sim, act.kind, withColleagues, state.timeMins, calisePresent);
+      if (npc.id === 'calise_bahou' && withColleagues) {
+        for (const other of Object.values(state.npcs || {})) {
+          if (other && other.id !== 'calise_bahou' && other.roomId === npc.roomId && other.sim) {
+            other.sim.morale = clamp((other.sim.morale ?? 50) + 3, 0, 100);
+          }
+        }
+        if (!state.spectatorMode && state.player?.roomId === npc.roomId) {
+          state.morale = clamp((state.morale ?? 50) + 3, 0, 100);
+        }
+      }
       sim.weeklyStats.lunchesTaken += 1;
       state._lunchCount = (state._lunchCount || 0) + 1;
       if (state._lunchDetails) {
@@ -3796,8 +4106,8 @@ window.KLB = window.KLB || {};
       if (st.stationTypes?.includes('drying_oven')) sim.prep.oven_flask = true;
       if (st.stationTypes?.includes('argon_cyl')) sim.prep.argon_balloon = true;
       if (st.stationTypes?.includes('chem_cupboard')) {
-        if ((st.cupboardHint || '').includes('Cupboard 1')) sim.prep.dry_solvent = true;
-        if ((st.cupboardHint || '').includes('Cupboard 5') && !sim.prep.bleach_bath) {
+        if (matchesCupboardHint(st.cupboardHint, 'Cupboard 1')) sim.prep.dry_solvent = true;
+        if (matchesCupboardHint(st.cupboardHint, 'Cupboard 5') && !sim.prep.bleach_bath) {
           applyWorkspaceMess(sim, 10, { thiol_dirty: true });
           if (state._labConditionStats) {
             state._labConditionStats.messEvents += 1;
@@ -3879,8 +4189,8 @@ window.KLB = window.KLB || {};
     const cqMembers = window.KLB.COFFEE_QUARTET?.members || [];
     const inWorkHours = (hour >= effectiveArrive && hour <= effectiveDepart) || isFridayMeeting;
 
-    // 1. Energy, Social, Morale & Lab Condition meters during workday
-    if (inWorkHours) {
+    // 1. Energy, Social, Morale & Lab Condition meters during workday (paused during celebration)
+    if (inWorkHours && !state.postAuditCelebration) {
       const drain = computeEnergyDrain(state, npc.id, sim.preferences, npc.roomId, false, hour, deltaMins);
       sim.energy = clamp(sim.energy - drain, 0, 100);
 
@@ -3973,6 +4283,18 @@ window.KLB = window.KLB || {};
     // Guard: let in-transit NPC finish walking to their portal/door/stairs
     if (npc.pendingRoomTravel) return;
 
+    // 3b. Post-Audit Celebration holds Big-Chuds in Gordon's Café
+    if (state.postAuditCelebration) {
+      if (npc.roomId !== 'gordons_cafe') {
+        const cPicked = pickStationForStep(state, npc, 'gordons_cafe', ['cafe_table', 'cafe_counter'], 'none', { allowShared: true });
+        if (cPicked) moveNpcToRoomAndObj(state, npc, 'gordons_cafe', cPicked.obj, false, cPicked.adj);
+        else moveNpcToRoomAndPoint(state, npc, 'gordons_cafe', 8, 10, false);
+      }
+      npc.specsOn = false;
+      npc.currentTaskText = "Celebrating at Gordon's Café";
+      return;
+    }
+
     // 4. Off-hours handling
     if (!inWorkHours) {
       if (npc.roomId !== 'offsite') {
@@ -4016,7 +4338,7 @@ window.KLB = window.KLB || {};
       return;
     }
 
-    // 6. Coffee Quartet holds members at Gordon's Cafe
+    // 6. Coffee Quartet holds members at Gordon's Café
     if (cqActive && cqMembers.includes(npc.id)) {
       return;
     }
@@ -4024,12 +4346,19 @@ window.KLB = window.KLB || {};
     // 7. Social huddle lock
     if ((npc.huddleLockTimer || 0) > 0) return;
 
-    // 8. Finish walking to current target
-    if (npc.path && npc.path.length > 0) return;
+    // 8. Finish walking to current target (or pending collision retry)
+    if ((npc.path && npc.path.length > 0) || npc._retryTarget) return;
 
     // 9. Activate pending wait-subtask job on arrival
     if (sim.pendingJobStart) {
       const pend = sim.pendingJobStart;
+      if (distToActionTarget(npc, pend.jobSpec) > 2.4) {
+        if (!moveNpcToRoomAndObj(state, npc, pend.jobSpec.roomId, pend.obj, false)) {
+          sim.pendingJobStart = null;
+          npc.busyObjId = null;
+        }
+        return;
+      }
       sim.pendingJobStart = null;
       if (isObjClaimed(state, pend.jobSpec.roomId, pend.jobSpec.objId, npc.id)) {
         const alt = pickStationForStep(state, npc, pend.jobSpec.roomId, [pend.jobSpec.stationType], 'none', { allowShared: false });
@@ -4049,7 +4378,26 @@ window.KLB = window.KLB || {};
     // 10. Tick / complete active currentAction
     if (sim.currentAction) {
       const act = sim.currentAction;
-      if ((act.kind === 'weekly_report' || act.kind === 'manuscript_draft') &&
+      if (act.kind === 'socialize' && act.partnerId) {
+        const partner = state.npcs?.[act.partnerId];
+        if (partner && partner.roomId === npc.roomId) {
+          act.x = partner.x;
+          act.y = partner.y;
+        }
+      }
+      if (act.kind !== 'smoke_break' && distToActionTarget(npc, act) > 2.4) {
+        const targetRoom = act.roomId || npc.roomId;
+        const rm = window.KLB.WORLD_MAPS?.rooms?.[targetRoom];
+        const actObj = act.objId ? rm?.objects?.find(o => o.id === act.objId) : null;
+        const repathed = actObj
+          ? moveNpcToRoomAndObj(state, npc, targetRoom, actObj, false)
+          : (act.x != null && act.y != null && moveNpcToRoomAndPoint(state, npc, targetRoom, Math.round(act.x), Math.round(act.y), false));
+        if (repathed && ((npc.path && npc.path.length > 0) || npc.pendingRoomTravel)) {
+          return;
+        }
+        sim.currentAction = null;
+        npc.busyObjId = null;
+      } else if ((act.kind === 'weekly_report' || act.kind === 'manuscript_draft') &&
           sim.activeJob && sim.activeJob.canOvercook &&
           (sim.activeJob.status === 'sweet' || sim.activeJob.status === 'overcooked')) {
         if (!(sim.toughWeek && Math.random() < 0.45)) {
@@ -4243,7 +4591,7 @@ window.KLB = window.KLB || {};
             elapsedMins: 0,
             targetMins: 18
           };
-          npc.currentTaskText = "Coffee run at Gordon's Cafe";
+          npc.currentTaskText = "Coffee run at Gordon's Café";
           return;
         }
       } else if (pref === 'tea') {
@@ -4433,10 +4781,32 @@ window.KLB = window.KLB || {};
 
     if (cqActive && cqMembers.includes(npc.id)) return;
     if ((npc.huddleLockTimer || 0) > 0) return;
-    if (npc.path && npc.path.length > 0) return;
+    if ((npc.path && npc.path.length > 0) || npc._retryTarget) return;
 
     const sim = npc.sim;
     if (!sim) return;
+
+    // Advance/complete smoke_break BEFORE sim.activeJob check so neighbours cleanly return to KLB 2F
+    if (sim.currentAction?.kind === 'smoke_break') {
+      const act = sim.currentAction;
+      if (act.elapsedMins >= act.targetMins) {
+        sim.morale = clamp((sim.morale ?? 50) + 5, 0, 100);
+        sim.social = clamp((sim.social ?? 84) + 5, 0, 100);
+        sim.currentAction = null;
+        npc.busyObjId = null;
+        if (npc.roomId === 'offsite' && sim.activeJob) {
+          const jRm = sim.activeJob.roomId || 'klb_2f';
+          const rm = window.KLB.WORLD_MAPS?.rooms?.[jRm];
+          const jObj = sim.activeJob.objId ? rm?.objects?.find(o => o.id === sim.activeJob.objId) : null;
+          if (jObj) moveNpcToRoomAndObj(state, npc, jRm, jObj, false);
+          else moveNpcToRoomAndPoint(state, npc, jRm, 28, 12, false);
+          npc.currentTaskText = sim.activeJob.title || 'Returning to bench';
+          return;
+        }
+      } else {
+        return;
+      }
+    }
 
     // Neighbour lunch window (1.25x duration: 28m)
     const lunchStart = meta.lunchHour || 12.3;
@@ -4467,15 +4837,39 @@ window.KLB = window.KLB || {};
         npc.busyObjId = null;
         sim.stageIdx = (sim.stageIdx + 1) % wf.length;
       } else {
+        if (npc.roomId === 'offsite') {
+          const jRm = sim.activeJob.roomId || 'klb_2f';
+          const rm = window.KLB.WORLD_MAPS?.rooms?.[jRm];
+          const jObj = sim.activeJob.objId ? rm?.objects?.find(o => o.id === sim.activeJob.objId) : null;
+          if (jObj) moveNpcToRoomAndObj(state, npc, jRm, jObj, false);
+          else moveNpcToRoomAndPoint(state, npc, jRm, 28, 12, false);
+          npc.currentTaskText = sim.activeJob.title || 'Returning to bench';
+        }
         return;
       }
     }
 
     if (sim.currentAction) {
       const act = sim.currentAction;
-      if (act.elapsedMins >= act.targetMins) {
+      if (act.kind !== 'smoke_break' && distToActionTarget(npc, act) > 2.4) {
+        const targetRoom = act.roomId || npc.roomId;
+        const rm = window.KLB.WORLD_MAPS?.rooms?.[targetRoom];
+        const actObj = act.objId ? rm?.objects?.find(o => o.id === act.objId) : null;
+        const repathed = actObj
+          ? moveNpcToRoomAndObj(state, npc, targetRoom, actObj, false)
+          : (act.x != null && act.y != null && moveNpcToRoomAndPoint(state, npc, targetRoom, Math.round(act.x), Math.round(act.y), false));
+        if (repathed && ((npc.path && npc.path.length > 0) || npc.pendingRoomTravel)) {
+          return;
+        }
+        sim.currentAction = null;
+        npc.busyObjId = null;
+      } else if (act.elapsedMins >= act.targetMins) {
         if (act.kind === 'lunch' || act.kind === 'packed_lunch') {
-          applyBreakEffects(sim, act.kind, hasColleaguesInRoom(state, npc.roomId, npc.id), state.timeMins);
+          const calisePresent = Boolean(
+            state.npcs?.calise_bahou?.roomId === npc.roomId ||
+            (!state.spectatorMode && state.player?.id === 'calise_bahou' && state.player?.roomId === npc.roomId)
+          );
+          applyBreakEffects(sim, act.kind, hasColleaguesInRoom(state, npc.roomId, npc.id), state.timeMins, calisePresent);
           state._lunchCount = (state._lunchCount || 0) + 1;
         } else if (act.kind === 'smoke_break') {
           sim.morale = clamp((sim.morale ?? 50) + 5, 0, 100);
@@ -4532,12 +4926,87 @@ window.KLB = window.KLB || {};
     }
   }
 
+  const VISITING_PI_PATROLS = [
+    {
+      id: 'jamie_baker',
+      group: 'baker',
+      stationTypes: ['fumehood', 'balance_table', 'lab_bench', 'writeup_desk'],
+      taskText: 'Patrolling Baker bay & checking specs',
+      windows: [
+        { startMins: 10 * 60, endMins: 10 * 60 + 35 },
+        { startMins: 14 * 60 + 30, endMins: 15 * 60 + 5 }
+      ]
+    },
+    {
+      id: 'tom_sheppard',
+      group: 'sheppard',
+      stationTypes: ['fumehood', 'balance_table', 'biotage', 'writeup_desk'],
+      taskText: 'Checking Sheppard bay hoods & benches',
+      windows: [
+        { startMins: 11 * 60 + 30, endMins: 12 * 60 },
+        { startMins: 15 * 60 + 45, endMins: 16 * 60 + 15 }
+      ]
+    }
+  ];
+
+  function stepVisitingPIPatrol(state, deltaMins) {
+    if (!state || state.fireAlarm?.active || state.postAuditCelebration) return;
+    if (state.dayIdx < 0 || state.dayIdx > 4) return;
+    for (const cfg of VISITING_PI_PATROLS) {
+      const pi = state.npcs?.[cfg.id];
+      if (!pi || pi.pendingRoomTravel) continue;
+      const activeWin = cfg.windows.find(w => state.timeMins >= w.startMins && state.timeMins <= w.endMins);
+      if (activeWin) {
+        pi.specsOn = true;
+        pi.departAtMins = Math.max(pi.departAtMins || 0, activeWin.endMins);
+        if (pi.roomId === 'offsite') {
+          const sp = window.KLB.ROOM_META?.klb_2f?.entrySpawn || { x: 28, y: 12 };
+          const free = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, cfg.id, true) || sp;
+          pi.pendingRoomTravel = null;
+          pi.roomId = 'klb_2f';
+          pi.x = free.x;
+          pi.y = free.y;
+          pi.dir = 'W';
+          pi.path = [];
+          const picked = pickStationForStep(state, pi, 'klb_2f', cfg.stationTypes, cfg.group, { allowShared: true });
+          if (picked?.adj) {
+            pi.path = findPathBFS('klb_2f', pi.x, pi.y, picked.adj.x, picked.adj.y, 45, state, cfg.id);
+          }
+          pi.currentTaskText = cfg.taskText;
+        } else if (pi.roomId !== 'klb_2f') {
+          const picked = pickStationForStep(state, pi, 'klb_2f', cfg.stationTypes, cfg.group, { allowShared: true });
+          if (picked) moveNpcToRoomAndObj(state, pi, 'klb_2f', picked.obj, false, picked.adj);
+          else moveNpcToRoomAndPoint(state, pi, 'klb_2f', 17, 16, false);
+          pi.currentTaskText = cfg.taskText;
+        } else if ((!pi.path || pi.path.length === 0) && (pi.huddleLockTimer || 0) <= 0 && Math.random() < 0.08 * deltaMins) {
+          const picked = pickStationForStep(state, pi, 'klb_2f', cfg.stationTypes, cfg.group, { allowShared: true });
+          if (picked?.adj) {
+            pi.path = findPathBFS('klb_2f', pi.x, pi.y, picked.adj.x, picked.adj.y, 45, state, cfg.id);
+          }
+          pi.currentTaskText = cfg.taskText;
+        }
+      } else if (
+        pi.roomId !== 'offsite' &&
+        (!pi.departAtMins || state.timeMins >= pi.departAtMins) &&
+        (pi.huddleLockTimer || 0) <= 0
+      ) {
+        pi.departAtMins = null;
+        pi.busyObjId = null;
+        pi.huddleLockTimer = 0;
+        pi.huddleTarget = null;
+        pi.currentTaskText = 'Heading back to KLB office';
+        moveNpcToRoomAndPoint(state, pi, 'offsite', 0, 0, false);
+      }
+    }
+  }
+
   function stepAllNpcAI(state, deltaMins) {
     const viewRoom = getViewRoom(state);
     const cast = window.KLB.CAST || [];
 
     // Advance delayed NPC departure timers via physical portal walk
     for (const npc of Object.values(state.npcs || {})) {
+      if (state.postAuditCelebration && npc.roomId === 'gordons_cafe') continue;
       if (npc.departAtMins && state.timeMins >= npc.departAtMins) {
         npc.departAtMins = null;
         if ((!state.vijayRound?.active || npc.id !== 'vijay_chudasama') && npc.roomId !== 'offsite') {
@@ -4553,9 +5022,9 @@ window.KLB = window.KLB || {};
     // Coffee Quartet takes priority during active windows
     syncCoffeeQuartet(state, false, deltaMins);
 
-    // Vijay lunch at Gordon's Cafe around 12:36-13:00 (and occasional 2F walkthroughs)
+    // Vijay lunch at Gordon's Café around 12:36-13:00 (and 2F walkthroughs / clean departure)
     const vj = state.npcs?.vijay_chudasama;
-    if (vj && !state.mutators?.vijays_not_in && !state.fireAlarm?.active && !isCoffeeQuartetWindow(state)) {
+    if (vj && !state.mutators?.vijays_not_in && !state.fireAlarm?.active && !state.postAuditCelebration && !isCoffeeQuartetWindow(state)) {
       const hour = state.timeMins / 60;
       const isFridayMeeting = state.dayIdx === 4 && state.timeMins >= 540 && state.timeMins <= 585;
       if (!isFridayMeeting && !vj.pendingRoomTravel) {
@@ -4569,29 +5038,70 @@ window.KLB = window.KLB || {};
             }
             vj.specsOn = false;
             vj.departAtMins = Math.round(13.02 * 60);
-            vj.currentTaskText = "Having Lunch at Gordon's Cafe";
+            vj.currentTaskText = "Having Lunch at Gordon's Café";
           }
         } else {
           const inWalkWindow = (hour >= 11.3 && hour <= 11.8) || (hour >= 14.1 && hour <= 14.55);
-          if (inWalkWindow && vj.roomId === 'offsite' && Math.random() < 0.08 * deltaMins) {
-            const sp = window.KLB.ROOM_META.klb_2f.entrySpawn;
-            const free = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, 'vijay_chudasama', true) || sp;
-            vj.pendingRoomTravel = null;
-            vj.roomId = 'klb_2f';
-            vj.x = free.x;
-            vj.y = free.y;
+          if (
+            inWalkWindow &&
+            !state.vijayRound?.active &&
+            ['offsite', 'gordons_cafe', 'meeting_room'].includes(vj.roomId) &&
+            Math.random() < 0.08 * deltaMins
+          ) {
             vj.specsOn = true;
             vj.departAtMins = state.timeMins + 20;
+            vj.currentTaskText = 'Walking through KLB 2F bays';
+            if (vj.roomId === 'offsite') {
+              const sp = window.KLB.ROOM_META.klb_2f.entrySpawn;
+              const free = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, 'vijay_chudasama', true) || sp;
+              vj.pendingRoomTravel = null;
+              vj.roomId = 'klb_2f';
+              vj.x = free.x;
+              vj.y = free.y;
+              const hood = findObjectByTypeOrLabel('klb_2f', 'fumehood');
+              if (hood) {
+                const adj = findFreeAdjacentWalkable(state, 'klb_2f', hood, 'vijay_chudasama');
+                if (adj) vj.path = findPathBFS('klb_2f', vj.x, vj.y, adj.x, adj.y, 45, state, 'vijay_chudasama');
+              }
+            } else {
+              const hood = findObjectByTypeOrLabel('klb_2f', 'fumehood');
+              if (hood) moveNpcToRoomAndObj(state, vj, 'klb_2f', hood, false);
+              else moveNpcToRoomAndPoint(state, vj, 'klb_2f', 18, 12, false);
+            }
+          } else if (
+            !state.vijayRound?.active &&
+            (vj.roomId === 'gordons_cafe' || vj.roomId === 'meeting_room') &&
+            (!vj.departAtMins || state.timeMins >= vj.departAtMins) &&
+            (!vj.path || vj.path.length === 0) &&
+            (vj.huddleLockTimer || 0) <= 0
+          ) {
+            vj.departAtMins = null;
+            vj.busyObjId = null;
+            vj.huddleLockTimer = 0;
+            vj.huddleTarget = null;
+            vj.currentTaskText = 'Returning to KLB office';
+            moveNpcToRoomAndPoint(state, vj, 'offsite', 0, 0, false);
+          } else if (
+            vj.roomId === 'klb_2f' &&
+            !state.vijayRound?.active &&
+            vj.departAtMins &&
+            state.timeMins < vj.departAtMins &&
+            (!vj.path || vj.path.length === 0) &&
+            (vj.huddleLockTimer || 0) <= 0 &&
+            Math.random() < 0.06 * deltaMins
+          ) {
             const hood = findObjectByTypeOrLabel('klb_2f', 'fumehood');
             if (hood) {
               const adj = findFreeAdjacentWalkable(state, 'klb_2f', hood, 'vijay_chudasama');
               if (adj) vj.path = findPathBFS('klb_2f', vj.x, vj.y, adj.x, adj.y, 45, state, 'vijay_chudasama');
             }
-            vj.currentTaskText = 'Walking through KLB 2F bays';
           }
         }
       }
     }
+
+    // Jamie Baker & Tom Sheppard daily KLB 2F bay patrols
+    stepVisitingPIPatrol(state, deltaMins);
 
     for (const meta of cast) {
       if (!state.spectatorMode && meta.id === state.player?.id) continue;
@@ -4608,14 +5118,23 @@ window.KLB = window.KLB || {};
     }
   }
 
-  function syncNPCSchedules(state, teleport = false) {
+  function syncNPCSchedules(state, teleport = false, callbacks = {}) {
     if (!state) return;
-    syncDayWeekRolloverFlags(state);
+    syncDayWeekRolloverFlags(state, callbacks);
 
     const hour = state.timeMins / 60;
     const cqActive = Boolean(isCoffeeQuartetWindow(state));
     const cqMembers = new Set(window.KLB.COFFEE_QUARTET?.members || []);
     const isFridayMorningMeeting = state.dayIdx === 4 && state.timeMins >= 540 && state.timeMins <= 585;
+
+    if (!state.fireAlarm?.active) {
+      for (const npc of Object.values(state.npcs || {})) {
+        if (npc?.pendingRoomTravel?.isFireEvac) {
+          npc.pendingRoomTravel = null;
+          npc.path = [];
+        }
+      }
+    }
 
     if (isFridayMorningMeeting && !state.fireAlarm?.active) {
       const mRoom = 'meeting_room';
@@ -4716,7 +5235,7 @@ window.KLB = window.KLB || {};
       const arrive = (state.dayIdx === 4 && c.playable) ? Math.min(c.arriveHour || 9.0, 9.0) : (c.arriveHour || 9.0);
       const inHours = hour >= arrive && hour <= (c.departHour || 18.0);
       if (!inHours) {
-        if (teleport) {
+        if (teleport && !(state.postAuditCelebration && c.playable)) {
           npc.pendingRoomTravel = null;
           npc.roomId = 'offsite';
           npc.busyObjId = null;
@@ -4863,10 +5382,11 @@ window.KLB = window.KLB || {};
       si.currentTaskText = 'Safety Inspection';
     }
 
+    const countdownSec = (!state.spectatorMode && state.player?.id === 'marcos_fernandez') ? 90 : 45;
     state.safetySweep = {
       active: true,
-      countdownSec: 45,
-      countdownMins: 2.0
+      countdownSec,
+      countdownMins: Math.round(countdownSec * CLOCK_MINS_PER_REAL_SEC * 10) / 10
     };
 
     const arch = loadArchive();
@@ -4878,11 +5398,13 @@ window.KLB = window.KLB || {};
     state._rareEventCounts.safety_sweep += 1;
 
     if (!state.spectatorMode && state.player?.roomId === 'klb_2f') {
-      pushWhatsApp(state, 'marcos_fernandez', 'Claire and the Safety Inspector are in KLB 2F #headsup -- Specs ON (G), Headphones OFF (H), and clean workspace!');
+      const sender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
+      pushWhatsApp(state, sender, 'Claire and the Safety Inspector are in KLB 2F #headsup — Specs ON (G), Headphones OFF (H), and clean workspace!', callbacks);
       if (callbacks?.onToast) {
-        callbacks.onToast('SAFETY INSPECTION IN 45s! Put Specs ON (G), take Headphones OFF (H), and clean workspace!');
+        callbacks.onToast(`SAFETY INSPECTION IN ${countdownSec}s! Put Specs ON (G), take Headphones OFF (H), and clean workspace!`);
       }
     }
+    callbacks?.onSweepAlert?.(state.safetySweep);
     if (callbacks?.onRareEvent) callbacks.onRareEvent('safety_sweep');
   }
 
@@ -4901,11 +5423,12 @@ window.KLB = window.KLB || {};
     saveArchive(arch);
 
     const ev = (window.KLB.RANDOM_EVENTS || []).find(e => e.id === 'kersti_lcms_down');
-    const waSender = (ev?.whatsappSender && ev.whatsappSender !== state.player?.id) ? ev.whatsappSender : 'antoine_maruani';
+    const waSender = pickNonPlayerBigChud(state, ev?.whatsappSender || 'antoine_maruani', 'daniel_richards');
     pushWhatsApp(
       state,
       waSender,
-      ev?.whatsappMsg || 'Heads up, Kersti in LG11 just flagged the Q-TOF: "LCMS is out of the operation -- PLRP-S column needs conditioning and mobile-phase flushing."'
+      ev?.whatsappMsg || 'Heads up, Kersti in LG11 just flagged the Q-TOF: "LCMS is out of the operation — PLRP-S column needs conditioning and mobile-phase flushing."',
+      callbacks
     );
 
     const pRoom = state.player?.roomId;
@@ -5014,14 +5537,15 @@ window.KLB = window.KLB || {};
     state._rareEventCounts = state._rareEventCounts || { safety_sweep: 0, fire_alarm_test: 0, alex_king_1718: 0 };
     state._rareEventCounts.fire_alarm_test += 1;
 
-    pushWhatsApp(state, 'marcos_fernandez', 'FIRE ALARM RINGING IN KLB! Everyone out via the left fire exit -- bench reactions keep ticking.');
+    const senderFire = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
+    pushWhatsApp(state, senderFire, 'FIRE ALARM RINGING IN KLB! Everyone out via the left fire exit — bench reactions keep ticking.', callbacks);
 
     if (!state.spectatorMode && callbacks?.onSpecialEvent) {
       const ev = (window.KLB.RANDOM_EVENTS || []).find(e => e.id === 'fire_alarm_test');
       callbacks.onSpecialEvent('fire_alarm_test', ev);
     }
     if (callbacks?.onRareEvent) callbacks.onRareEvent('fire_alarm_test');
-    syncNPCSchedules(state, false);
+    syncNPCSchedules(state, false, callbacks);
   }
 
   function triggerAlexKing1718(state, callbacks) {
@@ -5047,7 +5571,8 @@ window.KLB = window.KLB || {};
     state._rareEventCounts = state._rareEventCounts || { safety_sweep: 0, fire_alarm_test: 0, alex_king_1718: 0 };
     state._rareEventCounts.alex_king_1718 += 1;
 
-    pushWhatsApp(state, 'daniel_richards', "17:18 ALERT: Alex King is hovering by the Lab 230 door asking about Gordon's Cafe -- do not lead her up to 3F.");
+    const senderAlex = pickNonPlayerBigChud(state, 'daniel_richards', 'marcos_fernandez');
+    pushWhatsApp(state, senderAlex, "17:18 ALERT: Alex King is hovering by the Lab 230 door asking about Gordon's Café — do not lead her up to 3F.", callbacks);
 
     if (!state.spectatorMode && state.player?.roomId === 'klb_2f') {
       if (callbacks?.onSpecialEvent) callbacks.onSpecialEvent('alex_king_1718');
@@ -5168,7 +5693,8 @@ window.KLB = window.KLB || {};
         setLabCondition(state, getLabCondition(state) + 8);
         state.patience = Math.min(100, state.patience + 5);
         if (state.player?.roomId === 'klb_2f') {
-          pushWhatsApp(state, 'marcos_fernandez', 'Passed Claire and the Safety Inspector sweep with zero infractions. Exemplary bay.');
+          const senderPass = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
+          pushWhatsApp(state, senderPass, 'Passed Claire and the Safety Inspector sweep with zero infractions. Exemplary bay.', callbacks);
           if (callbacks.onToast) callbacks.onToast('Passed Departmental Safety Inspection! (+8 Lab Condition, +5 Patience)');
         }
       } else {
@@ -5176,7 +5702,8 @@ window.KLB = window.KLB || {};
         setLabCondition(state, getLabCondition(state) - pen);
         state.patience = Math.max(0, state.patience - 10);
         state.morale = Math.max(0, state.morale - 10);
-        pushWhatsApp(state, 'daniel_richards', `Safety Inspector logged infractions: ${playerViolations.join('; ')}.`);
+        const senderFail = pickNonPlayerBigChud(state, 'daniel_richards', 'marcos_fernandez');
+        pushWhatsApp(state, senderFail, `Safety Inspector logged infractions: ${playerViolations.join('; ')}.`, callbacks);
         if (state.player?.roomId === 'klb_2f' && callbacks.onToast) {
           callbacks.onToast(`Safety Inspection Penalty (-${pen} Lab Condition, -10 Patience, -10 Morale): ${playerViolations[0]}`);
         }
@@ -5222,6 +5749,8 @@ window.KLB = window.KLB || {};
     }
   }
 
+  const SPAWN_ON_TRIGGER_EVENT_IDS = new Set(['vijay_bench_round', 'jamie_specs_check', 'door_pls']);
+
   function triggerRandomKLBEvent(state, callbacks = {}) {
     if (!state || state.spectatorMode || state.fireAlarm?.active) return false;
     const playerRoom = state.player?.roomId;
@@ -5237,11 +5766,14 @@ window.KLB = window.KLB || {};
       if (state._seenEventsThisWeek[ev.id]) return false;
       if (ev.whatsappSender === playerId) return false;
 
+      const canSpawnActor = Boolean(ev.spawnActorOnTrigger === true || SPAWN_ON_TRIGGER_EVENT_IDS.has(ev.id));
       if (ev.actorId) {
         if (ev.actorId === playerId) return false;
-        const actor = state.npcs?.[ev.actorId];
-        if (!actor || actor.roomId !== playerRoom) return false;
-        if (Math.hypot(actor.x - state.player.x, actor.y - state.player.y) > 9.0) return false;
+        if (!canSpawnActor) {
+          const actor = state.npcs?.[ev.actorId];
+          if (!actor || actor.roomId !== playerRoom) return false;
+          if (Math.hypot(actor.x - state.player.x, actor.y - state.player.y) > 9.0) return false;
+        }
       }
       return true;
     });
@@ -5269,18 +5801,25 @@ window.KLB = window.KLB || {};
       state.vijayRound = { active: true, checkedPlayer: false };
       const vj = state.npcs?.vijay_chudasama;
       if (vj) {
+        vj.huddleLockTimer = 0;
+        vj.huddleTarget = null;
+        vj.busyObjId = null;
+        vj.specsOn = true;
+        vj.departAtMins = Math.max(vj.departAtMins || 0, state.timeMins + 20);
+        vj.currentTaskText = 'Doing KLB 2F bench rounds';
         if (vj.roomId === 'offsite') {
-          const sp = findFreeWalkableNear(state, 'klb_2f', 27, 12, 'vijay_chudasama', true) || { x: 27, y: 12 };
+          const sp = window.KLB.ROOM_META?.klb_2f?.entrySpawn || { x: 28, y: 12 };
+          const freeSp = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, 'vijay_chudasama', true) || sp;
           vj.pendingRoomTravel = null;
           vj.roomId = 'klb_2f';
-          vj.x = sp.x;
-          vj.y = sp.y;
+          vj.x = freeSp.x;
+          vj.y = freeSp.y;
           vj.dir = 'W';
-          vj.specsOn = true;
         }
         moveNpcToRoomAndPoint(state, vj, 'klb_2f', Math.round(state.player.x), Math.round(state.player.y), false);
       }
-      pushWhatsApp(state, 'marcos_fernandez', 'Vijay just walked into KLB 2nd Floor doing hood-to-hood bench checks #headsup.');
+      const vjSender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
+      pushWhatsApp(state, vjSender, 'Vijay just walked into KLB 2nd Floor doing hood-to-hood bench checks #headsup.', callbacks);
       if (callbacks.onToast) callbacks.onToast('Prof. Vijay Chudasama entered KLB 2nd Floor for bench rounds!');
       return true;
     }
@@ -5289,14 +5828,39 @@ window.KLB = window.KLB || {};
       const chuds = ['faiza_javaid', 'calise_bahou', 'peter_szijj', 'andre_shamsabadi'].filter(id => id !== playerId);
       const req = chuds[Math.floor(Math.random() * chuds.length)] || 'faiza_javaid';
       state.doorPls = { active: true, requesterId: req, expireMins: state.timeMins + 25 };
-      pushWhatsApp(state, req, 'Door pls! Forgot my UCL card upstairs (Interact with the main 2F exit door within 25m for +1 Favour).');
+      pushWhatsApp(state, req, 'Door pls! Forgot my UCL card upstairs (Interact with the main 2F exit door within 25m for +1 Favour).', callbacks);
       return true;
+    }
+
+    if ((ev.spawnActorOnTrigger === true || ev.id === 'jamie_specs_check') && ev.actorId) {
+      const actor = state.npcs?.[ev.actorId];
+      if (actor) {
+        actor.huddleLockTimer = 0;
+        actor.huddleTarget = null;
+        actor.busyObjId = null;
+        actor.specsOn = playerRoom === 'klb_2f';
+        actor.departAtMins = Math.max(actor.departAtMins || 0, state.timeMins + 15);
+        if (ev.id === 'jamie_specs_check') {
+          actor.currentTaskText = 'Patrolling Baker bay & checking specs';
+        }
+        if (actor.roomId === 'offsite') {
+          const sp = window.KLB.ROOM_META?.[playerRoom]?.entrySpawn || { x: 28, y: 12 };
+          const freeSp = findFreeWalkableNear(state, playerRoom, sp.x, sp.y, actor.id, true) || sp;
+          actor.pendingRoomTravel = null;
+          actor.roomId = playerRoom;
+          actor.x = freeSp.x;
+          actor.y = freeSp.y;
+          actor.dir = sp.dir || 'W';
+        }
+        moveNpcToRoomAndPoint(state, actor, playerRoom, Math.round(state.player.x), Math.round(state.player.y), false);
+      }
     }
 
     if (ev.id === 'cold_in_230') {
       state.weatherMode = 'cold_230';
       state.tempC = 16.3;
-      pushWhatsApp(state, 'richard_spears', 'HVAC broken again -- it is 16 C in Lab 230 and the anhydrous DMSO bottles are frozen solid.');
+      const sCold = pickNonPlayerBigChud(state, 'richard_spears', 'daniel_richards');
+      pushWhatsApp(state, sCold, 'HVAC broken again — it is 16 °C in Lab 230 and the anhydrous DMSO bottles are frozen solid.', callbacks);
       if (ev.choices && ev.choices.length && callbacks.onChoiceEvent) callbacks.onChoiceEvent(ev);
       return true;
     }
@@ -5304,32 +5868,37 @@ window.KLB = window.KLB || {};
     if (ev.id === 'may_heatwave') {
       state.weatherMode = 'heatwave';
       state.tempC = 30.1;
-      pushWhatsApp(state, 'calise_bahou', '30.1 C in Lab 230 today! Keep the 4 C fridge doors shut or cold PD reactions will warm up.');
+      const sHeat = pickNonPlayerBigChud(state, 'calise_bahou', 'daniel_richards');
+      pushWhatsApp(state, sHeat, '30.1 °C in Lab 230 today! Keep the 4 °C fridge doors shut or cold PD reactions will warm up.', callbacks);
       if (ev.choices && ev.choices.length && callbacks.onChoiceEvent) callbacks.onChoiceEvent(ev);
       return true;
     }
 
     if (ev.id === 'kersti_lcms_down') {
       state.lcmsBroken = true;
-      pushWhatsApp(state, 'antoine_maruani', 'Kersti email: LCMS is out of the operation -- PEG in mobile phase. Visit LG11 to flush or wait it out.');
+      const sLcms = pickNonPlayerBigChud(state, 'antoine_maruani', 'daniel_richards');
+      pushWhatsApp(state, sLcms, 'Kersti email: LCMS is out of the operation — PEG in mobile phase. Visit LG11 to flush or wait it out.', callbacks);
       if (ev.choices && ev.choices.length && callbacks.onChoiceEvent) callbacks.onChoiceEvent(ev);
       return true;
     }
 
     if (ev.id === 'solvent_cupboard_low') {
-      pushWhatsApp(state, ev.whatsappSender || 'andre_shamsabadi', ev.whatsappMsg || 'Cupboard 9 column solvents and Cupboard 1 dry THF Winchesters are running low!');
+      const sSolv = pickNonPlayerBigChud(state, ev.whatsappSender || 'andre_shamsabadi', 'daniel_richards');
+      pushWhatsApp(state, sSolv, ev.whatsappMsg || 'Cupboard 9 column solvents and Cupboard 1 dry THF Winchesters are running low!', callbacks);
       if (ev.choices && ev.choices.length && callbacks.onChoiceEvent) callbacks.onChoiceEvent(ev);
       return true;
     }
 
     if (ev.id === 'north_bench_ether_smell') {
-      pushWhatsApp(state, ev.whatsappSender || 'marcos_fernandez', ev.whatsappMsg || 'Strong diethyl ether fumes wafting from the north bench near Cupboard 20!');
+      const sEther = pickNonPlayerBigChud(state, ev.whatsappSender || 'marcos_fernandez', 'daniel_richards');
+      pushWhatsApp(state, sEther, ev.whatsappMsg || 'Strong diethyl ether fumes wafting from the south-east Baker bay near Cupboard 20!', callbacks);
       if (ev.choices && ev.choices.length && callbacks.onChoiceEvent) callbacks.onChoiceEvent(ev);
       return true;
     }
 
     if (ev.whatsappSender && ev.whatsappMsg) {
-      pushWhatsApp(state, ev.whatsappSender, ev.whatsappMsg);
+      const sEv = pickNonPlayerBigChud(state, ev.whatsappSender, 'daniel_richards');
+      pushWhatsApp(state, sEv, ev.whatsappMsg, callbacks);
     }
     if (ev.choices && ev.choices.length && callbacks.onChoiceEvent) {
       callbacks.onChoiceEvent(ev);
@@ -5357,24 +5926,31 @@ window.KLB = window.KLB || {};
     }
   }
 
-  function syncDayWeekRolloverFlags(state) {
+  function resetBigChudsWeeklySims(state) {
+    if (!state) return;
+    for (const npc of Object.values(state.npcs || {})) {
+      if (!npc || (!state.spectatorMode && npc.id === state.player?.id)) continue;
+      const meta = window.KLB.CAST_BY_ID?.[npc.id];
+      if (!npc.sim || !meta?.playable) continue;
+      const prevStats = npc.sim.weeklyStats;
+      const prevPatience = npc.sim.patience ?? 82;
+      const fresh = makeInitialNpcSim(meta);
+      fresh.weeklyStats = prevStats;
+      fresh.patience = prevPatience;
+      npc.sim = fresh;
+    }
+  }
+
+  function syncDayWeekRolloverFlags(state, callbacks = {}) {
     if (state._trackedWeekNum !== state.weekNum) {
       state._trackedWeekNum = state.weekNum;
       state._seenEventsThisWeek = {};
       state._weeklySigDone = {};
       state._lastWeeklySigMins = -999;
       state._lastWeeklySigDay = -1;
-      if (state.spectatorMode) {
-        for (const npc of Object.values(state.npcs || {})) {
-          if (!npc.sim || !window.KLB.CAST_BY_ID?.[npc.id]?.playable) continue;
-          const prevStats = npc.sim.weeklyStats;
-          const prevPatience = npc.sim.patience ?? 82;
-          const fresh = makeInitialNpcSim(window.KLB.CAST_BY_ID[npc.id]);
-          fresh.weeklyStats = prevStats;
-          fresh.patience = prevPatience;
-          npc.sim = fresh;
-        }
-      }
+      state.abilFineOwed = false;
+      state.fridayFinalAuditDone = false;
+      resetBigChudsWeeklySims(state);
     }
     if (state._trackedDayIdx !== state.dayIdx) {
       state._trackedDayIdx = state.dayIdx;
@@ -5390,7 +5966,7 @@ window.KLB = window.KLB || {};
       state._quartetWaToday = false;
       state._eveningToastToday = false;
       state._sampleAskCooldowns = {};
-      rollDailyBirthday(state);
+      rollDailyBirthday(state, callbacks);
     }
   }
 
@@ -5403,9 +5979,19 @@ window.KLB = window.KLB || {};
       evaluateManuscriptDeadline(state, callbacks);
     }
 
-    // Overcook unattended non-cold jobs left past 19:30 curfew
+    // Overcook unattended non-cold jobs left past 19:30 curfew & flag uncollected NMR tubes
     const overcookJob = j => {
       if (!j) return;
+      if (j.roomId === 'cib_lg1b_nmr' && !j._abilFineApplied && !state.spectatorMode) {
+        j._abilFineApplied = true;
+        state.abilFineOwed = true;
+        pushWhatsApp(
+          state,
+          'abil_aliev',
+          'Abil (LG1b NMR): "Uncollected NMR tube left past curfew — moved to the Sample Fridge (£130 fine). Collect your NMR tube or settle the fine!"',
+          callbacks
+        );
+      }
       if (!j.isCold4C && (j.canOvercook !== false)) j.status = 'overcooked';
     };
     (state.activeStationJobs || []).forEach(overcookJob);
@@ -5465,7 +6051,7 @@ window.KLB = window.KLB || {};
       state.dayIdx += 1;
     }
 
-    syncDayWeekRolloverFlags(state);
+    syncDayWeekRolloverFlags(state, callbacks);
 
     const charMeta = window.KLB.CAST_BY_ID?.[state.player?.id];
     const isFridayRollout = state.dayIdx === 4;
@@ -5501,15 +6087,15 @@ window.KLB = window.KLB || {};
       }
     }
 
-    syncNPCSchedules(state, true);
+    syncNPCSchedules(state, true, callbacks);
     syncVisibleReactionsCache(state);
     if (isFridayRollout) {
       callbacks.onFridayMorningMeeting?.();
     }
     if (!state.spectatorMode && callbacks.onToast) {
       callbacks.onToast(isFridayRollout
-        ? 'FRI 09:00 -- Group Meeting starting in the Seminar Room!'
-        : `19:30 KLB Security Lockup -- rolled to ${DAYS[state.dayIdx]} morning.`);
+        ? 'FRI 09:00 — Group Meeting starting in the Seminar Room!'
+        : `19:30 KLB Security Lockup — rolled to ${DAYS[state.dayIdx]} morning.`);
     }
     checkPermadeath(state, callbacks);
   }
@@ -5517,298 +6103,316 @@ window.KLB = window.KLB || {};
   function advanceMinutes(state, deltaMins, callbacks = {}) {
     if (!state || state.gameOver || state.victory || deltaMins <= 0) return;
 
-    syncDayWeekRolloverFlags(state);
+    const prevCb = state._activeCallbacks;
+    state._activeCallbacks = callbacks;
+    try {
+      syncDayWeekRolloverFlags(state, callbacks);
 
-    const prevTimeMins = state.timeMins;
-    state.timeMins += deltaMins;
-    const hour = state.timeMins / 60;
+      const prevTimeMins = state.timeMins;
+      state.timeMins += deltaMins;
+      const hour = state.timeMins / 60;
 
-    // 1. Float job/action/alarm progression ONLY when not called from tickRealTime (prevents double-counting)
-    if (!state._tickingRealTime) {
-      advanceActiveJobs(state, deltaMins, callbacks);
-      advancePlayerAction(state, deltaMins, callbacks);
-      advanceFireAlarm(state, deltaMins, callbacks);
-      tickNpcJobsAndActions(state, deltaMins);
-    }
-
-    // 2. Evaluate headless/non-realtime Safety Sweep countdown
-    if (state.safetySweep?.active && !state._tickingRealTime) {
-      state.safetySweep.countdownMins = Math.max(0, (state.safetySweep.countdownMins || 2) - deltaMins);
-      if (state.safetySweep.countdownMins <= 0) {
-        state.safetySweep.active = false;
-        evaluateSafetySweep(state, callbacks);
+      // 1. Float job/action/alarm progression ONLY when not called from tickRealTime (prevents double-counting)
+      if (!state._tickingRealTime) {
+        advanceActiveJobs(state, deltaMins, callbacks);
+        advancePlayerAction(state, deltaMins, callbacks);
+        advanceFireAlarm(state, deltaMins, callbacks);
+        tickNpcJobsAndActions(state, deltaMins);
       }
-    }
 
-    // 3. Evaluate stochastic rare Poisson hazards (~10% per day each; LC-MS ~30% per day)
-    if (!callbacks?.suppressRandomEvents) {
-      evaluateRarePoissonHazards(state, prevTimeMins, state.timeMins, callbacks);
-    }
-
-    // 3b. 17:00 AoE2 Event (25% daily chance Mon-Fri)
-    if (state.dayIdx >= 0 && state.dayIdx <= 4 && state.timeMins >= 17 * 60) {
-      const weekDayKey = `${state.weekNum || 1}_${state.dayIdx}`;
-      if (state._aoe2CheckedDayKey !== weekDayKey) {
-        state._aoe2CheckedDayKey = weekDayKey;
-        if (!state.fireAlarm?.active && Math.random() < 0.25) {
-          triggerAoe2Event(state, callbacks);
+      // 2. Evaluate headless/non-realtime Safety Sweep countdown (paused during WhatsApp time spend)
+      if (state.safetySweep?.active && !state._tickingRealTime && !callbacks?.suppressRandomEvents) {
+        state.safetySweep.countdownMins = Math.max(0, (state.safetySweep.countdownMins ?? 2) - deltaMins);
+        state.safetySweep.countdownSec = Math.max(0, state.safetySweep.countdownMins / CLOCK_MINS_PER_REAL_SEC);
+        if (state.safetySweep.countdownMins <= 0) {
+          state.safetySweep.active = false;
+          evaluateSafetySweep(state, callbacks);
         }
       }
-    }
-    if (state.aoe2Event?.active && state.timeMins >= (state.aoe2Event.endMins || 18 * 60)) {
-      state.aoe2Event.active = false;
-    }
 
-    // 4. Morning Coffee Quartet WhatsApp drop (10:27 - 10:36)
-    if (!state._quartetWaToday && state.dayIdx >= 0 && state.dayIdx <= 4 && hour >= 10.45 && hour <= 10.62) {
-      state._quartetWaToday = true;
-      state._coffeePingToday = true;
-      const sender = (!state.spectatorMode && state.player?.id === 'joao_nogueira') ? 'faiza_javaid' : 'joao_nogueira';
-      pushWhatsApp(state, sender, "10:30 Gordon's coffee run leaving now -- heading over with Nafsika and Vijay for twenty minutes.");
-    }
-
-    // 5. 18:15 Evening Shift Toast
-    if (!state._eveningToastToday && hour >= 18.25) {
-      state._eveningToastToday = true;
-      const evSender = (!state.spectatorMode && state.player?.id === 'daniel_richards') ? 'marcos_fernandez' : 'daniel_richards';
-      pushWhatsApp(state, evSender, '18:15 update: daytime shift heading out -- Peter and Nafsika holding the fort in Lab 230.');
-      if (!state.spectatorMode && callbacks.onToast) {
-        callbacks.onToast('18:15 Evening Shift: daytime crew packing up; Peter and Nafsika holding Lab 230.');
-      }
-    }
-
-    // 6. Thursday 18:00 Weekly Report Deadline & Friday 18:00 Manuscript Deadline
-    if (state.dayIdx === 3 && state.timeMins >= 18 * 60) {
-      evaluateWeeklyReportDeadline(state, callbacks);
-    }
-    if (state.dayIdx === 4 && state.timeMins >= 18 * 60) {
-      evaluateManuscriptDeadline(state, callbacks);
-    }
-
-    // 7. Decrement per-NPC player chat cooldowns
-    if (state.npcChatCooldowns) {
-      for (const [npcId, rem] of Object.entries(state.npcChatCooldowns)) {
-        const next = (Number(rem) || 0) - deltaMins;
-        if (next <= 0) delete state.npcChatCooldowns[npcId];
-        else state.npcChatCooldowns[npcId] = next;
-      }
-    }
-
-    // 8. Player Energy, Social, Morale & Lab Condition
-    if (!state.spectatorMode) {
-      const energyDrain = computeEnergyDrain(
-        state,
-        state.player?.id,
-        state.preferences,
-        state.player?.roomId,
-        Boolean(state.player?.headphonesOn),
-        hour,
-        deltaMins
-      );
-      state.energy = clamp(state.energy - energyDrain, 0, 100);
-
-      // Social drain when not actively in Coffee Quartet or shared Gordon's Café lunch
-      const inPlayerQuartet = Boolean(isCoffeeQuartetWindow(state)) && state.player?.roomId === 'gordons_cafe';
-      const inSharedLunch = state.activePlayerAction?.kind === 'lunch' && hasColleaguesInRoom(state, 'gordons_cafe', state.player?.id);
-      if (!inPlayerQuartet && !inSharedLunch) {
-        state.social = clamp((state.social ?? 84) - 0.085 * deltaMins, 0, 100);
+      // 3. Evaluate stochastic rare Poisson hazards (~10% per day each; LC-MS ~30% per day)
+      if (!callbacks?.suppressRandomEvents && !state.postAuditCelebration) {
+        evaluateRarePoissonHazards(state, prevTimeMins, state.timeMins, callbacks);
       }
 
-      // Passive Morale drain (lab stress in 2F/CIB + low social + preference neglect); Specs OFF reduces by 40%
-      const pRoom = state.player?.roomId || 'klb_2f';
-      let passiveMoraleDrain = 0;
-      if ((pRoom === 'klb_2f' || String(pRoom).startsWith('cib_')) && !state.fireAlarm?.active) {
-        passiveMoraleDrain += 0.025 * deltaMins;
-      }
-      if ((state.social ?? 84) < 30) {
-        passiveMoraleDrain += 0.04 * deltaMins;
-      }
-      if (isNeglectingPreferredBreak(state, state.timeMins)) {
-        passiveMoraleDrain += 0.025 * deltaMins;
-      }
-      if (state.player?.specsOn === false) {
-        passiveMoraleDrain *= 0.60;
-      }
-      if (passiveMoraleDrain > 0) {
-        state.morale = clamp(state.morale - passiveMoraleDrain, 0, 100);
-      }
-
-      // Uncleaned Cupboard 5 thiol glassware or uncapped waste drags Lab Condition
-      if (state.prep?.thiol_dirty || state.prep?.uncapped_waste) {
-        setLabCondition(state, getLabCondition(state) - 0.08 * deltaMins);
-      }
-      if (state.prep?.thiol_dirty) {
-        state.morale = Math.max(0, state.morale - 0.20 * deltaMins);
-      }
-    }
-
-    // 9. Door pls expiry
-    if (state.doorPls?.active && state.timeMins >= state.doorPls.expireMins) {
-      state.doorPls.active = false;
-    }
-
-    // 10. Advance NPC paths, portal hops & huddle locks proportionally during headless steps
-    if (!state._tickingRealTime) {
-      const stepsToAdvance = Math.max(1, Math.round(deltaMins * 1.4));
-      for (const npc of Object.values(state.npcs || {})) {
-        if ((npc.huddleLockTimer || 0) > 0) {
-          npc.huddleLockTimer = Math.max(0, npc.huddleLockTimer - deltaMins * 0.5);
-          if (npc.huddleLockTimer <= 0) finishNpcHuddleLock(state, npc);
+      // 3b. 17:00 AoE2 Event (25% daily chance Mon-Fri, skipped when random events suppressed)
+      if (!callbacks?.suppressRandomEvents && !state.postAuditCelebration && state.dayIdx >= 0 && state.dayIdx <= 4 && state.timeMins >= 17 * 60) {
+        const weekDayKey = `${state.weekNum || 1}_${state.dayIdx}`;
+        if (state._aoe2CheckedDayKey !== weekDayKey) {
+          state._aoe2CheckedDayKey = weekDayKey;
+          if (!state.fireAlarm?.active && Math.random() < 0.25) {
+            triggerAoe2Event(state, callbacks);
+          }
         }
-        if (npc.roomId === 'offsite') continue;
-        let remSteps = stepsToAdvance;
-        while (remSteps > 0) {
-          if (npc.path && npc.path.length > 0) {
-            const step = npc.path[0];
-            if (npc.path.length > 1 || !isOccupiedByCharacter(state, npc.roomId, step.x, step.y, npc.id, 0.48)) {
-              npc.x = step.x;
-              npc.y = step.y;
-              npc.dir = step.dir || npc.dir;
-              npc.path.shift();
-              remSteps--;
-              continue;
-            } else {
-              if (npc.pendingRoomTravel) {
-                const travel = npc.pendingRoomTravel;
-                const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
-                travel.waitSec = (travel.waitSec || 0) + (deltaMins / CLOCK_MINS_PER_REAL_SEC);
-                if (dist <= 1.85 || travel.waitSec >= 4.0) {
-                  completeNpcPortalHop(state, npc);
-                  if (npc.roomId === 'offsite') break;
-                  continue;
+      }
+      if (state.aoe2Event?.active && state.timeMins >= (state.aoe2Event.endMins || 18 * 60)) {
+        state.aoe2Event.active = false;
+      }
+
+      // 4. Morning Coffee Quartet WhatsApp drop (10:27 - 10:36)
+      if (!state._quartetWaToday && state.dayIdx >= 0 && state.dayIdx <= 4 && hour >= 10.45 && hour <= 10.62) {
+        state._quartetWaToday = true;
+        state._coffeePingToday = true;
+        const sender = pickNonPlayerBigChud(state, 'joao_nogueira', 'faiza_javaid');
+        pushWhatsApp(state, sender, "10:30 Gordon's coffee run leaving now — heading over with Nafsika and Vijay for twenty minutes.", callbacks);
+      }
+
+      // 5. 18:15 Evening Shift Toast
+      if (!state._eveningToastToday && hour >= 18.25) {
+        state._eveningToastToday = true;
+        const evSender = pickNonPlayerBigChud(state, 'daniel_richards', 'marcos_fernandez');
+        pushWhatsApp(state, evSender, '18:15 update: daytime shift heading out — Peter and Nafsika holding the fort in Lab 230.', callbacks);
+        if (!state.spectatorMode && callbacks.onToast) {
+          callbacks.onToast('18:15 Evening Shift: daytime crew packing up; Peter and Nafsika holding Lab 230.');
+        }
+      }
+
+      // 6. Thursday 18:00 Weekly Report Deadline & Friday 18:00 Manuscript Deadline
+      if (state.dayIdx === 3 && state.timeMins >= 18 * 60) {
+        evaluateWeeklyReportDeadline(state, callbacks);
+      }
+      if (state.dayIdx === 4 && state.timeMins >= 18 * 60) {
+        evaluateManuscriptDeadline(state, callbacks);
+      }
+
+      // 7. Decrement per-NPC player chat cooldowns
+      if (state.npcChatCooldowns) {
+        for (const [npcId, rem] of Object.entries(state.npcChatCooldowns)) {
+          const next = (Number(rem) || 0) - deltaMins;
+          if (next <= 0) delete state.npcChatCooldowns[npcId];
+          else state.npcChatCooldowns[npcId] = next;
+        }
+      }
+
+      // 8. Player Energy, Social, Morale & Lab Condition (paused during post-audit celebration)
+      if (!state.spectatorMode && !state.postAuditCelebration) {
+        const energyDrain = computeEnergyDrain(
+          state,
+          state.player?.id,
+          state.preferences,
+          state.player?.roomId,
+          Boolean(state.player?.headphonesOn),
+          hour,
+          deltaMins
+        );
+        state.energy = clamp(state.energy - energyDrain, 0, 100);
+
+        // Social drain when not actively in Coffee Quartet or shared Gordon's Café lunch
+        const inPlayerQuartet = Boolean(isCoffeeQuartetWindow(state)) && state.player?.roomId === 'gordons_cafe';
+        const inSharedLunch = state.activePlayerAction?.kind === 'lunch' && hasColleaguesInRoom(state, 'gordons_cafe', state.player?.id);
+        if (!inPlayerQuartet && !inSharedLunch) {
+          state.social = clamp((state.social ?? 84) - 0.085 * deltaMins, 0, 100);
+        }
+
+        // Passive Morale drain (lab stress in 2F/CIB + low social + preference neglect); Specs OFF reduces by 40%
+        const pRoom = state.player?.roomId || 'klb_2f';
+        let passiveMoraleDrain = 0;
+        if ((pRoom === 'klb_2f' || String(pRoom).startsWith('cib_')) && !state.fireAlarm?.active) {
+          passiveMoraleDrain += 0.025 * deltaMins;
+        }
+        if ((state.social ?? 84) < 30) {
+          passiveMoraleDrain += 0.04 * deltaMins;
+        }
+        if (isNeglectingPreferredBreak(state, state.timeMins)) {
+          passiveMoraleDrain += 0.025 * deltaMins;
+        }
+        if (state.player?.specsOn === false) {
+          passiveMoraleDrain *= 0.60;
+        }
+        if (passiveMoraleDrain > 0) {
+          state.morale = clamp(state.morale - passiveMoraleDrain, 0, 100);
+        }
+
+        // Uncleaned Cupboard 5 thiol glassware or uncapped waste drags Lab Condition
+        if (state.prep?.thiol_dirty || state.prep?.uncapped_waste) {
+          setLabCondition(state, getLabCondition(state) - 0.08 * deltaMins);
+        }
+        if (state.prep?.thiol_dirty) {
+          state.morale = Math.max(0, state.morale - 0.20 * deltaMins);
+        }
+      }
+
+      // 9. Door pls expiry
+      if (state.doorPls?.active && state.timeMins >= state.doorPls.expireMins) {
+        state.doorPls.active = false;
+      }
+
+      // 10. Advance NPC paths, portal hops & huddle locks proportionally during headless steps
+      if (!state._tickingRealTime) {
+        const stepsToAdvance = Math.max(1, Math.round(deltaMins * 1.65));
+        for (const npc of Object.values(state.npcs || {})) {
+          if ((npc.huddleLockTimer || 0) > 0) {
+            npc.huddleLockTimer = Math.max(0, npc.huddleLockTimer - deltaMins * 0.5);
+            if (npc.huddleLockTimer <= 0) finishNpcHuddleLock(state, npc);
+          }
+          if (npc.roomId === 'offsite') continue;
+          let remSteps = stepsToAdvance;
+          while (remSteps > 0) {
+            if (npc.path && npc.path.length > 0) {
+              const step = npc.path[0];
+              if (npc.path.length > 1 || !isOccupiedByCharacter(state, npc.roomId, step.x, step.y, npc.id, 0.48)) {
+                npc.x = step.x;
+                npc.y = step.y;
+                npc.dir = step.dir || npc.dir;
+                npc.path.shift();
+                remSteps--;
+                continue;
+              } else {
+                if (npc.pendingRoomTravel) {
+                  const travel = npc.pendingRoomTravel;
+                  const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
+                  travel.waitSec = (travel.waitSec || 0) + (deltaMins / CLOCK_MINS_PER_REAL_SEC);
+                  if (dist <= 1.85 || travel.waitSec >= 4.0) {
+                    completeNpcPortalHop(state, npc);
+                    if (npc.roomId === 'offsite') break;
+                    continue;
+                  }
                 }
+                const alt = findFreeWalkableNear(state, npc.roomId, step.x, step.y, npc.id, true);
+                if (alt) {
+                  npc.x = alt.x;
+                  npc.y = alt.y;
+                }
+                npc.path = [];
               }
-              const alt = findFreeWalkableNear(state, npc.roomId, step.x, step.y, npc.id, true);
-              if (alt) {
-                npc.x = alt.x;
-                npc.y = alt.y;
+            }
+            if (npc.pendingRoomTravel && (!npc.path || npc.path.length === 0)) {
+              const travel = npc.pendingRoomTravel;
+              const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
+              if (dist <= 1.85 || (travel.waitSec || 0) >= 4.0) {
+                completeNpcPortalHop(state, npc);
+                if (npc.roomId === 'offsite') break;
+                continue;
+              } else {
+                travel.waitSec = (travel.waitSec || 0) + (deltaMins / CLOCK_MINS_PER_REAL_SEC);
+                const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true) || travel.portalCell;
+                npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+                if (!npc.path || npc.path.length === 0) break;
+                continue;
               }
-              npc.path = [];
-            }
-          }
-          if (npc.pendingRoomTravel && (!npc.path || npc.path.length === 0)) {
-            const travel = npc.pendingRoomTravel;
-            const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
-            if (dist <= 1.85 || (travel.waitSec || 0) >= 4.0) {
-              completeNpcPortalHop(state, npc);
-              if (npc.roomId === 'offsite') break;
-              continue;
-            } else {
-              travel.waitSec = (travel.waitSec || 0) + (deltaMins / CLOCK_MINS_PER_REAL_SEC);
-              const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true) || travel.portalCell;
-              npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
-              if (!npc.path || npc.path.length === 0) break;
-              continue;
-            }
-          }
-          break;
-        }
-      }
-    }
-
-    // 11. Step autonomous NPCs & Coffee Quartet
-    syncNPCSchedules(state, false);
-    stepAllNpcAI(state, deltaMins);
-    if (!state._tickingRealTime && !callbacks?.suppressRandomEvents) {
-      // Headless weekly signature interactions across KLB 2F, 3F, and Gordon's Cafe
-      if (Math.random() < 0.08 * deltaMins) {
-        const sigRooms = ['klb_2f', 'klb_3f', 'gordons_cafe'].sort(() => Math.random() - 0.5);
-        for (const rm of sigRooms) {
-          const wRes = triggerWeeklySignatureInteraction(state, rm, { inPlace: true });
-          if (wRes && wRes.triggered) {
-            if (state.spectatorMode) {
-              state._queuedBubbles = [];
-              state.speechBubbles = [];
             }
             break;
           }
         }
       }
-      // Headless autonomous birthday wishes when active
-      if (state.birthday?.charId && Math.random() < 0.08 * deltaMins) {
-        const bId = state.birthday.charId;
-        const bEnt = resolveEntityById(state, bId);
-        const bRooms = ['klb_2f', 'klb_3f', 'gordons_cafe'];
-        const bFree = bEnt && bRooms.includes(bEnt.roomId) && (
-          (!state.spectatorMode && bEnt === state.player) ||
-          (!bEnt.pendingRoomTravel && (!bEnt.path || bEnt.path.length === 0) && (bEnt.huddleLockTimer || 0) <= 0)
-        );
-        if (bFree) {
-          const greeters = Object.values(state.npcs || {}).filter(n =>
-            n &&
-            n.id !== bId &&
-            n.roomId === bEnt.roomId &&
-            !['alex_king', 'claire_carmalt', 'safety_inspector'].includes(n.id) &&
-            !state.birthday.greetedBy?.[n.id] &&
-            !n.pendingRoomTravel &&
-            (!n.path || n.path.length === 0) &&
-            (n.huddleLockTimer || 0) <= 0 &&
-            n.sim?.currentAction?.kind !== 'quench'
-          );
-          if (greeters.length > 0) {
-            const g = greeters[Math.floor(Math.random() * greeters.length)];
-            const bRes = maybeTriggerBirthdayGreeting(state, g.id, bId, bEnt.roomId);
-            if (bRes && bRes.triggered && state.spectatorMode) {
-              state._queuedBubbles = [];
-              state.speechBubbles = [];
+
+      // 11. Step autonomous NPCs & Coffee Quartet
+      syncNPCSchedules(state, false, callbacks);
+      stepAllNpcAI(state, deltaMins);
+      if (!state._tickingRealTime && !callbacks?.suppressRandomEvents) {
+        // Headless weekly signature interactions across KLB 2F, 3F, and Gordon's Café
+        if (Math.random() < 0.08 * deltaMins) {
+          const sigRooms = ['klb_2f', 'klb_3f', 'gordons_cafe'].sort(() => Math.random() - 0.5);
+          for (const rm of sigRooms) {
+            const wRes = triggerWeeklySignatureInteraction(state, rm, { inPlace: true });
+            if (wRes && wRes.triggered) {
+              if (state.spectatorMode) {
+                state._queuedBubbles = [];
+                state.speechBubbles = [];
+              }
+              break;
             }
           }
         }
-      }
-      if (state.spectatorMode && Math.random() < 0.04 * deltaMins) {
-        if (triggerGroupHuddle(state)) {
-          state._queuedBubbles = [];
-          state.speechBubbles = [];
+        // Headless autonomous birthday wishes when active
+        if (state.birthday?.charId && Math.random() < 0.08 * deltaMins) {
+          const bId = state.birthday.charId;
+          const bEnt = resolveEntityById(state, bId);
+          const bRooms = ['klb_2f', 'klb_3f', 'gordons_cafe'];
+          const bFree = bEnt && bRooms.includes(bEnt.roomId) && (
+            (!state.spectatorMode && bEnt === state.player)
+              ? (!state.player.isMoving && !state.activePlayerAction)
+              : (!bEnt.pendingRoomTravel && (!bEnt.path || bEnt.path.length === 0) && (bEnt.huddleLockTimer || 0) <= 0)
+          );
+          if (bFree) {
+            const greeters = Object.values(state.npcs || {}).filter(n =>
+              n &&
+              n.id !== bId &&
+              n.roomId === bEnt.roomId &&
+              !['alex_king', 'claire_carmalt', 'safety_inspector'].includes(n.id) &&
+              !state.birthday.greetedBy?.[n.id] &&
+              !n.pendingRoomTravel &&
+              (!n.path || n.path.length === 0) &&
+              (n.huddleLockTimer || 0) <= 0 &&
+              n.sim?.currentAction?.kind !== 'quench' &&
+              (state.spectatorMode || bEnt !== state.player || Math.hypot(n.x - state.player.x, n.y - state.player.y) <= 4.2)
+            );
+            if (greeters.length > 0) {
+              const g = greeters[Math.floor(Math.random() * greeters.length)];
+              const bRes = maybeTriggerBirthdayGreeting(state, g.id, bId, bEnt.roomId);
+              if (bRes && bRes.triggered && state.spectatorMode) {
+                state._queuedBubbles = [];
+                state.speechBubbles = [];
+              }
+            }
+          }
+        }
+        if (state.spectatorMode && Math.random() < 0.04 * deltaMins) {
+          if (triggerGroupHuddle(state)) {
+            state._queuedBubbles = [];
+            state.speechBubbles = [];
+          }
+        }
+        if (state.spectatorMode) {
+          const headlessDt = deltaMins / CLOCK_MINS_PER_REAL_SEC;
+          for (const b of state.speechBubbles || []) b.ttlSec -= headlessDt;
+          state.speechBubbles = (state.speechBubbles || []).filter(b => b.ttlSec > 0);
+          for (const qb of state._queuedBubbles || []) qb.delaySec -= headlessDt;
+          state._queuedBubbles = (state._queuedBubbles || []).filter(qb => qb.delaySec > 0);
         }
       }
-      if (state.spectatorMode) {
-        const headlessDt = deltaMins / CLOCK_MINS_PER_REAL_SEC;
-        for (const b of state.speechBubbles || []) b.ttlSec -= headlessDt;
-        state.speechBubbles = (state.speechBubbles || []).filter(b => b.ttlSec > 0);
-        for (const qb of state._queuedBubbles || []) qb.delaySec -= headlessDt;
-        state._queuedBubbles = (state._queuedBubbles || []).filter(qb => qb.delaySec > 0);
-      }
-    }
-    syncVisibleReactionsCache(state);
+      syncVisibleReactionsCache(state);
 
-    // 12. Queued WhatsApp banter replies
-    if (state._queuedWaReplies && state._queuedWaReplies.length) {
-      const remaining = [];
-      for (const q of state._queuedWaReplies) {
-        q.delayMins -= deltaMins;
-        if (q.delayMins <= 0) {
-          pushWhatsApp(state, q.senderId, q.text);
+      // 12. Queued WhatsApp banter replies
+      if (state._queuedWaReplies && state._queuedWaReplies.length) {
+        const remaining = [];
+        for (const q of state._queuedWaReplies) {
+          q.delayMins -= deltaMins;
+          if (q.delayMins <= 0) {
+            pushWhatsApp(state, q.senderId, q.text, callbacks);
+          } else {
+            remaining.push(q);
+          }
+        }
+        state._queuedWaReplies = remaining;
+      }
+
+      // 13. Ambient WhatsApp banter & environment/proximity events
+      state.banterCooldownMins -= deltaMins;
+      if (state.banterCooldownMins <= 0) {
+        state.banterCooldownMins = 28 + Math.random() * 30;
+        triggerAmbientBanter(state);
+      }
+
+      state.eventCooldownMins -= deltaMins;
+      if (
+        state.eventCooldownMins <= 0 &&
+        !callbacks?.suppressRandomEvents &&
+        !state.postAuditCelebration &&
+        !state.spectatorMode &&
+        !state.fireAlarm?.active &&
+        hour >= 8.5 &&
+        hour <= 19.2
+      ) {
+        state.eventCooldownMins = 175 + Math.random() * 110;
+        triggerRandomKLBEvent(state, callbacks);
+      }
+
+      // 14. 19:30 Daily Security Lockup / Rollover (paused during celebration)
+      if (!state.postAuditCelebration && state.timeMins >= CURFEW_MINS) {
+        if (!state.spectatorMode && callbacks.onForceEndOfDay) {
+          callbacks.onForceEndOfDay();
         } else {
-          remaining.push(q);
+          rollToNextDay(state, callbacks, true);
         }
       }
-      state._queuedWaReplies = remaining;
-    }
 
-    // 13. Ambient WhatsApp banter & environment/proximity events
-    state.banterCooldownMins -= deltaMins;
-    if (state.banterCooldownMins <= 0) {
-      state.banterCooldownMins = 28 + Math.random() * 30;
-      triggerAmbientBanter(state);
+      // 15. Permadeath check (player mode only)
+      checkPermadeath(state, callbacks);
+    } finally {
+      if (prevCb) state._activeCallbacks = prevCb;
+      else delete state._activeCallbacks;
     }
-
-    state.eventCooldownMins -= deltaMins;
-    if (state.eventCooldownMins <= 0 && !callbacks?.suppressRandomEvents && !state.spectatorMode && !state.fireAlarm?.active && hour >= 8.5 && hour <= 19.2) {
-      state.eventCooldownMins = 175 + Math.random() * 110;
-      triggerRandomKLBEvent(state, callbacks);
-    }
-
-    // 14. 19:30 Daily Security Lockup / Rollover
-    if (state.timeMins >= CURFEW_MINS) {
-      if (!state.spectatorMode && callbacks.onForceEndOfDay) {
-        callbacks.onForceEndOfDay();
-      } else {
-        rollToNextDay(state, callbacks, true);
-      }
-    }
-
-    // 15. Permadeath check (player mode only)
-    checkPermadeath(state, callbacks);
   }
 
   const AOE2_BANTER_LINES = {
@@ -5817,7 +6421,7 @@ window.KLB = window.KLB || {};
       'Wait until Imperial Age, nobody survives these Paladin waves.'
     ],
     andre_shamsabadi: [
-      'Walling the choke point now -- do NOT look at my eco score!',
+      'Walling the choke point now — do NOT look at my eco score!',
       'Quick poll: Black Forest treaty 20 mins or immediate feudal rush?'
     ],
     antoine_maruani: [
@@ -5841,7 +6445,7 @@ window.KLB = window.KLB || {};
     const cqWin = isCoffeeQuartetWindow(state);
     const cqMembers = window.KLB.COFFEE_QUARTET?.members || [];
 
-    // 1. Coffee Quartet single-bubble turn-taking in Gordon's Cafe
+    // 1. Coffee Quartet single-bubble turn-taking in Gordon's Café
     if (cqWin && viewRoom === 'gordons_cafe') {
       const cqNpcs = cqMembers
         .map(id => state.npcs?.[id])
@@ -5942,202 +6546,288 @@ window.KLB = window.KLB || {};
     dt = Math.min(0.1, Math.max(0, Number(dt) || 0));
     if (dt <= 0) return;
 
-    const simDelta = dt * CLOCK_MINS_PER_REAL_SEC;
-
-    // Smooth 60 FPS float progression for jobs, player actions, fire alarm & NPC strips
-    advanceActiveJobs(state, simDelta, callbacks);
-    advancePlayerAction(state, simDelta, callbacks);
-    advanceFireAlarm(state, simDelta, callbacks);
-    tickNpcJobsAndActions(state, simDelta);
-
-    // Integer-minute accumulator for AI scheduling, meters, events & clock
-    state.realSecAccum = (state.realSecAccum || 0) + simDelta;
-    if (state.realSecAccum + 1e-9 >= 1.0) {
-      const mins = Math.floor(state.realSecAccum + 1e-9);
-      state.realSecAccum = Math.max(0, state.realSecAccum - mins);
-      state._tickingRealTime = true;
-      try {
-        advanceMinutes(state, mins, callbacks);
-      } finally {
-        state._tickingRealTime = false;
-      }
-    }
-
-    // Decay speech bubbles & process staggered huddle bubbles
-    for (const b of state.speechBubbles) b.ttlSec -= dt;
-    state.speechBubbles = state.speechBubbles.filter(b => b.ttlSec > 0);
-
-    if (state._queuedBubbles && state._queuedBubbles.length) {
-      const keep = [];
-      for (const qb of state._queuedBubbles) {
-        qb.delaySec -= dt;
-        if (qb.delaySec <= 0) {
-          const isPlayerSpk = !state.spectatorMode && state.player?.id === qb.entityId;
-          const spk = isPlayerSpk ? state.player : state.npcs?.[qb.entityId];
-          if (spk && spk.roomId === qb.roomId && !state.fireAlarm?.active) {
-            if (qb.partnerIds) {
-              const partners = qb.partnerIds
-                .map(id => (!state.spectatorMode && state.player?.id === id) ? state.player : state.npcs?.[id])
-                .filter(p => p && p.roomId === qb.roomId);
-              faceEachOther(partners);
+    const prevCb = state._activeCallbacks;
+    state._activeCallbacks = callbacks;
+    try {
+      // Release player-locked NPCs when changing rooms or walking > 4.2 tiles away
+      if (!state.spectatorMode && state.player) {
+        const curPRoom = state.player.roomId;
+        const roomChanged = Boolean(state._lastPlayerRoomId && state._lastPlayerRoomId !== curPRoom);
+        state._lastPlayerRoomId = curPRoom;
+        if (roomChanged) {
+          endPlayerConversations(state, null, { changingRooms: true });
+        }
+        for (const npc of Object.values(state.npcs || {})) {
+          if (!npc?.huddleTarget?.partnerIds?.includes(state.player.id)) continue;
+          const dist = Math.hypot(npc.x - state.player.x, npc.y - state.player.y);
+          if (npc.roomId !== curPRoom || dist > 4.2) {
+            const diffRoom = npc.roomId !== curPRoom;
+            npc.huddleLockTimer = 0;
+            npc.huddleTarget = null;
+            if (Array.isArray(state._queuedBubbles) && state._queuedBubbles.length) {
+              state._queuedBubbles = state._queuedBubbles.filter(qb => {
+                if (!qb) return false;
+                const involvesNpc = qb.entityId === npc.id || (Array.isArray(qb.partnerIds) && qb.partnerIds.includes(npc.id));
+                const involvesPlayer = qb.entityId === state.player.id || (Array.isArray(qb.partnerIds) && qb.partnerIds.includes(state.player.id));
+                if (involvesNpc || (diffRoom && involvesPlayer)) return false;
+                return true;
+              });
             }
-            const bubbleTtl = qb.ttlSec || calcBubbleTtl(qb.text);
-            pushBubble(state, qb.entityId, qb.roomId, qb.text, bubbleTtl, {
-              convoId: qb.convoId || null,
-              partnerIds: qb.partnerIds || null
-            });
-            if (!isPlayerSpk) spk.currentTaskSpeech = qb.text;
+            if (diffRoom && Array.isArray(state.speechBubbles) && state.speechBubbles.length) {
+              state.speechBubbles = state.speechBubbles.filter(b => {
+                if (!b) return false;
+                const involves = b.entityId === npc.id || b.entityId === state.player.id ||
+                  (Array.isArray(b.partnerIds) && (b.partnerIds.includes(npc.id) || b.partnerIds.includes(state.player.id)));
+                if (involves && b.roomId && b.roomId !== curPRoom) return false;
+                return true;
+              });
+            }
           }
-        } else {
-          keep.push(qb);
         }
       }
-      state._queuedBubbles = keep;
-    }
 
-    // Safety sweep real-time countdown
-    if (state.safetySweep?.active) {
-      state.safetySweep.countdownSec -= dt;
-      if (state.safetySweep.countdownSec <= 0) {
-        state.safetySweep.active = false;
-        evaluateSafetySweep(state, callbacks);
-      }
-    }
+      const simDelta = dt * CLOCK_MINS_PER_REAL_SEC;
 
-    const viewRoom = getViewRoom(state);
+      // Smooth 60 FPS float progression for jobs, player actions, fire alarm & NPC strips
+      advanceActiveJobs(state, simDelta, callbacks);
+      advancePlayerAction(state, simDelta, callbacks);
+      advanceFireAlarm(state, simDelta, callbacks);
+      tickNpcJobsAndActions(state, simDelta);
 
-    // Group turn-taking conversations & social group huddles in the viewed room
-    tickGroupRoomConversations(state, dt, viewRoom);
-    state.huddleCooldownSec = (state.huddleCooldownSec ?? 2.5) - dt;
-    if (state.huddleCooldownSec <= 0) {
-      state.huddleCooldownSec = 8 + Math.random() * 5;
-      triggerGroupHuddle(state);
-    }
-
-    // Move autonomous NPCs along BFS paths with energy-scaled speed, entity collision, portal hops & anti-deadlock
-    for (const npc of Object.values(state.npcs || {})) {
-      if (npc.roomId === 'offsite' || !window.KLB.WORLD_MAPS?.rooms?.[npc.roomId]) continue;
-
-      if ((npc.huddleLockTimer || 0) > 0) {
-        npc.huddleLockTimer = Math.max(0, npc.huddleLockTimer - dt);
-        if (npc.huddleLockTimer <= 0) finishNpcHuddleLock(state, npc);
+      // Integer-minute accumulator for AI scheduling, meters, events & clock
+      state.realSecAccum = (state.realSecAccum || 0) + simDelta;
+      if (state.realSecAccum + 1e-9 >= 1.0) {
+        const mins = Math.floor(state.realSecAccum + 1e-9);
+        state.realSecAccum = Math.max(0, state.realSecAccum - mins);
+        state._tickingRealTime = true;
+        try {
+          advanceMinutes(state, mins, callbacks);
+        } finally {
+          state._tickingRealTime = false;
+        }
       }
 
-      if (npc.path && npc.path.length > 0) {
-        const next = npc.path[0];
-        const npcEnergy = npc.sim?.energy ?? 85;
-        const energyFactor = 0.75 + 0.25 * (clamp(npcEnergy, 0, 100) / 100);
-        const speed = (state.mutators?.infinite_espresso ? 3.4 : 2.8) * energyFactor * dt;
-        const dx = next.x - npc.x;
-        const dy = next.y - npc.y;
-        const dist = Math.hypot(dx, dy);
-        npc.dir = next.dir || npc.dir;
+      // Decay speech bubbles & process staggered huddle bubbles
+      for (const b of state.speechBubbles) b.ttlSec -= dt;
+      state.speechBubbles = state.speechBubbles.filter(b => b.ttlSec > 0);
 
-        let nx;
-        let ny;
-        if (dist <= speed) {
-          nx = next.x;
-          ny = next.y;
-        } else {
-          nx = npc.x + (dx / dist) * speed;
-          ny = npc.y + (dy / dist) * speed;
+      if (state._queuedBubbles && state._queuedBubbles.length) {
+        const keep = [];
+        for (const qb of state._queuedBubbles) {
+          qb.delaySec -= dt;
+          if (qb.delaySec <= 0) {
+            const isPlayerSpk = !state.spectatorMode && state.player?.id === qb.entityId;
+            const spk = isPlayerSpk ? state.player : state.npcs?.[qb.entityId];
+            if (spk && spk.roomId === qb.roomId && !state.fireAlarm?.active) {
+              if (qb.partnerIds) {
+                const npcPartnerIds = qb.partnerIds.filter(id => state.spectatorMode || id !== state.player?.id);
+                faceNpcsTowardNearbyPartners(state, npcPartnerIds, qb.partnerIds, qb.roomId, 3.5);
+              }
+              const bubbleTtl = qb.ttlSec || calcBubbleTtl(qb.text);
+              pushBubble(state, qb.entityId, qb.roomId, qb.text, bubbleTtl, {
+                convoId: qb.convoId || null,
+                partnerIds: qb.partnerIds || null
+              });
+              if (!isPlayerSpk) spk.currentTaskSpeech = qb.text;
+            }
+          } else {
+            keep.push(qb);
+          }
+        }
+        state._queuedBubbles = keep;
+      }
+
+      // Safety sweep real-time countdown
+      if (state.safetySweep?.active) {
+        state.safetySweep.countdownSec -= dt;
+        state.safetySweep.countdownMins = Math.max(0, Math.round(state.safetySweep.countdownSec * CLOCK_MINS_PER_REAL_SEC * 10) / 10);
+        if (state.safetySweep.countdownSec <= 0) {
+          state.safetySweep.active = false;
+          evaluateSafetySweep(state, callbacks);
+        }
+      }
+
+      const viewRoom = getViewRoom(state);
+
+      // Group turn-taking conversations & social group huddles in the viewed room
+      tickGroupRoomConversations(state, dt, viewRoom);
+      state.huddleCooldownSec = (state.huddleCooldownSec ?? 2.5) - dt;
+      if (state.huddleCooldownSec <= 0) {
+        state.huddleCooldownSec = 8 + Math.random() * 5;
+        triggerGroupHuddle(state);
+      }
+
+      // Move autonomous NPCs along BFS paths with energy-scaled speed, entity collision, portal hops & anti-deadlock
+      for (const npc of Object.values(state.npcs || {})) {
+        if (npc.roomId === 'offsite' || !window.KLB.WORLD_MAPS?.rooms?.[npc.roomId]) continue;
+
+        if ((npc.huddleLockTimer || 0) > 0) {
+          npc.huddleLockTimer = Math.max(0, npc.huddleLockTimer - dt);
+          if (npc.huddleLockTimer <= 0) finishNpcHuddleLock(state, npc);
         }
 
-        if (!isOccupiedByCharacter(state, npc.roomId, nx, ny, npc.id, 0.48)) {
-          npc.x = nx;
-          npc.y = ny;
-          npc.blockedSec = 0;
-          npc.blockedCount = 0;
-          npc.walkAnimTimer = (npc.walkAnimTimer || 0) + dt * 7;
-          npc.walkFrame = Math.floor(npc.walkAnimTimer) % 4;
+        if (npc.path && npc.path.length > 0) {
+          const next = npc.path[0];
+          const npcEnergy = npc.sim?.energy ?? 85;
+          const energyFactor = 0.75 + 0.25 * (clamp(npcEnergy, 0, 100) / 100);
+          const speed = (state.mutators?.infinite_espresso ? 3.4 : 2.8) * energyFactor * dt;
+          const dx = next.x - npc.x;
+          const dy = next.y - npc.y;
+          const dist = Math.hypot(dx, dy);
+          npc.dir = next.dir || npc.dir;
+
+          let nx;
+          let ny;
           if (dist <= speed) {
-            npc.path.shift();
+            nx = next.x;
+            ny = next.y;
+          } else {
+            nx = npc.x + (dx / dist) * speed;
+            ny = npc.y + (dy / dist) * speed;
           }
-        } else {
-          npc.walkFrame = 0;
-          npc.blockedSec = (npc.blockedSec || 0) + dt;
-          if (npc.pendingRoomTravel) {
-            npc.pendingRoomTravel.waitSec = (npc.pendingRoomTravel.waitSec || 0) + dt;
-            const pDist = Math.hypot(npc.x - npc.pendingRoomTravel.portalCell.x, npc.y - npc.pendingRoomTravel.portalCell.y);
-            if (pDist <= 1.85 || npc.pendingRoomTravel.waitSec >= 5.5) {
-              completeNpcPortalHop(state, npc);
-              continue;
-            }
-          }
-          if (npc.blockedSec > 0.55) {
-            npc.blockedSec = 0;
-            npc.blockedCount = (npc.blockedCount || 0) + 1;
-            const goal = npc.path[npc.path.length - 1];
-            const newPath = goal
-              ? findPathBFS(npc.roomId, npc.x, npc.y, goal.x, goal.y, 65, state, npc.id)
-              : [];
 
-            if (newPath.length > 0 && !isOccupiedByCharacter(state, npc.roomId, newPath[0].x, newPath[0].y, npc.id, 0.48)) {
-              npc.path = newPath;
-            } else {
-              const aside = findFreeWalkableNear(state, npc.roomId, Math.round(npc.x), Math.round(npc.y), npc.id, false);
-              if (aside && (aside.x !== Math.round(npc.x) || aside.y !== Math.round(npc.y))) {
-                const asideDir = dirBetween(npc.x, npc.y, aside.x, aside.y) || npc.dir;
-                if (npc.blockedCount >= 2 || !goal) {
-                  npc.path = [{ x: aside.x, y: aside.y, dir: asideDir }];
-                  npc.blockedCount = 0;
-                } else {
-                  npc.path = [{ x: aside.x, y: aside.y, dir: asideDir }].concat(
-                    findPathBFS(npc.roomId, aside.x, aside.y, goal.x, goal.y, 65, state, npc.id)
-                  );
-                }
+          if (!isOccupiedByCharacter(state, npc.roomId, nx, ny, npc.id, 0.48)) {
+            npc.x = nx;
+            npc.y = ny;
+            npc.blockedSec = 0;
+            npc.blockedCount = 0;
+            npc.walkAnimTimer = (npc.walkAnimTimer || 0) + dt * 7;
+            npc.walkFrame = Math.floor(npc.walkAnimTimer) % 4;
+            if (dist <= speed) {
+              npc.path.shift();
+              if (npc.path.length === 0) {
+                npc._retryTarget = null;
+                npc._retryCount = 0;
+              }
+            }
+          } else {
+            npc.walkFrame = 0;
+            npc.blockedSec = (npc.blockedSec || 0) + dt;
+            if (npc.pendingRoomTravel) {
+              npc.pendingRoomTravel.waitSec = (npc.pendingRoomTravel.waitSec || 0) + dt;
+              const pDist = Math.hypot(npc.x - npc.pendingRoomTravel.portalCell.x, npc.y - npc.pendingRoomTravel.portalCell.y);
+              if (pDist <= 1.85 || npc.pendingRoomTravel.waitSec >= 5.5) {
+                completeNpcPortalHop(state, npc);
+                continue;
+              }
+            }
+            if (npc.blockedSec > 0.55) {
+              npc.blockedSec = 0;
+              npc.blockedCount = (npc.blockedCount || 0) + 1;
+              const goal = npc.path[npc.path.length - 1] || npc._retryTarget;
+              if (goal) {
+                npc._retryTarget = { roomId: npc.roomId, x: goal.x, y: goal.y };
+              }
+              const newPath = goal
+                ? findPathBFS(npc.roomId, npc.x, npc.y, goal.x, goal.y, 65, state, npc.id)
+                : [];
+
+              if (newPath.length > 0 && !isOccupiedByCharacter(state, npc.roomId, newPath[0].x, newPath[0].y, npc.id, 0.48)) {
+                npc.path = newPath;
               } else {
-                npc.path = [];
-                npc.blockedCount = 0;
+                const aside = findFreeWalkableNear(state, npc.roomId, Math.round(npc.x), Math.round(npc.y), npc.id, false);
+                if (aside && (aside.x !== Math.round(npc.x) || aside.y !== Math.round(npc.y))) {
+                  const asideDir = dirBetween(npc.x, npc.y, aside.x, aside.y) || npc.dir;
+                  const afterAside = goal
+                    ? findPathBFS(npc.roomId, aside.x, aside.y, goal.x, goal.y, 65, state, npc.id)
+                    : [];
+                  if (afterAside.length > 0) {
+                    npc.path = [{ x: aside.x, y: aside.y, dir: asideDir }].concat(afterAside);
+                    npc.blockedCount = 0;
+                  } else {
+                    npc.path = [{ x: aside.x, y: aside.y, dir: asideDir }];
+                    npc.blockedCount = 0;
+                    npc._retryTimerSec = 0.35;
+                  }
+                } else {
+                  npc.path = [];
+                  npc.blockedCount = 0;
+                  npc._retryTimerSec = 0.45;
+                }
               }
             }
           }
-        }
-      } else {
-        npc.walkFrame = 0;
+        } else {
+          npc.walkFrame = 0;
 
-        if (npc.pendingRoomTravel) {
-          const travel = npc.pendingRoomTravel;
-          const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
-          if (dist <= 1.85 || (travel.waitSec || 0) >= 4.0) {
-            completeNpcPortalHop(state, npc);
-          } else {
-            travel.waitSec = (travel.waitSec || 0) + dt;
-            const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true) || travel.portalCell;
-            npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+          if (npc.pendingRoomTravel) {
+            const travel = npc.pendingRoomTravel;
+            const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
+            if (dist <= 1.85 || (travel.waitSec || 0) >= 4.0) {
+              completeNpcPortalHop(state, npc);
+            } else {
+              travel.waitSec = (travel.waitSec || 0) + dt;
+              const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true) || travel.portalCell;
+              npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+            }
+            continue;
           }
-          continue;
-        }
 
-        if (npc.huddleTarget && (npc.huddleLockTimer || 0) > 0) {
-          const partners = (npc.huddleTarget.partnerIds || [])
-            .map(id => (!state.spectatorMode && state.player?.id === id) ? state.player : state.npcs?.[id])
-            .filter(p => p && p.roomId === npc.roomId);
-          faceEachOther(partners);
+          if (npc._retryTarget) {
+            if (npc._retryTarget.roomId !== npc.roomId || Math.hypot(npc.x - npc._retryTarget.x, npc.y - npc._retryTarget.y) <= 1.2) {
+              npc._retryTarget = null;
+              npc._retryCount = 0;
+            } else {
+              npc._retryTimerSec = (npc._retryTimerSec ?? 0) - dt;
+              if (npc._retryTimerSec <= 0) {
+                const retryPath = findPathBFS(npc.roomId, npc.x, npc.y, npc._retryTarget.x, npc._retryTarget.y, 65, state, npc.id);
+                if (retryPath.length > 0) {
+                  npc.path = retryPath;
+                  npc._retryCount = 0;
+                } else {
+                  npc._retryCount = (npc._retryCount || 0) + 1;
+                  npc._retryTimerSec = 0.45;
+                  if (npc._retryCount >= 8) {
+                    npc._retryTarget = null;
+                    npc._retryCount = 0;
+                    if (npc.sim) {
+                      if (npc.sim.currentAction && distToActionTarget(npc, npc.sim.currentAction) > 2.4) {
+                        npc.sim.currentAction = null;
+                        npc.busyObjId = null;
+                      }
+                      if (npc.sim.pendingJobStart && distToActionTarget(npc, npc.sim.pendingJobStart.jobSpec) > 2.4) {
+                        npc.sim.pendingJobStart = null;
+                        npc.busyObjId = null;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          if (npc.huddleTarget && (npc.huddleLockTimer || 0) > 0) {
+            faceNpcsTowardNearbyPartners(state, [npc.id], npc.huddleTarget.partnerIds || [], npc.roomId, 3.5);
+          }
         }
       }
-    }
 
-    // Check if Vijay reached player during bench round
-    if (!state.spectatorMode && state.vijayRound?.active && !state.vijayRound.checkedPlayer) {
-      const vj = state.npcs?.vijay_chudasama;
-      if (vj && vj.roomId === state.player?.roomId) {
-        const d = Math.hypot(vj.x - state.player.x, vj.y - state.player.y);
-        if (d < 2.4 || !vj.path || vj.path.length === 0) {
-          state.vijayRound.checkedPlayer = true;
-          state.vijayRound.active = false;
-          resolveVijayBenchCheck(state, callbacks);
-          vj.departAtMins = state.timeMins + 4;
+      // Check if Vijay reached player during bench round (strictly inside KLB 2F!)
+      if (!state.spectatorMode && state.vijayRound?.active && !state.vijayRound.checkedPlayer) {
+        const vj = state.npcs?.vijay_chudasama;
+        if (vj && vj.roomId === 'klb_2f' && state.player?.roomId === 'klb_2f') {
+          const d = Math.hypot(vj.x - state.player.x, vj.y - state.player.y);
+          if (d < 2.4 || (!vj.pendingRoomTravel && (!vj.path || vj.path.length === 0))) {
+            state.vijayRound.checkedPlayer = true;
+            state.vijayRound.active = false;
+            resolveVijayBenchCheck(state, callbacks);
+            vj.departAtMins = state.timeMins + 4;
+          }
         }
       }
-    }
 
-    syncVisibleReactionsCache(state);
+      syncVisibleReactionsCache(state);
+    } finally {
+      if (prevCb) state._activeCallbacks = prevCb;
+      else delete state._activeCallbacks;
+    }
   }
 
-  function resolveVijayBenchCheck(state, callbacks) {
+  function resolveVijayBenchCheck(state, callbacks = {}) {
+    const vj = state?.npcs?.vijay_chudasama;
+    if (!state || !vj || vj.roomId !== 'klb_2f' || state.player?.roomId !== 'klb_2f') return false;
     const hasRunning = ((state.activeStationJobs || []).length + (state.activeReactions || []).length) > 0;
-    const specsOk = state.player?.roomId !== 'klb_2f' || state.player?.specsOn;
+    const specsOk = Boolean(state.player?.specsOn);
     const convoMeta = {
       convoId: 'vijay_bench_round',
       partnerIds: state.player?.id ? ['vijay_chudasama', state.player.id] : ['vijay_chudasama']
@@ -6151,11 +6841,12 @@ window.KLB = window.KLB || {};
     } else {
       state.patience = Math.max(0, state.patience - 10);
       state.morale = Math.max(0, state.morale - 6);
-      const vLine = 'That is suboptimal -- one word. Pick up the pace!';
+      const vLine = 'That is suboptimal — one word. Pick up the pace!';
       pushBubble(state, 'vijay_chudasama', 'klb_2f', vLine, calcBubbleTtl(vLine), convoMeta);
       if (callbacks.onToast) callbacks.onToast('Vijay raised an eyebrow at your bench progress (-10 Patience).');
     }
     checkPermadeath(state, callbacks);
+    return true;
   }
 
   function checkPermadeath(state, callbacks = {}) {
@@ -6525,9 +7216,11 @@ window.KLB = window.KLB || {};
     maybeTriggerBirthdayGreeting,
     triggerWeeklySignatureInteraction,
     startPairConversation,
+    endPlayerConversations,
     triggerSampleRunCourtesy,
     interpolateWeeklyText,
     scheduleMultiTurnConversation,
+    resetBigChudsWeeklySims,
     satisfyHabit,
     applySocialInteraction,
     applyBreakEffects,
@@ -6541,6 +7234,7 @@ window.KLB = window.KLB || {};
     setLabCondition,
     getPortalHop,
     completeNpcPortalHop,
+    triggerSafetySweep,
     evaluateSafetySweep,
     evaluateWeeklyReportDeadline,
     evaluateManuscriptDeadline,

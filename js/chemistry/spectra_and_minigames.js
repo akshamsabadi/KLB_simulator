@@ -164,7 +164,43 @@ window.KLB = window.KLB || {};
   // =========================================================================
   // A. PROCEDURAL SPECTRA & GEL RENDERER (window.KLB.Spectra)
   // =========================================================================
-  function renderToCanvas(canvas, rawItem) {
+  function setupHiDpiCanvas(canvas, cssW, cssH) {
+    if (!canvas) return { ctx: null, dpr: 1, w: Number(cssW) || 680, h: Number(cssH) || 300 };
+    const dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
+    const w = Math.max(1, Number(cssW) || 680);
+    const h = Math.max(1, Number(cssH) || 300);
+    const backW = Math.round(w * dpr);
+    const backH = Math.round(h * dpr);
+    canvas.width = backW;
+    canvas.height = backH;
+    canvas._klbCssW = w;
+    canvas._klbCssH = h;
+    canvas._klbBackW = backW;
+    canvas._klbBackH = backH;
+    if (canvas.style) {
+      canvas.style.imageRendering = 'auto';
+      if (!canvas.style.width) canvas.style.width = `${w}px`;
+      if (!canvas.style.height) canvas.style.height = `${h}px`;
+    }
+    const ctx = canvas.getContext ? canvas.getContext('2d') : null;
+    if (ctx && typeof ctx.setTransform === 'function') {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    return { ctx, dpr, w, h };
+  }
+
+  function fitCanvasText(ctx, text, maxWidth) {
+    const raw = String(text || '');
+    if (!ctx || typeof ctx.measureText !== 'function' || maxWidth <= 0) return raw;
+    if (ctx.measureText(raw).width <= maxWidth) return raw;
+    let out = raw;
+    while (out.length > 2 && ctx.measureText(`${out}…`).width > maxWidth) {
+      out = out.slice(0, -1);
+    }
+    return `${out}…`;
+  }
+
+  function renderToCanvas(canvas, rawItem, opts) {
     if (!canvas || !canvas.getContext) return;
     const item = Object.assign({
       id: 'spec_preview',
@@ -179,12 +215,12 @@ window.KLB = window.KLB || {};
       notes: ''
     }, rawItem || {});
 
-    // Smooth vector rendering for spectra & labels (override pixel-art rule on world canvas)
-    canvas.style.imageRendering = 'auto';
+    const sameBack = canvas._klbCssW && canvas.width === canvas._klbBackW && canvas.height === canvas._klbBackH;
+    const cssW = (opts && Number(opts.width)) || (sameBack ? canvas._klbCssW : (Number(canvas.width) || 680));
+    const cssH = (opts && Number(opts.height)) || (sameBack ? canvas._klbCssH : (Number(canvas.height) || 300));
+    const { ctx, w, h } = setupHiDpiCanvas(canvas, cssW, cssH);
+    if (!ctx) return;
 
-    const w = canvas.width || 680;
-    const h = canvas.height || 300;
-    const ctx = canvas.getContext('2d');
     ctx.save();
     ctx.clearRect(0, 0, w, h);
 
@@ -210,12 +246,210 @@ window.KLB = window.KLB || {};
     return Number.isFinite(n) ? clamp(n, 0, 100) : fallback;
   }
 
-  // -------------------- 1. UV 254 nm / KMnO4 SILICA TLC PLATE --------------------
+  // -------------------- 1. TLC / LATERAL-FLOW / ELLMAN DTNB UV-VIS --------------------
   function drawTlcPlate(ctx, w, h, item, rng) {
     const compact = w < 440;
     const q = getQuality(item, 80);
     const poor = q < 78;
-    const isKmno4 = /kmno4|permanganate|char/i.test(`${item.stain || ''} ${item.notes || ''}`) && !/uv/i.test(item.stain || '');
+    const tlcMeta = `${item.stain || ''} ${item.label || ''} ${item.productPeak || ''} ${item.notes || ''} ${item.metricLabel || ''}`;
+
+    // 1A) Lateral-Flow Nitrocellulose Strip (dan_step_5)
+    if (/lateral.?flow|nc-?95/i.test(tlcMeta)) {
+      ctx.fillStyle = '#090e1a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(0, 0, w, compact ? 20 : 26);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = `bold ${compact ? 9.5 : 11.5}px Consolas, monospace`;
+      ctx.textAlign = 'left';
+      ctx.fillText(
+        compact ? 'NC-95 Lateral Flow' : 'NC-95 Lateral-Flow Strip Array • HER2 (0–50 nM)',
+        10,
+        compact ? 14 : 18
+      );
+      drawTopMetaMetrics(ctx, w, item, compact, compact ? 14 : 18, compact ? 8 : 12);
+
+      const strips = [
+        { title: '50 nM HER2', y: compact ? 36 : 52, sh: compact ? 34 : 58, hasTest: true, testInt: poor ? 0.42 : 0.95 },
+        { title: '0 nM Blank', y: compact ? 84 : 136, sh: compact ? 34 : 58, hasTest: poor, testInt: poor ? 0.35 : 0 }
+      ];
+      const sx = compact ? 14 : 26;
+      const sw = w - sx - (compact ? 114 : 200);
+      const padW = sw * 0.17;
+      const conjW = sw * 0.14;
+      const wickW = sw * 0.17;
+      const ncX = sx + padW + conjW;
+      const ncW = sw - padW - conjW - wickW;
+
+      strips.forEach(st => {
+        // Cassette backing
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(sx - 4, st.y - 4, sw + 8, st.sh + 8);
+        // Sample pad
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(sx, st.y, padW, st.sh);
+        // AuNP conjugate pad
+        ctx.fillStyle = '#fda4af';
+        ctx.fillRect(sx + padW, st.y, conjW, st.sh);
+        // White NC-95 nitrocellulose strip
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(ncX, st.y, ncW, st.sh);
+        // Absorbent wick
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(ncX + ncW, st.y, wickW, st.sh);
+
+        if (poor) {
+          ctx.fillStyle = 'rgba(190, 18, 60, 0.16)';
+          ctx.fillRect(ncX, st.y, ncW, st.sh);
+        }
+
+        // Test line (T) at 38% across NC-95, Control line (C) at 72%
+        const tX = ncX + ncW * 0.38;
+        const cX = ncX + ncW * 0.72;
+        const lineW = compact ? 4 : 6;
+        if (st.hasTest && st.testInt > 0) {
+          ctx.fillStyle = `rgba(190, 18, 60, ${st.testInt})`;
+          ctx.fillRect(tX - lineW / 2, st.y + 2, lineW, st.sh - 4);
+        }
+        ctx.fillStyle = 'rgba(185, 28, 28, 0.94)';
+        ctx.fillRect(cX - lineW / 2, st.y + 2, lineW, st.sh - 4);
+
+        ctx.fillStyle = '#334155';
+        ctx.font = `bold ${compact ? 8 : 9.5}px Consolas, monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText('T', tX, st.y + st.sh + (compact ? 9 : 13));
+        ctx.fillText('C', cX, st.y + st.sh + (compact ? 9 : 13));
+
+        // Right callout inside < w - 6
+        const rx = sx + sw + 10;
+        const maxRW = w - 6 - rx;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = `bold ${compact ? 8.5 : 10.5}px Consolas, monospace`;
+        ctx.fillText(fitCanvasText(ctx, st.title, maxRW), rx, st.y + (compact ? 11 : 18));
+        ctx.fillStyle = st.title.includes('Blank')
+          ? (poor ? '#fca5a5' : '#86efac')
+          : (poor ? '#fde68a' : '#fda4af');
+        ctx.font = `${compact ? 8 : 9.5}px Consolas, monospace`;
+        const statusTxt = st.title.includes('Blank')
+          ? (poor ? 'False T bleed!' : 'Clean (C only)')
+          : (poor ? 'Weak T / smear' : 'Ruby T+C (85 pM)');
+        ctx.fillText(fitCanvasText(ctx, statusTxt, maxRW), rx, st.y + (compact ? 24 : 36));
+      });
+
+      if (!compact) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px Consolas, monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText('Running buffer: Serum + 0.1% Tween 20 on NC-95 nitrocellulose', 26, h - 18);
+      }
+      return;
+    }
+
+    // 1B) Ellman DTNB UV-Vis 412 nm Absorbance Audit (antoine_step_2)
+    if (/ellman|dtnb|a412/i.test(tlcMeta)) {
+      ctx.fillStyle = '#090f1d';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#13203b';
+      ctx.fillRect(0, 0, w, compact ? 20 : 26);
+      ctx.fillStyle = '#fde68a';
+      ctx.font = `bold ${compact ? 9.5 : 11.5}px Consolas, monospace`;
+      ctx.textAlign = 'left';
+      ctx.fillText(
+        compact ? 'Ellman DTNB (412 nm)' : 'Ellman DTNB UV-Vis Assay • 412 nm Free-Thiol Audit',
+        10,
+        compact ? 14 : 18
+      );
+      drawTopMetaMetrics(ctx, w, item, compact, compact ? 14 : 18, compact ? 8 : 12);
+
+      const padL = compact ? 34 : 46;
+      const padR = 14;
+      const padB = compact ? 24 : 32;
+      const plotTop = compact ? 30 : 42;
+      const baseY = h - padB;
+      const plotW = w - padL - padR;
+      const plotH = baseY - plotTop;
+      const wlMin = 320, wlMax = 520;
+      const wlToX = wl => padL + ((wl - wlMin) / (wlMax - wlMin)) * plotW;
+
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(padL, plotTop);
+      ctx.lineTo(padL, baseY);
+      ctx.lineTo(w - padR, baseY);
+      ctx.stroke();
+
+      // 412 nm vertical marker
+      const x412 = wlToX(412);
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = 'rgba(250, 204, 21, 0.55)';
+      ctx.beginPath();
+      ctx.moveTo(x412, plotTop);
+      ctx.lineTo(x412, baseY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Unconjugated thiol reference trace (dashed amber)
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.50)';
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      for (let i = 0; i <= plotW; i++) {
+        const wl = wlMin + (i / plotW) * (wlMax - wlMin);
+        const refVal = 0.72 * Math.exp(-0.5 * Math.pow((wl - 412) / 21, 2)) + 0.08 * Math.exp(-0.5 * Math.pow((wl - 332) / 14, 2));
+        const y = baseY - refVal * plotH * 0.88;
+        if (i === 0) ctx.moveTo(padL + i, y);
+        else ctx.lineTo(padL + i, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Sample trace (flat A412 = 0.002 when clean; strong 412 nm TNB2- peak when poor)
+      const samplePeak = poor ? 0.34 : 0.004;
+      ctx.strokeStyle = poor ? '#f87171' : '#38bdf8';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      for (let i = 0; i <= plotW; i++) {
+        const wl = wlMin + (i / plotW) * (wlMax - wlMin);
+        const dtnb = 0.14 * Math.exp(-0.5 * Math.pow((wl - 326) / 11, 2));
+        const tnb = samplePeak * Math.exp(-0.5 * Math.pow((wl - 412) / 21, 2));
+        const val = dtnb + tnb + (rng() - 0.5) * 0.004;
+        const y = baseY - clamp(val, 0, 1) * plotH * 0.88;
+        if (i === 0) ctx.moveTo(padL + i, y);
+        else ctx.lineTo(padL + i, y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#fde68a';
+      ctx.font = `${compact ? 8.5 : 10}px Consolas, monospace`;
+      ctx.textAlign = 'left';
+      ctx.fillText(compact ? 'Ref (-SH)' : 'Reduced mAb Ctrl (A412 = 0.68)', x412 + 6, plotTop + 14);
+      ctx.fillStyle = poor ? '#fca5a5' : '#86efac';
+      ctx.font = `bold ${compact ? 9 : 11}px Consolas, monospace`;
+      ctx.fillText(
+        poor ? 'Sample A412 = 0.245 (Free -SH!)' : 'Sample A412 = 0.002 (0.0 -SH)',
+        clamp(x412 + 6, padL + 4, w - (compact ? 165 : 220)),
+        baseY - (poor ? samplePeak * plotH * 0.88 + 8 : 16)
+      );
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = `${compact ? 8.5 : 10}px Consolas, monospace`;
+      ctx.textAlign = 'center';
+      [340, 380, 412, 460, 500].forEach(wl => {
+        const tx = wlToX(wl);
+        ctx.fillText(`${wl}`, tx, baseY + (compact ? 14 : 17));
+      });
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('λ (nm)', w - padR, baseY + (compact ? 22 : 28));
+      return;
+    }
+
+    // 1C) Silica / RP-TLC Plate (UV 254 nm or KMnO4 Permanganate)
+    const isKmno4 = /kmno4|permanganate|char/i.test(tlcMeta);
+    const isRpTlc = /rp-?tlc/i.test(tlcMeta);
+    const isPlga = /plga|nile-?red|encapsulat/i.test(tlcMeta);
 
     // Dark Lab 230 UV Viewing Cabinet backdrop
     const bgGrad = ctx.createRadialGradient(w * 0.5, h * 0.15, 10, w * 0.5, h * 0.5, w * 0.7);
@@ -224,7 +458,6 @@ window.KLB = window.KLB || {};
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // Subtle 254 nm UV tube glow along top of cabinet
     if (!isKmno4) {
       const uvGlow = ctx.createLinearGradient(0, 0, 0, h * 0.22);
       uvGlow.addColorStop(0, 'rgba(168, 85, 247, 0.36)');
@@ -239,30 +472,30 @@ window.KLB = window.KLB || {};
     ctx.fillStyle = '#cbd5e1';
     ctx.font = `bold ${compact ? 9.5 : 11.5}px Consolas, monospace`;
     ctx.textAlign = 'left';
-    ctx.fillText(
-      compact
-        ? (isKmno4 ? 'KMnO4 Char TLC' : 'UV 254 nm TLC Plate')
-        : (isKmno4 ? 'KMnO4 Dip + Heat-Gun Char' : 'CAMAG UV Cabinet • λ = 254 nm (Silica 60 F254)'),
-      10,
-      compact ? 14 : 18
-    );
+    const headerTitle = isRpTlc
+      ? (compact ? 'RP-TLC (254 nm)' : 'RP-TLC C18 Plate • λ = 254 nm')
+      : isKmno4
+        ? (compact ? 'KMnO4 + UV TLC' : 'KMnO4 Dip + Heat-Gun Char TLC')
+        : (compact ? 'UV 254 nm TLC Plate' : 'CAMAG UV Cabinet • λ = 254 nm (Silica 60 F254)');
+    ctx.fillText(headerTitle, 10, compact ? 14 : 18);
     drawTopMetaMetrics(ctx, w, item, compact, compact ? 14 : 18, compact ? 8 : 12);
 
-    // Aluminium-backed Silica Plate centered
-    const pw = Math.min(w * (compact ? 0.56 : 0.44), h * 0.95);
+    // Aluminium-backed Silica Plate positioned so right labels fit cleanly inside < w - 6
+    const pw = compact ? Math.min(126, w * 0.38) : Math.min(w * 0.42, h * 0.92);
     const ph = compact ? h * 0.76 : h * 0.80;
-    const px = Math.round((w - pw) * (compact ? 0.36 : 0.42));
+    const px = compact ? 14 : Math.round((w - pw) * 0.38);
     const py = compact ? Math.round(h * 0.17) : Math.round(h * 0.13);
 
-    // Aluminium foil backing bevel
     ctx.fillStyle = '#94a3b8';
     ctx.fillRect(px - 2, py - 2, pw + 4, ph + 4);
 
-    // Glowing F254 green phosphor OR KMnO4 permanganate purple-pink silica
     const plateGrad = ctx.createLinearGradient(px, py, px + pw, py + ph);
     if (isKmno4) {
       plateGrad.addColorStop(0, '#9d3b72');
       plateGrad.addColorStop(1, '#7e2a59');
+    } else if (isRpTlc) {
+      plateGrad.addColorStop(0, '#8fe3a8');
+      plateGrad.addColorStop(1, '#68c488');
     } else {
       plateGrad.addColorStop(0, '#9ef58a');
       plateGrad.addColorStop(0.5, '#86ef74');
@@ -271,9 +504,8 @@ window.KLB = window.KLB || {};
     ctx.fillStyle = plateGrad;
     ctx.fillRect(px, py, pw, ph);
 
-    // Subtle silica grain speckles
     ctx.fillStyle = isKmno4 ? 'rgba(255,220,240,0.06)' : 'rgba(20,60,25,0.06)';
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 80; i++) {
       ctx.fillRect(px + rng() * pw, py + rng() * ph, 1.5, 1.5);
     }
 
@@ -281,7 +513,6 @@ window.KLB = window.KLB || {};
     const baseY = py + ph * 0.84;
     const runDist = baseY - frontY;
 
-    // Pencil solvent front (dashed) & baseline (solid)
     ctx.strokeStyle = isKmno4 ? 'rgba(255,255,255,0.55)' : 'rgba(30, 41, 59, 0.65)';
     ctx.lineWidth = 1.1;
     ctx.setLineDash([4, 3]);
@@ -296,25 +527,34 @@ window.KLB = window.KLB || {};
     ctx.lineTo(px + pw - 6, baseY);
     ctx.stroke();
 
-    // 3 Lanes: SM, Co, Rxn
-    const lanes = [
-      { lbl: 'SM', x: px + pw * 0.23 },
-      { lbl: 'Co', x: px + pw * 0.50 },
-      { lbl: 'Rxn', x: px + pw * 0.77 }
-    ];
+    const lanes = isPlga
+      ? [
+          { lbl: 'Dye', x: px + pw * 0.23 },
+          { lbl: 'Co',  x: px + pw * 0.50 },
+          { lbl: 'NPs', x: px + pw * 0.77 }
+        ]
+      : [
+          { lbl: 'SM',  x: px + pw * 0.23 },
+          { lbl: 'Co',  x: px + pw * 0.50 },
+          { lbl: 'Rxn', x: px + pw * 0.77 }
+        ];
 
-    // Extract Rf from productPeak if present (supports both 'Rf = 0.42' and 'Rf 0.42')
     const rfMatch = String(item.productPeak || '').match(/Rf\s*(?:=|\s)\s*(0\.\d+)/i);
-    const prodRf = rfMatch ? clamp(parseFloat(rfMatch[1]), 0.35, 0.78) : 0.56;
-    const smRf = clamp(prodRf - 0.32, 0.14, 0.32);
+    const parsedRf = rfMatch ? clamp(parseFloat(rfMatch[1]), 0.00, 0.85) : 0.56;
+    const prodRf = isPlga ? 0.00 : parsedRf;
+    const smRf = isPlga ? (rfMatch ? clamp(parseFloat(rfMatch[1]), 0.35, 0.78) : 0.55) : clamp(prodRf - 0.30, 0.14, 0.32);
 
-    function drawSpot(cx, rf, rx, ry, alpha, isCharYellow = false) {
+    function drawSpot(cx, rf, rx, ry, alpha, colorMode = 'auto') {
       const cy = baseY - rf * runDist;
       ctx.save();
       ctx.translate(cx, cy);
       ctx.scale(1, ry / Math.max(1, rx));
       const g = ctx.createRadialGradient(0, 0, rx * 0.1, 0, 0, rx);
-      if (isKmno4 || isCharYellow) {
+      if (colorMode === 'magenta') {
+        g.addColorStop(0, `rgba(190, 24, 93, ${alpha})`);
+        g.addColorStop(0.65, `rgba(219, 39, 119, ${alpha * 0.7})`);
+        g.addColorStop(1, 'rgba(219, 39, 119, 0)');
+      } else if (isKmno4 || colorMode === 'yellow') {
         g.addColorStop(0, `rgba(253, 224, 71, ${alpha})`);
         g.addColorStop(0.65, `rgba(202, 138, 4, ${alpha * 0.7})`);
         g.addColorStop(1, 'rgba(202, 138, 4, 0)');
@@ -331,51 +571,57 @@ window.KLB = window.KLB || {};
       return cy;
     }
 
-    // Pencil tick marks & labels
     ctx.fillStyle = isKmno4 ? '#f8fafc' : '#1e293b';
-    ctx.font = `bold ${compact ? 10 : 11}px Consolas, monospace`;
+    ctx.font = `bold ${compact ? 9.5 : 11}px Consolas, monospace`;
     ctx.textAlign = 'center';
     lanes.forEach(ln => {
       ctx.beginPath();
       ctx.moveTo(ln.x, baseY - 3);
       ctx.lineTo(ln.x, baseY + 3);
       ctx.stroke();
-      ctx.fillText(ln.lbl, ln.x, baseY + (compact ? 13 : 16));
+      ctx.fillText(ln.lbl, ln.x, baseY + (compact ? 12 : 16));
     });
 
-    const rSpot = Math.max(7, pw * 0.075);
-    // SM lane: Starting Material only
-    drawSpot(lanes[0].x, smRf, rSpot, rSpot * 0.78, 0.90);
-    drawSpot(lanes[0].x, 0.0, rSpot * 0.45, rSpot * 0.35, 0.28);
-
-    // Co-spot lane: SM + Product cleanly separated
-    drawSpot(lanes[1].x, smRf, rSpot * 0.85, rSpot * 0.7, 0.78);
-    drawSpot(lanes[1].x, prodRf, rSpot * 0.85, rSpot * 0.7, 0.82);
-    drawSpot(lanes[1].x, 0.0, rSpot * 0.5, rSpot * 0.4, 0.32);
-
-    // Rxn lane: Product + optional streaking/unreacted SM/baseline gunk when quality < 78
-    if (poor) {
-      // Vertical silica tailing streak
-      const streakTop = baseY - prodRf * runDist;
-      const sg = ctx.createLinearGradient(0, streakTop, 0, baseY);
-      sg.addColorStop(0, isKmno4 ? 'rgba(250,204,21,0.35)' : 'rgba(67,20,110,0.38)');
-      sg.addColorStop(1, isKmno4 ? 'rgba(180,83,9,0.55)' : 'rgba(46,16,101,0.55)');
-      ctx.fillStyle = sg;
-      ctx.fillRect(lanes[2].x - rSpot * 0.45, streakTop, rSpot * 0.9, baseY - streakTop);
-
-      // Heavy baseline gunk + unreacted SM + high-Rf side product
-      drawSpot(lanes[2].x, 0.0, rSpot * 1.05, rSpot * 0.62, 0.88);
-      drawSpot(lanes[2].x, smRf, rSpot * 0.88, rSpot * 0.72, 0.76);
-      drawSpot(lanes[2].x, Math.min(0.88, prodRf + 0.22), rSpot * 0.65, rSpot * 0.48, 0.62);
-      drawSpot(lanes[2].x, prodRf, rSpot * 0.95, rSpot * 0.82, 0.80);
+    const rSpot = Math.max(6, pw * 0.075);
+    if (isPlga) {
+      // Dye lane: free Nile Red at smRf (0.55)
+      drawSpot(lanes[0].x, smRf, rSpot, rSpot * 0.78, 0.90, 'magenta');
+      // Co lane: encapsulated baseline NPs + free dye
+      drawSpot(lanes[1].x, 0.00, rSpot * 0.92, rSpot * 0.72, 0.85, 'magenta');
+      drawSpot(lanes[1].x, smRf, rSpot * 0.82, rSpot * 0.68, 0.76, 'magenta');
+      // NPs lane: strong encapsulated PLGA-NPs at Rf = 0.00; minimal free dye unless poor
+      drawSpot(lanes[2].x, 0.00, rSpot * 1.12, rSpot * 0.82, 0.96, 'magenta');
+      drawSpot(lanes[2].x, smRf, rSpot * (poor ? 0.95 : 0.45), rSpot * (poor ? 0.75 : 0.35), poor ? 0.88 : 0.18, 'magenta');
     } else {
-      drawSpot(lanes[2].x, 0.0, rSpot * 0.42, rSpot * 0.32, 0.22);
-      drawSpot(lanes[2].x, prodRf, rSpot * 1.08, rSpot * 0.82, 0.94);
+      drawSpot(lanes[0].x, smRf, rSpot, rSpot * 0.78, 0.90);
+      drawSpot(lanes[0].x, 0.0, rSpot * 0.45, rSpot * 0.35, 0.28);
+
+      drawSpot(lanes[1].x, smRf, rSpot * 0.85, rSpot * 0.7, 0.78);
+      drawSpot(lanes[1].x, prodRf, rSpot * 0.85, rSpot * 0.7, 0.82);
+      drawSpot(lanes[1].x, 0.0, rSpot * 0.5, rSpot * 0.4, 0.32);
+
+      if (poor) {
+        const streakTop = baseY - Math.max(0.15, prodRf) * runDist;
+        const sg = ctx.createLinearGradient(0, streakTop, 0, baseY);
+        sg.addColorStop(0, isKmno4 ? 'rgba(250,204,21,0.35)' : 'rgba(67,20,110,0.38)');
+        sg.addColorStop(1, isKmno4 ? 'rgba(180,83,9,0.55)' : 'rgba(46,16,101,0.55)');
+        ctx.fillStyle = sg;
+        ctx.fillRect(lanes[2].x - rSpot * 0.45, streakTop, rSpot * 0.9, baseY - streakTop);
+
+        drawSpot(lanes[2].x, 0.0, rSpot * 1.05, rSpot * 0.62, 0.88);
+        drawSpot(lanes[2].x, smRf, rSpot * 0.88, rSpot * 0.72, 0.76);
+        drawSpot(lanes[2].x, Math.min(0.88, prodRf + 0.22), rSpot * 0.65, rSpot * 0.48, 0.62);
+        drawSpot(lanes[2].x, prodRf, rSpot * 0.95, rSpot * 0.82, 0.80);
+      } else {
+        drawSpot(lanes[2].x, 0.0, rSpot * 0.42, rSpot * 0.32, 0.22);
+        drawSpot(lanes[2].x, prodRf, rSpot * 1.08, rSpot * 0.82, 0.94);
+      }
     }
 
-    // Right-hand callout tags (Rf annotations)
+    // Right-hand callout tags strictly fitted inside < w - 6
     ctx.textAlign = 'left';
-    const tagX = px + pw + 10;
+    const tagX = px + pw + (compact ? 8 : 10);
+    const maxTagW = Math.max(40, w - 6 - tagX);
     const prodY = baseY - prodRf * runDist;
     const smY = baseY - smRf * runDist;
 
@@ -386,8 +632,11 @@ window.KLB = window.KLB || {};
     ctx.lineTo(tagX - 3, prodY);
     ctx.stroke();
     ctx.fillStyle = '#86efac';
-    ctx.font = `bold ${compact ? 9.5 : 11.5}px Consolas, monospace`;
-    ctx.fillText(`Product Rf = ${prodRf.toFixed(2)}`, tagX, prodY + 4);
+    ctx.font = `bold ${compact ? 9 : 11.5}px Consolas, monospace`;
+    const prodLbl = isPlga
+      ? (compact ? 'PLGA NPs Rf=0.00' : 'PLGA-PEG NPs Rf = 0.00')
+      : (compact ? `Prod Rf = ${prodRf.toFixed(2)}` : `Product Rf = ${prodRf.toFixed(2)}`);
+    ctx.fillText(fitCanvasText(ctx, prodLbl, maxTagW), tagX, prodY + (isPlga ? -2 : 4));
 
     ctx.strokeStyle = poor ? '#f87171' : '#94a3b8';
     ctx.beginPath();
@@ -395,118 +644,176 @@ window.KLB = window.KLB || {};
     ctx.lineTo(tagX - 3, smY);
     ctx.stroke();
     ctx.fillStyle = poor ? '#fca5a5' : '#cbd5e1';
-    ctx.fillText(poor ? `Unreacted SM Rf = ${smRf.toFixed(2)}!` : `SM Ref Rf = ${smRf.toFixed(2)}`, tagX, smY + 4);
+    const smLbl = isPlga
+      ? (poor ? `Free Dye Rf=${smRf.toFixed(2)}!` : `Free Dye Rf=${smRf.toFixed(2)}`)
+      : (poor ? `SM Rf = ${smRf.toFixed(2)}!` : (compact ? `SM Rf = ${smRf.toFixed(2)}` : `SM Ref Rf = ${smRf.toFixed(2)}`));
+    ctx.fillText(fitCanvasText(ctx, smLbl, maxTagW), tagX, smY + 4);
 
     ctx.fillStyle = '#94a3b8';
-    ctx.font = `${compact ? 9 : 10.5}px Consolas, monospace`;
-    ctx.fillText('Solvent Front', tagX, frontY + 4);
-    if (poor) {
-      drawVectorWarning(ctx, tagX + 4, baseY, compact ? 3.8 : 4.3, '#f87171', '#070a12');
-      ctx.fillStyle = '#fca5a5';
-      ctx.fillText('Baseline Tailing / Gunk', tagX + 12, baseY + 4);
-    } else {
-      ctx.fillText('Clean Origin Baseline', tagX, baseY + 4);
+    ctx.font = `${compact ? 8.5 : 10.5}px Consolas, monospace`;
+    ctx.fillText(fitCanvasText(ctx, compact ? 'Front' : 'Solvent Front', maxTagW), tagX, frontY + 4);
+    if (!isPlga) {
+      if (poor) {
+        drawVectorWarning(ctx, tagX + 4, baseY, compact ? 3.5 : 4.3, '#f87171', '#070a12');
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'Baseline Tailing!' : 'Baseline Tailing / Gunk', maxTagW - 12), tagX + 12, baseY + 4);
+      } else {
+        ctx.fillText(fitCanvasText(ctx, compact ? 'Clean Origin' : 'Clean Origin Baseline', maxTagW), tagX, baseY + 4);
+      }
     }
   }
 
-  // -------------------- 2. COOMASSIE ("BLUE PARTY MIX") SDS-PAGE GEL --------------------
+  // -------------------- 2. COOMASSIE / FLUOR / MOBILITY SDS-PAGE GEL --------------------
   function drawSdsPageGel(ctx, w, h, item, rng) {
-    const compact = w < 440;
+    const compact = w < 420;
     const q = getQuality(item, 82);
     const overRed = Boolean(item.hasOverReduction) || q < 78;
     const blueMishap = Boolean(item.hasBlueDyeMishap);
+    const gelMeta = `${item.label || ''} ${item.productPeak || ''} ${item.notes || ''} ${item.metricLabel || ''}`;
 
-    // Bright white LED transilluminator lightbox frame
+    // 7 distinct biochemical visual modes
+    let gelMode = 'hhll';
+    if (/aunp|529\s*nm|colloidal\s*mobility|ruby-?red/i.test(gelMeta)) {
+      gelMode = 'aunp_ruby';
+    } else if (/tricine|vnar|depletion/i.test(gelMeta)) {
+      gelMode = 'vnar_tricine';
+    } else if (/dual-?fluor|fluorescence\s*sds|495\/?646|cy5|coumarin|hsa.*gsh|turn-on/i.test(gelMeta)) {
+      gelMode = 'dual_fluor';
+    } else if (/native\s+her2|antigen-?shift|fcrn\s*complex/i.test(gelMeta)) {
+      gelMode = 'native_shift';
+    } else if (/reducing\s+sds-?page/i.test(gelMeta) && !/non-?reducing/i.test(gelMeta)) {
+      gelMode = 'reducing';
+    } else if (/fab|48(?:\.\d+)?\s*kda|fc\s*panel|digest/i.test(gelMeta)) {
+      gelMode = 'fab_48';
+    }
+
+    const isDarkFluor = gelMode === 'dual_fluor';
+    const isHsaFluor = gelMode === 'dual_fluor' && /hsa|coumarin|66\.5/i.test(gelMeta);
+    const isFcrnShift = gelMode === 'native_shift' && /fcrn/i.test(gelMeta);
+    const isMultiFab = gelMode === 'fab_48' && /3-antibody|fabcd3|fccd20/i.test(gelMeta);
+
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, w, h);
 
-    const lx = compact ? 10 : 18;
-    const ly = compact ? 22 : 28;
+    const lx = compact ? 8 : 18;
+    const ly = compact ? 21 : 28;
     const lw = w - lx * 2;
-    const lh = h - ly - (compact ? 10 : 14);
+    const lh = h - ly - (compact ? 8 : 14);
 
-    // Backlit white transilluminator glass
-    const lightGrad = ctx.createLinearGradient(lx, ly, lx, ly + lh);
-    lightGrad.addColorStop(0, '#f1f5f9');
-    lightGrad.addColorStop(1, '#dbeafe');
-    ctx.fillStyle = lightGrad;
+    if (isDarkFluor) {
+      ctx.fillStyle = '#070c16';
+    } else {
+      const lightGrad = ctx.createLinearGradient(lx, ly, lx, ly + lh);
+      lightGrad.addColorStop(0, '#f1f5f9');
+      lightGrad.addColorStop(1, '#dbeafe');
+      ctx.fillStyle = lightGrad;
+    }
     ctx.beginPath();
     ctx.roundRect ? ctx.roundRect(lx, ly, lw, lh, 8) : ctx.rect(lx, ly, lw, lh);
     ctx.fill();
 
-    // Top banner
-    ctx.fillStyle = '#93c5fd';
+    // Header banner
+    const headerMap = {
+      fab_48: compact ? 'SDS-PAGE: 48 kDa Fab' : '12% Non-Reducing SDS-PAGE • Sequential Fab Digest',
+      vnar_tricine: compact ? '16% Tricine: VNAR' : '16% Tricine SDS-PAGE • Shark VNAR Depletion',
+      reducing: compact ? 'Reducing SDS-PAGE' : 'Reducing SDS-PAGE (+DTT) • HC / LC Chains',
+      aunp_ruby: compact ? 'AuNP Mobility Gel' : 'Colloidal Mobility Shift Gel • 40 nm AuNP (529 nm)',
+      dual_fluor: isHsaFluor
+        ? (compact ? 'Fluor PAGE: HSA/GSH' : 'Fluorescence SDS-PAGE • HSA Non-Transfer vs GSH')
+        : (compact ? 'Dual-Fluor SDS-PAGE' : 'Dual-Fluorescence (495/646 nm) + Coomassie Gel'),
+      native_shift: isFcrnShift
+        ? (compact ? 'FcRn Shift Gel' : 'pH 6.0 vs 7.4 FcRn Complex Shift SDS-PAGE')
+        : (compact ? 'Native HER2 Shift' : 'Native HER2 Antigen-Shift Gel • Binding Check'),
+      hhll: compact ? 'SDS-PAGE (Coomassie)' : '4–15% Mini-PROTEAN SDS-PAGE • Coomassie Stain'
+    };
+
+    ctx.fillStyle = isDarkFluor ? '#67e8f9' : '#93c5fd';
     ctx.font = `bold ${compact ? 9.5 : 11.5}px Consolas, monospace`;
     ctx.textAlign = 'left';
-    ctx.fillText(
-      compact ? 'SDS-PAGE (Coomassie)' : '4–15% Mini-PROTEAN SDS-PAGE • Coomassie Stain',
-      lx,
-      compact ? 14 : 18
-    );
-    drawTopMetaMetrics(ctx, w, item, compact, compact ? 14 : 18, compact ? 10 : 18);
+    ctx.fillText(headerMap[gelMode], lx, compact ? 14 : 18);
+    drawTopMetaMetrics(ctx, w, item, compact, compact ? 14 : 18, compact ? 8 : 18);
 
-    // Translucent Coomassie-tinted polyacrylamide slab
-    const gx = lx + (compact ? 48 : 74);
-    const gy = ly + 8;
-    const gw = lw - (compact ? 128 : 210);
-    const gh = lh - 16;
+    // Gel slab geometry (compact gives generous room for short non-clipping right callouts)
+    const gx = lx + (compact ? 38 : 74);
+    const gy = ly + (compact ? 6 : 8);
+    const gw = lw - (compact ? 142 : 214);
+    const gh = lh - (compact ? 12 : 16);
 
-    const gelGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
-    gelGrad.addColorStop(0, 'rgba(96, 165, 250, 0.32)');
-    gelGrad.addColorStop(0.5, 'rgba(59, 130, 246, 0.25)');
-    gelGrad.addColorStop(1, 'rgba(37, 99, 235, 0.36)');
-    ctx.fillStyle = gelGrad;
-    ctx.strokeStyle = 'rgba(30, 64, 175, 0.45)';
+    if (isDarkFluor) {
+      ctx.fillStyle = '#0b1424';
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+    } else if (gelMode === 'aunp_ruby') {
+      ctx.fillStyle = 'rgba(199, 210, 254, 0.30)';
+      ctx.strokeStyle = 'rgba(79, 70, 229, 0.42)';
+    } else {
+      const gelGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
+      gelGrad.addColorStop(0, 'rgba(96, 165, 250, 0.32)');
+      gelGrad.addColorStop(0.5, 'rgba(59, 130, 246, 0.25)');
+      gelGrad.addColorStop(1, 'rgba(37, 99, 235, 0.36)');
+      ctx.fillStyle = gelGrad;
+      ctx.strokeStyle = 'rgba(30, 64, 175, 0.45)';
+    }
     ctx.lineWidth = 1.5;
     ctx.fillRect(gx, gy, gw, gh);
     ctx.strokeRect(gx, gy, gw, gh);
 
-    // 4 Comb Wells at top: Ladder | Ctrl mAb | Reduced | Product
-    const laneNames = ['Ladder', 'Ctrl mAb', 'Reduced', 'Product'];
+    // Lane titles per mode
+    const laneNamesByMode = {
+      fab_48: isMultiFab ? ['Ladder', 'FabHER2', 'FabCD3', 'FcCD20'] : ['Ladder', 'Ctrl IgG', 'Pepsin', 'Fab Prod'],
+      vnar_tricine: ['Ladder', 'Input', 'Ctrl NP', 'N3-NP Sup'],
+      reducing: ['Ladder', 'Native', 'Red Ctrl', 'Dha mAb'],
+      aunp_ruby: ['Ladder', 'Bare Au', 'PBS Fail', 'BSA-TCO'],
+      dual_fluor: isHsaFluor ? ['Ladder', 'HSA', 'HSA+SMDC', '5mM GSH'] : ['Ladder', 'mAb', 'Dox4', 'Dox4-Cy5'],
+      native_shift: isFcrnShift ? ['Ladder', 'mAb', 'pH 6.0', 'pH 7.4'] : ['Ladder', 'Herceptin', 'mAb+HER2', 'ADC+HER2'],
+      hhll: ['Ladder', 'Ctrl mAb', 'Reduced', 'Product']
+    };
+    const laneNames = laneNamesByMode[gelMode];
     const laneW = gw / 4;
     const wellTop = gy + 4;
-    const wellBottom = gy + (compact ? 15 : 20);
+    const wellBottom = gy + (compact ? 14 : 20);
 
-    ctx.font = `bold ${compact ? 9 : 11}px Segoe UI, sans-serif`;
+    ctx.font = `bold ${compact ? 7.5 : 10.5}px Segoe UI, sans-serif`;
     ctx.textAlign = 'center';
     laneNames.forEach((name, idx) => {
       const wx = gx + idx * laneW + laneW * 0.16;
       const ww = laneW * 0.68;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.68)';
+      ctx.fillStyle = isDarkFluor ? 'rgba(30, 41, 59, 0.85)' : 'rgba(255, 255, 255, 0.68)';
       ctx.fillRect(wx, wellTop, ww, wellBottom - wellTop);
-      ctx.strokeStyle = 'rgba(30, 58, 138, 0.4)';
+      ctx.strokeStyle = isDarkFluor ? 'rgba(94, 234, 212, 0.45)' : 'rgba(30, 58, 138, 0.4)';
       ctx.strokeRect(wx, wellTop, ww, wellBottom - wellTop);
 
-      ctx.fillStyle = '#1e3a8a';
-      ctx.fillText(name, gx + (idx + 0.5) * laneW, wellBottom + (compact ? 10 : 13));
+      ctx.fillStyle = isDarkFluor ? '#cbd5e1' : '#1e3a8a';
+      ctx.fillText(name, gx + (idx + 0.5) * laneW, wellBottom + (compact ? 9 : 13));
     });
 
-    // Logarithmic migration mapping for 250 -> 10 kDa
-    const bandTop = wellBottom + (compact ? 16 : 22);
+    const bandTop = wellBottom + (compact ? 14 : 22);
     const bandSpan = gh - (bandTop - gy) - 10;
     const mwToY = kda => {
-      const logMax = Math.log10(265);
-      const logMin = Math.log10(9.5);
-      const frac = (logMax - Math.log10(kda)) / (logMax - logMin);
+      const logMax = Math.log10(gelMode === 'vnar_tricine' ? 110 : 270);
+      const logMin = Math.log10(gelMode === 'vnar_tricine' ? 6.5 : 9.5);
+      const frac = (logMax - Math.log10(clamp(kda, 6.5, 270))) / (logMax - logMin);
       return bandTop + clamp(frac, 0.02, 0.98) * bandSpan;
     };
 
-    function drawGelBand(laneIdx, kda, intensity, thickness = 4.5, colorOverride = null) {
+    function drawGelBand(laneIdx, kda, intensity, thickness = 4.5, colorOverride = null, glowCol = null) {
       const cx = gx + (laneIdx + 0.5) * laneW;
       const bw = laneW * 0.58;
       const y = mwToY(kda);
       const th = compact ? thickness * 0.78 : thickness;
 
       ctx.save();
+      if (glowCol) {
+        ctx.shadowColor = glowCol;
+        ctx.shadowBlur = compact ? 7 : 12;
+      }
       const g = ctx.createLinearGradient(cx - bw / 2, y - th / 2, cx - bw / 2, y + th / 2);
-      const col = colorOverride || '23, 37, 84'; // Deep Coomassie Navy-Indigo
+      const col = colorOverride || (isDarkFluor ? '56, 189, 248' : '23, 37, 84');
       g.addColorStop(0, `rgba(${col}, 0.08)`);
       g.addColorStop(0.3, `rgba(${col}, ${intensity})`);
       g.addColorStop(0.7, `rgba(${col}, ${intensity})`);
       g.addColorStop(1, `rgba(${col}, 0.08)`);
       ctx.fillStyle = g;
 
-      // Slight smiling meniscus curve like a real SDS-PAGE band
       ctx.beginPath();
       ctx.moveTo(cx - bw / 2, y - th / 2);
       ctx.quadraticCurveTo(cx, y - th / 2 + 1.2, cx + bw / 2, y - th / 2);
@@ -518,42 +825,43 @@ window.KLB = window.KLB || {};
       return y;
     }
 
-    // 10-band Precision Plus Dual Color MW Ladder (250, 150, 100, 75, 50, 37, 25, 20, 15, 10 kDa)
-    const ladderBands = [
-      { kda: 250, pink: true, showLbl: true },
-      { kda: 150, pink: false, showLbl: true },
-      { kda: 100, pink: false, showLbl: true },
-      { kda: 75,  pink: true, showLbl: true },
-      { kda: 50,  pink: false, showLbl: true },
-      { kda: 37,  pink: false, showLbl: true },
-      { kda: 25,  pink: true, showLbl: true },
-      { kda: 20,  pink: false, showLbl: false },
-      { kda: 15,  pink: false, showLbl: true },
-      { kda: 10,  pink: false, showLbl: false }
-    ];
+    // MW Ladder
+    const ladderBands = gelMode === 'vnar_tricine'
+      ? [
+          { kda: 75, pink: true, showLbl: true },
+          { kda: 50, pink: false, showLbl: true },
+          { kda: 37, pink: false, showLbl: false },
+          { kda: 25, pink: true, showLbl: true },
+          { kda: 20, pink: false, showLbl: false },
+          { kda: 15, pink: false, showLbl: true },
+          { kda: 10, pink: true, showLbl: true }
+        ]
+      : [
+          { kda: 250, pink: true, showLbl: true },
+          { kda: 150, pink: false, showLbl: true },
+          { kda: 100, pink: false, showLbl: false },
+          { kda: 75,  pink: true, showLbl: true },
+          { kda: 50,  pink: false, showLbl: true },
+          { kda: 37,  pink: false, showLbl: false },
+          { kda: 25,  pink: true, showLbl: true },
+          { kda: 15,  pink: false, showLbl: true }
+        ];
 
-    ctx.font = `bold ${compact ? 8.5 : 10}px Consolas, monospace`;
+    ctx.font = `bold ${compact ? 7.5 : 10}px Consolas, monospace`;
     ctx.textAlign = 'right';
     ladderBands.forEach(b => {
-      const y = drawGelBand(0, b.kda, 0.85, 3.6, b.pink ? '157, 23, 77' : '30, 58, 138');
+      const col = isDarkFluor
+        ? (b.pink ? '244, 114, 182' : '148, 163, 184')
+        : (b.pink ? '157, 23, 77' : '30, 58, 138');
+      const y = drawGelBand(0, b.kda, isDarkFluor ? 0.65 : 0.85, 3.4, col);
       if (b.showLbl) {
-        ctx.fillStyle = b.pink ? '#9d174d' : '#1e293b';
-        ctx.fillText(`${b.kda} kDa`, gx - 5, y + 3);
+        ctx.fillStyle = isDarkFluor ? '#94a3b8' : (b.pink ? '#9d174d' : '#1e293b');
+        ctx.fillText(compact ? `${b.kda}` : `${b.kda} kDa`, gx - 4, y + 3);
       }
     });
 
-    // Lane 1 (index 1): Unreduced Ctrl mAb -> crisp 150 kDa intact IgG (HHLL)
-    drawGelBand(1, 150, 0.94, 6.2);
-    drawGelBand(1, 75, 0.12, 3.0);
-
-    // Lane 2 (index 2): TCEP Reduced Control -> 50 kDa Heavy (H) + 25 kDa Light (L)
-    drawGelBand(2, 50, 0.90, 5.8);
-    drawGelBand(2, 25, 0.82, 4.8);
-    drawGelBand(2, 75, 0.18, 3.2);
-
-    // Lane 3 (index 3): Product Sample Lane
+    // Helper for blue loading-dye smear on lane 3
     if (blueMishap) {
-      // Peter's catastrophic LDS blue loading-dye smear down the entire lane!
       const sx = gx + 3 * laneW + laneW * 0.14;
       const sw = laneW * 0.72;
       const smear = ctx.createLinearGradient(sx, wellTop, sx, gy + gh - 4);
@@ -564,74 +872,257 @@ window.KLB = window.KLB || {};
       ctx.fillRect(sx, wellTop + 2, sw, gy + gh - wellTop - 8);
     }
 
-    if (overRed) {
-      // Incomplete rebridging / unbuffered 37 °C TCEP fragmentation: weak 150 kDa + strong 75 kDa HL, 50 kDa H, 25 kDa L!
-      drawGelBand(3, 150, 0.45, 5.0);
-      drawGelBand(3, 75,  0.88, 5.8, '185, 28, 28');
-      drawGelBand(3, 50,  0.66, 4.6);
-      drawGelBand(3, 25,  0.58, 4.2);
-    } else {
-      // Clean >90–95% rebridged 150 kDa HHLL intact antibody!
-      drawGelBand(3, 150, 0.96, 6.8);
-      drawGelBand(3, 75,  0.14 + (100 - q) * 0.005, 3.0);
-    }
-
-    // Right margin callouts
-    const rx = gx + gw + 8;
+    // Right margin callouts container (guaranteed inside < w - 6!)
+    const rx = gx + gw + (compact ? 6 : 8);
+    const maxRW = Math.max(40, w - 6 - rx);
     ctx.textAlign = 'left';
-    ctx.font = `bold ${compact ? 9 : 11}px Consolas, monospace`;
+    ctx.font = `bold ${compact ? 8.5 : 10.5}px Consolas, monospace`;
 
-    const y150 = mwToY(150);
-    if (overRed) {
-      ctx.fillStyle = '#334155';
-      ctx.fillText('150 kDa HHLL (Weak)', rx, y150 + 3);
+    if (gelMode === 'fab_48') {
+      if (isMultiFab) {
+        drawGelBand(1, 48.1, 0.94, 6.0);
+        drawGelBand(2, 47.6, 0.92, 6.0);
+        drawGelBand(3, 49.9, overRed ? 0.55 : 0.94, 6.2);
+        if (overRed) drawGelBand(3, 25, 0.72, 4.4, '185, 28, 28');
+      } else {
+        drawGelBand(1, 150, 0.92, 6.0);
+        drawGelBand(2, 100, 0.88, 5.6);
+        if (overRed) {
+          drawGelBand(3, 48, 0.52, 4.8);
+          drawGelBand(3, 25, 0.80, 5.0, '185, 28, 28');
+        } else {
+          drawGelBand(3, 48, 0.96, 6.6);
+          drawGelBand(3, 150, 0.08, 2.5);
+        }
+      }
+      const y48 = mwToY(48);
+      if (overRed) {
+        drawVectorWarning(ctx, rx + 4, y48 - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(fitCanvasText(ctx, compact ? '25 kDa Frag!' : '25 kDa Reduced Fab!', maxRW - 11), rx + 11, mwToY(25) + 3);
+        ctx.fillStyle = '#334155';
+        ctx.fillText(fitCanvasText(ctx, compact ? '48 kDa (Weak)' : '48 kDa Fab (Weak)', maxRW), rx, y48 + 3);
+      } else {
+        drawVectorCheck(ctx, rx + 4, y48 - 1, compact ? 3.5 : 4.3, '#15803d');
+        ctx.fillStyle = '#15803d';
+        ctx.fillText(fitCanvasText(ctx, compact ? '48 kDa Fab' : '48 kDa Crisp Fab Band', maxRW - 11), rx + 11, y48 + 3);
+        ctx.fillStyle = '#475569';
+        ctx.fillText(fitCanvasText(ctx, compact ? '150 kDa IgG' : '150 kDa IgG Consumed', maxRW), rx, mwToY(150) + 3);
+      }
+    } else if (gelMode === 'vnar_tricine') {
+      drawGelBand(1, 12, 0.94, 6.2);
+      drawGelBand(2, 12, 0.86, 5.8);
+      drawGelBand(3, 12, overRed ? 0.68 : 0.16, overRed ? 5.2 : 3.2, overRed ? '185, 28, 28' : '30, 58, 138');
+      const y12 = mwToY(12);
+      if (overRed) {
+        drawVectorWarning(ctx, rx + 4, y12 - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'Weak Uptake!' : 'Poor VNAR Depletion!', maxRW - 11), rx + 11, y12 + 3);
+      } else {
+        drawVectorCheck(ctx, rx + 4, y12 - 1, compact ? 3.5 : 4.3, '#15803d');
+        ctx.fillStyle = '#15803d';
+        ctx.fillText(fitCanvasText(ctx, compact ? '12 kDa -88%' : '12 kDa VNAR (-88% Sup.)', maxRW - 11), rx + 11, y12 + 3);
+        ctx.fillStyle = '#475569';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'Input Ctrl' : 'Input / Ctrl NP Bands', maxRW), rx, mwToY(25) + 3);
+      }
+    } else if (gelMode === 'reducing') {
+      drawGelBand(1, 150, 0.90, 5.8);
+      drawGelBand(2, 50, 0.90, 5.6);
+      drawGelBand(2, 25, 0.84, 4.8);
+      if (overRed) {
+        drawGelBand(3, 50, 0.56, 4.8);
+        drawGelBand(3, 25, 0.58, 4.2);
+        drawGelBand(3, 37, 0.72, 4.6, '185, 28, 28');
+        drawGelBand(3, 15, 0.62, 4.0, '185, 28, 28');
+      } else {
+        drawGelBand(3, 50, 0.95, 6.2);
+        drawGelBand(3, 25, 0.88, 5.0);
+      }
+      if (overRed) {
+        drawVectorWarning(ctx, rx + 4, mwToY(37) - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'HC Cleavage!' : 'Over-Cleaved Fragments!', maxRW - 11), rx + 11, mwToY(37) + 3);
+      } else {
+        drawVectorCheck(ctx, rx + 4, mwToY(50) - 1, compact ? 3.5 : 4.3, '#15803d');
+        ctx.fillStyle = '#15803d';
+        ctx.fillText(fitCanvasText(ctx, compact ? '50 kDa H' : '50 kDa Heavy (HC Dha)', maxRW - 11), rx + 11, mwToY(50) + 3);
+        ctx.fillStyle = '#334155';
+        ctx.fillText(fitCanvasText(ctx, compact ? '25 kDa L' : '25 kDa Intact Light (L)', maxRW), rx, mwToY(25) + 3);
+      }
+    } else if (gelMode === 'aunp_ruby') {
+      // Bare Au & PBS fail aggregate in well top (250 kDa); BSA-TCO runs as crisp ruby-red 529 nm band!
+      drawGelBand(1, 240, 0.88, 7.5, '55, 48, 82');
+      drawGelBand(2, 235, 0.85, 7.2, '68, 51, 102');
+      if (overRed) {
+        drawGelBand(3, 235, 0.78, 7.2, '55, 48, 82');
+        drawGelBand(3, 110, 0.40, 5.2, '190, 18, 60');
+      } else {
+        drawGelBand(3, 110, 0.96, 8.2, '220, 38, 68');
+      }
+      const yAu = mwToY(110);
+      if (overRed) {
+        drawVectorWarning(ctx, rx + 4, mwToY(235) - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'Well Agg.!' : 'Purple Well Aggregation!', maxRW - 11), rx + 11, mwToY(235) + 3);
+      } else {
+        drawVectorCheck(ctx, rx + 4, yAu - 1, compact ? 3.5 : 4.3, '#be123c');
+        ctx.fillStyle = '#be123c';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'Ruby 529 nm' : 'Ruby 529 nm Corona Band', maxRW - 11), rx + 11, yAu + 3);
+        ctx.fillStyle = '#475569';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'Bare Well Agg' : 'Bare Au Stalled in Well', maxRW), rx, mwToY(235) + 3);
+      }
+    } else if (gelMode === 'dual_fluor') {
+      if (isHsaFluor) {
+        // Marcos Step 5: 66.5 kDa HSA lanes completely dark (Coomassie ghost only), 5 mM GSH glows bright cyan-green!
+        drawGelBand(1, 66.5, 0.45, 5.2, '59, 130, 246');
+        drawGelBand(2, 66.5, overRed ? 0.75 : 0.42, 5.2, overRed ? '74, 222, 128' : '59, 130, 246', overRed ? '#4ade80' : null);
+        drawGelBand(3, 15, overRed ? 0.45 : 0.96, 6.8, '52, 211, 153', '#22d3ee');
+        if (overRed) {
+          drawVectorWarning(ctx, rx + 4, mwToY(66.5) - 1, compact ? 3.5 : 4.2, '#f87171', '#070c16');
+          ctx.fillStyle = '#fca5a5';
+          ctx.fillText(fitCanvasText(ctx, compact ? 'HSA Leak!' : 'Albumin Fluor Transfer!', maxRW - 11), rx + 11, mwToY(66.5) + 3);
+        } else {
+          drawVectorCheck(ctx, rx + 4, mwToY(15) - 1, compact ? 3.5 : 4.3, '#4ade80');
+          ctx.fillStyle = '#6ee7b7';
+          ctx.fillText(fitCanvasText(ctx, compact ? '42x GSH Glow' : '42x GSH Release Glow', maxRW - 11), rx + 11, mwToY(15) + 3);
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText(fitCanvasText(ctx, compact ? '66.5 kDa Dark' : '66.5 kDa HSA Dark (0%)', maxRW), rx, mwToY(66.5) + 3);
+        }
+      } else {
+        // Antoine Step 5: Dual-Fluorescence 495/646 nm + Coomassie 150 kDa
+        drawGelBand(1, 150, 0.42, 5.8, '59, 130, 246');
+        drawGelBand(2, 150, 0.92, 6.2, '74, 222, 128', '#4ade80');
+        if (overRed) {
+          drawGelBand(3, 150, 0.48, 5.0, '34, 211, 238', '#22d3ee');
+          drawGelBand(3, 75, 0.85, 5.6, '248, 113, 113', '#f87171');
+          drawVectorWarning(ctx, rx + 4, mwToY(75) - 1, compact ? 3.5 : 4.2, '#f87171', '#070c16');
+          ctx.fillStyle = '#fca5a5';
+          ctx.fillText(fitCanvasText(ctx, compact ? '75 kDa HL!' : '75 kDa Half-mAb Split!', maxRW - 11), rx + 11, mwToY(75) + 3);
+        } else {
+          drawGelBand(3, 150, 0.96, 6.8, '34, 211, 238', '#4ade80');
+          drawGelBand(3, 150, 0.72, 3.6, '167, 243, 208', '#22d3ee');
+          drawVectorCheck(ctx, rx + 4, mwToY(150) - 1, compact ? 3.5 : 4.3, '#4ade80');
+          ctx.fillStyle = '#6ee7b7';
+          ctx.fillText(fitCanvasText(ctx, compact ? 'Dox+Cy5 150' : 'Co-localised 150 kDa', maxRW - 11), rx + 11, mwToY(150) + 3);
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText(fitCanvasText(ctx, compact ? '495 / 646 nm' : '495 nm Dox + 646 nm Cy5', maxRW), rx, mwToY(100) + 3);
+        }
+      }
+    } else if (gelMode === 'native_shift') {
+      if (isFcrnShift) {
+        drawGelBand(1, 150, 0.92, 6.0);
+        drawGelBand(2, 210, overRed ? 0.48 : 0.94, 6.6);
+        if (overRed) drawGelBand(2, 150, 0.65, 5.0, '185, 28, 28');
+        drawGelBand(3, 150, 0.92, 6.0);
+        drawGelBand(3, 45, 0.76, 4.4);
+        if (overRed) {
+          drawVectorWarning(ctx, rx + 4, mwToY(210) - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+          ctx.fillStyle = '#dc2626';
+          ctx.fillText(fitCanvasText(ctx, compact ? 'Weak pH 6.0!' : 'Incomplete FcRn Bind!', maxRW - 11), rx + 11, mwToY(210) + 3);
+        } else {
+          drawVectorCheck(ctx, rx + 4, mwToY(210) - 1, compact ? 3.5 : 4.3, '#15803d');
+          ctx.fillStyle = '#15803d';
+          ctx.fillText(fitCanvasText(ctx, compact ? 'pH 6 Shift' : 'pH 6.0 FcRn Complex', maxRW - 11), rx + 11, mwToY(210) + 3);
+          ctx.fillStyle = '#475569';
+          ctx.fillText(fitCanvasText(ctx, compact ? 'pH 7.4 Free' : 'pH 7.4 Clean Release', maxRW), rx, mwToY(150) + 3);
+        }
+      } else {
+        drawGelBand(1, 150, 0.92, 6.0);
+        drawGelBand(2, 235, 0.94, 6.8);
+        drawGelBand(3, 235, overRed ? 0.50 : 0.95, 6.8);
+        if (overRed) drawGelBand(3, 150, 0.68, 5.0, '185, 28, 28');
+        if (overRed) {
+          drawVectorWarning(ctx, rx + 4, mwToY(150) - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+          ctx.fillStyle = '#dc2626';
+          ctx.fillText(fitCanvasText(ctx, compact ? 'Unbound ADC!' : 'Lost HER2 Binding!', maxRW - 11), rx + 11, mwToY(150) + 3);
+        } else {
+          drawVectorCheck(ctx, rx + 4, mwToY(235) - 1, compact ? 3.5 : 4.3, '#15803d');
+          ctx.fillStyle = '#15803d';
+          ctx.fillText(fitCanvasText(ctx, compact ? 'HER2 Shift' : '100% HER2 Shift Band', maxRW - 11), rx + 11, mwToY(235) + 3);
+          ctx.fillStyle = '#475569';
+          ctx.fillText(fitCanvasText(ctx, compact ? '150 kDa Free' : '150 kDa Unbound Ctrl', maxRW), rx, mwToY(150) + 3);
+        }
+      }
     } else {
-      drawVectorCheck(ctx, rx + 4, y150 - 1, compact ? 3.8 : 4.5, '#15803d');
-      ctx.fillStyle = '#15803d';
-      ctx.fillText('150 kDa Rebridged HHLL', rx + 12, y150 + 3);
-    }
+      // Classic 150 kDa HHLL mAb conjugate
+      drawGelBand(1, 150, 0.94, 6.2);
+      drawGelBand(1, 75, 0.12, 3.0);
+      drawGelBand(2, 50, 0.90, 5.8);
+      drawGelBand(2, 25, 0.82, 4.8);
+      drawGelBand(2, 75, 0.18, 3.2);
 
-    const y75 = mwToY(75);
-    if (overRed) {
-      drawVectorWarning(ctx, rx + 4, y75 - 1, compact ? 3.8 : 4.3, '#dc2626', '#ffffff');
-      ctx.fillStyle = '#dc2626';
-      ctx.fillText('75 kDa HL Half-mAb!', rx + 12, y75 + 3);
-      drawVectorWarning(ctx, rx + 4, mwToY(50) - 1, compact ? 3.8 : 4.3, '#dc2626', '#ffffff');
-      ctx.fillText('50 H / 25 L Fragments', rx + 12, mwToY(50) + 3);
-    } else {
-      ctx.fillStyle = '#475569';
-      ctx.fillText('50 kDa (H) [Red. Ctrl]', rx, mwToY(50) + 3);
-      ctx.fillText('25 kDa (L) [Red. Ctrl]', rx, mwToY(25) + 3);
+      if (overRed) {
+        drawGelBand(3, 150, 0.45, 5.0);
+        drawGelBand(3, 75,  0.88, 5.8, '185, 28, 28');
+        drawGelBand(3, 50,  0.66, 4.6);
+        drawGelBand(3, 25,  0.58, 4.2);
+      } else {
+        drawGelBand(3, 150, 0.96, 6.8);
+        drawGelBand(3, 75,  0.14 + (100 - q) * 0.005, 3.0);
+      }
+
+      const y150 = mwToY(150);
+      if (overRed) {
+        ctx.fillStyle = '#334155';
+        ctx.fillText(fitCanvasText(ctx, compact ? '150 kDa Weak' : '150 kDa HHLL (Weak)', maxRW), rx, y150 + 3);
+      } else {
+        drawVectorCheck(ctx, rx + 4, y150 - 1, compact ? 3.5 : 4.5, '#15803d');
+        ctx.fillStyle = '#15803d';
+        ctx.fillText(fitCanvasText(ctx, compact ? '150 kDa HHLL' : '150 kDa Rebridged HHLL', maxRW - 11), rx + 11, y150 + 3);
+      }
+
+      const y75 = mwToY(75);
+      if (overRed) {
+        drawVectorWarning(ctx, rx + 4, y75 - 1, compact ? 3.5 : 4.3, '#dc2626', '#ffffff');
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(fitCanvasText(ctx, compact ? '75 kDa HL!' : '75 kDa HL Half-mAb!', maxRW - 11), rx + 11, y75 + 3);
+        drawVectorWarning(ctx, rx + 4, mwToY(50) - 1, compact ? 3.5 : 4.3, '#dc2626', '#ffffff');
+        ctx.fillText(fitCanvasText(ctx, compact ? '50H / 25L!' : '50 H / 25 L Fragments', maxRW - 11), rx + 11, mwToY(50) + 3);
+      } else {
+        ctx.fillStyle = '#475569';
+        ctx.fillText(fitCanvasText(ctx, compact ? '50 kDa (H)' : '50 kDa (H) [Red. Ctrl]', maxRW), rx, mwToY(50) + 3);
+        ctx.fillText(fitCanvasText(ctx, compact ? '25 kDa (L)' : '25 kDa (L) [Red. Ctrl]', maxRW), rx, mwToY(25) + 3);
+      }
     }
 
     if (blueMishap) {
-      drawVectorWarning(ctx, rx + 4, gy + gh - 16, compact ? 3.8 : 4.3, '#0369a1', '#ffffff');
+      drawVectorWarning(ctx, rx + 4, gy + gh - 14, compact ? 3.5 : 4.3, '#0369a1', '#ffffff');
       ctx.fillStyle = '#0369a1';
-      ctx.fillText('Blue LDS Dye Spill!', rx + 12, gy + gh - 12);
+      ctx.fillText(fitCanvasText(ctx, compact ? 'Blue LDS!' : 'Blue LDS Dye Spill!', maxRW - 11), rx + 11, gy + gh - 10);
     }
   }
 
-  // -------------------- 3. BRUKER TOPSPIN 1H NMR SPECTRUM --------------------
+  // -------------------- 3. BRUKER TOPSPIN 1H / 31P NMR SPECTRUM --------------------
   function drawBrukerNmr(ctx, w, h, item, rng) {
     const compact = w < 440;
     const q = getQuality(item, 85);
     const hasSolvent = Boolean(item.hasSolventPeak) || q < 78;
-    const useDmso = /dmso|hydrogel|peg|sm|folate|peptide/i.test(`${item.label} ${item.notes}`);
+    const nmrMeta = `${item.label || ''} ${item.productPeak || ''} ${item.notes || ''} ${item.metricLabel || ''}`;
+
+    // Check explicit CDCl3 first before defaulting to DMSO-d6
+    const explicitCdCl3 = /cdcl3/i.test(nmrMeta);
+    const explicitDmso = /dmso/i.test(nmrMeta);
+    const useDmso = explicitDmso || (!explicitCdCl3 && /hydrogel|folate|peptide|pabc|phenazepam/i.test(nmrMeta));
+    const mhzMatch = nmrMeta.match(/(\d{3})\s*MHz/i);
+    const freqMhz = mhzMatch ? mhzMatch[1] : '600';
+    const isVt = /vt-?nmr|120\s*c|393\s*k|coalesc/i.test(nmrMeta);
+    const tempK = isVt ? '393 K' : '298 K';
+    const is31P = /31p/i.test(nmrMeta);
 
     // Crisp Bruker TopSpin dark-slate scientific theme
     ctx.fillStyle = '#090f1d';
     ctx.fillRect(0, 0, w, h);
 
-    // TopSpin window title strip
     ctx.fillStyle = '#13203b';
     ctx.fillRect(0, 0, w, compact ? 20 : 26);
     ctx.fillStyle = '#93c5fd';
     ctx.font = `bold ${compact ? 9.5 : 11.5}px Consolas, monospace`;
     ctx.textAlign = 'left';
+    const solvStr = useDmso ? 'DMSO-d6' : 'CDCl3';
     ctx.fillText(
-      compact
-        ? `1H NMR (${useDmso ? 'DMSO-d6' : 'CDCl3'})`
-        : `Bruker Neo 600 MHz • 1H NMR (${useDmso ? 'DMSO-d6' : 'CDCl3'}, 298 K)`,
+      is31P
+        ? (compact ? `31P NMR (${solvStr})` : `Bruker Neo ${freqMhz} MHz • 31P{1H} NMR (${solvStr}, ${tempK})`)
+        : (compact ? `1H NMR (${solvStr})` : `Bruker Neo ${freqMhz} MHz • 1H NMR (${solvStr}, ${tempK})`),
       10,
       compact ? 13 : 17
     );
@@ -645,16 +1136,104 @@ window.KLB = window.KLB || {};
     const plotH = baseY - plotTop;
     const plotW = w - padL - padR;
 
-    // Axis mapping: 10.5 ppm (left) -> -0.5 ppm (right)
-    const ppmMax = 10.5;
+    // 31P{1H} NMR branch (max_step_2)
+    if (is31P) {
+      const pMax = 40, pMin = -35;
+      const pToX = p => padL + ((pMax - p) / (pMax - pMin)) * plotW;
+      const xToP = px => pMax - ((px - padL) / plotW) * (pMax - pMin);
+
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.11)';
+      ctx.lineWidth = 1;
+      for (let p = 40; p >= -30; p -= 10) {
+        const gx = pToX(p);
+        ctx.beginPath(); ctx.moveTo(gx, plotTop); ctx.lineTo(gx, baseY); ctx.stroke();
+      }
+
+      const pPeaks = [
+        { ppm: -17.4, amp: hasSolvent ? 0.56 : 0.94, w: 0.28, isFlaw: false },
+        { ppm: 29.5, amp: hasSolvent ? 0.88 : 0.03, w: 0.30, isFlaw: hasSolvent }
+      ];
+      const cleanVals = new Float32Array(plotW + 1);
+      const flawVals = new Float32Array(plotW + 1);
+      for (let i = 0; i <= plotW; i++) {
+        const ppm = xToP(padL + i);
+        let vc = (rng() - 0.5) * 0.01;
+        let vf = 0;
+        for (const pk of pPeaks) {
+          const d = (ppm - pk.ppm) / pk.w;
+          const lor = pk.amp / (1 + d * d);
+          if (pk.isFlaw) vf += lor;
+          else vc += lor;
+        }
+        cleanVals[i] = vc;
+        flawVals[i] = vf;
+      }
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.45;
+      ctx.beginPath();
+      for (let i = 0; i <= plotW; i++) {
+        const x = padL + i;
+        const y = baseY - cleanVals[i] * plotH * 0.84;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      const phosX = pToX(-17.4);
+      ctx.fillStyle = '#86efac';
+      ctx.font = `bold ${compact ? 8.5 : 10.5}px Consolas, monospace`;
+      ctx.textAlign = 'right';
+      ctx.fillText(compact ? '-17.4 ppm P(III)' : '-17.4 ppm Live Phosphine (>97%)', Math.min(w - padR, phosX + 10), plotTop + 14);
+
+      if (hasSolvent) {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i <= plotW; i++) {
+          const x = padL + i;
+          const y = baseY - Math.max(0, flawVals[i]) * plotH * 0.84;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        const oxX = pToX(29.5);
+        ctx.fillStyle = '#fca5a5';
+        ctx.textAlign = 'left';
+        drawVectorWarning(ctx, oxX + 4, plotTop + 14, compact ? 3.5 : 4.1, '#f87171', '#090f1d');
+        ctx.fillText(compact ? '+29.5 P=O!' : '+29.5 ppm P=O Oxide Crash!', oxX + 12, plotTop + 18);
+      }
+
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(padL, baseY + 2); ctx.lineTo(w - padR, baseY + 2); ctx.stroke();
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = `${compact ? 8.5 : 10}px Consolas, monospace`;
+      ctx.textAlign = 'center';
+      for (let p = 40; p >= -30; p -= 10) {
+        const tx = pToX(p);
+        ctx.beginPath(); ctx.moveTo(tx, baseY + 2); ctx.lineTo(tx, baseY + 7); ctx.stroke();
+        ctx.fillText(String(p), tx, baseY + (compact ? 16 : 18));
+      }
+      ctx.fillStyle = '#94a3b8';
+      ctx.textAlign = 'right';
+      ctx.fillText('δ 31P (ppm)', w - padR, baseY + (compact ? 25 : 30));
+      return;
+    }
+
+    // 1H NMR: Expand ppmMax to 11.2 when 1H productPeak has downfield shift > 10.2 (ignore 13C > 15.5 ppm)
+    const shiftMatches = [...String(item.productPeak || '').matchAll(/(\d{1,3}\.\d+)\s*(?:ppm|\()/gi)];
+    const hasHigh1HShift = shiftMatches.some(m => {
+      const v = parseFloat(m[1]);
+      return v > 10.2 && v <= 15.5;
+    });
+    const ppmMax = hasHigh1HShift ? 11.2 : 10.5;
     const ppmMin = -0.5;
     const ppmToX = ppm => padL + ((ppmMax - ppm) / (ppmMax - ppmMin)) * plotW;
     const xToPpm = px => ppmMax - ((px - padL) / plotW) * (ppmMax - ppmMin);
 
-    // Subtle vertical chemical shift grid
     ctx.strokeStyle = 'rgba(148, 163, 184, 0.11)';
     ctx.lineWidth = 1;
-    for (let p = 10; p >= 0; p--) {
+    const topTick = Math.floor(ppmMax);
+    for (let p = topTick; p >= 0; p--) {
       const gx = ppmToX(p);
       ctx.beginPath();
       ctx.moveTo(gx, plotTop);
@@ -662,20 +1241,69 @@ window.KLB = window.KLB || {};
       ctx.stroke();
     }
 
-    // Multiplet definitions: { ppm, amp, widthPpm, split: [rel Intensities], jPpm, isSolventFlaw, isRef, integralH }
-    const peaks = [
-      // Aromatic pyridazinedione / aryl multiplets (7.1 - 8.4 ppm)
-      { ppm: 8.18 + (rng() - 0.5) * 0.12, amp: 0.48, w: 0.011, split: [1, 1], j: 0.022, intH: '2.00H' },
-      { ppm: 7.66 + (rng() - 0.5) * 0.12, amp: 0.42, w: 0.012, split: [1, 2, 1], j: 0.020, intH: '2.01H' },
-      { ppm: 7.38 + (rng() - 0.5) * 0.08, amp: 0.38, w: 0.011, split: [1, 1], j: 0.021, intH: '2.03H' },
-      // Aliphatic / linker multiplets (1.2 - 4.6 ppm)
-      { ppm: 4.38 + (rng() - 0.5) * 0.10, amp: 0.44, w: 0.012, split: [1, 2, 1], j: 0.022, intH: '2.00H' },
-      { ppm: 3.66 + (rng() - 0.5) * 0.08, amp: 0.56, w: 0.014, split: [1, 3, 3, 1], j: 0.018, intH: '4.04H' },
-      { ppm: 2.86 + (rng() - 0.5) * 0.08, amp: 0.40, w: 0.012, split: [1, 2, 1], j: 0.020, intH: '2.02H' },
-      { ppm: 1.44 + (rng() - 0.5) * 0.06, amp: 0.62, w: 0.011, split: [1], j: 0, intH: '3.01H' },
-      // TMS at 0.00 ppm
-      { ppm: 0.00, amp: 0.16, w: 0.009, split: [1], j: 0, isRef: true }
-    ];
+    // Context-aware 1H multiplet profiles (aromatic vs non-aromatic vs disclosed EtOAc)
+    const hasArylContext = /aryl|tz-?arh|\bn-?ph\b|pteridine|pabc|phenazepam|7\.\d{2}|8\.\d{2}|10\.\d{2}/i.test(nmrMeta);
+    const nonAromatic = !hasArylContext && /dibrpd|astra-?pd|bcn|nhs|monobrpd/i.test(nmrMeta);
+    const hasVinylicBr = /7\.06|ch=cbr|monobrpd/i.test(nmrMeta);
+    const hasDisclosedEtoac = /0\.08\s*eq\s*etoac|etoac\s*disclosed/i.test(nmrMeta);
+
+    const peaks = [];
+    if (hasHigh1HShift) {
+      // Phenazepam / VT-NMR NH + coalesced CH2 + aryl
+      peaks.push(
+        { ppm: 10.74, amp: 0.42, w: 0.015, split: [1], j: 0, intH: '1.00H' },
+        { ppm: 7.72,  amp: 0.46, w: 0.012, split: [1, 1], j: 0.020, intH: '2.01H' },
+        { ppm: 7.41,  amp: 0.40, w: 0.012, split: [1, 2, 1], j: 0.019, intH: '3.02H' },
+        { ppm: 4.18,  amp: 0.58, w: 0.012, split: [1], j: 0, intH: '2.00H' }
+      );
+    } else if (nonAromatic) {
+      // Non-aromatic linker / PD scaffolds (diBrPD-PEG2-BCN, Astra-PD, diBrPD-NHS, monoBrPD-PEG2-BCN)
+      if (hasVinylicBr) {
+        peaks.push({ ppm: 7.06, amp: 0.52, w: 0.010, split: [1], j: 0, intH: '1.00H' });
+      }
+      if (/astra-?pd|propargyl/i.test(nmrMeta)) {
+        peaks.push(
+          { ppm: 4.92, amp: 0.52, w: 0.011, split: [1, 1], j: 0.016, intH: '2.00H' },
+          { ppm: 3.62, amp: 0.48, w: 0.013, split: [1, 2, 1], j: 0.018, intH: '4.01H' },
+          { ppm: 3.16, amp: 0.66, w: 0.010, split: [1], j: 0, intH: '3.00H' },
+          { ppm: 2.34, amp: 0.44, w: 0.011, split: [1, 2, 1], j: 0.015, intH: '1.01H' }
+        );
+      } else if (/nhs/i.test(nmrMeta)) {
+        peaks.push(
+          { ppm: 3.96, amp: 0.50, w: 0.012, split: [1, 2, 1], j: 0.020, intH: '2.00H' },
+          { ppm: 3.21, amp: 0.68, w: 0.010, split: [1], j: 0, intH: '3.01H' },
+          { ppm: 2.84, amp: 0.78, w: 0.011, split: [1], j: 0, intH: '4.00H' },
+          { ppm: 1.66, amp: 0.42, w: 0.013, split: [1, 2, 1], j: 0.018, intH: '2.02H' }
+        );
+      } else {
+        // BCN-PEG-PD
+        peaks.push(
+          { ppm: 4.14, amp: 0.50, w: 0.011, split: [1, 1], j: 0.018, intH: '2.00H' },
+          { ppm: 3.66, amp: 0.60, w: 0.014, split: [1, 3, 3, 1], j: 0.018, intH: '6.04H' },
+          { ppm: 3.18, amp: 0.68, w: 0.010, split: [1], j: 0, intH: '3.00H' },
+          { ppm: 2.24, amp: 0.40, w: 0.013, split: [1, 2, 1], j: 0.018, intH: '4.02H' },
+          { ppm: 0.94, amp: 0.46, w: 0.013, split: [1, 2, 1], j: 0.016, intH: '2.01H' }
+        );
+      }
+    } else {
+      // Aromatic pyridazinedione / pteridine / tetrazine / PABC multiplets
+      const downfieldShift = /8\.64|8\.52/.test(nmrMeta) ? (/8\.64/.test(nmrMeta) ? 8.64 : 8.52) : 8.18 + (rng() - 0.5) * 0.12;
+      if (/10\.12/.test(nmrMeta)) {
+        peaks.push({ ppm: 10.12, amp: 0.36, w: 0.014, split: [1], j: 0, intH: '1.00H' });
+      }
+      peaks.push(
+        { ppm: downfieldShift, amp: 0.48, w: 0.011, split: [1, 1], j: 0.022, intH: '2.00H' },
+        { ppm: 7.66 + (rng() - 0.5) * 0.12, amp: 0.42, w: 0.012, split: [1, 2, 1], j: 0.020, intH: '2.01H' },
+        { ppm: 7.38 + (rng() - 0.5) * 0.08, amp: 0.38, w: 0.011, split: [1, 1], j: 0.021, intH: '2.03H' },
+        { ppm: 4.38 + (rng() - 0.5) * 0.10, amp: 0.44, w: 0.012, split: [1, 2, 1], j: 0.022, intH: '2.00H' },
+        { ppm: 3.66 + (rng() - 0.5) * 0.08, amp: 0.56, w: 0.014, split: [1, 3, 3, 1], j: 0.018, intH: '4.04H' },
+        { ppm: 2.86 + (rng() - 0.5) * 0.08, amp: 0.40, w: 0.012, split: [1, 2, 1], j: 0.020, intH: '2.02H' },
+        { ppm: 1.44 + (rng() - 0.5) * 0.06, amp: 0.62, w: 0.011, split: [1], j: 0, intH: '3.01H' }
+      );
+    }
+
+    // TMS at 0.00 ppm
+    peaks.push({ ppm: 0.00, amp: 0.16, w: 0.009, split: [1], j: 0, isRef: true });
 
     // Deuterated NMR reference solvent peak (CDCl3 7.26 or DMSO-d6 2.50)
     if (useDmso) {
@@ -684,22 +1312,31 @@ window.KLB = window.KLB || {};
       peaks.push({ ppm: 7.26, amp: 0.36, w: 0.009, split: [1], j: 0, isRef: true, refLbl: 'CDCl3 7.26' });
     }
 
-    // Residual workup/column solvent spikes if hasSolventPeak or quality < 78!
+    // Subtle 0.08 eq EtOAc trace on Richard Step 2 (disclosed cleanly, non-flaw)
+    if (hasDisclosedEtoac && !hasSolvent) {
+      peaks.push(
+        { ppm: 4.12, amp: 0.14, w: 0.010, split: [1, 3, 3, 1], j: 0.016, isTrace: true, traceLbl: '0.08 eq EtOAc' },
+        { ppm: 2.05, amp: 0.22, w: 0.009, split: [1], j: 0, isTrace: true },
+        { ppm: 1.26, amp: 0.15, w: 0.010, split: [1, 2, 1], j: 0.016, isTrace: true }
+      );
+    }
+
+    // Residual workup/column solvent spikes if hasSolventPeak or quality < 78
     if (hasSolvent) {
-      // Towering 5.30 ppm DCM singlet + trace EtOAc quartet/singlet/triplet (4.12 / 2.04 / 1.26 ppm)
       peaks.push({ ppm: 5.30, amp: 0.96, w: 0.009, split: [1], j: 0, isFlaw: true, flawLbl: '5.30 ppm (DCM!)' });
       peaks.push({ ppm: 4.12, amp: 0.42, w: 0.010, split: [1, 3, 3, 1], j: 0.018, isFlaw: true, flawLbl: '4.12 (EtOAc)' });
       peaks.push({ ppm: 2.04, amp: 0.68, w: 0.009, split: [1], j: 0, isFlaw: true, flawLbl: '2.04 (EtOAc)' });
       peaks.push({ ppm: 1.26, amp: 0.46, w: 0.010, split: [1, 2, 1], j: 0.018, isFlaw: true });
     }
 
-    // Evaluate Lorentzian spectrum across pixel columns
     const cleanVals = new Float32Array(plotW + 1);
+    const traceVals = new Float32Array(plotW + 1);
     const flawVals = new Float32Array(plotW + 1);
 
     for (let i = 0; i <= plotW; i++) {
       const ppm = xToPpm(padL + i);
       let vClean = (rng() - 0.5) * (q < 78 ? 0.022 : 0.009);
+      let vTrace = 0;
       let vFlaw = 0;
 
       for (const pk of peaks) {
@@ -710,14 +1347,16 @@ window.KLB = window.KLB || {};
           const d = (ppm - linePpm) / pk.w;
           const lor = (pk.amp * (pk.split[k] / maxRel)) / (1 + d * d);
           if (pk.isFlaw) vFlaw += lor;
+          else if (pk.isTrace) vTrace += lor;
           else vClean += lor;
         }
       }
       cleanVals[i] = vClean;
+      traceVals[i] = vTrace;
       flawVals[i] = vFlaw;
     }
 
-    // 1) Draw green integration step-curves above product multiplets
+    // 1) Green integration step-curves above product multiplets
     ctx.strokeStyle = 'rgba(52, 211, 153, 0.78)';
     ctx.fillStyle = '#6ee7b7';
     ctx.lineWidth = 1.15;
@@ -743,7 +1382,7 @@ window.KLB = window.KLB || {};
       }
     }
 
-    // 2) Draw main cyan/blue Bruker 1H trace
+    // 2) Main cyan/blue Bruker 1H trace
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 1.25;
     ctx.beginPath();
@@ -755,7 +1394,25 @@ window.KLB = window.KLB || {};
     }
     ctx.stroke();
 
-    // 3) Draw red-flagged residual solvent trace on top if present!
+    // 2b) Subtle disclosed EtOAc trace (Richard Step 2)
+    if (hasDisclosedEtoac && !hasSolvent) {
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.15;
+      ctx.beginPath();
+      for (let i = 0; i <= plotW; i++) {
+        const x = padL + i;
+        const y = baseY - traceVals[i] * plotH * 0.86;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#fde68a';
+      ctx.font = `${compact ? 7.5 : 9}px Consolas, monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText(compact ? '0.08eq EtOAc' : '0.08 eq EtOAc (disclosed)', ppmToX(2.05), baseY - 0.24 * plotH * 0.86 - 6);
+    }
+
+    // 3) Red-flagged residual solvent trace on top if present
     if (hasSolvent) {
       ctx.strokeStyle = '#ef4444';
       ctx.lineWidth = 1.45;
@@ -768,20 +1425,20 @@ window.KLB = window.KLB || {};
       }
       ctx.stroke();
 
-      // Bold red callout tag right on 5.30 ppm DCM!
       const dcmX = ppmToX(5.30);
       const dcmTopY = Math.max(plotTop - 4, baseY - 0.92 * plotH * 0.90);
-      ctx.fillStyle = 'rgba(185, 28, 28, 0.92)';
       const boxW = compact ? 132 : 178;
       const boxH = compact ? 18 : 22;
-      ctx.fillRect(dcmX + 6, dcmTopY, boxW, boxH);
+      const boxX = clamp(dcmX + 6, padL + 2, w - padR - boxW - 2);
+      ctx.fillStyle = 'rgba(185, 28, 28, 0.92)';
+      ctx.fillRect(boxX, dcmTopY, boxW, boxH);
       ctx.strokeStyle = '#fca5a5';
-      ctx.strokeRect(dcmX + 6, dcmTopY, boxW, boxH);
-      drawVectorWarning(ctx, dcmX + 15, dcmTopY + boxH / 2, compact ? 3.5 : 4.2, '#fde047', '#7f1d1d');
+      ctx.strokeRect(boxX, dcmTopY, boxW, boxH);
+      drawVectorWarning(ctx, boxX + 9, dcmTopY + boxH / 2, compact ? 3.5 : 4.2, '#fde047', '#7f1d1d');
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${compact ? 8.5 : 10.5}px Consolas, monospace`;
       ctx.textAlign = 'left';
-      ctx.fillText(compact ? '5.30 DCM + EtOAc!' : '5.30 ppm DCM + EtOAc!', dcmX + 23, dcmTopY + (compact ? 12 : 15));
+      ctx.fillText(compact ? '5.30 DCM + EtOAc!' : '5.30 ppm DCM + EtOAc!', boxX + 17, dcmTopY + (compact ? 12 : 15));
     }
 
     // Reference solvent tag (CDCl3 7.26 / DMSO-d6 2.50)
@@ -805,7 +1462,7 @@ window.KLB = window.KLB || {};
     ctx.fillStyle = '#cbd5e1';
     ctx.font = `${compact ? 8.5 : 10}px Consolas, monospace`;
     ctx.textAlign = 'center';
-    for (let p = 10; p >= 0; p--) {
+    for (let p = topTick; p >= 0; p--) {
       const tx = ppmToX(p);
       ctx.beginPath();
       ctx.moveTo(tx, baseY + 2);
@@ -824,27 +1481,27 @@ window.KLB = window.KLB || {};
     const q = getQuality(item, 85);
     const hasAdduct = Boolean(item.hasAdduct) || q < 78;
 
-    // Parse center mass from item.productPeak if possible
     const rawPeakStr = String(item.productPeak || '148420 Da');
+    const lcmsMeta = `${item.label || ''} ${rawPeakStr} ${item.notes || ''} ${item.metricLabel || ''}`;
     const cleanNumStr = rawPeakStr.replace(/,/g, '');
     const massMatches = [...cleanNumStr.matchAll(/(\d{3,6}(?:\.\d+)?)/g)];
     let centerMass = 148420;
     if (massMatches.length > 0) {
       centerMass = parseFloat(massMatches[0][1]);
-    } else if (/small|pd|sm|linker|phenazepam|m\/z/i.test(`${item.label} ${rawPeakStr}`)) {
+    } else if (/small|pd|sm|linker|phenazepam|m\/z/i.test(lcmsMeta)) {
       centerMass = 548.1;
     }
 
-    const isProtein = centerMass >= 2500;
-    const spanLeft = isProtein ? 220 : 90;
-    const spanRight = isProtein ? 340 : 280;
+    // Only treat as protein/antibody conjugate for mass > 5000 (or >= 2000 with protein keywords); < 2000 Da is always small-molecule!
+    const isProtein = centerMass >= 2000 && (centerMass > 5000 || /fab|igg|mab|bsa|hsa|vnar|her2|dar|par/i.test(lcmsMeta));
+    const spanLeft = isProtein ? 220 : 28;
+    const spanRight = isProtein ? 340 : 42;
     const mMin = centerMass - spanLeft;
     const mMax = centerMass + spanRight;
 
     ctx.fillStyle = '#090e1a';
     ctx.fillRect(0, 0, w, h);
 
-    // Waters MassLynx / Agilent MassHunter header
     ctx.fillStyle = '#16213a';
     ctx.fillRect(0, 0, w, compact ? 20 : 26);
     ctx.fillStyle = '#c4b5fd';
@@ -862,7 +1519,7 @@ window.KLB = window.KLB || {};
     drawTopMetaMetrics(ctx, w, item, compact, compact ? 13 : 17, compact ? 8 : 10);
 
     const padL = compact ? 34 : 46;
-    const padR = 18;
+    const padR = compact ? 14 : 18;
     const padB = compact ? 28 : 36;
     const plotTop = compact ? 34 : 46;
     const baseY = h - padB;
@@ -872,7 +1529,6 @@ window.KLB = window.KLB || {};
     const mToX = m => padL + ((m - mMin) / (mMax - mMin)) * plotW;
     const xToM = px => mMin + ((px - padL) / plotW) * (mMax - mMin);
 
-    // Axes
     ctx.strokeStyle = '#475569';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
@@ -881,7 +1537,6 @@ window.KLB = window.KLB || {};
     ctx.lineTo(w - padR, baseY);
     ctx.stroke();
 
-    // Y-axis % labels
     ctx.fillStyle = '#94a3b8';
     ctx.font = `${compact ? 8 : 9.5}px Consolas, monospace`;
     ctx.textAlign = 'right';
@@ -897,24 +1552,56 @@ window.KLB = window.KLB || {};
       }
     });
 
-    // Mass peaks: main product at 100%, minor Na+/H2O satellites, plus +69 Da adduct & +44 Da PEG comb if flawed!
-    const widthDa = isProtein ? 6.5 : 1.3;
+    const widthDa = isProtein ? 6.5 : 0.35;
     const msPeaks = [
-      { m: centerMass, amp: 1.0, w: widthDa, isFlaw: false },
-      { m: centerMass + 18, amp: 0.08, w: widthDa * 0.85, isFlaw: false },
-      { m: centerMass - (isProtein ? 148 : 36), amp: hasAdduct ? 0.22 : 0.05, w: widthDa, isFlaw: hasAdduct }
+      { m: centerMass, amp: 1.0, w: widthDa, isFlaw: false }
     ];
 
-    if (hasAdduct) {
-      // Signature +69 Da adduct spike + periodic +44 Da PEG contamination comb (+44, +88, +132, +176, +220 Da)
-      msPeaks.push({ m: centerMass + 69, amp: 0.56, w: widthDa * 0.9, isFlaw: true });
-      for (let k = 1; k <= 5; k++) {
-        msPeaks.push({
-          m: centerMass + 44 * k,
-          amp: 0.44 * Math.pow(0.84, k - 1),
-          w: widthDa * 0.72,
-          isFlaw: true
-        });
+    if (isProtein) {
+      msPeaks.push(
+        { m: centerMass + 18, amp: 0.08, w: widthDa * 0.85, isFlaw: false },
+        { m: centerMass - 148, amp: hasAdduct ? 0.22 : 0.05, w: widthDa, isFlaw: hasAdduct }
+      );
+      if (/47,964|4:1/.test(rawPeakStr) && massMatches.length > 1) {
+        msPeaks.push({ m: parseFloat(massMatches[1][1]), amp: 0.25, w: widthDa, isFlaw: false });
+      }
+      if (hasAdduct) {
+        msPeaks.push({ m: centerMass + 69, amp: 0.56, w: widthDa * 0.9, isFlaw: true });
+        for (let k = 1; k <= 5; k++) {
+          msPeaks.push({
+            m: centerMass + 44 * k,
+            amp: 0.44 * Math.pow(0.84, k - 1),
+            w: widthDa * 0.72,
+            isFlaw: true
+          });
+        }
+      }
+    } else {
+      // Clean small-molecule isotopic cluster (Br2 1:2:1, BrCl, Cl 3:1, or standard 13C M+1/M+2)
+      if (/1:2:1|br2/i.test(lcmsMeta)) {
+        msPeaks.push(
+          { m: centerMass + 2.0, amp: 0.98, w: widthDa, isFlaw: false },
+          { m: centerMass + 4.0, amp: 0.52, w: widthDa, isFlaw: false }
+        );
+      } else if (/79br35cl|81br35cl/i.test(lcmsMeta)) {
+        msPeaks.push(
+          { m: centerMass + 1.998, amp: 1.0, w: widthDa, isFlaw: false },
+          { m: centerMass + 3.995, amp: 0.32, w: widthDa, isFlaw: false }
+        );
+        msPeaks[0].amp = 0.77;
+      } else if (/35cl\/37cl|3:1/i.test(lcmsMeta)) {
+        msPeaks.push({ m: centerMass + 1.997, amp: 0.34, w: widthDa, isFlaw: false });
+      } else {
+        msPeaks.push(
+          { m: centerMass + 1.003, amp: 0.24, w: widthDa, isFlaw: false },
+          { m: centerMass + 2.006, amp: 0.04, w: widthDa, isFlaw: false }
+        );
+      }
+      if (hasAdduct) {
+        msPeaks.push(
+          { m: centerMass - 18.0, amp: 0.46, w: widthDa * 1.1, isFlaw: true },
+          { m: centerMass + 16.0, amp: 0.38, w: widthDa * 1.1, isFlaw: true }
+        );
       }
     }
 
@@ -934,7 +1621,6 @@ window.KLB = window.KLB || {};
       flawCurve[i] = vf;
     }
 
-    // Draw clean main product envelope (violet-cyan fill + stroke)
     ctx.beginPath();
     ctx.moveTo(padL, baseY);
     for (let i = 0; i <= plotW; i++) {
@@ -956,7 +1642,6 @@ window.KLB = window.KLB || {};
     }
     ctx.stroke();
 
-    // Draw +69 Da adduct & +44 Da PEG comb in red/amber if present!
     if (hasAdduct) {
       ctx.strokeStyle = '#f87171';
       ctx.lineWidth = 1.5;
@@ -969,36 +1654,54 @@ window.KLB = window.KLB || {};
       }
       ctx.stroke();
 
-      const addX = mToX(centerMass + 69);
-      const addY = baseY - 0.56 * plotH * 0.86;
-      drawVectorWarning(ctx, addX - 2, addY - 10, compact ? 3.4 : 4.1, '#f87171', '#090e1a');
-      ctx.fillStyle = '#fca5a5';
-      ctx.font = `bold ${compact ? 8.5 : 10.5}px Consolas, monospace`;
+      ctx.font = `bold ${compact ? 8 : 10.5}px Consolas, monospace`;
       ctx.textAlign = 'left';
-      ctx.fillText('+69 Da Adduct!', addX + 6, addY - 7);
-      const pegX = mToX(centerMass + 88);
-      const pegY = baseY - 0.36 * plotH * 0.86 - 16;
-      drawVectorWarning(ctx, pegX + 4, pegY - 3, compact ? 3.4 : 4.1, '#fbbf24', '#090e1a');
-      ctx.fillStyle = '#fbbf24';
-      ctx.fillText('+44 Da PEG Comb (+44/+88/+132)', pegX + 12, pegY);
+      if (isProtein) {
+        const addX = mToX(centerMass + 69);
+        const addY = baseY - 0.56 * plotH * 0.86;
+        const addTxt = compact ? '+69 Da Adduct!' : '+69 Da Adduct!';
+        const addMaxW = Math.max(40, w - padR - (addX + 6));
+        drawVectorWarning(ctx, Math.min(w - padR - 50, addX - 2), addY - 10, compact ? 3.2 : 4.1, '#f87171', '#090e1a');
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText(fitCanvasText(ctx, addTxt, addMaxW), Math.min(w - padR - 44, addX + 6), addY - 7);
+
+        const pegX = mToX(centerMass + 88);
+        const pegY = baseY - 0.36 * plotH * 0.86 - 16;
+        const pegTxt = compact ? '+44 Da PEG Comb' : '+44 Da PEG Comb (+44/+88/+132)';
+        const pegTxtW = ctx.measureText(pegTxt).width;
+        const pegDrawX = clamp(pegX + 12, padL + 16, w - padR - Math.min(pegTxtW, plotW * 0.55) - 2);
+        drawVectorWarning(ctx, pegDrawX - 8, pegY - 3, compact ? 3.2 : 4.1, '#fbbf24', '#090e1a');
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText(fitCanvasText(ctx, pegTxt, w - padR - pegDrawX), pegDrawX, pegY);
+      } else {
+        const impX = mToX(centerMass + 16);
+        const impY = baseY - 0.38 * plotH * 0.86;
+        const impTxt = compact ? 'Impurity Peak!' : 'Unreacted SM / Hydrolysis Impurity!';
+        const impDrawX = clamp(impX + 6, padL + 14, w - padR - (compact ? 74 : 185));
+        drawVectorWarning(ctx, impDrawX - 8, impY - 9, compact ? 3.2 : 4.0, '#f87171', '#090e1a');
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText(fitCanvasText(ctx, impTxt, w - padR - impDrawX), impDrawX, impY - 6);
+      }
     }
 
-    // Main Product Peak Label
+    // Main Product Peak Label (strictly clamped inside plot bounds even at 340px)
     const mainX = mToX(centerMass);
     const mainY = baseY - plotH * 0.86;
     ctx.fillStyle = '#86efac';
-    ctx.font = `bold ${compact ? 9.5 : 11.5}px Consolas, monospace`;
+    ctx.font = `bold ${compact ? 9 : 11.5}px Consolas, monospace`;
     ctx.textAlign = 'center';
-    const shortPeak = rawPeakStr.length > 32 ? rawPeakStr.slice(0, 30) + '…' : rawPeakStr;
-    const lblX = clamp(mainX, padL + 85, w - padR - 85);
+    const shortPeak = fitCanvasText(ctx, rawPeakStr, plotW - 22);
     const lblW = ctx.measureText(shortPeak).width;
-    drawVectorDiamond(ctx, lblX - lblW / 2 - 8, mainY - 11, compact ? 3.4 : 4.0, '#86efac');
+    const minCenter = padL + lblW / 2 + 14;
+    const maxCenter = w - padR - lblW / 2 - 4;
+    const lblX = minCenter <= maxCenter ? clamp(mainX, minCenter, maxCenter) : padL + plotW / 2;
+    drawVectorDiamond(ctx, lblX - lblW / 2 - 8, mainY - 11, compact ? 3.2 : 4.0, '#86efac');
     ctx.fillText(shortPeak, lblX, mainY - 8);
 
     // X-axis ticks (Da / m/z)
     ctx.fillStyle = '#cbd5e1';
     ctx.font = `${compact ? 8.5 : 10}px Consolas, monospace`;
-    const tickCount = 5;
+    const tickCount = compact ? 4 : 5;
     for (let t = 0; t <= tickCount; t++) {
       const mVal = mMin + (t / tickCount) * (mMax - mMin);
       const tx = mToX(mVal);
@@ -1007,7 +1710,8 @@ window.KLB = window.KLB || {};
       ctx.lineTo(tx, baseY + 5);
       ctx.strokeStyle = '#64748b';
       ctx.stroke();
-      ctx.fillText(isProtein ? Math.round(mVal).toLocaleString() : mVal.toFixed(0), tx, baseY + (compact ? 15 : 17));
+      ctx.textAlign = t === tickCount ? 'right' : (t === 0 ? 'left' : 'center');
+      ctx.fillText(isProtein ? Math.round(mVal).toLocaleString() : mVal.toFixed(1), tx, baseY + (compact ? 15 : 17));
     }
     ctx.fillStyle = '#94a3b8';
     ctx.textAlign = 'right';
@@ -1015,7 +1719,8 @@ window.KLB = window.KLB || {};
   }
 
   window.KLB.Spectra = {
-    renderToCanvas
+    renderToCanvas,
+    setupHiDpiCanvas
   };
 
   // =========================================================================
@@ -1083,7 +1788,7 @@ window.KLB = window.KLB || {};
           icon: 'compass',
           badge: 'CORRIDOR EVASION',
           defaultTitle: 'Corridor Decoy Evasion',
-          controls: 'Move with [WASD/Arrows] or [Mouse] to the green exit; avoid her vision cone and the 3F stairs.',
+          controls: 'WASD / Arrows or Hold Left-Click to move to the green exit; avoid her vision cone and the 3F stairs.',
           durationSec: 10.0
         }
       };
@@ -1092,8 +1797,8 @@ window.KLB = window.KLB || {};
       const modalTitle = String(config.title || meta.defaultTitle);
       const modalSubtitle = String(config.subtitle || meta.defaultSubtitle || '');
       mountEl.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <div class="klb-mg-shell" style="display:flex;flex-direction:column;gap:10px;">
+        <header class="klb-modal-header" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
           <div>
             <div style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#60a5fa;letter-spacing:0.5px;">
               ${iconSvg(meta.icon, 14)}
@@ -1105,6 +1810,7 @@ window.KLB = window.KLB || {};
           <div style="display:flex;gap:8px;align-items:center;font-family:Consolas,monospace;">
             <span id="mg-live-score" style="padding:4px 10px;border-radius:6px;background:#0f172a;border:1px solid #3b82f6;color:#93c5fd;font-weight:500;font-size:13px;box-shadow:0 2px 6px rgba(2,6,23,0.45), inset 0 1px 0 rgba(147,197,253,0.08);">Score: --</span>
             <span id="mg-live-timer" style="padding:4px 10px;border-radius:6px;background:#0f172a;border:1px solid #475569;color:#f8fafc;font-weight:500;font-size:13px;box-shadow:0 2px 6px rgba(2,6,23,0.45), inset 0 1px 0 rgba(148,163,184,0.08);">${meta.durationSec.toFixed(1)}s</span>
+            <button id="mg-close-btn" type="button" class="hud-btn" title="Abort and close (Esc)">${iconSvg('x', 13)}<span>Close / Esc</span></button>
           </div>
         </header>
 
@@ -1117,7 +1823,7 @@ window.KLB = window.KLB || {};
           </div>
         </section>
 
-        <section style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:#cbd5e1;background:#111c33;border:1px solid #2e3d5e;border-radius:8px;padding:7px 11px;text-align:center;font-family:Consolas,monospace;box-shadow:0 4px 12px rgba(2,6,23,0.45), inset 0 1px 0 rgba(148,163,184,0.06);">
+        <section class="klb-hint-box" style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:#cbd5e1;background:#111c33;border:1px solid #2e3d5e;border-radius:8px;padding:7px 11px;text-align:center;font-family:Consolas,monospace;box-shadow:0 4px 12px rgba(2,6,23,0.45), inset 0 1px 0 rgba(148,163,184,0.06);">
           ${iconSvg('gamepad-2', 15)}
           <span>${meta.controls}</span>
         </section>
@@ -1125,10 +1831,12 @@ window.KLB = window.KLB || {};
     `;
 
       const canvas = mountEl.querySelector('#mg-canvas');
-      canvas.style.imageRendering = 'auto';
-      const ctx = canvas.getContext('2d');
+      const W = 680;
+      const H = 310;
+      const { ctx } = setupHiDpiCanvas(canvas, W, H);
       const scoreEl = mountEl.querySelector('#mg-live-score');
       const timerEl = mountEl.querySelector('#mg-live-timer');
+      const closeBtn = mountEl.querySelector('#mg-close-btn');
       const finishBanner = mountEl.querySelector('#mg-finish-banner');
       const finishTitle = mountEl.querySelector('#mg-finish-title');
       const finishSub = mountEl.querySelector('#mg-finish-sub');
@@ -1143,13 +1851,15 @@ window.KLB = window.KLB || {};
       const input = {
         keys: new Set(),
         mouseDown: false,
-        mouseX: 340,
-        mouseY: 155,
+        mouseX: W / 2,
+        mouseY: H / 2,
         hasMouseMoved: false,
-        justPressedAction: false
+        justPressedAction: false,
+        justClickedOnCanvas: false
       };
 
       let finished = false;
+      let finishedAt = 0;
       let closed = false;
       let rafId = null;
       let autoCloseTimer = null;
@@ -1164,10 +1874,16 @@ window.KLB = window.KLB || {};
       function updatePointerCoords(e) {
         const rect = canvas.getBoundingClientRect();
         if (rect.width > 0 && rect.height > 0) {
-          input.mouseX = clamp(((e.clientX - rect.left) / rect.width) * canvas.width, 0, canvas.width);
-          input.mouseY = clamp(((e.clientY - rect.top) / rect.height) * canvas.height, 0, canvas.height);
+          input.mouseX = clamp(((e.clientX - rect.left) / rect.width) * W, 0, W);
+          input.mouseY = clamp(((e.clientY - rect.top) / rect.height) * H, 0, H);
           input.hasMouseMoved = true;
         }
+      }
+
+      function abortAndExit() {
+        if (closed) return;
+        cleanupListeners();
+        if (onFinish) onFinish({ score: 0, aborted: true });
       }
 
       function onKeyDown(e) {
@@ -1175,8 +1891,16 @@ window.KLB = window.KLB || {};
         if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
           e.preventDefault();
         }
+        if (e.code === 'Escape') {
+          e.preventDefault();
+          abortAndExit();
+          return;
+        }
+        if (e.repeat) return;
         if (finished) {
-          if (e.code === 'Space' || e.code === 'Enter') finalizeAndExit();
+          if ((e.code === 'Space' || e.code === 'Enter') && (performance.now() - finishedAt >= 450)) {
+            finalizeAndExit();
+          }
           return;
         }
         if (!input.keys.has(e.code) && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyE')) {
@@ -1195,6 +1919,7 @@ window.KLB = window.KLB || {};
         updatePointerCoords(e);
         input.mouseDown = true;
         input.justPressedAction = true;
+        input.justClickedOnCanvas = true;
       }
 
       function onMouseMove(e) {
@@ -1210,8 +1935,9 @@ window.KLB = window.KLB || {};
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('keyup', onKeyUp);
       canvas.addEventListener('mousedown', onMouseDown);
-      window.addEventListener('mousemove', onMouseMove);
+      canvas.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
+      if (closeBtn) closeBtn.onclick = abortAndExit;
 
       function cleanupListeners() {
         if (closed) return;
@@ -1227,8 +1953,9 @@ window.KLB = window.KLB || {};
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);
         canvas.removeEventListener('mousedown', onMouseDown);
-        window.removeEventListener('mousemove', onMouseMove);
+        canvas.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
+        if (closeBtn) closeBtn.onclick = null;
         if (finishBtn) finishBtn.onclick = null;
         if (type === 'alex_stealth' && window.KLB.Audio?.setRoomAmbience) {
           window.KLB.Audio.setRoomAmbience({ alexPursuitOn: false });
@@ -1251,6 +1978,7 @@ window.KLB = window.KLB || {};
       function triggerComplete(score, summary) {
         if (finished || closed) return;
         finished = true;
+        finishedAt = performance.now();
         const cleanScore = clamp(Math.round(score), 0, 100);
         finalPayload = { score: cleanScore, summary };
 
@@ -1262,9 +1990,11 @@ window.KLB = window.KLB || {};
         finishTitle.style.color = cleanScore >= 80 ? '#86efac' : cleanScore >= 55 ? '#fde68a' : '#fca5a5';
         finishSub.textContent = summary;
         finishBanner.style.display = 'flex';
-        finishBtn.onclick = finalizeAndExit;
+        finishBtn.onclick = () => {
+          if (performance.now() - finishedAt >= 450) finalizeAndExit();
+        };
 
-        // Auto-advance cleanly after 1.15s if player doesn't click earlier (guarded against modal abort/detach)
+        // Auto-advance cleanly after 2.4s if player doesn't click earlier (guarded against modal abort/detach)
         autoCloseTimer = setTimeout(() => {
           autoCloseTimer = null;
           if (closed || isCanvasDetached()) {
@@ -1272,11 +2002,11 @@ window.KLB = window.KLB || {};
             return;
           }
           finalizeAndExit();
-        }, 1150);
+        }, 2400);
       }
 
-      // Instantiate specific wet-lab runner
-      const runner = createMinigameRunner(type, canvas.width, canvas.height, meta.durationSec, config);
+      // Instantiate specific wet-lab runner using CSS logical dimensions (680x310)
+      const runner = createMinigameRunner(type, W, H, meta.durationSec, config);
       let lastTs = performance.now();
       let elapsed = 0;
 
@@ -1293,6 +2023,7 @@ window.KLB = window.KLB || {};
           const holding = input.mouseDown || input.keys.has('Space');
           const stepState = runner.update(dt, elapsed, input, holding);
           input.justPressedAction = false;
+          input.justClickedOnCanvas = false;
 
           runner.render(ctx);
           scoreEl.textContent = `Score: ${clamp(Math.round(stepState.liveScore), 0, 100)}%`;
@@ -1357,17 +2088,25 @@ window.KLB = window.KLB || {};
       let prodTotal = 0;
       let junkCaptured = 0;
       let sfxCooldown = 0;
-      const history = []; // { t, uv, isProd, collected }
+      const history = []; // { t, uv, isProd, isImpurity, collected }
+
+      // Randomize impurity & product elution times slightly per run (±0.45s)
+      const jitter = () => (Math.random() - 0.5) * 0.90;
+      const tForerun = clamp(1.55 + jitter(), 0.95, 2.15);
+      const tProd = clamp(4.65 + jitter(), 3.85, 5.45);
+      const tTail = clamp(7.45 + jitter(), 6.85, 7.95);
+      const prodStart = tProd - 1.25;
+      const prodEnd = tProd + 1.25;
 
       function uvProfile(t) {
-        // Early forerun impurity (1.1 - 2.2s), Main Product UV peak (3.1 - 6.3s), late tailing gunk (7.1 - 8.1s)
-        const forerun = 0.48 * Math.exp(-0.5 * Math.pow((t - 1.55) / 0.34, 2));
-        const mainProd = 0.94 * Math.exp(-0.5 * Math.pow((t - 4.65) / 0.78, 2));
-        const tailGunk = 0.38 * Math.exp(-0.5 * Math.pow((t - 7.45) / 0.36, 2));
+        const forerun = 0.48 * Math.exp(-0.5 * Math.pow((t - tForerun) / 0.34, 2));
+        const mainProd = 0.94 * Math.exp(-0.5 * Math.pow((t - tProd) / 0.78, 2));
+        const tailGunk = 0.38 * Math.exp(-0.5 * Math.pow((t - tTail) / 0.36, 2));
         const base = 0.04 + 0.01 * Math.sin(t * 9);
         const uv = clamp(base + forerun + mainProd + tailGunk, 0, 1);
-        const isProd = t >= 3.35 && t <= 5.95 && mainProd >= 0.24;
-        return { uv, isProd, mainProd, impurity: forerun + tailGunk };
+        const isProd = t >= prodStart && t <= prodEnd && mainProd >= 0.24;
+        const isImpurity = !isProd && (forerun >= 0.12 || tailGunk >= 0.12);
+        return { uv, isProd, isImpurity, mainProd, impurity: forerun + tailGunk };
       }
 
       return {
@@ -1386,9 +2125,11 @@ window.KLB = window.KLB || {};
             playSfxSafe(p.isProd ? 'pipette' : 'bump');
           }
 
-          history.push({ t: elapsed, uv: p.uv, isProd: p.isProd, collected: holding });
-          const recovery = prodTotal > 0.05 ? (prodCaptured / prodTotal) : 0.85;
-          const liveScore = clamp(recovery * 100 - junkCaptured * 42 + 8, 10, 100);
+          history.push({ t: elapsed, uv: p.uv, isProd: p.isProd, isImpurity: p.isImpurity, collected: holding });
+          const prodWeight = clamp(prodTotal / 0.35, 0, 1);
+          const rec = prodTotal > 0.02 ? clamp(prodCaptured / prodTotal, 0, 1) : 1.0;
+          const effectiveRec = 0.90 * (1 - prodWeight) + rec * prodWeight;
+          const liveScore = clamp(effectiveRec * 100 - junkCaptured * 48, 10, 100);
           return { liveScore, done: false };
         },
         render(ctx) {
@@ -1399,24 +2140,22 @@ window.KLB = window.KLB || {};
           ctx.strokeStyle = '#334155';
           ctx.strokeRect(gx, gy, gw, gh);
 
-          // Shaded guidance regions (Forerun, Main Product Window, Baseline Gunk)
           const tToX = t => gx + (t / totalSec) * gw;
-          ctx.fillStyle = 'rgba(239, 68, 68, 0.09)';
-          ctx.fillRect(tToX(0.9), gy, tToX(2.25) - tToX(0.9), gh);
-          ctx.fillRect(tToX(6.85), gy, tToX(8.2) - tToX(6.85), gh);
 
-          ctx.fillStyle = 'rgba(34, 197, 94, 0.11)';
-          ctx.fillRect(tToX(3.35), gy, tToX(5.95) - tToX(3.35), gh);
-
-          ctx.font = 'bold 10.5px Consolas, monospace';
-          drawVectorWarning(ctx, tToX(1.05) + 4, gy + 11, 3.8, '#fca5a5', '#08101e');
-          ctx.fillStyle = '#fca5a5';
-          ctx.fillText('FORERUN', tToX(1.05) + 12, gy + 15);
-          drawVectorWarning(ctx, tToX(6.92) + 4, gy + 11, 3.8, '#fca5a5', '#08101e');
-          ctx.fillText('TAIL GUNK', tToX(6.92) + 12, gy + 15);
-          drawVectorDiamond(ctx, tToX(3.48) + 4, gy + 11, 4.0, '#86efac');
-          ctx.fillStyle = '#86efac';
-          ctx.fillText('MAIN PRODUCT PEAK (HOLD COLLECT!)', tToX(3.48) + 12, gy + 15);
+          // Only reveal eluted regions behind the live playhead (0 -> t), keeping un-eluted future trace hidden!
+          for (let i = 1; i < history.length; i++) {
+            const prev = history[i - 1];
+            const cur = history[i];
+            const x1 = tToX(prev.t);
+            const x2 = tToX(cur.t) + 1;
+            if (cur.isProd) {
+              ctx.fillStyle = 'rgba(34, 197, 94, 0.14)';
+              ctx.fillRect(x1, gy, Math.max(1.5, x2 - x1), gh);
+            } else if (cur.isImpurity) {
+              ctx.fillStyle = 'rgba(239, 68, 68, 0.11)';
+              ctx.fillRect(x1, gy, Math.max(1.5, x2 - x1), gh);
+            }
+          }
 
           // Threshold dashed line (240 mAU)
           const threshY = gy + gh * (1 - 0.25);
@@ -1427,21 +2166,9 @@ window.KLB = window.KLB || {};
           ctx.lineTo(gx + gw, threshY);
           ctx.stroke();
           ctx.setLineDash([]);
+          ctx.font = 'bold 10.5px Consolas, monospace';
           ctx.fillStyle = '#c4b5fd';
-          ctx.fillText('Threshold', gx + 6, threshY - 5);
-
-          // Faint preview of full chromatogram Ghost + live colored elution fill
-          ctx.strokeStyle = 'rgba(148, 163, 184, 0.18)';
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          for (let i = 0; i <= 140; i++) {
-            const t = (i / 140) * totalSec;
-            const x = tToX(t);
-            const y = gy + gh * (1 - uvProfile(t).uv * 0.9);
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
+          ctx.fillText('240 mAU Threshold', gx + 6, threshY - 5);
 
           // Collected fraction highlight bars
           for (let i = 1; i < history.length; i++) {
@@ -1451,31 +2178,47 @@ window.KLB = window.KLB || {};
               const x1 = tToX(prev.t);
               const x2 = tToX(cur.t) + 1;
               const y = gy + gh * (1 - cur.uv * 0.9);
-              ctx.fillStyle = cur.isProd ? 'rgba(34, 197, 94, 0.42)' : 'rgba(239, 68, 68, 0.45)';
+              ctx.fillStyle = cur.isProd ? 'rgba(34, 197, 94, 0.44)' : 'rgba(239, 68, 68, 0.45)';
               ctx.fillRect(x1, y, Math.max(1.5, x2 - x1), gy + gh - y);
             }
           }
 
-          // Live 254 nm UV trace
+          // Progressive live 254 nm UV trace (0 -> t only)
           if (history.length > 1) {
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2.4;
-            ctx.beginPath();
-            history.forEach((pt, idx) => {
-              const x = tToX(pt.t);
-              const y = gy + gh * (1 - pt.uv * 0.9);
-              if (idx === 0) ctx.moveTo(x, y);
-              else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
+            for (let i = 1; i < history.length; i++) {
+              const prev = history[i - 1];
+              const cur = history[i];
+              ctx.strokeStyle = cur.isProd ? '#4ade80' : (cur.isImpurity ? '#f87171' : '#38bdf8');
+              ctx.lineWidth = 2.4;
+              ctx.beginPath();
+              ctx.moveTo(tToX(prev.t), gy + gh * (1 - prev.uv * 0.9));
+              ctx.lineTo(tToX(cur.t), gy + gh * (1 - cur.uv * 0.9));
+              ctx.stroke();
+            }
 
             const head = history[history.length - 1];
             const hx = tToX(head.t);
             const hy = gy + gh * (1 - head.uv * 0.9);
-            ctx.fillStyle = head.collected ? (head.isProd ? '#4ade80' : '#ef4444') : '#f8fafc';
+            ctx.fillStyle = head.isProd ? '#4ade80' : (head.isImpurity ? '#ef4444' : '#f8fafc');
             ctx.beginPath();
             ctx.arc(hx, hy, 5, 0, Math.PI * 2);
             ctx.fill();
+
+            // Dynamic peak status badge at top of plot
+            ctx.textAlign = 'right';
+            if (head.isProd) {
+              drawVectorDiamond(ctx, gx + gw - 178, gy + 11, 4.0, '#86efac');
+              ctx.fillStyle = '#86efac';
+              ctx.fillText('PRODUCT ELUTING — HOLD!', gx + gw - 10, gy + 15);
+            } else if (head.isImpurity) {
+              drawVectorWarning(ctx, gx + gw - 172, gy + 11, 3.8, '#fca5a5', '#08101e');
+              ctx.fillStyle = '#fca5a5';
+              ctx.fillText('IMPURITY PEAK — WASTE!', gx + gw - 10, gy + 15);
+            } else {
+              ctx.fillStyle = '#94a3b8';
+              ctx.fillText('BASELINE ELUTION', gx + gw - 10, gy + 15);
+            }
+            ctx.textAlign = 'left';
 
             // Valve indicator badge at bottom
             const valveY = gy + gh + 14;
@@ -1483,7 +2226,6 @@ window.KLB = window.KLB || {};
             ctx.fillRect(gx, valveY, gw, 34);
             ctx.strokeStyle = head.collected ? (head.isProd ? '#86efac' : '#fca5a5') : '#475569';
             ctx.strokeRect(gx, valveY, gw, 34);
-            // Status LED vector circle inside valve bar
             ctx.fillStyle = head.collected ? (head.isProd ? '#86efac' : '#fde047') : '#94a3b8';
             ctx.beginPath();
             ctx.arc(gx + 18, valveY + 17, 5, 0, Math.PI * 2);
@@ -1494,7 +2236,7 @@ window.KLB = window.KLB || {};
             ctx.fillText(
               head.collected
                 ? (head.isProd ? 'VALVE: COLLECTING PURE PRODUCT FRACTIONS!' : 'VALVE OPEN ON IMPURITY / BASELINE — RELEASE!')
-                : 'VALVE: DIVERTING TO SOLVENT WASTE (Hold SPACE / Mouse on Product Peak)',
+                : (head.isProd ? 'PRODUCT PEAK DETECTED — HOLD [SPACE / CLICK] NOW!' : 'VALVE: DIVERTING TO SOLVENT WASTE (Watch UV Peak)'),
               gx + gw / 2 + 8,
               valveY + 22
             );
@@ -1503,7 +2245,7 @@ window.KLB = window.KLB || {};
         },
         finish() {
           const rec = prodTotal > 0 ? clamp(prodCaptured / prodTotal, 0, 1) : 0;
-          const score = clamp(Math.round(rec * 96 + 6 - junkCaptured * 44), 15, 100);
+          const score = clamp(Math.round(rec * 100 - junkCaptured * 45), 10, 100);
           return {
             score,
             summary: `Captured ${Math.round(rec * 100)}% of the 254 nm product peak${junkCaptured > 0.25 ? ' with minor co-eluted forerun/tail fractions.' : ' cleanly into Tubes 4–7 with zero baseline gunk!'}`
@@ -1530,19 +2272,26 @@ window.KLB = window.KLB || {};
 
       return {
         update(dt, elapsed, input) {
-          if (input.hasMouseMoved) {
-            baseX += (input.mouseX - baseX) * Math.min(1, dt * 14);
-          }
-          const moveDir = (input.keys.has('KeyD') || input.keys.has('ArrowRight') ? 1 : 0)
-                        - (input.keys.has('KeyA') || input.keys.has('ArrowLeft') ? 1 : 0);
-          if (moveDir !== 0) {
-            input.hasMouseMoved = false;
-            baseX = clamp(baseX + moveDir * 270 * dt, 60, W - 60);
-          }
-
           // Natural P20 pipette hand micro-tremor
           const tremor = Math.sin(elapsed * 11.5) * 7.5 + Math.cos(elapsed * 19.3) * 4.2;
-          tipX = clamp(baseX + tremor, 45, W - 45);
+
+          if (input.justClickedOnCanvas) {
+            // Snap baseX immediately to clicked pointer before evaluating dispense
+            baseX = clamp(input.mouseX, 60, W - 60);
+            tipX = clamp(baseX + tremor, 45, W - 45);
+          } else {
+            if (input.hasMouseMoved) {
+              baseX += (input.mouseX - baseX) * Math.min(1, dt * 14);
+            }
+            const moveDir = (input.keys.has('KeyD') || input.keys.has('ArrowRight') ? 1 : 0)
+                          - (input.keys.has('KeyA') || input.keys.has('ArrowLeft') ? 1 : 0);
+            if (moveDir !== 0) {
+              input.hasMouseMoved = false;
+              baseX = clamp(baseX + moveDir * 270 * dt, 60, W - 60);
+            }
+            tipX = clamp(baseX + tremor, 45, W - 45);
+          }
+
           if (dipAnim > 0) dipAnim = Math.max(0, dipAnim - dt * 4);
 
           if (input.justPressedAction && currentWell < wells.length) {
@@ -1573,7 +2322,6 @@ window.KLB = window.KLB || {};
           return { liveScore: avg, done: currentWell >= wells.length && dipAnim <= 0.1 };
         },
         render(ctx) {
-          // Tris-Glycine running buffer tank
           const tankGrad = ctx.createLinearGradient(0, 0, 0, H);
           tankGrad.addColorStop(0, '#0b192c');
           tankGrad.addColorStop(0.35, '#123052');
@@ -1581,7 +2329,6 @@ window.KLB = window.KLB || {};
           ctx.fillStyle = tankGrad;
           ctx.fillRect(0, 0, W, H);
 
-          // Buffer meniscus shimmer
           ctx.strokeStyle = 'rgba(125, 211, 252, 0.45)';
           ctx.lineWidth = 2;
           ctx.beginPath();
@@ -1589,7 +2336,6 @@ window.KLB = window.KLB || {};
           ctx.lineTo(W, 74);
           ctx.stroke();
 
-          // Polyacrylamide gel slab with 4 carved comb wells
           const gelTop = 128;
           const wellBottom = 212;
           ctx.fillStyle = 'rgba(191, 219, 254, 0.22)';
@@ -1597,7 +2343,6 @@ window.KLB = window.KLB || {};
 
           wells.forEach((w, idx) => {
             const isTarget = idx === currentWell;
-            // Carve well opening
             ctx.fillStyle = '#0c2340';
             ctx.fillRect(w.cx - w.halfW, gelTop, w.halfW * 2, wellBottom - gelTop);
 
@@ -1605,7 +2350,6 @@ window.KLB = window.KLB || {};
             ctx.lineWidth = isTarget ? 2.5 : 1.5;
             ctx.strokeRect(w.cx - w.halfW, gelTop, w.halfW * 2, wellBottom - gelTop);
 
-            // Center sweet-spot target tick
             if (isTarget) {
               ctx.fillStyle = 'rgba(74, 222, 128, 0.25)';
               ctx.fillRect(w.cx - 8, wellBottom - 18, 16, 18);
@@ -1635,7 +2379,6 @@ window.KLB = window.KLB || {};
             ctx.fillText(w.label, w.cx, H - 24);
           });
 
-          // Draw P20 Micropipette Tip + Blue Sample Glycerol Plug
           const tipBottomY = 114 + dipAnim * 82;
           ctx.fillStyle = '#e2e8f0';
           ctx.beginPath();
@@ -1646,7 +2389,6 @@ window.KLB = window.KLB || {};
           ctx.closePath();
           ctx.fill();
 
-          // Blue LDS sample plug inside tip
           ctx.fillStyle = '#2563eb';
           ctx.beginPath();
           ctx.moveTo(tipX - 5.5, tipBottomY - 34);
@@ -1673,29 +2415,58 @@ window.KLB = window.KLB || {};
     if (type === 'syringe_cryo') {
       const cryoTitle = String(config?.title || 'Syringe Pump Flow Control').trim();
       const cryoSubtitle = String(config?.subtitle || 'Keep addition rate steady inside the target zone').trim();
-      const isCryoContext = /-78|cryo|dry[- ]?ice|acetone/i.test(`${cryoTitle} ${cryoSubtitle}`);
+      const contextStr = `${cryoTitle} ${cryoSubtitle}`;
+      const isCryoContext = /-78|cryo|dry[- ]?ice|acetone|bromomalonate/i.test(contextStr);
+
+      // Parse dynamic rateLabel / tempLabel if supplied
+      const rawRateCfg = String(config?.rateLabel || '').trim();
+      const rateMatch = rawRateCfg.match(/^([+-]?\d+(?:\.\d+)?)\s*(.*)$/);
+      const defaultRate = /emulsif|plga|dropwise/i.test(contextStr) ? 25.0 : (/herceptin|staple/i.test(contextStr) ? 4.0 : 5.7);
+      const baseRateVal = rateMatch ? parseFloat(rateMatch[1]) : defaultRate;
+      const rateUnit = (rateMatch && rateMatch[2]) ? rateMatch[2] : 'µL/min';
+
+      const rawTempCfg = String(config?.tempLabel || '').trim();
+      const tempMatch = rawTempCfg.match(/^([+-]?\d+(?:\.\d+)?)\s*(.*)$/);
+      const baseTempVal = tempMatch ? parseFloat(tempMatch[1]) : (isCryoContext ? -78 : 21);
+      const tempUnit = (tempMatch && tempMatch[2]) ? tempMatch[2] : '°C';
+
+      // Gentle random frequency & phase drift per run
+      const freq1 = 1.45 + (Math.random() - 0.5) * 0.35;
+      const freq2 = 2.95 + (Math.random() - 0.5) * 0.50;
+      const phase1 = Math.random() * Math.PI * 2;
+      const phase2 = Math.random() * Math.PI * 2;
+
       let marker = 0.5;
       let vel = 0;
-      let bandCenter = 0.52;
+      let bandCenter = 0.5;
       const bandHalf = 0.16;
       let inZoneTime = 0;
       let totalTime = 0;
+      let wasInBand = true;
+      let warnCooldown = 0;
 
       return {
         update(dt, elapsed, _input, holding) {
           totalTime += dt;
-          // Moving target band representing addition / thermal fluctuations
-          bandCenter = 0.5 + 0.24 * Math.sin(elapsed * 1.55) + 0.10 * Math.cos(elapsed * 3.1);
+          warnCooldown = Math.max(0, warnCooldown - dt);
+          bandCenter = 0.5 + 0.24 * Math.sin(elapsed * freq1 + phase1) + 0.10 * Math.cos(elapsed * freq2 + phase2);
           const accel = holding ? 1.55 : -1.35;
           vel = clamp(vel * Math.pow(0.18, dt) + accel * dt, -0.95, 0.95);
           marker = clamp(marker + vel * dt, 0.04, 0.96);
 
           const dist = Math.abs(marker - bandCenter);
-          if (dist <= bandHalf) {
+          const inBandNow = dist <= bandHalf;
+          if (inBandNow) {
             inZoneTime += dt;
           } else if (dist <= bandHalf * 1.45) {
             inZoneTime += dt * 0.45;
           }
+          if (wasInBand && !inBandNow && totalTime > 0.25 && warnCooldown <= 0) {
+            playSfxSafe('warning');
+            warnCooldown = 0.65;
+          }
+          wasInBand = inBandNow;
+
           const liveScore = clamp((inZoneTime / Math.max(0.15, totalTime)) * 104, 15, 100);
           return { liveScore, done: false };
         },
@@ -1703,7 +2474,6 @@ window.KLB = window.KLB || {};
           ctx.fillStyle = '#08111f';
           ctx.fillRect(0, 0, W, H);
 
-          // Left panel: Parameterized Syringe Pump / Reaction Context Readout
           ctx.fillStyle = '#111e36';
           ctx.strokeStyle = '#334155';
           ctx.lineWidth = 1.5;
@@ -1711,9 +2481,15 @@ window.KLB = window.KLB || {};
           ctx.strokeRect(24, 24, 308, H - 48);
 
           const inBand = Math.abs(marker - bandCenter) <= bandHalf;
-          const tempReadout = (-78 + (marker - bandCenter) * 38).toFixed(1);
-          const rateReadout = (5.7 + (marker - bandCenter) * 3.4).toFixed(2);
           const zoneStability = clamp(Math.round((1 - Math.abs(marker - bandCenter) / 0.5) * 100), 0, 100);
+          const rateDisp = (rawRateCfg && !rateMatch)
+            ? rawRateCfg
+            : `${(baseRateVal + (marker - bandCenter) * Math.max(1.2, Math.abs(baseRateVal) * 0.45)).toFixed(baseRateVal >= 10 ? 1 : 2)} ${rateUnit}`;
+          const tempDisp = (rawTempCfg && !tempMatch)
+            ? rawTempCfg
+            : (rawTempCfg || isCryoContext)
+              ? `Temp: ${(baseTempVal + (marker - bandCenter) * 10).toFixed(1)} ${tempUnit}${rawTempCfg ? ` (${rawTempCfg})` : ''}`
+              : `Stability: ${zoneStability}%`;
 
           ctx.textAlign = 'left';
           ctx.fillStyle = '#93c5fd';
@@ -1727,18 +2503,13 @@ window.KLB = window.KLB || {};
 
           const metricY = Math.max(106, subY + subLines * 14 + 14);
           ctx.fillStyle = inBand ? '#4ade80' : '#f87171';
-          ctx.font = 'bold 22px Consolas, monospace';
-          ctx.fillText(`${rateReadout} µL/min`, 36, metricY);
+          ctx.font = 'bold 21px Consolas, monospace';
+          ctx.fillText(fitCanvasText(ctx, rateDisp, 284), 36, metricY);
 
           ctx.fillStyle = inBand ? '#38bdf8' : '#fbbf24';
-          ctx.font = 'bold 16px Consolas, monospace';
-          ctx.fillText(
-            isCryoContext ? `Bath: ${tempReadout} °C` : `Stability: ${zoneStability}%`,
-            36,
-            metricY + 26
-          );
+          ctx.font = 'bold 14px Consolas, monospace';
+          ctx.fillText(fitCanvasText(ctx, tempDisp, 284), 36, metricY + 26);
 
-          // Reaction vessel / reservoir illustration
           const vesselY = metricY + 42;
           const vesselH = Math.max(46, 256 - vesselY);
           ctx.fillStyle = inBand ? 'rgba(56, 189, 248, 0.28)' : 'rgba(239, 68, 68, 0.32)';
@@ -1761,7 +2532,6 @@ window.KLB = window.KLB || {};
             274
           );
 
-          // Right panel: Vertical Target Zone Control Column
           const gx = 370, gy = 24, gw = 260, gh = H - 48;
           ctx.fillStyle = '#0d1729';
           ctx.fillRect(gx, gy, gw, gh);
@@ -1782,7 +2552,6 @@ window.KLB = window.KLB || {};
           ctx.fillText('TARGET ZONE', gx + gw / 2, bTop + bHeight / 2 + 4);
           ctx.textAlign = 'left';
 
-          // Player marker bar
           const my = gy + (1 - marker) * gh;
           ctx.fillStyle = inBand ? '#4ade80' : '#f97316';
           ctx.fillRect(gx + 16, my - 7, gw - 32, 14);
@@ -1800,8 +2569,10 @@ window.KLB = window.KLB || {};
       };
     }
 
-    // -------------------- 4. CALISE'S FLYING SAINSBURY'S LEMONS & FLASKS --------------------
+    // -------------------- 4. CALISE'S FLYING REDUCED BAGS OF LEMONS & FLASKS --------------------
     if (type === 'lemons') {
+      const lemonTitle = String(config?.title || 'Catch Flasks and Lemons').trim();
+      const lemonSubtitle = String(config?.subtitle || '').trim();
       let trayX = W / 2;
       const trayW = 108;
       const trayY = H - 38;
@@ -1813,7 +2584,7 @@ window.KLB = window.KLB || {};
       const items = []; // { x, y, vy, kind: 'lemon'|'flask'|'silica' }
 
       return {
-        update(dt, _elapsed, input) {
+        update(dt, elapsed, input) {
           if (input.hasMouseMoved) {
             trayX += (input.mouseX - trayX) * Math.min(1, dt * 16);
           }
@@ -1825,17 +2596,20 @@ window.KLB = window.KLB || {};
           }
           trayX = clamp(trayX, trayW / 2 + 12, W - trayW / 2 - 12);
 
-          spawnTimer -= dt;
-          if (spawnTimer <= 0) {
-            spawnTimer = 0.36 + Math.random() * 0.22;
-            const r = Math.random();
-            const kind = r < 0.38 ? 'lemon' : r < 0.72 ? 'flask' : 'silica';
-            items.push({
-              x: 42 + Math.random() * (W - 84),
-              y: -16,
-              vy: 165 + Math.random() * 95,
-              kind
-            });
+          // Stop spawning new items in the final 1.6s so everything on screen can be caught cleanly
+          if (elapsed < totalSec - 1.6) {
+            spawnTimer -= dt;
+            if (spawnTimer <= 0) {
+              spawnTimer = 0.36 + Math.random() * 0.22;
+              const r = Math.random();
+              const kind = r < 0.38 ? 'lemon' : r < 0.72 ? 'flask' : 'silica';
+              items.push({
+                x: 42 + Math.random() * (W - 84),
+                y: -16,
+                vy: 165 + Math.random() * 95,
+                kind
+              });
+            }
           }
 
           for (let i = items.length - 1; i >= 0; i--) {
@@ -1867,7 +2641,6 @@ window.KLB = window.KLB || {};
           ctx.fillStyle = '#0c1526';
           ctx.fillRect(0, 0, W, H);
 
-          // Vector legend indicators + clean counts
           ctx.fillStyle = '#facc15';
           ctx.beginPath();
           ctx.ellipse(22, 18, 6.5, 4.5, -0.25, 0, Math.PI * 2);
@@ -1885,6 +2658,12 @@ window.KLB = window.KLB || {};
           ctx.fillText(`Lemons: ${lemonsCaught}`, 34, 22);
           ctx.fillText(`Flasks: ${flasksCaught}`, 150, 22);
           ctx.fillText(`Silica Hits: ${silicaHits}`, 268, 22);
+          if (lemonSubtitle) {
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(fitCanvasText(ctx, lemonSubtitle, 250), W - 14, 22);
+            ctx.textAlign = 'left';
+          }
 
           items.forEach(it => {
             ctx.save();
@@ -1906,7 +2685,6 @@ window.KLB = window.KLB || {};
               ctx.fillStyle = '#e2e8f0';
               ctx.fillRect(-3.5, -12, 7, 10);
             } else {
-              // Spilled silica gel hazard cloud
               ctx.fillStyle = 'rgba(248, 113, 113, 0.85)';
               ctx.beginPath();
               ctx.arc(0, 0, 12, 0, Math.PI * 2);
@@ -1919,7 +2697,6 @@ window.KLB = window.KLB || {};
             ctx.restore();
           });
 
-          // Blue KLB Winchester / Bottle Carrier Tray
           ctx.fillStyle = '#2563eb';
           ctx.fillRect(trayX - trayW / 2, trayY, trayW, 18);
           ctx.strokeStyle = '#93c5fd';
@@ -1934,7 +2711,7 @@ window.KLB = window.KLB || {};
         finish() {
           return {
             score: clamp(Math.round(scorePts), 15, 100),
-            summary: `Caught ${flasksCaught} round-bottom flasks & ${lemonsCaught} lucky Sainsbury's lemons (${silicaHits} silica cloud hit${silicaHits === 1 ? '' : 's'}).`
+            summary: `${lemonTitle}: caught ${flasksCaught} round-bottom flasks & ${lemonsCaught} reduced bags of lemons (${silicaHits} silica cloud hit${silicaHits === 1 ? '' : 's'}).`
           };
         }
       };
@@ -1951,6 +2728,7 @@ window.KLB = window.KLB || {};
       { x: 455, y: 84, w: 48, h: 56 }
     ];
     let exposure = 0;
+    let finishElapsed = totalSec;
     let outcome = null; // 'escaped' | 'caught' | 'led_3f'
 
     function rectContainsCircle(rx, ry, rw, rh, cx, cy, cr) {
@@ -1991,17 +2769,19 @@ window.KLB = window.KLB || {};
         // Check forbidden 3F stairs!
         if (rectContainsCircle(stairs3F.x, stairs3F.y, stairs3F.w, stairs3F.h, player.x, player.y, player.r)) {
           outcome = 'led_3f';
+          finishElapsed = elapsed;
           return { liveScore: 15, done: true };
         }
 
         // Check CIB Walk-to-NMR Decoy Exit!
         if (rectContainsCircle(cibExit.x, cibExit.y, cibExit.w, cibExit.h, player.x, player.y, player.r)) {
           outcome = 'escaped';
+          finishElapsed = elapsed;
           const fastBonus = Math.round(clamp((totalSec - elapsed) * 1.5, 0, 12));
           return { liveScore: clamp(90 + fastBonus - exposure * 25, 75, 100), done: true };
         }
 
-        // Vision cone check (blocked by corridor pillars!)
+        // Vision cone check (8 ray sample points along line-of-sight for pillar occlusion)
         const dx = player.x - alex.x;
         const dy = player.y - alex.y;
         const dist = Math.hypot(dx, dy);
@@ -2011,8 +2791,9 @@ window.KLB = window.KLB || {};
 
         let inCone = dist < alex.coneLen && Math.abs(angDiff) < alex.coneHalf;
         if (inCone) {
-          // Simple ray sample check for pillar occlusion
-          for (let s = 0.25; s <= 0.85; s += 0.2) {
+          const raySamples = 8;
+          for (let i = 1; i <= raySamples; i++) {
+            const s = i / (raySamples + 1);
             const sx = alex.x + dx * s;
             const sy = alex.y + dy * s;
             if (pillars.some(p => sx >= p.x && sx <= p.x + p.w && sy >= p.y && sy <= p.y + p.h)) {
@@ -2026,6 +2807,7 @@ window.KLB = window.KLB || {};
           exposure += dt * (dist < 24 ? 3.0 : 2.1);
           if (exposure >= 0.48) {
             outcome = 'caught';
+            finishElapsed = elapsed;
             return { liveScore: 26, done: true };
           }
         } else {
@@ -2039,7 +2821,6 @@ window.KLB = window.KLB || {};
         ctx.fillStyle = '#0b1220';
         ctx.fillRect(0, 0, W, H);
 
-        // Subtle corridor floor grid
         ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
         for (let x = 0; x < W; x += 34) {
           ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
@@ -2048,7 +2829,6 @@ window.KLB = window.KLB || {};
           ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
         }
 
-        // Forbidden 3F Spiral Stairs zone (top center)
         ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
         ctx.fillRect(stairs3F.x, stairs3F.y, stairs3F.w, stairs3F.h);
         ctx.strokeStyle = '#ef4444';
@@ -2061,7 +2841,6 @@ window.KLB = window.KLB || {};
         ctx.fillText('3F SPIRAL STAIRS', stairs3F.x + stairs3F.w / 2 + 7, stairs3F.y + 18);
         ctx.fillText('(NEVER LEAD HER UP!)', stairs3F.x + stairs3F.w / 2, stairs3F.y + 33);
 
-        // CIB Walk-to-NMR Decoy Exit (bottom right)
         ctx.fillStyle = 'rgba(34, 197, 94, 0.24)';
         ctx.fillRect(cibExit.x, cibExit.y, cibExit.w, cibExit.h);
         ctx.strokeStyle = '#4ade80';
@@ -2071,7 +2850,6 @@ window.KLB = window.KLB || {};
         ctx.fillText('CIB DECOY', cibExit.x + cibExit.w / 2 + 7, cibExit.y + 28);
         ctx.fillText('"Walk to NMR"', cibExit.x + cibExit.w / 2, cibExit.y + 45);
 
-        // Corridor lockers/pillars (provide stealth cover!)
         pillars.forEach(p => {
           ctx.fillStyle = '#1e293b';
           ctx.fillRect(p.x, p.y, p.w, p.h);
@@ -2079,7 +2857,6 @@ window.KLB = window.KLB || {};
           ctx.strokeRect(p.x, p.y, p.w, p.h);
         });
 
-        // Alex King's emerald-green vision cone
         ctx.save();
         const coneGrad = ctx.createRadialGradient(alex.x, alex.y, 8, alex.x, alex.y, alex.coneLen);
         coneGrad.addColorStop(0, exposure > 0.05 ? 'rgba(239, 68, 68, 0.52)' : 'rgba(34, 197, 94, 0.45)');
@@ -2092,7 +2869,6 @@ window.KLB = window.KLB || {};
         ctx.fill();
         ctx.restore();
 
-        // Alex King sprite token (wavy brunette hair + bright green eyes)
         ctx.fillStyle = '#451a03';
         ctx.beginPath();
         ctx.arc(alex.x, alex.y, 14, 0, Math.PI * 2);
@@ -2107,9 +2883,8 @@ window.KLB = window.KLB || {};
 
         ctx.fillStyle = '#bbf7d0';
         ctx.font = 'bold 10.5px Segoe UI, sans-serif';
-        ctx.fillText('"Are you going for drinks?"', alex.x, alex.y - 20);
+        ctx.fillText('"Heading to Gordon\'s Café?"', alex.x, alex.y - 20);
 
-        // Player researcher token
         ctx.fillStyle = '#3b82f6';
         ctx.beginPath();
         ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
@@ -2124,13 +2899,15 @@ window.KLB = window.KLB || {};
       },
       finish() {
         if (outcome === 'escaped') {
-          return { score: 96, summary: 'Cleanly executed the CIB "Walk-to-NMR" corridor decoy without revealing the 3rd-Floor Office!' };
+          const fastBonus = Math.round(clamp((totalSec - finishElapsed) * 1.5, 0, 12));
+          const score = clamp(Math.round(90 + fastBonus - exposure * 25), 75, 100);
+          return { score, summary: 'Cleanly executed the CIB "Walk-to-NMR" corridor decoy without revealing the 3rd-Floor Office!' };
         }
         if (outcome === 'led_3f') {
           return { score: 15, summary: 'Disaster! You ran toward the 3rd-Floor Spiral Stairs with Alex King right behind you!' };
         }
         if (outcome === 'caught') {
-          return { score: 26, summary: 'Caught inside Alex King’s 17:18 green-eyed vision cone ("So where is everyone going for drinks?!").' };
+          return { score: 26, summary: 'Caught inside Alex King’s 17:18 green-eyed vision cone ("So is everyone at Gordon\'s Café right now?!").' };
         }
         return { score: 54, summary: 'Hid behind the KLB lockers until 17:25, narrowly keeping 3F secret.' };
       }
@@ -2228,145 +3005,208 @@ window.KLB = window.KLB || {};
         }).join('');
       };
 
-      const cardStyle = 'background:#10192d;border:1px solid #334155;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:7px;box-shadow:0 6px 18px rgba(2,6,23,0.48), inset 0 1px 0 rgba(148,163,184,0.08);';
-      const cardHeadingStyle = 'margin:0;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#93c5fd;letter-spacing:0.35px;text-transform:uppercase;';
-      const previewBoxStyle = 'background:#070a12;border:1px solid #1e293b;border-radius:7px;padding:4px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;min-height:142px;box-shadow:inset 0 2px 8px rgba(0,0,0,0.45);';
-      const selectStyle = 'width:100%;padding:6px 8px;background:#090d16;color:#f8fafc;border:1px solid #475569;border-radius:6px;font-size:11.5px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.4);';
+      const t1 = String(fig1?.type || '').toLowerCase();
+      const t2 = String(fig2?.type || '').toLowerCase();
+      const hasNmr = t1 === 'nmr' || t2 === 'nmr';
+      const hasMsOrGel = t1 === 'lcms' || t2 === 'lcms' || t1 === 'gel' || t2 === 'gel';
+      let pairBadgeCls = 'warn';
+      let pairBadgeText = 'Orthogonal Pair: Pending';
+      if (distinctPair) {
+        if (hasNmr && hasMsOrGel) {
+          pairBadgeCls = 'good';
+          pairBadgeText = `Orthogonal Pair: ${t1.toUpperCase()} + ${t2.toUpperCase()}`;
+        } else if (t1 !== t2) {
+          pairBadgeCls = 'good';
+          pairBadgeText = `Cross-Method: ${t1.toUpperCase()} + ${t2.toUpperCase()}`;
+        } else {
+          pairBadgeCls = 'warn';
+          pairBadgeText = `Same Method: ${t1.toUpperCase()} × 2`;
+        }
+      }
+
+      const slideFigs = [fig1, fig2].filter((f, idx, arr) => f && arr.findIndex(x => x && x.id === f.id) === idx);
+      const slideAvgQ = slideFigs.length
+        ? Math.round(slideFigs.reduce((s, f) => s + getQuality(f, 0), 0) / slideFigs.length)
+        : 0;
+      const qualBadgeCls = slideFigs.length === 0 ? 'warn' : slideAvgQ >= 80 ? 'good' : slideAvgQ >= 70 ? 'warn' : 'poor';
+      const flawBadgeCls = !anyFlaw ? 'good' : draft.honestDisclosure ? 'warn' : 'poor';
+      const flawBadgeText = !slideFigs.length
+        ? 'Flaw Status: No Data'
+        : !anyFlaw
+          ? 'Flaw Status: Clean'
+          : draft.honestDisclosure
+            ? 'Flaw Status: Disclosed (Safe)'
+            : 'Flaw Status: Hidden Risk!';
+
+      const renderSlideCard = (slideTitle, iconName, selectId, cvId, fig, emptyMsg, extraTagHtml = '') => {
+        const flawed = hasSpectrumFlaw(fig);
+        const qNum = fig ? Math.round(getQuality(fig, 0)) : 0;
+        const figBadgeCls = !fig ? 'warn' : flawed ? 'poor' : qNum >= 80 ? 'good' : 'warn';
+        return `
+          <section class="slide-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+              <h4>${iconSvg(iconName, 13)}<span>${slideTitle}</span></h4>
+              ${extraTagHtml}
+            </div>
+            <select id="${selectId}" class="ui-select compact">
+              ${makeOptions(fig ? fig.id : '')}
+            </select>
+            <div style="background:#070a12;border:1px solid #1e293b;border-radius:7px;padding:4px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;min-height:142px;">
+              ${fig
+                ? `<canvas id="${cvId}" width="340" height="145" style="width:100%;height:auto;border-radius:5px;"></canvas>
+                   <div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:2px 4px;">
+                     <span class="mono-muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(fig.productPeak || fig.label)}</span>
+                     <span class="yield-quality-badge ${figBadgeCls}">${escHtml(formatFigureMetrics(fig))}${flawed ? ' • Flaw' : ' • Clean'}</span>
+                   </div>`
+                : `<span class="mono-muted">${emptyMsg}</span>`}
+            </div>
+          </section>
+        `;
+      };
+
+      const radioOpt = (name, val, checked, title, desc, tone = 'info') => {
+        const activeStyle = checked
+          ? (tone === 'good'
+              ? 'margin-bottom:0;border-color:rgba(34,197,94,0.65);background:rgba(34,197,94,0.12);'
+              : tone === 'warn'
+                ? 'margin-bottom:0;border-color:rgba(245,158,11,0.65);background:rgba(245,158,11,0.12);'
+                : 'margin-bottom:0;border-color:rgba(59,130,246,0.6);background:rgba(59,130,246,0.16);')
+          : 'margin-bottom:0;border-color:rgba(148,163,184,0.16);background:rgba(15,23,42,0.45);';
+        return `
+          <label class="bloom-sample-opt" style="${activeStyle}">
+            <input type="radio" name="${name}" value="${val}" ${checked ? 'checked' : ''} />
+            <span><strong>${title}</strong> — ${desc}</span>
+          </label>
+        `;
+      };
 
       mountEl.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <header style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2e3d5e;padding-bottom:9px;">
-            <div>
-              <div style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#60a5fa;letter-spacing:0.4px;text-transform:uppercase;">
-                ${iconSvg('presentation', 14)}
-                <span>Friday 09:00 • 4-Slide Deck Builder</span>
-              </div>
-              <h3 style="margin:3px 0 0 0;font-size:18px;font-weight:600;color:#f8fafc;">${escHtml(campTitle)} — ${escHtml(playerMeta.name)}</h3>
+        <header class="klb-modal-header">
+          <div>
+            <div class="klb-tag info" style="margin-bottom:5px;">
+              ${iconSvg('presentation', 13)}
+              <span>Friday 09:00 • 4-Slide Deck Builder</span>
             </div>
-            <button id="sb-cancel-top" class="hud-pill" style="display:inline-flex;align-items:center;gap:5px;font-weight:500;">${iconSvg('x', 13)}<span>Cancel</span></button>
-          </header>
+            <h3>${escHtml(campTitle)} — ${escHtml(playerMeta.name)}</h3>
+          </div>
+          <button id="sb-cancel-top" type="button" class="hud-btn">${iconSvg('x', 13)}<span>Cancel</span></button>
+        </header>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#0b1324;border:1px solid #263554;border-radius:8px;padding:7px 11px;font-size:11.5px;color:#94a3b8;">
+        <div class="klb-modal-body">
+          <div class="klb-hint-box" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
             <span style="display:inline-flex;align-items:center;gap:5px;">
               ${iconSvg('file-text', 13)}
               <span>Weekly Report:</span>
-              <span style="font-weight:600;color:${weeklyReportPct >= 85 ? '#86efac' : weeklyReportPct >= 50 ? '#93c5fd' : '#fde68a'};">${weeklyReportPct}%</span>
-              <span style="color:#64748b;">(Due Thu 18:00)</span>
+              <span class="yield-quality-badge ${weeklyReportPct >= 85 ? 'good' : weeklyReportPct >= 50 ? 'warn' : 'poor'}">${weeklyReportPct}%</span>
+              <span class="mono-muted">(Due Thu 18:00)</span>
             </span>
             <span style="display:inline-flex;align-items:center;gap:5px;">
               ${iconSvg('pen-tool', 13)}
               <span>Manuscript Draft:</span>
-              <span style="font-weight:600;color:${manuscriptPct >= 85 ? '#86efac' : manuscriptPct >= 50 ? '#93c5fd' : '#fde68a'};">${manuscriptPct}%</span>
-              <span style="color:#64748b;">(Due Fri 18:00)</span>
+              <span class="yield-quality-badge ${manuscriptPct >= 85 ? 'good' : manuscriptPct >= 50 ? 'warn' : 'poor'}">${manuscriptPct}%</span>
+              <span class="mono-muted">(Due Fri 18:00)</span>
             </span>
             <span style="display:inline-flex;align-items:center;gap:5px;">
               ${iconSvg('shield-check', 13)}
               <span>Lab Condition:</span>
-              <span style="font-weight:600;color:${labCondPct >= 70 ? '#86efac' : labCondPct >= 40 ? '#93c5fd' : '#fca5a5'};">${labCondPct}%</span>
-              <span style="color:#64748b;">(Min 40%)</span>
+              <span class="yield-quality-badge ${labCondPct >= 70 ? 'good' : labCondPct >= 40 ? 'warn' : 'poor'}">${labCondPct}%</span>
+              <span class="mono-muted">(Min 40%)</span>
             </span>
           </div>
 
           ${missingClicker ? `
-            <section style="display:flex;align-items:center;gap:9px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.55);border-radius:8px;padding:8px 12px;font-size:12px;color:#fde68a;box-shadow:0 4px 12px rgba(2,6,23,0.42), inset 0 1px 0 rgba(253,230,138,0.1);">
+            <section class="klb-hint-box warn" style="display:flex;align-items:center;gap:8px;">
               ${iconSvg('alert-circle', 15)}
-              <span><span style="font-weight:600;color:#fef3c7;">Clicker Missing:</span> Grab your laser clicker from the KLB 3F Write-Up Desk.</span>
+              <span><strong>Clicker Missing:</strong> Grab your laser clicker from the KLB 3F Write-Up Desk.</span>
             </section>
           ` : ''}
 
-          <!-- 2x2 4-Slide Widescreen Deck Grid -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <!-- 2x2 4-Slide Widescreen Deck Grid: Slide 1 (TL) -> Slide 2 (TR) -> Slide 3 (BL) -> Slide 4 (BR) -->
+          <div class="slide-grid-2x2">
 
-            <!-- SLIDE 1: PROJECT AIM & FRAMING -->
-            <section style="${cardStyle}">
-              <h4 style="${cardHeadingStyle}">${iconSvg('compass', 13)}<span>SLIDE 1 • PROJECT AIM &amp; FRAMING</span></h4>
-              <label style="display:flex;gap:7px;align-items:flex-start;font-size:11.5px;cursor:pointer;padding:6px;border-radius:6px;border:1px solid ${draft.framing === 'mechanistic' ? 'rgba(59,130,246,0.55)' : 'transparent'};background:${draft.framing === 'mechanistic' ? 'rgba(59,130,246,0.16)' : 'transparent'};">
-                <input type="radio" name="sb-framing" value="mechanistic" ${draft.framing === 'mechanistic' ? 'checked' : ''} />
-                <span><span style="font-weight:600;color:#f1f5f9;">Mechanistic &amp; Concise</span> — Stoichiometries, pH &amp; controls (reliable baseline)</span>
-              </label>
-              <label style="display:flex;gap:7px;align-items:flex-start;font-size:11.5px;cursor:pointer;padding:6px;border-radius:6px;border:1px solid ${draft.framing === 'bold' ? 'rgba(59,130,246,0.55)' : 'transparent'};background:${draft.framing === 'bold' ? 'rgba(59,130,246,0.16)' : 'transparent'};">
-                <input type="radio" name="sb-framing" value="bold" ${draft.framing === 'bold' ? 'checked' : ''} />
-                <span><span style="font-weight:600;color:#f1f5f9;">Bold Therapeutic Pitch</span> — High-impact claim (+bonus at ≥82% purity, risk if weak)</span>
-              </label>
-              <label style="display:flex;gap:7px;align-items:flex-start;font-size:11.5px;cursor:pointer;padding:6px;border-radius:6px;border:1px solid ${draft.framing === 'humble' ? 'rgba(59,130,246,0.55)' : 'transparent'};background:${draft.framing === 'humble' ? 'rgba(59,130,246,0.16)' : 'transparent'};">
-                <input type="radio" name="sb-framing" value="humble" ${draft.framing === 'humble' ? 'checked' : ''} />
-                <span><span style="font-weight:600;color:#f1f5f9;">Humble Preliminary Update</span> — Conservative framing for unfinished steps</span>
-              </label>
+            <!-- SLIDE 1 (TOP-LEFT): PROJECT AIM & FRAMING -->
+            <section class="slide-card">
+              <h4>${iconSvg('compass', 13)}<span>SLIDE 1 • PROJECT AIM &amp; FRAMING</span></h4>
+              ${radioOpt('sb-framing', 'mechanistic', draft.framing === 'mechanistic', 'Mechanistic &amp; Concise', 'Stoichiometries, pH &amp; controls (reliable baseline)')}
+              ${radioOpt('sb-framing', 'bold', draft.framing === 'bold', 'Bold Therapeutic Pitch', 'High-impact claim (+bonus at ≥82% purity, risk if weak)')}
+              ${radioOpt('sb-framing', 'humble', draft.framing === 'humble', 'Humble Preliminary Update', 'Conservative framing for unfinished steps')}
             </section>
 
-            <!-- SLIDE 4: CONCLUSIONS & SCIENTIFIC HONESTY -->
-            <section style="${cardStyle}">
-              <h4 style="${cardHeadingStyle}">${iconSvg('shield-check', 13)}<span>SLIDE 4 • CONCLUSIONS &amp; HONESTY</span></h4>
-              <label style="display:flex;gap:7px;align-items:flex-start;font-size:11.5px;cursor:pointer;padding:6px;border-radius:6px;border:1px solid ${draft.honestDisclosure ? 'rgba(34,197,94,0.65)' : 'transparent'};background:${draft.honestDisclosure ? 'rgba(34,197,94,0.12)' : 'transparent'};box-shadow:${draft.honestDisclosure ? 'inset 0 1px 0 rgba(134,239,172,0.1)' : 'none'};">
-                <input type="radio" name="sb-honesty" value="honest" ${draft.honestDisclosure ? 'checked' : ''} />
-                <span><span style="font-weight:600;color:#f1f5f9;">Disclose Flaws Rigorously</span> — Flag residual peaks/adducts honestly (+0.65 Rigor${isRichard ? ', +0.55 Richard perk' : ''}).</span>
-              </label>
-              <label style="display:flex;gap:7px;align-items:flex-start;font-size:11.5px;cursor:pointer;padding:6px;border-radius:6px;border:1px solid ${!draft.honestDisclosure ? 'rgba(245,158,11,0.65)' : 'transparent'};background:${!draft.honestDisclosure ? 'rgba(245,158,11,0.12)' : 'transparent'};box-shadow:${!draft.honestDisclosure ? 'inset 0 1px 0 rgba(253,230,138,0.1)' : 'none'};">
-                <input type="radio" name="sb-honesty" value="gamble" ${!draft.honestDisclosure ? 'checked' : ''} />
-                <span><span style="font-weight:600;color:#f1f5f9;">Present As Clean</span> — <span style="display:inline-flex;align-items:center;gap:4px;color:${anyFlaw ? '#fca5a5' : '#94a3b8'};">${anyFlaw ? `${iconSvg('alert-triangle', 12)}<span>Risk: visible figure flaws (-1.5 Vijay callout).</span>` : `${iconSvg('check-circle', 12)}<span>Selected figures look clean.</span>`}</span></span>
-              </label>
-            </section>
+            <!-- SLIDE 2 (TOP-RIGHT): SYNTHETIC / BIOCONJUGATION PREP FIGURE -->
+            ${renderSlideCard(
+              'SLIDE 2 • SYNTHETIC / PREP FIGURE',
+              'flask-conical',
+              'sb-fig1',
+              'sb-cv-1',
+              fig1,
+              'Collect a TLC / NMR / Gel in Lab 230 for Slide 2'
+            )}
 
-            <!-- SLIDE 2: SYNTHETIC / BIOCONJUGATION PREP FIGURE -->
-            <section style="${cardStyle}">
-              <h4 style="${cardHeadingStyle}">${iconSvg('flask-conical', 13)}<span>SLIDE 2 • SYNTHETIC / PREP FIGURE</span></h4>
-              <select id="sb-fig1" style="${selectStyle}">
-                ${makeOptions(draft.fig1Id)}
-              </select>
-              <div style="${previewBoxStyle}">
-                ${fig1
-                  ? `<canvas id="sb-cv-1" width="340" height="145" style="width:100%;height:auto;"></canvas>
-                     <div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 4px;font-size:10.5px;color:#94a3b8;font-family:Consolas,monospace;">
-                       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(fig1.productPeak || fig1.label)}</span>
-                       <span style="flex-shrink:0;font-weight:600;color:${hasSpectrumFlaw(fig1) ? '#fca5a5' : '#86efac'};">${formatFigureMetrics(fig1)}</span>
-                     </div>`
-                  : `<span style="font-size:11.5px;color:#64748b;">Collect a TLC / NMR / Gel in Lab 230 for Slide 2</span>`}
-              </div>
-            </section>
+            <!-- SLIDE 3 (BOTTOM-LEFT): CHARACTERISATION & PURITY PROOF -->
+            ${renderSlideCard(
+              'SLIDE 3 • CHARACTERISATION PROOF',
+              'activity',
+              'sb-fig2',
+              'sb-cv-2',
+              fig2,
+              'Collect a 2nd distinct Gel / LC-MS / NMR for Slide 3',
+              fig1 && fig2 && !distinctPair ? `<span class="klb-tag danger">${iconSvg('alert-triangle', 12)}<span>Duplicate</span></span>` : ''
+            )}
 
-            <!-- SLIDE 3: CHARACTERISATION & PURITY PROOF -->
-            <section style="${cardStyle}">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <h4 style="${cardHeadingStyle}">${iconSvg('activity', 13)}<span>SLIDE 3 • CHARACTERISATION PROOF</span></h4>
-                ${fig1 && fig2 && !distinctPair ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#fca5a5;font-weight:600;">${iconSvg('alert-triangle', 12)}<span>Duplicate Figure</span></span>` : ''}
-              </div>
-              <select id="sb-fig2" style="${selectStyle}">
-                ${makeOptions(draft.fig2Id)}
-              </select>
-              <div style="${previewBoxStyle}">
-                ${fig2
-                  ? `<canvas id="sb-cv-2" width="340" height="145" style="width:100%;height:auto;"></canvas>
-                     <div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 4px;font-size:10.5px;color:#94a3b8;font-family:Consolas,monospace;">
-                       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(fig2.productPeak || fig2.label)}</span>
-                       <span style="flex-shrink:0;font-weight:600;color:${hasSpectrumFlaw(fig2) ? '#fca5a5' : '#86efac'};">${formatFigureMetrics(fig2)}</span>
-                     </div>`
-                  : `<span style="font-size:11.5px;color:#64748b;">Collect a 2nd distinct Gel / LC-MS / NMR for Slide 3</span>`}
-              </div>
+            <!-- SLIDE 4 (BOTTOM-RIGHT): CONCLUSIONS & SCIENTIFIC HONESTY -->
+            <section class="slide-card">
+              <h4>${iconSvg('shield-check', 13)}<span>SLIDE 4 • CONCLUSIONS &amp; HONESTY</span></h4>
+              ${radioOpt(
+                'sb-honesty',
+                'honest',
+                draft.honestDisclosure,
+                'Disclose Flaws Rigorously',
+                anyFlaw
+                  ? `Flag flaws honestly (+0.40 Rigor${isRichard ? ', +0.25 Richard perk' : ''} partial credit).`
+                  : 'Add cautious caveats/controls (+0.60 Rigor).',
+                'good'
+              )}
+              ${radioOpt(
+                'sb-honesty',
+                'gamble',
+                !draft.honestDisclosure,
+                'Present As Clean',
+                anyFlaw
+                  ? `<span class="klb-tag danger">${iconSvg('alert-triangle', 12)}<span>Risk: visible flaws (-1.40 Rigor, -6 Patience).</span></span>`
+                  : `<span class="klb-tag good">${iconSvg('check-circle', 12)}<span>Clean polish (+0.65 Rigor).</span></span>`,
+                anyFlaw ? 'warn' : 'good'
+              )}
             </section>
           </div>
-
-          <footer style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:4px;flex-wrap:wrap;">
-            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11.5px;color:#94a3b8;">
-              <span style="display:inline-flex;align-items:center;gap:5px;">
-                ${iconSvg(distinctPair ? 'check-circle' : 'alert-circle', 13)}
-                <span>Deck Status:</span>
-                <span style="font-weight:600;color:${distinctPair ? '#86efac' : '#fde68a'};">${distinctPair ? '4/4 Slides Ready (2 Distinct Raw Figures)' : `${labBook.length}/2 Distinct Figures Available`}</span>
-              </span>
-            </div>
-            <div style="display:flex;gap:8px;">
-              <button id="sb-cancel-btn" class="rpg-btn" style="font-weight:500;">Cancel</button>
-              <button id="sb-save-btn" class="rpg-btn primary" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;font-weight:500;">${iconSvg('check', 14)}<span>Save 4-Slide Deck</span></button>
-            </div>
-          </footer>
         </div>
+
+        <footer class="klb-modal-footer">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="klb-tag ${distinctPair ? 'good' : 'warn'}">
+              ${iconSvg(distinctPair ? 'check-circle' : 'alert-circle', 13)}
+              <span>${distinctPair ? '4/4 Slides Ready' : `${labBook.length}/2 Distinct Figures`}</span>
+            </span>
+            <span class="klb-tag ${pairBadgeCls === 'good' ? 'good' : 'warn'}">${escHtml(pairBadgeText)}</span>
+            <span class="klb-tag ${qualBadgeCls === 'good' ? 'good' : qualBadgeCls === 'poor' ? 'danger' : 'warn'}">Slide Quality: ${slideAvgQ}%</span>
+            <span class="klb-tag ${flawBadgeCls === 'good' ? 'good' : flawBadgeCls === 'poor' ? 'danger' : 'warn'}">${flawBadgeText}</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button id="sb-cancel-btn" type="button" class="hud-btn">Cancel</button>
+            <button id="sb-save-btn" type="button" class="hud-btn primary">${iconSvg('check', 14)}<span>Save 4-Slide Deck</span></button>
+          </div>
+        </footer>
       `;
 
-      // Render live spectra previews onto Slide 2 & Slide 3 canvases!
-      if (fig1 && mountEl.querySelector('#sb-cv-1')) {
-        renderToCanvas(mountEl.querySelector('#sb-cv-1'), fig1);
+      // Render HiDPI live spectra previews onto Slide 2 & Slide 3 canvases
+      const cv1 = mountEl.querySelector('#sb-cv-1');
+      if (fig1 && cv1) {
+        setupHiDpiCanvas(cv1, 340, 145);
+        renderToCanvas(cv1, fig1, { width: 340, height: 145 });
       }
-      if (fig2 && mountEl.querySelector('#sb-cv-2')) {
-        renderToCanvas(mountEl.querySelector('#sb-cv-2'), fig2);
+      const cv2 = mountEl.querySelector('#sb-cv-2');
+      if (fig2 && cv2) {
+        setupHiDpiCanvas(cv2, 340, 145);
+        renderToCanvas(cv2, fig2, { width: 340, height: 145 });
       }
 
       // Wire interactive controls
@@ -2437,8 +3277,11 @@ window.KLB = window.KLB || {};
   }
 
   // -------------------- SOLO VIJAY 0.0-10.0 FRIDAY SCORE-CARD AUDITOR --------------------
-  function evaluateFridayAudit(gameState) {
+  function evaluateFridayAudit(gameState, opts = {}) {
     const state = gameState || {};
+    const auditOpts = opts || {};
+    const phase = auditOpts.phase || 'morning';
+    const isFinalPhase = phase === 'final';
     const playerId = state.player?.id || 'daniel_richards';
     const playerMeta = window.KLB.CAST_BY_ID?.[playerId] || { name: 'Researcher', shortName: 'Chud' };
     const totalSteps = window.KLB.CAMPAIGNS?.[playerId]?.steps?.length || 5;
@@ -2453,69 +3296,106 @@ window.KLB = window.KLB || {};
       || null;
     const distinctFigures = Boolean(fig1 && fig2 && fig1.id !== fig2.id);
 
-    // Mean quality and yield across labBook (0..100)
-    const avgQualityRaw = labBook.length > 0
-      ? labBook.reduce((s, f) => s + getQuality(f, 0), 0) / labBook.length
-      : 0;
-    const avgYieldRaw = labBook.length > 0
-      ? labBook.reduce((s, f) => {
+    // Curated Data Quality & Yield: 70% weight on Slide 2 + Slide 3 curated figures, 30% on remaining labBook
+    const slideFigs = [];
+    for (const f of [fig1, fig2]) {
+      if (f && !slideFigs.some(u => u.id === f.id)) slideFigs.push(f);
+    }
+    const slideIdSet = new Set(slideFigs.map(f => f.id));
+    const otherFigs = labBook.filter(f => !slideIdSet.has(f.id));
+
+    const meanQualityOf = arr => arr.length ? arr.reduce((s, f) => s + getQuality(f, 0), 0) / arr.length : 0;
+    const meanYieldOf = arr => arr.length
+      ? arr.reduce((s, f) => {
           const y = parseYieldPct(f, false);
           return s + (y !== null ? y : getQuality(f, 0));
-        }, 0) / labBook.length
+        }, 0) / arr.length
       : 0;
+
+    let avgQualityRaw = 0;
+    let avgYieldRaw = 0;
+    if (slideFigs.length > 0 && otherFigs.length > 0) {
+      avgQualityRaw = meanQualityOf(slideFigs) * 0.70 + meanQualityOf(otherFigs) * 0.30;
+      avgYieldRaw = meanYieldOf(slideFigs) * 0.70 + meanYieldOf(otherFigs) * 0.30;
+    } else if (slideFigs.length > 0) {
+      avgQualityRaw = meanQualityOf(slideFigs);
+      avgYieldRaw = meanYieldOf(slideFigs);
+    } else if (otherFigs.length > 0) {
+      avgQualityRaw = meanQualityOf(otherFigs) * 0.30;
+      avgYieldRaw = meanYieldOf(otherFigs) * 0.30;
+    }
     const avgQuality = Math.round(avgQualityRaw * 10) / 10;
     const avgYield = Math.round(avgYieldRaw * 10) / 10;
 
     // 1) YIELD & CAMPAIGN COMPLETION SCORE (0.0 - 2.0)
-    const stepRatio = clamp(doneSteps / Math.max(1, totalSteps), 0, 1);
+    // Morning (Fri 09:00) grades generously toward Steps 1-4; Final (Fri 18:00) requires full 5/5 steps
+    const stepDenom = isFinalPhase ? Math.max(1, totalSteps) : Math.max(1, totalSteps - 1);
+    const stepRatio = clamp(doneSteps / stepDenom, 0, 1);
     const yieldRatio = clamp(avgYieldRaw / 100, 0, 1);
     let yieldRaw = 0.5 * stepRatio * 2.0 + 0.5 * yieldRatio * 2.0;
-    if (deck.framing === 'bold' && stepRatio >= 0.8 && avgQualityRaw >= 82 && avgYieldRaw >= 75) yieldRaw += 0.15;
-    if (deck.framing === 'bold' && (stepRatio < 0.6 || (labBook.length > 0 && (avgQualityRaw < 72 || avgYieldRaw < 60)))) yieldRaw -= 0.2;
-    if (deck.framing === 'humble' && stepRatio < 0.8) yieldRaw += 0.1;
+    if (!isFinalPhase && doneSteps >= totalSteps) yieldRaw += 0.05;
+    let framingNote = '';
+    if (deck.framing === 'bold' && stepRatio >= 0.8 && avgQualityRaw >= 82 && avgYieldRaw >= 75) {
+      yieldRaw += 0.15;
+      framingNote = ', +bold pitch';
+    } else if (deck.framing === 'bold' && (stepRatio < 0.6 || (labBook.length > 0 && (avgQualityRaw < 72 || avgYieldRaw < 60)))) {
+      yieldRaw -= 0.20;
+      framingNote = ', -overclaim penalty';
+    } else if (deck.framing === 'humble' && doneSteps < totalSteps) {
+      yieldRaw += 0.10;
+      framingNote = ', +humble framing';
+    }
     const yieldScore = Math.round(clamp(yieldRaw, 0, 2.0) * 10) / 10;
+    const yieldReason = `${doneSteps}/${isFinalPhase ? totalSteps : stepDenom} ${isFinalPhase ? 'steps' : 'morning target steps'}, ${Math.round(avgYieldRaw)}% curated yield${framingNote}`;
 
     // 2) HOMOGENEITY & SWEET-SPOT PURITY SCORE (0.0 - 2.0)
     const overcookedCount = (state.activeReactions || []).filter(r => r.status === 'overcooked').length;
     const homogeneityRaw = (avgQualityRaw / 100) * 2.0 - overcookedCount * 0.2;
     const homogeneityScore = Math.round(clamp(homogeneityRaw, 0, 2.0) * 10) / 10;
+    const homogeneityReason = `${Math.round(avgQualityRaw)}% curated quality (70% slides / 30% book)${overcookedCount > 0 ? `, -${(overcookedCount * 0.2).toFixed(1)} (${overcookedCount} overcooked)` : ''}`;
 
+    const figTypeOf = f => String(f?.type || f?.output?.type || f?.dataOutput?.type || 'data').toLowerCase();
     // 3) ANALYTICAL RIGOR & SCIENTIFIC HONESTY SCORE (0.0 - 2.0)
+    // Spotless Slide 2+3 data ALWAYS outscores flawed-but-disclosed data!
     let rigorRaw = 0.15;
+    let pairDesc = 'No figures';
     if (distinctFigures) {
-      const t1 = String(fig1.type || '').toLowerCase();
-      const t2 = String(fig2.type || '').toLowerCase();
+      const t1 = figTypeOf(fig1);
+      const t2 = figTypeOf(fig2);
       const hasNmr = t1 === 'nmr' || t2 === 'nmr';
       const hasMsOrGel = t1 === 'lcms' || t2 === 'lcms' || t1 === 'gel' || t2 === 'gel';
       if (hasNmr && hasMsOrGel) {
-        rigorRaw = 1.45;
-      } else if (t1 !== t2) {
         rigorRaw = 1.30;
+        pairDesc = `Orthogonal ${t1.toUpperCase()}+${t2.toUpperCase()}`;
+      } else if (t1 !== t2) {
+        rigorRaw = 1.20;
+        pairDesc = `Cross-method ${t1.toUpperCase()}+${t2.toUpperCase()}`;
       } else {
-        rigorRaw = 1.05;
+        rigorRaw = 0.90;
+        pairDesc = `Same-method ${t1.toUpperCase()}×2`;
       }
     } else if (fig1 || fig2) {
-      rigorRaw = 0.70;
+      rigorRaw = 0.60;
+      pairDesc = `Single ${figTypeOf(fig1 || fig2).toUpperCase()} figure`;
     }
 
     const slideFlawedFig = [fig2, fig1].find(f => hasSpectrumFlaw(f)) || null;
     const caughtHiding = Boolean(slideFlawedFig && !deck.honestDisclosure);
     let vijayCalloutLine = null;
     let richardPerkTriggered = false;
+    let rigorReason = pairDesc;
 
     if (slideFlawedFig) {
       if (deck.honestDisclosure) {
-        // Honest disclosure bonus (+0.65) + Richard Spears meticulous auditor perk (+0.55)
-        rigorRaw += 0.65;
-        if (playerId === 'richard_spears') {
-          rigorRaw += 0.55;
-          richardPerkTriggered = true;
-        }
+        const isRich = playerId === 'richard_spears';
+        rigorRaw += isRich ? 0.65 : 0.40;
+        richardPerkTriggered = isRich;
+        rigorReason = `${pairDesc}; flaw disclosed (+${isRich ? '0.65 Richard perk' : '0.40'} recovery)`;
       } else {
-        // Gambling that Vijay won't spot flawed spectra -> brutal -1.5 callout penalty!
-        rigorRaw -= 1.5;
+        rigorRaw -= 1.40;
         const slideNum = slideFlawedFig.id === fig1?.id ? 2 : 3;
-        const figType = String(slideFlawedFig.type || '').toLowerCase();
+        const figType = figTypeOf(slideFlawedFig);
+        rigorReason = `Slide ${slideNum} flaw hidden (-1.40 Vijay callout)`;
         if (figType === 'nmr' || slideFlawedFig.hasSolventPeak) {
           vijayCalloutLine = `Wait — is that 5.30 ppm DCM on Slide ${slideNum}?! That's suboptimal — one word.`;
         } else if (figType === 'gel' || slideFlawedFig.hasOverReduction || slideFlawedFig.hasBlueDyeMishap) {
@@ -2530,26 +3410,49 @@ window.KLB = window.KLB || {};
         }
       }
     } else if (distinctFigures) {
-      // Genuinely clean orthogonal spectra on both slides!
-      rigorRaw += 0.55;
+      const bonus = !deck.honestDisclosure ? 0.65 : 0.60;
+      rigorRaw += bonus;
+      rigorReason = `${pairDesc}; spotless data (+${bonus.toFixed(2)})`;
+    } else if (fig1 || fig2) {
+      const bonus = !deck.honestDisclosure ? 0.45 : 0.40;
+      rigorRaw += bonus;
+      rigorReason = `${pairDesc}; clean (+${bonus.toFixed(2)})`;
     }
     const rigorScore = Math.round(clamp(rigorRaw, 0, 2.0) * 10) / 10;
 
     // 4) THURSDAY WEEKLY REPORT + FRIDAY MANUSCRIPT PREPARATION SCORE (0.0 - 1.5)
+    // Morning (09:00): grade Weekly Report only (do NOT deduct incomplete Fri 18:00 Manuscript Draft!)
+    // Final (18:00): include final Manuscript Draft progress (0..0.85) + Weekly Report (0..0.65)
     const weeklyReportPct = clamp(Number(state.weeklyReportProgress) || 0, 0, 100);
     const manuscriptPct = clamp(Number(state.manuscriptProgress) || 0, 0, 100);
-    const manuscriptRaw = clamp((weeklyReportPct / 100) * 0.65 + (manuscriptPct / 100) * 0.85, 0, 1.5);
+    const manuscriptRaw = isFinalPhase
+      ? clamp((weeklyReportPct / 100) * 0.65 + (manuscriptPct / 100) * 0.85, 0, 1.5)
+      : clamp((weeklyReportPct / 100) * 1.5, 0, 1.5);
     const manuscriptScore = Math.round(manuscriptRaw * 10) / 10;
+    const manuscriptReason = isFinalPhase
+      ? `Thu Report ${Math.round(weeklyReportPct)}% + Fri Manuscript ${Math.round(manuscriptPct)}%`
+      : `Thu Report ${Math.round(weeklyReportPct)}% (Fri 18:00 Manuscript not docked at 09:00)`;
 
     // 5) SLIDE HYGIENE, PUNCTUALITY & CLICKER SCORE (0.0 - 1.5)
     let hygieneRaw = 0;
-    if (deck.ready && distinctFigures) hygieneRaw += 0.75;
-    else if (deck.ready && (fig1 || fig2)) hygieneRaw += 0.50;
-    else if (deck.ready) hygieneRaw += 0.30;
-    else hygieneRaw += 0.10;
+    let deckHygieneTxt = 'deck unsaved';
+    if (deck.ready && distinctFigures) {
+      hygieneRaw += 0.75;
+      deckHygieneTxt = '2 distinct figures saved';
+    } else if (deck.ready && (fig1 || fig2)) {
+      hygieneRaw += 0.50;
+      deckHygieneTxt = '1 figure saved';
+    } else if (deck.ready) {
+      hygieneRaw += 0.30;
+      deckHygieneTxt = 'deck saved (no figures)';
+    } else {
+      hygieneRaw += 0.10;
+    }
 
     const curTimeMins = Number.isFinite(Number(state.timeMins)) ? Number(state.timeMins) : 540;
-    const onTime = curTimeMins <= 575;
+    const onTime = isFinalPhase
+      ? (typeof state.lastAuditResult?.onTime === 'boolean' ? state.lastAuditResult.onTime : (curTimeMins <= 575 || curTimeMins >= 1065))
+      : curTimeMins <= 575;
     hygieneRaw += onTime ? 0.45 : 0.15;
 
     const hasClicker = playerId === 'andre_shamsabadi'
@@ -2558,6 +3461,7 @@ window.KLB = window.KLB || {};
     if (hasClicker) hygieneRaw += 0.30;
 
     const hygieneScore = Math.round(clamp(hygieneRaw, 0, 1.5) * 10) / 10;
+    const hygieneReason = `${deckHygieneTxt}, ${onTime ? 'on time' : 'late'}, ${hasClicker ? 'clicker ready' : 'missing clicker'}`;
 
     // 6) KLB LAB CITIZENSHIP, LAB CONDITION & VIJAY PATIENCE RUBRIC SCORE (0.0 - 1.0)
     const rawPatience = (state.patience !== undefined && state.patience !== null)
@@ -2575,14 +3479,13 @@ window.KLB = window.KLB || {};
     else if (vijayPatience < 55) citizenshipRaw -= (vijayPatience < 30 ? 0.20 : 0.12);
     if (state.prep?.thiol_dirty) citizenshipRaw -= 0.25;
     if (state.abilFineOwed) citizenshipRaw -= 0.25;
+    // Fold Faiza's +0.5 PI Charm perk cleanly into citizenshipScore (capped at 1.0)
+    if (playerId === 'faiza_javaid') citizenshipRaw += 0.50;
     const citizenshipScore = Math.round(clamp(citizenshipRaw, 0, 1.0) * 10) / 10;
+    const citizenshipReason = `Lab ${Math.round(safeLabCond)}%, ${Number(state.favours) || 0} favour(s), Patience ${Math.round(vijayPatience)}${playerId === 'faiza_javaid' ? ', +0.5 Faiza PI charm' : ''}${state.prep?.thiol_dirty ? ', thiol penalty' : ''}${state.abilFineOwed ? ', NMR fine' : ''}`;
 
     // Presented Group Meeting Quality & Yield -> Vijay Patience Delta
-    const uniqueSlideFigs = [];
-    for (const f of [fig1, fig2]) {
-      if (f && !uniqueSlideFigs.some(u => u.id === f.id)) uniqueSlideFigs.push(f);
-    }
-    const presentedFigs = uniqueSlideFigs.length > 0 ? uniqueSlideFigs : labBook.slice();
+    const presentedFigs = slideFigs.length > 0 ? slideFigs : labBook.slice();
     let presentedAvgQuality = 0;
     let presentedAvgYield = 0;
     let presentedPerf = 45;
@@ -2609,6 +3512,7 @@ window.KLB = window.KLB || {};
       patienceDelta -= 6;
     }
 
+    // Total ALWAYS equals exact sum of the 6 rounded breakdown cards
     const total = Math.round(clamp(
       yieldScore + homogeneityScore + rigorScore + manuscriptScore + hygieneScore + citizenshipScore,
       0,
@@ -2624,8 +3528,10 @@ window.KLB = window.KLB || {};
 
     if (doneSteps >= totalSteps) {
       vijayVerdictLines.push(`All ${totalSteps} campaign steps executed across the week, ${playerMeta.shortName} — very solid synthetic momentum.`);
+    } else if (!isFinalPhase && doneSteps >= totalSteps - 1) {
+      vijayVerdictLines.push(`Strong momentum with ${doneSteps} of ${totalSteps} planned steps complete by Friday morning — wrap up Step ${totalSteps} before 18:00.`);
     } else if (doneSteps >= 3) {
-      vijayVerdictLines.push(`You pushed through ${doneSteps} of ${totalSteps} planned steps; let's close out the remaining characterisation first thing Monday.`);
+      vijayVerdictLines.push(`You pushed through ${doneSteps} of ${totalSteps} planned steps; let's close out the remaining characterisation ${isFinalPhase ? 'first thing Monday' : 'before 18:00'}.`);
     } else {
       vijayVerdictLines.push(`Only ${doneSteps} of ${totalSteps} steps completed by Friday Group Meeting. That's suboptimal — one word.`);
     }
@@ -2637,7 +3543,7 @@ window.KLB = window.KLB || {};
           : `Good scientific rigor disclosing the ${describeFigureFlaw(slideFlawedFig)} openly on Slide 4 with a clear re-purification plan.`
       );
     } else if (!slideFlawedFig && distinctFigures) {
-      vijayVerdictLines.push(`Crisp orthogonal proof across your ${fig1.type.toUpperCase()} and ${fig2.type.toUpperCase()} slides — baseline-resolved and publication-ready.`);
+      vijayVerdictLines.push(`Crisp orthogonal proof across your ${figTypeOf(fig1).toUpperCase()} and ${figTypeOf(fig2).toUpperCase()} slides — baseline-resolved and publication-ready.`);
     } else if (!deck.ready) {
       vijayVerdictLines.push(`Walking into Friday Group Meeting without saving a finished 4-slide deck is brave, I'll give you that.`);
     }
@@ -2657,7 +3563,7 @@ window.KLB = window.KLB || {};
         vijayVerdictLines.push(`Thursday Weekly Report was submitted cleanly at 100% ahead of deadline.`);
       }
       if (msRounded < 100) {
-        if (curTimeMins < 1080) {
+        if (!isFinalPhase) {
           vijayVerdictLines.push(
             msRounded >= 50
               ? `Manuscript Draft is off to a strong start at ${msRounded}% (due Fri 18:00 — keep writing after meeting).`
@@ -2738,7 +3644,7 @@ window.KLB = window.KLB || {};
       });
     }
 
-    if (wrRounded < 50 || (curTimeMins >= 1080 && msRounded < 50)) {
+    if (wrRounded < 50 || (isFinalPhase && msRounded < 50)) {
       chudReactions.push({
         senderId: 'peter_szijj',
         text: `Don't skip the 3F Write-Up Desk next week @${playerMeta.shortName} — Vijay always checks Thursday reports and Friday SI drafts!`
@@ -2753,7 +3659,7 @@ window.KLB = window.KLB || {};
         },
         {
           senderId: 'calise_bahou',
-          text: `Bringing celebratory Sainsbury's lemons to Gordon's!`
+          text: `Bringing celebratory reduced bags of lemons to Gordon's!`
         }
       );
     } else {
@@ -2772,6 +3678,8 @@ window.KLB = window.KLB || {};
     return {
       total,
       passed,
+      phase,
+      onTime,
       patienceDelta,
       avgQuality,
       avgYield,
@@ -2783,6 +3691,14 @@ window.KLB = window.KLB || {};
         manuscriptScore,
         hygieneScore,
         citizenshipScore
+      },
+      breakdownReasons: {
+        yieldScore: yieldReason,
+        homogeneityScore: homogeneityReason,
+        rigorScore: rigorReason,
+        manuscriptScore: manuscriptReason,
+        hygieneScore: hygieneReason,
+        citizenshipScore: citizenshipReason
       },
       vijayVerdictLines,
       chudReactions: chudReactions.filter(r => PLAYABLE_CHUD_IDS.has(r.senderId) && r.senderId !== playerId)

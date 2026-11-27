@@ -80,7 +80,7 @@ window.KLB.CUPBOARD_CONTENTS = {
     desc: 'Sure/Seal anhydrous DCM, THF, DMF, MeCN, Toluene & DMSO over 4Å molecular sieves.'
   },
   'Cupboard 5 (Thiols)': {
-    tag: 'Thiols (STENCHO HAZARD)',
+    tag: 'Thiols (STENCH HAZARD)',
     group: 'chudasama',
     items: ['thiophenol', 'dodecanethiol', 'bme', 'edt', 'gsh'],
     stenchRisk: true,
@@ -120,7 +120,7 @@ window.KLB.CUPBOARD_CONTENTS = {
     tag: 'Legacy Mystery Bottles',
     group: 'none',
     items: ['mystery_vial', 'vintage_silica'],
-    desc: '2011 unlabelled lachrymatory bottles & faded Paraffin-wrapped flasks. Inspect at your own peril!'
+    desc: '2011 unlabelled lachrymatory bottles & faded Parafilm-wrapped flasks. Inspect at your own peril!'
   },
   'Cupboard 20 (Flammables)': {
     tag: 'Flammables COSHH Cabinet',
@@ -177,7 +177,7 @@ window.KLB.BLOOMSBURY_ERRANDS = [
     targetRoom: 'meeting_room',
     type: 'room',
     icon: 'presentation',
-    hours: 'Fri 16:00 Group Meeting',
+    hours: 'Fri 09:00 Group Meeting',
     mins: 0,
     note: 'Friday group meeting with Vijay.'
   }

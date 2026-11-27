@@ -16,7 +16,7 @@
           <span class="icon-inline" data-lucide="flask-conical" data-size="22"></span>
           <span>KLB Simulator</span>
         </h1>
-        <p>UCL Chemistry survival across KLB 2nd Floor, 3rd Floor, Gordon's Cafe, and CIB facilities while the Big-Chuds, Baker, and Sheppard groups operate autonomously.</p>
+        <p>UCL Chemistry survival across KLB 2nd Floor, 3rd Floor, Gordon's Café, and CIB facilities while the Big-Chuds, Baker, and Sheppard groups operate autonomously.</p>
       </div>
 
       <div class="title-controls">
@@ -40,6 +40,29 @@
           <span id="archive-progress-lbl" class="mono-muted">0 / 10 Audited</span>
         </div>
         <div id="char-grid" class="char-grid"></div>
+        <section class="quickstart-card" aria-label="How to Play">
+          <div class="quickstart-col">
+            <h4>
+              <span class="icon-inline" data-lucide="gamepad-2" data-size="13"></span>
+              <span>Controls</span>
+            </h4>
+            <p><code>WASD / Click</code> Move &middot; <code>E</code> Interact &middot; <code>Space</code> Pause &middot; <code>G</code> Specs &middot; <code>H</code> Headphones &middot; <code>M</code> Mute</p>
+          </div>
+          <div class="quickstart-col">
+            <h4>
+              <span class="icon-inline" data-lucide="list-checks" data-size="13"></span>
+              <span>Your KLB Week</span>
+            </h4>
+            <p>Complete 5 bench steps &rarr; Submit Weekly Report (<code>Thu 18:00</code>) &rarr; Build 4-Slide Deck for Vijay (<code>Fri 09:00</code>) &rarr; Finish Manuscript (<code>Fri 18:00</code>)</p>
+          </div>
+          <div class="quickstart-col">
+            <h4>
+              <span class="icon-inline" data-lucide="shield-check" data-size="13"></span>
+              <span>Lab Survival</span>
+            </h4>
+            <p>Specs ON + Headphones OFF during sweeps (<code>Lab Condition &ge; 40</code>). Honour your researcher's coffee/tea break &amp; manage Favours.</p>
+          </div>
+        </section>
       </section>
 
       <aside id="char-dossier" class="char-dossier" aria-label="Selected Researcher Dossier"></aside>
@@ -52,12 +75,16 @@
     <!-- Left/Center (~70%): Pokemon 3/4 Oblique 2.5D Viewport -->
     <section id="viewport-col">
       <header id="top-hud-bar">
+        <div class="hud-room-cluster">
+          <span id="hud-char-badge" class="hud-char-badge"></span>
+          <span id="hud-room-badge" class="hud-room-badge"></span>
+        </div>
         <div class="hud-toolbar">
           <button id="btn-toggle-specs" class="hud-btn on" title="Toggle Safety Specs (G) — Specs OFF slows Morale drain; Specs ON required for inspections">
             <span class="icon-inline" data-lucide="glasses" data-size="15"></span>
             <span id="lbl-specs">Specs ON</span>
           </button>
-          <button id="btn-toggle-headphones" class="hud-btn" title="Toggle Headphones (H) — Headphones ON slows Energy/Focus drain; Headphones OFF required for inspections">
+          <button id="btn-toggle-headphones" class="hud-btn" title="Toggle Headphones (H) — Quiet KLB 2F hood roar &amp; faster focus, -20% Social gain; OFF for inspections">
             <span class="icon-inline" data-lucide="headphones" data-size="15"></span>
             <span id="lbl-headphones">Headphones</span>
           </button>
@@ -69,6 +96,7 @@
           <select id="select-zoom" class="ui-select compact" aria-label="Camera Zoom">
             <option value="1">Zoom 100%</option>
             <option value="1.25">Zoom 125%</option>
+            <option value="1.5">Zoom 150%</option>
             <option value="0.8">Zoom 80%</option>
           </select>
 
@@ -251,17 +279,17 @@
       </section>
 
       <!-- 3-Tab Bottom Panel -->
-      <nav class="deck-tabs" aria-label="Command Deck Panels">
-        <button class="deck-tab active" data-tab="whatsapp">
+      <nav class="deck-tabs" role="tablist" aria-label="Command Deck Panels">
+        <button type="button" class="deck-tab active" role="tab" aria-selected="true" data-tab="whatsapp">
           <span class="icon-inline" data-lucide="message-square" data-size="14"></span>
           <span>Big-Chuds</span>
           <span id="wa-unread-count" class="unread-num hidden">0</span>
         </button>
-        <button class="deck-tab" data-tab="labbook">
+        <button type="button" class="deck-tab" role="tab" aria-selected="false" data-tab="labbook">
           <span class="icon-inline" data-lucide="book-open" data-size="14"></span>
           <span id="tab-lbl-labbook">Lab Book</span>
         </button>
-        <button class="deck-tab" data-tab="archive">
+        <button type="button" class="deck-tab" role="tab" aria-selected="false" data-tab="archive">
           <span class="icon-inline" data-lucide="archive" data-size="14"></span>
           <span>Archive</span>
         </button>

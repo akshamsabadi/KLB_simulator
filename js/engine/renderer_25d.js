@@ -135,7 +135,6 @@
   function stripBubbleEmojis(str) {
     return String(str || '')
       .replace(/[\p{Extended_Pictographic}\u{1F000}-\u{1FAFF}\u{231A}-\u{23FA}\u{2600}-\u{27BF}\u{2B05}-\u{2B55}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}]/gu, '')
-      .replace(/\u2026|\.{3,}/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -328,6 +327,34 @@
     if (!label) return '';
     const m = String(label).match(/cupboard\s*#?(\d+)/i) || String(label).match(/#(\d+)/);
     return m ? '#' + m[1] : '';
+  }
+
+  function drawStationMicroTag(ctx, cx, cy, label, opts) {
+    if (!label) return;
+    const cfg = opts || {};
+    ctx.save();
+    ctx.font = cfg.font || 'bold 8px monospace';
+    const tw = ctx.measureText(label).width;
+    const pw = Math.ceil(tw + 8);
+    const ph = 11;
+    const bx = Math.round(cx - pw * 0.5);
+    const by = Math.round(cy - ph * 0.5);
+    fillRoundRect(
+      ctx,
+      bx,
+      by,
+      pw,
+      ph,
+      2.5,
+      cfg.bg || 'rgba(15, 23, 42, 0.88)',
+      cfg.border || 'rgba(148, 163, 184, 0.6)',
+      0.9
+    );
+    ctx.fillStyle = cfg.color || '#f1f5f9';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, cx, by + ph * 0.5 + 0.5);
+    ctx.restore();
   }
 
   // ============================================================================
@@ -667,26 +694,26 @@
       const openE = getTileSafe(room, obj.x + obj.w, obj.y) === 0;
       const cx = px + pw * 0.5;
       const cy = py + ph * 0.5;
+      const horiz = pw >= ph;
+      const ax = horiz ? (cx - 18) : cx;
+      const ay = horiz ? cy : (cy - 10);
       ctx.fillStyle = '#fde047';
-      ctx.font = 'bold 11px monospace';
-      const labelW = ctx.measureText('EXIT').width;
-      const totalW = 10 + labelW;
-      const ax = cx - totalW * 0.5 + 3.5;
       ctx.beginPath();
       if (openE) {
-        ctx.moveTo(ax - 3, cy - 4);
-        ctx.lineTo(ax + 4, cy);
-        ctx.lineTo(ax - 3, cy + 4);
+        ctx.moveTo(ax - 3, ay - 4);
+        ctx.lineTo(ax + 4, ay);
+        ctx.lineTo(ax - 3, ay + 4);
       } else {
-        ctx.moveTo(ax - 4, cy - 3);
-        ctx.lineTo(ax + 4, cy - 3);
-        ctx.lineTo(ax, cy + 4);
+        ctx.moveTo(ax - 4, ay - 3);
+        ctx.lineTo(ax + 4, ay - 3);
+        ctx.lineTo(ax, ay + 4);
       }
       ctx.closePath();
       ctx.fill();
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('EXIT', ax + 7, cy + 0.5);
+      drawStationMicroTag(ctx, horiz ? (cx + 6) : cx, horiz ? cy : (cy + 5), 'EXIT', {
+        border: '#eab308',
+        color: '#fde047'
+      });
     } else if (obj.type === 'npc_marker') {
       // Subtle cushioned workstation floor mat
       fillRoundRect(ctx, px + 6, py + 8, pw - 12, ph - 12, 5, 'rgba(30, 41, 59, 0.16)', 'rgba(51, 65, 85, 0.22)', 1);
@@ -694,7 +721,7 @@
   }
 
   function getCachedFloorCanvas(room, dpr) {
-    const cacheScale = Math.min(2, Math.max(1, Math.ceil((dpr || 1) * 1.25)));
+    const cacheScale = Math.min(2.5, Math.max(1, Math.ceil((dpr || 1) * 1.25)));
     const sig = roomSignature(room) + '@' + cacheScale;
     const cached = roomFloorCache.get(room.id);
     if (cached && cached.sig === sig) return cached;
@@ -1037,6 +1064,8 @@
     const tS = getTileSafe(room, gx, gy + 1);
     const tW = getTileSafe(room, gx - 1, gy);
     const tE = getTileSafe(room, gx + 1, gy);
+    const northIsIndoor = isWalkableTile(tN) || tN === 7 || tN === 8;
+    const capOverhang = northIsIndoor ? 0 : WALL_CAP_OVERHANG;
 
     // ---- CASE 7: STANDARD WARM-OAK LAB DOOR ----
     if (tileId === 7) {
@@ -1048,12 +1077,12 @@
 
         // Left & Right oak door jambs
         ctx.fillStyle = '#78350f';
-        ctx.fillRect(px, py - WALL_CAP_OVERHANG, 6, TILE_H + WALL_CAP_OVERHANG);
-        ctx.fillRect(px + TILE_W - 6, py - WALL_CAP_OVERHANG, 6, TILE_H + WALL_CAP_OVERHANG);
+        ctx.fillRect(px, py - capOverhang, 6, TILE_H + capOverhang);
+        ctx.fillRect(px + TILE_W - 6, py - capOverhang, 6, TILE_H + capOverhang);
 
         // Overhead transom header + Georgian wired glass transom light
         ctx.fillStyle = '#1e293b';
-        ctx.fillRect(px, py - WALL_CAP_OVERHANG, TILE_W, 10);
+        ctx.fillRect(px, py - capOverhang, TILE_W, 4 + capOverhang);
         ctx.fillStyle = '#92400e';
         ctx.fillRect(px + 4, py + 4, TILE_W - 8, 9);
         ctx.fillStyle = 'rgba(186, 230, 253, 0.55)';
@@ -1082,7 +1111,7 @@
 
         // North & South oak jamb posts
         ctx.fillStyle = '#78350f';
-        ctx.fillRect(px + 10, py - WALL_CAP_OVERHANG, TILE_W - 20, 7);
+        ctx.fillRect(px + 10, py - capOverhang, TILE_W - 20, 1 + capOverhang);
         ctx.fillRect(px + 10, py + TILE_H - 6, TILE_W - 20, 6);
 
         // Open warm-oak lab door leaf swung into doorway with vision panel + push plate
@@ -1157,18 +1186,18 @@
 
     // ---- CASE 6: GLASS PARTITION ----
     if (tileId === 6) {
-      const capY = py - WALL_CAP_OVERHANG;
+      const capY = py - capOverhang;
       ctx.fillStyle = '#334155';
-      ctx.fillRect(px, capY, TILE_W, 12);
+      ctx.fillRect(px, capY, TILE_W, 6 + capOverhang);
       ctx.fillStyle = 'rgba(125, 211, 252, 0.38)';
-      ctx.fillRect(px + 2, capY + 12, TILE_W - 4, TILE_H - 6);
+      ctx.fillRect(px + 2, capY + 6 + capOverhang, TILE_W - 4, TILE_H - 6);
       ctx.strokeStyle = '#64748b';
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(px + 1, capY + 1, TILE_W - 2, TILE_H + WALL_CAP_OVERHANG - 2);
+      ctx.strokeRect(px + 1, capY + 1, TILE_W - 2, TILE_H + capOverhang - 2);
       // Specular glass streak
       ctx.strokeStyle = 'rgba(255,255,255,0.65)';
       ctx.beginPath();
-      ctx.moveTo(px + 10, capY + 15);
+      ctx.moveTo(px + 10, capY + 9 + capOverhang);
       ctx.lineTo(px + 20, capY + TILE_H);
       ctx.stroke();
       return;
@@ -1181,11 +1210,11 @@
     const westIsWall = isWallLike(tW);
     const eastIsWall = isWallLike(tE);
 
-    const capTop = py - WALL_CAP_OVERHANG;
+    const capTop = py - capOverhang;
+    const capH = TILE_H + capOverhang - WALL_H; // 18px exterior, 12px interior divider (never slices y-1!)
 
     if (southIsIndoor) {
       // NORTH / BACK WALL WITH VISIBLE 30px PAINTED INTERIOR PLASTER FASCIA!
-      const capH = TILE_H + WALL_CAP_OVERHANG - WALL_H; // 42 + 6 - 30 = 18px dark architectural roof cap
       const fasciaTop = py + TILE_H - WALL_H;           // py + 12 .. py + 42 (30px tall!)
 
       // 1. Dark Slate Top Roof Cap
@@ -1271,6 +1300,7 @@
     } else if (southIsWall) {
       // VERTICAL SIDE / INTERIOR WALL CONTINUING SOUTH: Full continuous dark cutaway roof cap!
       const capSpanH = TILE_H;
+      const cheekTop = py;
       ctx.fillStyle = '#1e293b';
       ctx.fillRect(px, capTop, TILE_W, capSpanH);
 
@@ -1278,40 +1308,40 @@
       if (isWalkableTile(tE)) {
         if (isExteriorWestWindowTile(room, gx, gy, tW, tE)) {
           const atm = atmo || getAtmosphereProfile(570, '');
-          const wg = ctx.createLinearGradient(0, capTop + 6, 0, capTop + 6 + capSpanH);
+          const wg = ctx.createLinearGradient(0, cheekTop, 0, cheekTop + capSpanH);
           wg.addColorStop(0, atm.skyTop);
           wg.addColorStop(1, atm.skyBot);
           ctx.fillStyle = wg;
-          ctx.fillRect(px + TILE_W - 6, capTop + 6, 5, capSpanH - 4);
+          ctx.fillRect(px + TILE_W - 6, cheekTop, 5, capSpanH - 4);
           ctx.fillStyle = '#f8fafc';
-          ctx.fillRect(px + TILE_W - 6, capTop + 6, 5, 2);
-          ctx.fillRect(px + TILE_W - 6, capTop + Math.round(capSpanH * 0.5) + 3, 5, 2);
-          ctx.fillRect(px + TILE_W - 6, capTop + capSpanH, 5, 2);
+          ctx.fillRect(px + TILE_W - 6, cheekTop, 5, 2);
+          ctx.fillRect(px + TILE_W - 6, cheekTop + Math.round(capSpanH * 0.5) - 3, 5, 2);
+          ctx.fillRect(px + TILE_W - 6, cheekTop + capSpanH - 6, 5, 2);
         } else {
           ctx.fillStyle = '#cbd5e1';
-          ctx.fillRect(px + TILE_W - 6, capTop + 6, 5, capSpanH);
+          ctx.fillRect(px + TILE_W - 6, cheekTop, 5, capSpanH);
         }
         ctx.fillStyle = '#334155';
-        ctx.fillRect(px + TILE_W - 2, capTop + 6, 2, capSpanH);
+        ctx.fillRect(px + TILE_W - 2, cheekTop, 2, capSpanH);
       }
       if (isWalkableTile(tW)) {
         ctx.fillStyle = '#cbd5e1';
-        ctx.fillRect(px + 1, capTop + 6, 5, capSpanH);
+        ctx.fillRect(px + 1, cheekTop, 5, capSpanH);
         ctx.fillStyle = '#334155';
-        ctx.fillRect(px, capTop + 6, 2, capSpanH);
+        ctx.fillRect(px, cheekTop, 2, capSpanH);
       }
     } else {
       // SOUTH PERIMETER CUTAWAY WALL (south is Void 0):
       // Start strictly at py (never py - WALL_CAP_OVERHANG!) so south-row furniture (e.g. klb_3f y=5) is never clipped!
       const effCapTop = py;
-      const capH = 20;
+      const southCapH = 20;
       ctx.fillStyle = '#1e293b';
-      ctx.fillRect(px, effCapTop, TILE_W, capH);
+      ctx.fillRect(px, effCapTop, TILE_W, southCapH);
       ctx.fillStyle = '#334155';
-      ctx.fillRect(px, effCapTop + capH - 3, TILE_W, 3);
+      ctx.fillRect(px, effCapTop + southCapH - 3, TILE_W, 3);
 
       // Exterior building stone/slate plinth dropping into the void
-      const extTop = effCapTop + capH;
+      const extTop = effCapTop + southCapH;
       const extH = (py + TILE_H) - extTop;
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(px, extTop, TILE_W, extH);
@@ -1321,8 +1351,8 @@
 
     // Auto-tiled crisp Pokémon outer bevel borders around connected wall roof caps
     const borderTop = (!southIsIndoor && !southIsWall) ? py : capTop;
-    const borderSideH = southIsIndoor ? 18 : (southIsWall ? TILE_H : 20);
-    const darkSideH = southIsIndoor ? 18 : (southIsWall ? TILE_H : TILE_H);
+    const borderSideH = southIsIndoor ? capH : (southIsWall ? TILE_H : 20);
+    const darkSideH = southIsIndoor ? capH : TILE_H;
     ctx.fillStyle = '#475569';
     if (!northIsWall) ctx.fillRect(px, borderTop, TILE_W, 2);
     if (!westIsWall) ctx.fillRect(px, borderTop, 2, borderSideH);
@@ -2347,6 +2377,8 @@
     ctx.strokeStyle = '#475569';
     ctx.lineWidth = 1;
     ctx.stroke();
+
+    drawStationMicroTag(ctx, px + pw * 0.5, py + ph - 7, 'BUCHI');
   }
 
   // 7. BIOTAGE ISOLERA FLASH CHROMATOGRAPHY (UV Chromatogram Screen + Solvent Bottles + Fraction Racks!)
@@ -2457,6 +2489,8 @@
     } else {
       fillRoundRect(ctx, px + pw * 0.5 + 2, deckY - 22, pw * 0.42, 16, 2, '#2563eb', '#1e3a8a', 1);
     }
+
+    drawStationMicroTag(ctx, px + pw * 0.5, py + ph - 7.5, 'BIOTAGE');
   }
 
   // 8. UV TLC STATION + RED HEATGUN
@@ -2485,6 +2519,8 @@
     ctx.fillRect(px + 31, py + 23, 11, 5);
     ctx.fillStyle = '#94a3b8'; // silver nozzle
     ctx.fillRect(px + 28, py + 24, 3, 3);
+
+    drawStationMicroTag(ctx, px + 16, py + 3, 'UV');
   }
 
   // 9. GLASSWARE DRYING OVEN (Brushed Steel + Glowing Amber Window Showing Flasks!)
@@ -2511,6 +2547,8 @@
     ctx.fillRect(px + pw - 10, frontTopY + 6, 3, 4);
     ctx.fillStyle = '#334155';
     ctx.fillRect(px + pw - 10, frontTopY + 13, 3, 5);
+
+    drawStationMicroTag(ctx, px + pw * 0.5, py - 6, 'OVEN');
   }
 
   // 10. BASE / BLEACH BATH (Lime-Amber Nalgene Tub Inside Hood (15, 8))
@@ -2528,6 +2566,8 @@
     // Warning stripe on front of tub
     ctx.fillStyle = '#facc15';
     ctx.fillRect(px + 12, py + ph - 14, pw - 24, 4);
+
+    drawStationMicroTag(ctx, px + pw * 0.5, py + ph - 12, 'BLEACH');
   }
 
   // 11. HARVARD SYRINGE PUMP (Precision Horizontal Syringe + PTFE Micro-Tubing Inside Hood (20, 8))
@@ -2628,6 +2668,8 @@
     ctx.beginPath();
     ctx.arc(balX - 2, balY - 3, 2, 0, Math.PI * 2);
     ctx.fill();
+
+    drawStationMicroTag(ctx, cx, baseY - 9, 'ARGON');
   }
 
   // 13. ANALYTICAL BALANCE TABLE (Heavy Granite Anti-Vibration Slab + Glass-Draft-Shield Balances)
@@ -2711,6 +2753,8 @@
       ctx.fillStyle = '#1d4ed8'; // GL45 blue cap
       ctx.fillRect(bx + 1.5, py + 5, 5, 3);
     }
+
+    drawStationMicroTag(ctx, px + pw * 0.5, py + ph - 9, 'TCEP');
   }
 
   // 15. SDS-PAGE GEL TANK (Clear Bio-Rad Tank + Blue Coomassie Lanes + Red/Black Leads!)
@@ -2754,6 +2798,8 @@
     ctx.moveTo(px + 23, py + 6);
     ctx.quadraticCurveTo(px + 28, py + 1, px + 36, py + 6);
     ctx.stroke();
+
+    drawStationMicroTag(ctx, px + pw * 0.5, py + ph - 8, 'GEL');
   }
 
   // 16. BENCHTOP MICROCENTRIFUGE (Compact Eppendorf Body + Magenta Rotor Lid!)
@@ -2997,7 +3043,7 @@
   }
 
   // 20. PC TERMINAL (Dedicated Acquisition / Shared PC with Live Spectrum Display!)
-  function drawPcTerminal(ctx, px, py, pw, ph, activeJob, nowSec, obj, isViewing) {
+  function drawPcTerminal(ctx, px, py, pw, ph, activeJob, nowSec, obj, isViewing, microTag) {
     const tSec = nowSec || 0;
     const isLive = Boolean(activeJob || isViewing);
     const jobStatus = activeJob ? classifyReactionStatus(activeJob, obj) : (isViewing ? 'running' : null);
@@ -3072,6 +3118,10 @@
     ctx.fillRect(px + 7, py + 19, 19, 6);
     ctx.fillStyle = '#2563eb';
     ctx.fillRect(px + 28, py + 19, 7, 6);
+
+    if (microTag) {
+      drawStationMicroTag(ctx, px + pw * 0.5, py + ph - 9, microTag);
+    }
   }
 
   // 21. SPIRAL STAIRS (2x2 Circular Wrought-Iron Staircase Shaft at (18, 0)!)
@@ -3142,6 +3192,8 @@
     ctx.beginPath();
     ctx.arc(cx, cy - 24, 4.5, 0, Math.PI * 2);
     ctx.fill();
+
+    drawStationMicroTag(ctx, cx, py + ph - 9, '2F\u21943F');
   }
 
   // 22. LIFT (2x2 Elevator Doors Fallback)
@@ -3265,7 +3317,7 @@
     ctx.fill();
   }
 
-  // 27. TEA DRAWER ("Richard's Kettle" with Steam Puffs + Yorkshire/Betty's Biscuit Tin!)
+  // 27. TEA DRAWER ("Richard's Kettle" with Steam Puffs + Yorkshire/Bettys Biscuit Tin!)
   function drawTeaDrawer(ctx, obj, nowSec) {
     const px = obj.x * TILE_W;
     const py = obj.y * TILE_H;
@@ -3318,7 +3370,7 @@
       ctx.fill();
     }
 
-    // Red & Gold Betty's / Yorkshire Tea Tin + Ceramic Mug on right!
+    // Red & Gold Bettys / Yorkshire Tea Tin + Ceramic Mug on right!
     draw3DBox(ctx, px + 26, py + 1, 12, 9, 8, '#facc15', '#dc2626', '#7f1d1d');
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
@@ -4107,7 +4159,10 @@
         const pcRoomJob = activeJob || getRoomInstrumentJobForPc(state, room, obj);
         const pcViewing = isHighlighted || isHovered || isPersonNearObj(obj, state, room) ||
           Boolean(state.viewingPcObjId === obj.id || state.activeSpectrumObjId === obj.id);
-        drawPcTerminal(ctx, px, py, pw, ph, pcRoomJob, nowSec, obj, pcViewing);
+        const pcMicroTag = room.id === 'cib_lg1b_nmr'
+          ? 'TOPSPIN'
+          : (room.id === 'cib_lg11_ms' ? 'LC-MS PC' : '');
+        drawPcTerminal(ctx, px, py, pw, ph, pcRoomJob, nowSec, obj, pcViewing, pcMicroTag);
         break;
       }
       case 'spiral_stairs':
@@ -4530,14 +4585,53 @@
 
     let px = Math.round(anchorX - pw * 0.5);
     let py = Math.round(anchorY + 4);
+    let minPx = -Infinity;
+    let maxPx = Infinity;
+    let minPy = -Infinity;
+    let maxPy = Infinity;
     if (bounds) {
       const pad = bounds.edgePad || 4;
-      const minPx = bounds.visMinX + pad;
-      const maxPx = Math.max(minPx, bounds.visMaxX - pad - pw);
-      const minPy = bounds.visMinY + pad;
-      const maxPy = Math.max(minPy, bounds.visMaxY - pad - ph);
+      minPx = bounds.visMinX + pad;
+      maxPx = Math.max(minPx, bounds.visMaxX - pad - pw);
+      minPy = bounds.visMinY + pad;
+      maxPy = Math.max(minPy, bounds.visMaxY - pad - ph);
       px = Math.round(clamp(px, minPx, maxPx));
       py = Math.round(clamp(py, minPy, maxPy));
+    }
+
+    if (occupiedRectsOut && occupiedRectsOut.length) {
+      const origPx = px;
+      const origPy = py;
+      const hasOverlap = function (cx, cy) {
+        for (let i = 0; i < occupiedRectsOut.length; i++) {
+          const r = occupiedRectsOut[i];
+          if (rectsOverlapPad(cx, cy, pw, ph, r.bx, r.by, r.bw, r.bh, 2)) return true;
+        }
+        return false;
+      };
+      if (hasOverlap(px, py)) {
+        const dyCandidates = [12, 17, -12, -17, 29, 34, -29, -34, 46, 51];
+        let resolved = false;
+        for (let k = 0; k < dyCandidates.length; k++) {
+          const candY = Math.round(clamp(origPy + dyCandidates[k], minPy, maxPy));
+          if (!hasOverlap(origPx, candY)) {
+            py = candY;
+            resolved = true;
+            break;
+          }
+        }
+        if (!resolved) {
+          const dxCandidates = [Math.round(pw * 0.65), -Math.round(pw * 0.65)];
+          for (let k = 0; k < dxCandidates.length; k++) {
+            const candX = Math.round(clamp(origPx + dxCandidates[k], minPx, maxPx));
+            if (!hasOverlap(candX, origPy)) {
+              px = candX;
+              resolved = true;
+              break;
+            }
+          }
+        }
+      }
     }
 
     const bgCol = meta.isPlayer ? 'rgba(15, 23, 42, 0.94)' : 'rgba(15, 23, 42, 0.92)';
@@ -4588,11 +4682,12 @@
       edgePad: 4 / zoom
     };
 
+    const placedNameRects = Array.isArray(occupiedRectsOut) ? occupiedRectsOut : [];
     const seen = new Set();
     entityMetaMap.forEach(function (meta) {
       if (!meta || seen.has(meta)) return;
       seen.add(meta);
-      drawEntityLabel(ctx, meta, bounds, occupiedRectsOut);
+      drawEntityLabel(ctx, meta, bounds, placedNameRects);
     });
   }
 
@@ -5243,8 +5338,45 @@
     }
   }
 
-  function drawWayfindingOverlay(ctx, room, renderState, surfaceParentMap, nowSec) {
-    if (!room || renderState.showWayfinding === false) return;
+  function getWayfindingTargetLabel(t) {
+    if (t && t.label) return stripBubbleEmojis(t.label);
+    const o = t && t.obj;
+    if (!o) return 'Target';
+    if (o.type === 'exit_stairs') return 'Exit Door';
+    if (o.type === 'spiral_stairs') return stripBubbleEmojis(o.label || 'Spiral Stairs');
+    if (o.type === 'chem_cupboard' && o.label) {
+      const m = String(o.label).match(/cupboard\s*#?(\d+)/i);
+      if (m) return 'Cupboard ' + m[1];
+    }
+    return stripBubbleEmojis(o.label || ASSET_LABELS[o.type] || o.type || 'Target');
+  }
+
+  function drawWayfindingOverlay(ctx, room, renderState, surfaceParentMap, nowSec, viewW, viewH, cam, occupiedPillRects) {
+    if (!room || !renderState || renderState.showWayfinding === false) return;
+    let occRects = occupiedPillRects;
+    let vWArg = viewW;
+    if (Array.isArray(viewW) && occRects === undefined) {
+      occRects = viewW;
+      vWArg = undefined;
+    }
+
+    const activeCam = cam || cameraState;
+    const vW = vWArg || activeCam.viewW || 800;
+    const vH = viewH || activeCam.viewH || 600;
+    const zoom = activeCam.zoom || 1;
+    const sx = activeCam.scaleRatioX || 1;
+    const sy = activeCam.scaleRatioY || 1;
+    const camX = (typeof activeCam.camX === 'number') ? activeCam.camX : 0;
+    const camY = (typeof activeCam.camY === 'number') ? activeCam.camY : 0;
+    const rawTx = vW * 0.5 - camX * zoom;
+    const rawTy = vH * 0.5 - camY * zoom;
+    const effTx = Math.round(rawTx * sx) / sx;
+    const effTy = Math.round(rawTy * sy) / sy;
+    const visMinX = -effTx / zoom;
+    const visMaxX = (vW - effTx) / zoom;
+    const visMinY = -effTy / zoom;
+    const visMaxY = (vH - effTy) / zoom;
+
     const objs = room.objects || [];
     const objById = new Map();
     for (let i = 0; i < objs.length; i++) objById.set(objs[i].id, objs[i]);
@@ -5252,7 +5384,7 @@
     const targets = []; // { obj, gx, gy, label, kind }
     const seenIds = new Set();
 
-    // 1. Explicit renderState.questTargetObjIds (Array or Set of IDs or descriptors)
+    // 1. Explicit renderState.questTargetObjIds (Array or Set of IDs or { id, label, kind } descriptors)
     const qRaw = renderState.questTargetObjIds;
     if (qRaw) {
       const qList = Array.isArray(qRaw) ? qRaw : (typeof qRaw[Symbol.iterator] === 'function' ? Array.from(qRaw) : []);
@@ -5262,7 +5394,19 @@
         const o = oid ? objById.get(oid) : null;
         if (o && !seenIds.has(o.id)) {
           seenIds.add(o.id);
-          targets.push({ obj: o, label: entry && entry.label ? entry.label : '', kind: (entry && entry.kind) || 'quest' });
+          targets.push({
+            obj: o,
+            label: (entry && typeof entry === 'object' && entry.label) ? entry.label : '',
+            kind: (entry && typeof entry === 'object' && entry.kind) || 'quest'
+          });
+        } else if (entry && typeof entry === 'object' && typeof entry.gx === 'number' && typeof entry.gy === 'number') {
+          targets.push({
+            obj: null,
+            gx: entry.gx,
+            gy: entry.gy,
+            label: entry.label || '',
+            kind: entry.kind || 'quest'
+          });
         }
       }
     }
@@ -5294,77 +5438,12 @@
           targets.push({ obj: st, label: 'To 2F Fire Exit', kind: 'evac' });
         }
       }
-    } else if (typeof renderState.campaignStepIdx === 'number' && renderState.player) {
-      // 4. Auto-derive from KLB.CAMPAIGNS when campaignStepIdx is supplied
-      const camp = window.KLB && window.KLB.CAMPAIGNS && window.KLB.CAMPAIGNS[renderState.player.id];
-      const step = camp && camp.steps && camp.steps[renderState.campaignStepIdx];
-      if (step) {
-        const prep = renderState.prep || {};
-        const reqs = step.prepRequired || [];
-        const prepTypeMap = {
-          oven_flask: { type: 'drying_oven', match: null },
-          argon_balloon: { type: 'argon_cyl', match: null },
-          dry_solvent: { type: 'chem_cupboard', match: 'cupboard 1' },
-          bleach_bath: { type: 'base_bath', match: null },
-          tlc_check: { type: 'tlc_station', match: null }
-        };
-        for (let r = 0; r < reqs.length; r++) {
-          const reqKey = reqs[r];
-          if (prep[reqKey]) continue;
-          const spec = prepTypeMap[reqKey];
-          if (!spec) continue;
-          const matchObj = objs.find(function (o) {
-            if (o.type !== spec.type) return false;
-            if (spec.match && !String(o.label || '').toLowerCase().includes(spec.match)) return false;
-            return true;
-          });
-          if (matchObj && !seenIds.has(matchObj.id)) {
-            seenIds.add(matchObj.id);
-            targets.push({ obj: matchObj, label: 'Prep', kind: 'prep' });
-          }
-        }
-
-        const locRoom = step.locationRoom;
-        if (locRoom && locRoom !== room.id) {
-          const destLabel = locRoom === 'cib_lg11_ms' ? 'To CIB Mass Spec'
-            : (locRoom === 'cib_lg1b_nmr' ? 'To CIB NMR'
-            : (locRoom === 'klb_2f' ? 'To 2F Wet Lab' : 'Specialist Errand'));
-          const portal = (room.id === 'klb_3f' && locRoom === 'klb_2f')
-            ? objs.find(function (o) { return o.type === 'spiral_stairs'; })
-            : (objs.find(function (o) { return o.type === 'exit_stairs'; }) || objs.find(function (o) { return o.type === 'spiral_stairs'; }));
-          if (portal && !seenIds.has(portal.id)) {
-            seenIds.add(portal.id);
-            targets.push({ obj: portal, label: destLabel, kind: 'quest' });
-          }
-        } else if (Array.isArray(step.stationTypes) && step.stationTypes.length) {
-          const px = Number(renderState.player.x) || 0;
-          const py = Number(renderState.player.y) || 0;
-          const busySet = new Set();
-          const rawNpcs = Array.isArray(renderState.npcs)
-            ? renderState.npcs
-            : (renderState.npcs && typeof renderState.npcs === 'object' ? Object.values(renderState.npcs) : []);
-          for (let n = 0; n < rawNpcs.length; n++) {
-            if (rawNpcs[n] && rawNpcs[n].busyObjId) busySet.add(rawNpcs[n].busyObjId);
-          }
-          const candidates = objs.filter(function (o) { return step.stationTypes.indexOf(o.type) >= 0; });
-          candidates.sort(function (a, b) {
-            const aChud = a.group === 'chudasama' ? 0 : 1;
-            const bChud = b.group === 'chudasama' ? 0 : 1;
-            if (aChud !== bChud) return aChud - bChud;
-            const aBusy = busySet.has(a.id) ? 1 : 0;
-            const bBusy = busySet.has(b.id) ? 1 : 0;
-            if (aBusy !== bBusy) return aBusy - bBusy;
-            const da = Math.hypot((a.x + a.w * 0.5) - px, (a.y + a.h * 0.5) - py);
-            const db = Math.hypot((b.x + b.w * 0.5) - px, (b.y + b.h * 0.5) - py);
-            return da - db;
-          });
-          if (candidates[0] && !seenIds.has(candidates[0].id)) {
-            seenIds.add(candidates[0].id);
-            targets.push({ obj: candidates[0], label: '', kind: 'quest' });
-          }
-        }
-      }
     }
+
+    if (!targets.length) return;
+
+    const usedRects = Array.isArray(occRects) ? occRects.slice() : [];
+    const offScreenTargets = [];
 
     for (let i = 0; i < targets.length; i++) {
       const t = targets[i];
@@ -5373,13 +5452,15 @@
       const primary = isEvac ? '#34d399' : (isPrep ? '#fb923c' : '#fbbf24');
       const glow = isEvac ? 'rgba(16, 185, 129, 0.75)' : (isPrep ? 'rgba(251, 146, 60, 0.65)' : 'rgba(251, 191, 36, 0.78)');
 
+      let cx;
+      let baseTipY;
       if (t.obj) {
         const o = t.obj;
-        const parentSurf = surfaceParentMap.get(o.id);
+        const parentSurf = surfaceParentMap ? surfaceParentMap.get(o.id) : null;
         let rise = (FIXTURE_RISE[o.type] || 18) + getSurfaceZ(parentSurf);
         if (parentSurf && parentSurf.type === 'fumehood') rise = Math.max(rise, 34);
-        const cx = (o.x + o.w * 0.5) * TILE_W;
-        const tipY = o.y * TILE_H - rise - 6;
+        cx = (o.x + o.w * 0.5) * TILE_W;
+        baseTipY = o.y * TILE_H - rise - 6;
 
         // Soft pulsing floor corner glow around target station footprint
         const pulse = 0.35 + 0.3 * Math.sin(nowSec * 4.5 + i);
@@ -5391,13 +5472,142 @@
         roundRectPath(ctx, o.x * TILE_W + 2, o.y * TILE_H + 2, o.w * TILE_W - 4, o.h * TILE_H - 4, 4);
         ctx.stroke();
         ctx.restore();
-
-        drawWayfindingChevron(ctx, cx, tipY, primary, glow, t.label, nowSec, i);
       } else {
-        const cx = (t.gx + 0.5) * TILE_W;
-        const tipY = t.gy * TILE_H - 18;
-        drawWayfindingChevron(ctx, cx, tipY, primary, glow, t.label, nowSec, i);
+        cx = (t.gx + 0.5) * TILE_W;
+        baseTipY = t.gy * TILE_H - 18;
       }
+
+      const inFrustum =
+        cx >= visMinX + 20 &&
+        cx <= visMaxX - 20 &&
+        baseTipY >= visMinY + 20 &&
+        baseTipY <= visMaxY - 20;
+
+      if (!inFrustum) {
+        offScreenTargets.push({ t, cx, tipY: baseTipY, isEvac });
+        continue;
+      }
+
+      const cleanLabel = t.label ? stripBubbleEmojis(t.label) : '';
+      let boxW = 16;
+      let boxH = 16;
+      if (cleanLabel) {
+        ctx.save();
+        ctx.font = 'bold 8.5px system-ui, -apple-system, sans-serif';
+        const pw = Math.ceil(ctx.measureText(cleanLabel).width + 10);
+        ctx.restore();
+        boxW = Math.max(16, pw);
+        boxH = 31;
+      }
+
+      let tipY = baseTipY;
+      for (let pass = 0; pass < 6; pass++) {
+        let hit = null;
+        const boxX = cx - boxW * 0.5;
+        const boxY = tipY - boxH;
+        for (let p = 0; p < usedRects.length; p++) {
+          const r = usedRects[p];
+          if (rectsOverlapPad(boxX, boxY, boxW, boxH + 3, r.bx, r.by, r.bw, r.bh, 3)) {
+            hit = r;
+            break;
+          }
+        }
+        if (!hit) break;
+        tipY = Math.floor(hit.by - 6);
+      }
+      tipY = Math.max(visMinY + boxH + 6, tipY);
+
+      drawWayfindingChevron(ctx, cx, tipY, primary, glow, cleanLabel, nowSec, i);
+      usedRects.push({ bx: cx - boxW * 0.5, by: tipY - boxH, bw: boxW, bh: boxH + 3 });
+    }
+
+    // Screen-Edge Off-Screen Compass Pills (clamped along 14px inner canvas margin)
+    if (offScreenTargets.length) {
+      ctx.save();
+      if (typeof ctx.setTransform === 'function') {
+        ctx.setTransform(sx, 0, 0, sy, 0, 0);
+      } else {
+        ctx.translate(-effTx / zoom, -effTy / zoom);
+        ctx.scale(1 / zoom, 1 / zoom);
+      }
+
+      const margin = 14;
+      const pillH = 22;
+      const placedCompassRects = [];
+
+      for (let i = 0; i < offScreenTargets.length; i++) {
+        const item = offScreenTargets[i];
+        const scrX = item.cx * zoom + effTx;
+        const scrY = item.tipY * zoom + effTy;
+
+        let outX = 0;
+        if (item.cx < visMinX + 20) outX = item.cx - (visMinX + 20);
+        else if (item.cx > visMaxX - 20) outX = item.cx - (visMaxX - 20);
+
+        let outY = 0;
+        if (item.tipY < visMinY + 20) outY = item.tipY - (visMinY + 20);
+        else if (item.tipY > visMaxY - 20) outY = item.tipY - (visMaxY - 20);
+
+        const arrow = Math.abs(outX) >= Math.abs(outY)
+          ? (outX < 0 ? '\u2190' : '\u2192')
+          : (outY < 0 ? '\u2191' : '\u2193');
+
+        ctx.font = 'bold 10px system-ui, -apple-system, sans-serif';
+        const rawLabel = getWayfindingTargetLabel(item.t);
+        const fittedLabel = fitLabelNoEllipsis(ctx, rawLabel, 136);
+        const fullText = arrow + ' ' + fittedLabel;
+        const tw = ctx.measureText(fullText).width;
+        const pillW = Math.ceil(tw + 16);
+
+        const minBx = margin;
+        const maxBx = Math.max(minBx, vW - margin - pillW);
+        const minBy = margin;
+        const maxBy = Math.max(minBy, vH - margin - pillH);
+
+        const bx = Math.round(clamp(scrX - pillW * 0.5, minBx, maxBx));
+        const baseBy = Math.round(clamp(scrY - pillH * 0.5, minBy, maxBy));
+        let by = baseBy;
+
+        const stepY = pillH + 6;
+        for (let s = 0; s <= 8; s++) {
+          const dirList = s === 0 ? [0] : [s * stepY, -s * stepY];
+          let foundSpot = false;
+          for (let d = 0; d < dirList.length; d++) {
+            const candY = Math.round(clamp(baseBy + dirList[d], minBy, maxBy));
+            const overlaps = placedCompassRects.some(function (r) {
+              return rectsOverlapPad(bx, candY, pillW, pillH, r.bx, r.by, r.bw, r.bh, 4);
+            });
+            if (!overlaps) {
+              by = candY;
+              foundSpot = true;
+              break;
+            }
+          }
+          if (foundSpot) break;
+        }
+        placedCompassRects.push({ bx, by, bw: pillW, bh: pillH });
+
+        const compColor = item.isEvac ? '#34d399' : '#fbbf24';
+        const compGlow = item.isEvac ? 'rgba(16, 185, 129, 0.55)' : 'rgba(251, 191, 36, 0.50)';
+
+        ctx.save();
+        ctx.shadowColor = compGlow;
+        ctx.shadowBlur = 7;
+        fillRoundRect(ctx, bx, by, pillW, pillH, 6, 'rgba(15, 23, 42, 0.93)', compColor, 1.4);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        const textCy = by + pillH * 0.5 + 0.5;
+        ctx.fillStyle = compColor;
+        ctx.fillText(arrow, bx + 8, textCy);
+        const arrowW = ctx.measureText(arrow + ' ').width;
+        ctx.fillStyle = item.isEvac ? '#dcfce7' : '#fef3c7';
+        ctx.fillText(fittedLabel, bx + 8 + arrowW, textCy);
+        ctx.restore();
+      }
+      ctx.restore();
     }
   }
 
@@ -5696,7 +5906,6 @@
         accent,
         clusterId: -1,
         clusterSize: 1,
-        clusterMeanX: anchorX,
         lines: [],
         bw: 92,
         bh: 30,
@@ -5727,16 +5936,12 @@
           }
         }
       }
-      let sumX = 0;
-      for (let m = 0; m < members.length; m++) sumX += members[m].anchorX;
-      const meanX = sumX / members.length;
       for (let m = 0; m < members.length; m++) {
         members[m].clusterSize = members.length;
-        members[m].clusterMeanX = meanX;
       }
     }
 
-    // 2. Measure & wrap text cleanly (maxWidth = 216, zero speaker name prefix inside bubbles)
+    // 2. Measure & wrap text cleanly (maxWidth = 216, max 3 lines, zero speaker name prefix inside bubbles)
     const visSpanW = (visMaxX - visMinX) - edgePad * 2;
     const wrapMaxW = visSpanW > 64 ? Math.min(216, Math.floor(visSpanW - 24)) : 216;
     ctx.save();
@@ -5744,6 +5949,7 @@
     for (let i = 0; i < rawItems.length; i++) {
       const it = rawItems[i];
       it.lines = wrapBubbleText(ctx, it.sourceText, wrapMaxW, 0);
+      if (it.lines.length > 3) it.lines = it.lines.slice(0, 3);
       if (!it.lines.length) continue;
 
       let maxRenderedLineWidth = 0;
@@ -5756,8 +5962,7 @@
 
       const minBx = visMinX + edgePad;
       const maxBx = Math.max(minBx, visMaxX - edgePad - it.bw);
-      const spreadX = 0;
-      it.bx = Math.round(clamp(it.anchorX - it.bw * 0.5 + spreadX, minBx, maxBx));
+      it.bx = Math.round(clamp(it.anchorX - it.bw * 0.5, minBx, maxBx));
     }
     ctx.restore();
 
@@ -5947,15 +6152,19 @@
       const t = age / 0.72;
       const cx = (r.gx + 0.5) * TILE_W;
       const cy = (r.gy + 0.5) * TILE_H;
-      const colRgb = r.kind === 'fixture' ? '56, 189, 248' : (r.kind === 'npc' ? '251, 191, 36' : '52, 211, 153');
+      const isInteract = r.kind === 'interact';
+      const outerRgb = isInteract
+        ? '251, 191, 36'
+        : (r.kind === 'fixture' ? '56, 189, 248' : (r.kind === 'npc' ? '251, 191, 36' : '52, 211, 153'));
+      const innerRgb = isInteract ? '52, 211, 153' : outerRgb;
       ctx.save();
-      ctx.strokeStyle = 'rgba(' + colRgb + ', ' + ((1 - t) * 0.85).toFixed(2) + ')';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(' + outerRgb + ', ' + ((1 - t) * (isInteract ? 0.90 : 0.85)).toFixed(2) + ')';
+      ctx.lineWidth = isInteract ? 2.2 : 2;
       ctx.beginPath();
       ctx.ellipse(cx, cy, 6 + t * 14, 3.5 + t * 8, 0, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.strokeStyle = 'rgba(' + colRgb + ', ' + ((1 - t) * 0.55).toFixed(2) + ')';
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(' + innerRgb + ', ' + ((1 - t) * (isInteract ? 0.78 : 0.55)).toFixed(2) + ')';
+      ctx.lineWidth = isInteract ? 1.5 : 1.2;
       ctx.beginPath();
       ctx.ellipse(cx, cy, 3 + t * 7, 1.8 + t * 4, 0, 0, Math.PI * 2);
       ctx.stroke();
@@ -6192,14 +6401,38 @@
     return roomOrId;
   }
 
+  function resolveEffectiveCameraZoom(room, bounds, renderState, viewW, viewH) {
+    const rawZoom = (renderState && renderState.cameraZoom !== undefined)
+      ? Number(renderState.cameraZoom)
+      : 1.0;
+    const baseZoom = clamp(rawZoom || 1.0, 0.75, 1.5);
+    if (baseZoom === 1 && room && (room.id === 'klb_3f' || room.id === 'meeting_room')) {
+      const roomB = bounds || computeRoomBounds(room);
+      const rawH = roomB.pxMaxY - roomB.pxMinY;
+      const vW = viewW || 800;
+      const vH = viewH || 600;
+      if (vW >= 680 && vH >= (rawH + 64) * 1.22) {
+        return 1.22;
+      }
+    }
+    return baseZoom;
+  }
+
   function updateCamera(room, bounds, renderState, viewW, viewH, dt) {
-    const zoom = clamp(Number(renderState.cameraZoom) || 1.0, 0.75, 1.5);
+    const zoom = resolveEffectiveCameraZoom(room, bounds, renderState, viewW, viewH);
     const halfWorldW = (viewW * 0.5) / zoom;
     const halfWorldH = (viewH * 0.5) / zoom;
 
-    const padX = TILE_W * 1.5;
-    const padTop = TILE_H * 1.2 + WALL_H;
-    const padBot = TILE_H * 2.2;
+    const isTinyRoom = Boolean(room && (room.id === 'klb_3f' || room.id === 'meeting_room'));
+    const isCompactRoom = Boolean(room && (
+      room.id === 'gordons_cafe' ||
+      room.id === 'cib_lg11_ms' ||
+      room.id === 'cib_lg1b_nmr' ||
+      (room.id && room.id.indexOf('cib_') === 0)
+    ));
+    const padX = isTinyRoom ? (TILE_W * 0.75) : (isCompactRoom ? (TILE_W * 0.9) : (TILE_W * 1.5));
+    const padTop = isTinyRoom ? (TILE_H * 0.45) : (isCompactRoom ? (TILE_H * 0.55) : (TILE_H * 1.2 + WALL_H));
+    const padBot = isTinyRoom ? (TILE_H * 0.85) : (isCompactRoom ? (TILE_H * 0.90) : (TILE_H * 2.2));
 
     const minWorldX = bounds.pxMinX - padX;
     const maxWorldX = bounds.pxMaxX + padX;
@@ -6252,31 +6485,16 @@
     return cameraState;
   }
 
-  function screenToGrid(canvas, clientX, clientY, optionalRenderState) {
-    if (!canvas || typeof canvas.getBoundingClientRect !== 'function') {
-      return { gx: 0, gy: 0, x: 0, y: 0, fx: 0, fy: 0, worldX: 0, worldY: 0, inBounds: false, obj: null, objId: null, npc: null, npcId: null };
-    }
-    const rect = canvas.getBoundingClientRect();
-    const localX = clientX - rect.left;
-    const localY = clientY - rect.top;
-
-    const viewW = rect.width || cameraState.viewW || canvas.width || 800;
-    const viewH = rect.height || cameraState.viewH || canvas.height || 600;
+  function resolveWorldHit(roomOrId, worldX, worldY, optionalRenderState) {
     const effState = optionalRenderState || cameraState.lastRenderState || null;
-    const zoom = (effState && Number(effState.cameraZoom))
-      ? clamp(Number(effState.cameraZoom), 0.75, 1.5)
-      : (cameraState.zoom || 1.0);
-
-    const worldX = (localX - viewW * 0.5) / zoom + cameraState.camX;
-    const worldY = (localY - viewH * 0.5) / zoom + cameraState.camY;
+    const room = resolveRoomObject(roomOrId) ||
+      (effState && resolveRoomObject(effState.room || effState.roomId)) ||
+      cameraState.lastRoom;
 
     const fx = worldX / TILE_W;
     const fy = worldY / TILE_H;
     const gx = Math.floor(fx);
     const gy = Math.floor(fy);
-
-    const room = (effState && resolveRoomObject(effState.room || effState.roomId)) ||
-      cameraState.lastRoom;
 
     // 1. Check live NPC hitboxes ([anchorX - 18 .. +18, anchorY - 68 .. +4]) front-to-back
     let hitNpc = null;
@@ -6302,7 +6520,7 @@
       }
     }
 
-    // 2. Check 3D elevated fixture bounds INCLUDING parent surface surfZ!
+    // 2. Check 3D elevated fixture bounds INCLUDING parent surface surfZ (clamping north spillover over row y-1 fixtures)
     let hitObj = null;
     if (room && Array.isArray(room.objects)) {
       const surfMap = computeSurfaceParentMap(room).surfaceParentMap;
@@ -6314,11 +6532,29 @@
         const surfZ = getSurfaceZ(parentSurf);
         const ox0 = o.x * TILE_W;
         const ox1 = (o.x + o.w) * TILE_W;
-        const rise = FIXTURE_RISE[o.type] || 16;
-        const oy0 = o.y * TILE_H - rise - surfZ;
+        const rise = FLOOR_DECAL_TYPES.has(o.type) ? 0 : (FIXTURE_RISE[o.type] || 16);
+        let oy0 = o.y * TILE_H - rise - surfZ;
+
+        // Prevent elevated/stacked fixtures (e.g. obj_nmr_pc at 12,6) from stealing clicks inside row y-1 (e.g. obj_nmr_fridge at 12,5)
+        let hasNorthFixture = false;
+        for (let j = 0; j < room.objects.length; j++) {
+          const other = room.objects[j];
+          if (!other || other === o || other.type === 'npc_marker' || SURFACE_TYPES.has(other.type)) continue;
+          const xOverlap = Math.min(o.x + o.w, other.x + other.w) - Math.max(o.x, other.x);
+          if (xOverlap > 0 && o.y - 1 >= other.y && o.y - 1 < other.y + other.h) {
+            hasNorthFixture = true;
+            break;
+          }
+        }
+        if (hasNorthFixture) {
+          const maxTopY = o.y * TILE_H - Math.min(14, rise);
+          if (oy0 < maxTopY) oy0 = maxTopY;
+        }
+
         const oy1 = (o.y + o.h) * TILE_H;
         if (worldX >= ox0 && worldX <= ox1 && worldY >= oy0 && worldY <= oy1) {
-          const prio = (o.y + o.h) * 10 + (SURFACE_TYPES.has(o.type) ? 0 : 5) + (surfZ > 0 ? 3 : 0);
+          const exactTileHit = gx >= o.x && gx < o.x + o.w && gy >= o.y && gy < o.y + o.h;
+          const prio = (exactTileHit ? 1000 : 0) + (o.y + o.h) * 10 + (SURFACE_TYPES.has(o.type) ? 0 : 5) + (surfZ > 0 ? 3 : 0);
           if (prio >= bestPriority) {
             bestPriority = prio;
             hitObj = o;
@@ -6343,6 +6579,40 @@
       npc: hitNpc,
       npcId: hitNpc ? (hitNpc.id || hitNpc.charId || null) : null
     };
+  }
+
+  function resolveTileClick(roomOrCanvas, x, y, optionalRenderState) {
+    if (roomOrCanvas && typeof roomOrCanvas.getBoundingClientRect === 'function') {
+      return screenToGrid(roomOrCanvas, x, y, optionalRenderState);
+    }
+    if (typeof roomOrCanvas === 'number' && typeof x === 'number') {
+      const stateArg = (y && typeof y === 'object') ? y : optionalRenderState;
+      return resolveWorldHit(null, roomOrCanvas, x, stateArg);
+    }
+    return resolveWorldHit(roomOrCanvas, Number(x) || 0, Number(y) || 0, optionalRenderState);
+  }
+
+  function screenToGrid(canvas, clientX, clientY, optionalRenderState) {
+    if (!canvas || typeof canvas.getBoundingClientRect !== 'function') {
+      return { gx: 0, gy: 0, x: 0, y: 0, fx: 0, fy: 0, worldX: 0, worldY: 0, inBounds: false, obj: null, objId: null, npc: null, npcId: null };
+    }
+    const rect = canvas.getBoundingClientRect();
+    const localX = clientX - rect.left;
+    const localY = clientY - rect.top;
+
+    const viewW = rect.width || cameraState.viewW || canvas.width || 800;
+    const viewH = rect.height || cameraState.viewH || canvas.height || 600;
+    const effState = optionalRenderState || cameraState.lastRenderState || null;
+    const room = (effState && resolveRoomObject(effState.room || effState.roomId)) ||
+      cameraState.lastRoom;
+    const zoom = effState
+      ? resolveEffectiveCameraZoom(room, null, effState, viewW, viewH)
+      : (cameraState.zoom || 1.0);
+
+    const worldX = (localX - viewW * 0.5) / zoom + cameraState.camX;
+    const worldY = (localY - viewH * 0.5) / zoom + cameraState.camY;
+
+    return resolveWorldHit(room, worldX, worldY, effState);
   }
 
   function worldToScreen(gx, gy, zPx) {
@@ -6373,14 +6643,6 @@
       tracker.active = false;
       tracker.hoveredObjId = null;
       tracker.hoveredNpcId = null;
-    }, { passive: true });
-    canvas.addEventListener('mousedown', function (e) {
-      if (e.button !== 0) return;
-      const cell = screenToGrid(canvas, e.clientX, e.clientY);
-      if (cell && cell.inBounds) {
-        const kind = cell.npc ? 'npc' : (cell.obj ? 'fixture' : 'floor');
-        triggerClickRipple(cell.gx, cell.gy, kind);
-      }
     }, { passive: true });
     canvasTrackerMap.set(canvas, tracker);
     return tracker;
@@ -6709,16 +6971,16 @@
     // ---- PASS 4: WORLD-SPACE AMBIENT EFFECTS (LOTR NOTES, CAFÉ PENDANT GLOW, SUNSHAFTS & DUST) ----
     drawAmbientAndSpecialEffects(ctx, room, state, nowSec, atmo);
 
-    // ---- PASS 5: FLOATING WORLD-SPACE UI (NAMEPLATES, WAYFINDING, REACTION BARS, [E] CURSOR, SPEECH BUBBLES) ----
+    // ---- PASS 5: FLOATING WORLD-SPACE UI (NAMEPLATES, REACTION BARS, [E] CURSOR, WAYFINDING, SPEECH BUBBLES) ----
     const occupiedPillRects = [];
     const nameplateRects = [];
     drawEntityNameplatesOverlay(ctx, room, state, entityMetaMap, viewW, viewH, cam, nameplateRects);
-    drawWayfindingOverlay(ctx, room, state, surfaceParentMap, nowSec);
     drawReactionBarsOverlay(ctx, room, state, surfaceParentMap, nowSec, occupiedPillRects);
     drawNpcReactionBadgesOverlay(ctx, room, state.npcReactions, state, surfaceParentMap, nowSec, occupiedPillRects);
     drawPlayerActionBarOverlay(ctx, room, state, surfaceParentMap, nowSec, entityMetaMap, occupiedPillRects);
     drawInteractionHighlightOverlay(ctx, room, state, surfaceParentMap, nowSec, entitiesById, entityMetaMap, occupiedPillRects);
     for (let i = 0; i < nameplateRects.length; i++) occupiedPillRects.push(nameplateRects[i]);
+    drawWayfindingOverlay(ctx, room, state, surfaceParentMap, nowSec, viewW, viewH, cam, occupiedPillRects);
     drawSpeechBubblesOverlay(ctx, room, state, entitiesById, nowSec, viewW, viewH, cam, entityMetaMap, occupiedPillRects);
 
     ctx.restore(); // End world camera transform
@@ -6759,6 +7021,13 @@
     return screenToGrid(canvasOrX, xOrY, maybeY, maybeState);
   };
 
+  Renderer25D.prototype.resolveTileClick = function (roomOrCanvas, x, y, maybeState) {
+    if (typeof roomOrCanvas === 'number' && !maybeState && this.canvas) {
+      return screenToGrid(this.canvas, roomOrCanvas, x, y);
+    }
+    return resolveTileClick(roomOrCanvas, x, y, maybeState);
+  };
+
   Renderer25D.prototype.worldToScreen = worldToScreen;
   Renderer25D.prototype.preloadSprites = preloadAllSprites;
   Renderer25D.prototype.triggerClickRipple = triggerClickRipple;
@@ -6793,6 +7062,7 @@
     return screenToGrid(canvas, clientX, clientY, optionalRenderState);
   };
 
+  Renderer25D.resolveTileClick = resolveTileClick;
   Renderer25D.worldToScreen = worldToScreen;
   Renderer25D.triggerClickRipple = triggerClickRipple;
 
@@ -6813,6 +7083,7 @@
   Renderer25D.drawPlayerActionBarOverlay = drawPlayerActionBarOverlay;
   Renderer25D.drawEntityLabel = drawEntityLabel;
   Renderer25D.drawEntityNameplatesOverlay = drawEntityNameplatesOverlay;
+  Renderer25D.drawWayfindingOverlay = drawWayfindingOverlay;
   Renderer25D.drawSpeechBubblesOverlay = drawSpeechBubblesOverlay;
 
   window.KLB.Renderer25D = Renderer25D;
