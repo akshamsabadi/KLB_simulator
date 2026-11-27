@@ -1424,7 +1424,7 @@ window.KLB.RANDOM_EVENTS = [
 ];
 
 // ============================================================================
-// 2. LIVE "BIG-CHUDS" WHATSAPP IDLE BANTER & 2-MESSAGE EXCHANGES (64 Items)
+// 2. LIVE "BIG-CHUDS" WHATSAPP IDLE BANTER & 2-MESSAGE EXCHANGES (204 Items)
 // ============================================================================
 window.KLB.WHATSAPP_BANTER = [
   {
@@ -1874,6 +1874,1028 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Oui vieux, save me an almond croissant and an espresso.',
     hourHint: 10
+  },
+  {
+    senderId: 'daniel_richards',
+    text: '07:50 and the central balance actually has zero silica dust on it. Morning Lab 230 hits different.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Give Max and Antoine forty minutes and it will look like a snowy car park again.',
+    hourHint: 8,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'northern line suspended between camden and euston on a monday morning, why do i even bother',
+    replySenderId: 'calise_bahou',
+    replyText: 'Victoria Line is crawling too Daiza, walking from Warren Street in drizzle like a drowned rat.',
+    hourHint: 9,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Staring at a blank ChemDraw page on Monday 08:45 trying to remember what molecule I was even making on Friday.',
+    replySenderId: 'daniel_richards',
+    replyText: 'Step one: open your lab book. Step two: drink strong coffee before touching glassware.',
+    hourHint: 8,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Rain is horizontal outside Euston and my bus got overtaken by a bloke walking a bulldog. Great Tuesday.',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Get to Gordon\'s Café immediately irmão, emergency pastel de nata and double espresso waiting.',
+    hourHint: 8,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Kettle on 3F is descaled, fresh Bettys tea bags deployed, and I still wish it were Saturday.',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Monday morning shouldn\'t be legally permitted before 10:00 Rich, keep that kettle warm.',
+    hourHint: 9,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Eurostar delayed twenty minutes outside Ebbsfleet and the Northern Line died at King\'s Cross. Send actual coffee.',
+    replySenderId: 'peter_szijj',
+    replyText: 'Rough Monday start mon ami, I\'m just stepping onto the escalator at Euston myself!',
+    hourHint: 9,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'calise_bahou',
+    text: '08:35 bench update: my 4 °C Herceptin tube is actually at 4 °C and nobody raided my Parafilm drawer!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Small blessings Big C. Meanwhile someone already hid the 10 mL measuring cylinder.',
+    hourHint: 8,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Pepsin digest at pH 3.1 ticked along overnight without crashing out. Might even smile before 09:30.',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Steady Dr Dan, save that optimism for when Kersti checks your LC-MS baseline!',
+    hourHint: 8,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Walking up Gower Street behind someone carrying a Pret bag and a laptop. Peak Bloomsbury morning energy today.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Meanwhile I\'m in a waistcoat debating whether a third coffee counts as breakfast.',
+    hourHint: 9,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'train signal failure outside euston AGAIN, tell vijay i am spiritually present at the 2f bench pls',
+    replySenderId: 'daniel_richards',
+    replyText: 'Standard #HalfDayDaiza schedule — I\'ll put your beaker on the ice tray so it looks busy.',
+    hourHint: 9,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'Note to self: staying up till 02:30 building a Polish-Lithuanian Commonwealth in HoI4 does NOT help Monday TLC spotting.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Explains why your baseline spot looks like a cavalry flank attack.',
+    hourHint: 10,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'vijay_chudasama',
+    text: 'Morning team — train ran early, read two manuscripts and cleared my inbox. How is Lab 230 looking?',
+    replySenderId: 'daniel_richards',
+    replyText: 'Specs on, balances wiped, and Marcos hasn\'t opened Cupboard 5 yet so morale is high!',
+    hourHint: 9,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: '10:25 warning: two minutes till the Gordon\'s Café espresso squad departs 2F. Gloves off, coats off!',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Arriving at the spiral stairs now — if someone bought flat sliced croissants I\'m turning round.',
+    hourHint: 10,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'charlotte_coomber',
+    text: 'Took three South London buses because the Northern Line melted down — does anyone on 2F have spare tea?',
+    replySenderId: 'faiza_javaid',
+    replyText: '3F kettle is right next to richard\'s biscuit tin charlotte, run before max clears the bourbons!',
+    hourHint: 9,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: '08:45 Monday unlock complete. Heating in Lab 230 feels like an English bus shelter again — 16 °C on the wall gauge.',
+    replySenderId: 'richard_spears',
+    replyText: 'Keep a lab coat on over two jumpers, Marcos — my DMSO-d6 bottle froze solid last time.',
+    hourHint: 8,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Monday diet update: intermittent fasting starts right after this warm Gordon\'s Café sausage roll.',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Strong start Samwise, that pastry lasted eleven minutes into your week.',
+    hourHint: 9,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'nafsika_forte',
+    text: 'Need a Gordon\'s Café flat white before Baker bay sees me trying to pipette PBS into my coffee mug.',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Right behind you Nafsika, saving you the sunny corner table downstairs!',
+    hourHint: 10,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'archie_wall',
+    text: 'Central Line felt like a vacuum-packed Eppendorf this morning. Tell me someone put the 3F kettle on.',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Richard beat you to it at 08:50 Archie, Yorkshire brew waiting upstairs.',
+    hourHint: 9,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Monday poll: spend 25 minutes on RiskNET for 2 mL toluene or take up sheep farming in the Cotswolds?',
+    replySenderId: 'calise_bahou',
+    replyText: 'Sheep don\'t ask you to upload GHS pictograms in triplicate mate, count me in.',
+    hourHint: 10,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Nothing beats 08:05 quiet pipetting before the Sheppard bay stereo or Charlotte\'s morning commute story starts.',
+    replySenderId: 'richard_spears',
+    replyText: 'Peak morning serenity, Dan — already on cup two of Bettys gold.',
+    hourHint: 8,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Brb spending twenty minutes hunting for a P1000 that actually clicks properly without leaking PBS onto my glove.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Check behind the gel tank, Max — someone stashed the good Gilson there yesterday.',
+    hourHint: 10,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'marco_sabatini',
+    text: 'Buongiorno KLB — someone tried making instant coffee granules in a paper cup on 3F. I am calling the carabinieri.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Un vrai scandale Marco, meet us at Gordon\'s Café at 10:30 for actual caffeine.',
+    hourHint: 9,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'wait is the nmr keypad still 2145 or did estates change it over the weekend??',
+    replySenderId: 'peter_szijj',
+    replyText: 'Still 2145 Daiza! And 1965 for Kersti\'s door if you\'re doing a basement double run.',
+    hourHint: 10
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Who took the last pastel de nata at Gordon\'s Café at 10:15?? Reveal yourself coward!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Look at who arrived at 07:45 with a suspiciously flaky napkin on Desk 1.',
+    hourHint: 10,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'Just spotted a pigeon inside Euston station riding the down escalator like a paying commuter.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Still more punctual than the Northern Line Charing Cross branch, ngl.',
+    hourHint: 10
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Monday rain at King\'s Cross — forgot my umbrella, walked up Gower Street into sideways drizzle, now my lab coat feels like wet blotting paper.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Hang it near the drying oven for five mins Rich, instant sauna.',
+    hourHint: 9,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: '08:50 #headsup: Jamie Baker just locked his bike outside Gordon Street and looks very awake about safety specs today.',
+    replySenderId: 'daniel_richards',
+    replyText: 'Cheers Marcos — specs firmly glued to my face before I even touch the cold room.',
+    hourHint: 8,
+    vibe: 'morning'
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Monday morning motto: measure twice, desalt 10×, never trust an unlabelled fridge Eppendorf.',
+    replySenderId: 'faiza_javaid',
+    replyText: 'needed that reminder before i almost used 2016 mystery buffer tbh',
+    hourHint: 10,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'WHO STOLE THE BLUE ICE BUCKET FROM BAY 2?? my antibody is warming up faster than my patience pls',
+    replySenderId: 'maximillian_lee',
+    replyText: 'It\'s by the centrifuge with three lonely VivaSpins in it, don\'t tell Archie!',
+    hourHint: 11
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Has anyone seen the communal Parafilm roll? Last person who hid it in their drawer owes everyone Gordon\'s Café brownies.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Check behind Cupboard 6, someone tucked it next to the spare septa last week.',
+    hourHint: 11
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Day 412 of asking: who keeps leaving empty tip boxes on the TCEP bench like decorative plastic art?',
+    replySenderId: 'peter_szijj',
+    replyText: 'Not me!! Also pls don\'t ask me to weigh fresh TCEP again while I\'m holding 20 gels.',
+    hourHint: 11
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Someone put a "DO NOT TOUCH" Post-it on a 50 mL Falcon tube dated March 2016. Should we donate it to the British Museum?',
+    replySenderId: 'calise_bahou',
+    replyText: 'Leave it alone Dan, whatever is growing inside probably pays UCL tuition fees by now.',
+    hourHint: 11
+  },
+  {
+    senderId: 'archie_wall',
+    text: 'Whoever left the benchtop centrifuge unbalanced by 1.4 g — it nearly walked off the bench into Baker bay.',
+    replySenderId: 'daniel_richards',
+    replyText: 'Wasn\'t me Archie, my 40 nm gold preps are weighed to four decimal places out of pure paranoia!',
+    hourHint: 11
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'DTNB assay came back crystal colourless — zero leftover free thiols on the Fab. Ready for SPAAC click!',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Rare joy when Ellman\'s actually behaves instead of turning passive-aggressive yellow.',
+    hourHint: 11
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Heads up before you start lunch prep: cracking open dodecanethiol in Cupboard 5 in three mins. Close your sash.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Appreciate the three-minute evacuation window Marcos, heading up to 3F now.',
+    hourHint: 11
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Used bench-stable CDMP at pH 8.0 for dehydroalanine again — zero explosion risk and clean mass shift on LC-MS.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'MSH stays banned forever in Lab 230. Safety Inspector would faint on sight.',
+    hourHint: 12
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'Stared at my gel tank for twenty minutes wondering why the ladder hadn\'t moved before noticing the power switch was off!',
+    replySenderId: 'faiza_javaid',
+    replyText: 'literally did that twice last month peetah, blue dye sitting right at the top like modern art',
+    hourHint: 14
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Sneezed three feet away from my 5.7 µL/min syringe pump and watched my heart rate hit 160 bpm.',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Leave the hood sash down to the arrow and step away quietly André!',
+    hourHint: 14
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Tween 80 at 0.05% literally rescued my VNAR–PLGA nanoparticles from floating on PBS like angry breadcrumbs.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Surfactant magic mate, my hydrophobic diBrPD linkers owe half my thesis to 5% DMSO!',
+    hourHint: 14
+  },
+  {
+    senderId: 'marco_sabatini',
+    text: 'London humidity today is 92% — had to flame-dry my borate amidation glassware twice before the air wet it again.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Bloomsbury air basically counts as an aqueous workup by itself, Marco.',
+    hourHint: 15
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Forgot to peel the green tape off the bottom of my precast SDS-PAGE gel for the third time this quarter. Classic silverback.',
+    replySenderId: 'daniel_richards',
+    replyText: 'Why does the gel box say 2 mA and zero movement, Max? Every single month.',
+    hourHint: 15
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Wait why did my VivaSpin concentration spreadsheet just tell me I recovered 118% of my initial Trastuzumab?!',
+    replySenderId: 'peter_szijj',
+    replyText: 'Check your dilution factor cell in Excel Big C!! You definitely multiplied by 2 twice!',
+    hourHint: 15
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Quenched the Pepsin Fab digest at 4 hours sharp — single clean 50 kDa band with zero over-digestion on the gel.',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Clean Dr Dan! Meanwhile half my lane is still staring back at me at 150 kDa.',
+    hourHint: 15
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'who pinched the brass tweezers AND the metal spatula from Bay 1?? return them or i start locking my P10 in a safe',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Check beside Büchi 2, someone was scraping yellow PD foam off a bump trap earlier.',
+    hourHint: 15
+  },
+  {
+    senderId: 'nafsika_forte',
+    text: 'Pulled an unmarked Chudasama flask off Büchi 2 right before the water bath boiled it into caramel. You\'re welcome.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Panic-checking my hood right now Nafsika — if that\'s mine I owe you pastries all week!',
+    hourHint: 16
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Six hours into a GSH exchange kinetics run and the UV-vis cuvette actually stayed crystal clear without crashing out.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Should frame that absorbance trace on the 3F wall next to the Bettys tea caddy, Rich.',
+    hourHint: 15
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Whoever finished the dry-ice dewar on 2F without refilling it from the basement owes me a functioning -78 °C bath.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'There is still a scoop left if you move fast, brb grabbing my Dewar first.',
+    hourHint: 14
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Saw someone put 4 Å molecular sieves directly into a wet RB flask without oven-drying them first. Painful to watch.',
+    replySenderId: 'richard_spears',
+    replyText: 'Nothing like adding pre-hydrated gravel to your anhydrous THF reaction.',
+    hourHint: 11
+  },
+  {
+    senderId: 'charlotte_coomber',
+    text: 'Just snapped four glass TLC capillaries in a row before 11:30 — Sheppard bay has officially run out of patience.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Borrow two from Chudasama bay Charlotte, in exchange for one working whiteboard marker.',
+    hourHint: 11
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Blue Party Mix stained my gel bands so crisp you can read DAR 2.0 from across Lab 230. Best recipe in UCL Chemistry.',
+    replySenderId: 'faiza_javaid',
+    replyText: 'still convinced 30% of that recipe is pure coomassie magic and silverback vibes tbh',
+    hourHint: 14
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'WHO unplugged my nanoparticle stirring plate at the central bench to charge their phone?! Four hours of mixing gone!',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Check the Baker bay extension lead — someone always swaps plugs without looking at the red tape!',
+    hourHint: 16
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'Running Trastuzumab, Rituximab and OKT3 digests side by side — zero cross-contamination so far, touch wood!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Double-check your Sharpie labels before touching the Protein A resin, Peetah.',
+    hourHint: 16
+  },
+  {
+    senderId: 'vijay_chudasama',
+    text: 'Quick reminder from upstairs: make sure unreduced mAb controls are on your gels before Friday slides.',
+    hourHint: 11
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Found a 2014 amber bottle in Cupboard 19 labelled "X-24 maybe" in faded pencil. Put the lid back very gently.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Rule one of Cupboard 19: if the Parafilm turns yellow, back away slowly.',
+    hourHint: 14
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Pro tip from making gram-scale diBrPD acid: p-TsOH·H2O in toluene gives zero bromide exchange, unlike cursed TFA.',
+    replySenderId: 'richard_spears',
+    replyText: 'Saved me two days of mystery monobromo peaks last winter, Big C — absolute textbook tip.',
+    hourHint: 14
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'My product rode straight up to Rf 0.92 in 100% hexane. Basically invented organic grease today.',
+    replySenderId: 'calise_bahou',
+    replyText: 'At least it elutes fast Marcos, my polar diBrPD acid needs half the methanol barrel in Cupboard 9!',
+    hourHint: 15
+  },
+  {
+    senderId: 'archie_wall',
+    text: 'Doing a 12% non-reducing SDS-PAGE run in twenty mins — got two spare lanes if any Chud wants a quick look.',
+    replySenderId: 'peter_szijj',
+    replyText: 'YES PLS Archie!! Bringing 12 µL of my sialidase CiTE conjugate right over!',
+    hourHint: 15
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: '2F A280 bench is free for the next hour if anyone wants protein conc or DAR ratios checked before 5pm!',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Legend Daiza, coming over with my VNAR–PLGA dialysis fraction right now!',
+    hourHint: 16
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Monday\'s episode of Soluble or Not Soluble ended with 5% DMSO crashing my aryl-PD out like Alpine snow.',
+    hourHint: 11,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Who swapped the blue 1000 µL pipette tip box for an empty cardboard shell on Bay 1? Pure psychological warfare.',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Not guilty, I\'m still rationing the last three tips on my personal rack like gold dust.',
+    hourHint: 16
+  },
+  {
+    senderId: 'nafsika_forte',
+    text: 'Just topped up the first-aid plasters in Baker bay after someone lost a duel with a snapped Pasteur pipette.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Always use the cotton wool plugs and snap away from your glove, people.',
+    hourHint: 15
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Cut P2 pipette tip + Sephadex G-25 slurry just desalted 40 µL Fab faster than booking the ÄKTA.',
+    replySenderId: 'calise_bahou',
+    replyText: '#Hackerman strikes again, saving my Spin-Filter budget singlehandedly!',
+    hourHint: 16
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Store Street lunch vote: proper warm falafel wrap or are you monsters buying soggy supermarket triangle sandwiches again?',
+    replySenderId: 'calise_bahou',
+    replyText: 'Excuse me João, a £3.50 meal deal with chicken club, crisps and mango smoothie is elite economics.',
+    hourHint: 12
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'If anyone brings another cold cheese-and-ham toastie made out of sliced croissant to 3F I am resigning from UCL.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Stay strong Antoine, let\'s walk down to Store Street for proper warm Mediterranean wraps.',
+    hourHint: 12
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Lunchtime poll: Store Street falafel & halloumi wrap vs Goodge Street ICCO pizza vs Torrington Square Thursday market?',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Torrington Square hot food stalls every Thursday, Store Street Espresso the rest of the week!',
+    hourHint: 13
+  },
+  {
+    senderId: 'marco_sabatini',
+    text: 'Saw someone snap dried spaghetti in half outside Store Street before lunch. Still recovering emotionally.',
+    replySenderId: 'daniel_richards',
+    replyText: 'Wait till you see how Max cooks baked beans in chorizo fat, Marco.',
+    hourHint: 13
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Wait — remember when we survived an entire Heslington winter on Tesco meal deals and Martin Fascione\'s free seminar biscuits?',
+    replySenderId: 'richard_spears',
+    replyText: 'Simpler times, Max — though I still maintain Yorkshire tap water made that tea twice as good.',
+    hourHint: 13
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'pls stop sending close-up hummus and crispy chicken pics when i\'m stuck waiting on a 45-min desalting spin!!',
+    replySenderId: 'maximillian_lee',
+    replyText: 'No mercy Daiza, this Store Street salt beef bagel is singing.',
+    hourHint: 13
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Just bought a "chicken" wrap off Store Street and bit straight into spiced tofu. My day is measurably ruined.',
+    replySenderId: 'daniel_richards',
+    replyText: 'Karma for laughing at my egg and cress triangle sandwich, Big C.',
+    hourHint: 12
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Brought homemade bacalhau com natas upstairs — meanwhile someone down on 2F is sipping Dr Pepper like it\'s medicine.',
+    replySenderId: 'marco_sabatini',
+    replyText: 'Madonna mia João, Dr Pepper smells like cough syrup and sadness. Save me a forkful!',
+    hourHint: 13
+  },
+  {
+    senderId: 'peter_szijj',
+    text: '20 spicy nuggets and two large fries from Tottenham Court Road — zero regrets, 100% protein energy for afternoon gels.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'At least three kilos of nuggets per week keeps the Szijj antibody factory running, mon ami.',
+    hourHint: 13
+  },
+  {
+    senderId: 'richard_spears',
+    text: '3F kettle is boiled and I brought a fresh tin of Bettys Yorkshire shortbread if anyone wants proper post-lunch biscuits.',
+    replySenderId: 'faiza_javaid',
+    replyText: 'brb sprinting up the spiral stairs before max eats half the tin!!',
+    hourHint: 12
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Look João, I know food is a privilege, but sometimes a lazy Thursday calls for £3.50 meal deal efficiency.',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Cold wet triangle bread is not efficiency Dan, it is a cry for help!',
+    hourHint: 13,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'charlotte_coomber',
+    text: 'Doing a quick Store Street coffee & pastry sprint at 12:15 — shout orders now before the queue stretches to Gower St!',
+    replySenderId: 'calise_bahou',
+    replyText: 'Hero Charlotte!! Grab me a warm sausage roll and an iced flat white pls!',
+    hourHint: 12
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Checked the Gordon\'s Café counter at 12:40 — zero almond croissants left, only sorrow and lukewarm paninis.',
+    replySenderId: 'peter_szijj',
+    replyText: 'We move to Store Street then, grabbing proper Portuguese tarts or Korean rice bowls!',
+    hourHint: 13
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Half of Store Street is queued outside the ramen bar and the other half is debating Yorkshire tea vs espresso.',
+    replySenderId: 'nafsika_forte',
+    replyText: 'Espresso wins every time Marcos — coming for a quick walk past Gordon Square?',
+    hourHint: 13
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Hot take: Gordon\'s Café paninis slapped straight off the grill beat Store Street gourmet sourdough by pure value per pound.',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Value per pound is not a Michelin criterion Max!!',
+    hourHint: 12
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Smuggled 500 g of Maldon sea salt flakes back to Paris last weekend because French supermarket shelves had none.',
+    replySenderId: 'richard_spears',
+    replyText: 'Top-tier smuggling, Antoine — almost as vital as packing Bettys tea bags for Australia.',
+    hourHint: 13
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Quick heads up: someone left an unlabelled Tupperware of curry on 3F without a name. Brave soul eating that unguarded.',
+    replySenderId: 'faiza_javaid',
+    replyText: 'not mine!! mine is safely tucked at the back behind richard\'s tea caddy',
+    hourHint: 13
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Left my leftover pasta in the 3F fridge clearly labelled "BIOHAZARD: CONTAINS GARLIC" so nobody pinches it.',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Bold of you to think a biohazard label slows down a hungry 160 kg silverback.',
+    hourHint: 12
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Back from Store Street with extra piri-piri — reminded once again that British food fears seasoning like water fears dry THF.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Counterpoint: salt and vinegar crisps inside a ham sandwich is chaotic British engineering.',
+    hourHint: 13
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'PSA again: Hungarian sóskifli is NOT a sad British croissant, it\'s salted crescent pastry perfection!',
+    replySenderId: 'marco_sabatini',
+    replyText: 'Approved by Italy and France alike, Little baby Peetah — better than cold triangle bread.',
+    hourHint: 12
+  },
+  {
+    senderId: 'nafsika_forte',
+    text: 'Still baffled that half this WhatsApp group spent three consecutive days debating how to heat baked beans.',
+    replySenderId: 'richard_spears',
+    replyText: 'Wait until someone brings up whether toast needs butter before marmite, Nafsika.',
+    hourHint: 13
+  },
+  {
+    senderId: 'archie_wall',
+    text: 'Whoever raided the 3F posh biscuit tin and left two broken ginger nuts and crumbs — Baker bay sees your sin.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Wasn\'t me Archie, I\'m strictly on a post-steak-pie fast till 16:00!',
+    hourHint: 12
+  },
+  {
+    senderId: 'vijay_chudasama',
+    text: 'Walking past Gordon\'s Café now — espresso queue looks brutal, is Store Street any quicker?',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Store Street Espresso moves fast boss, saving you a spot if you want a double!',
+    hourHint: 12
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'honestly why do torrington square street-food queues double in length the exact second i leave 2f at 12:55',
+    replySenderId: 'charlotte_coomber',
+    replyText: 'Because everyone in Bloomsbury finishes lectures at 12:50 sharp — grab falafel on Store Street instead!',
+    hourHint: 13
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'kersti just wrote "LCMS is out of the operation — pls stop injecting PBS!!" in bright red bold in her email, who did it??',
+    replySenderId: 'daniel_richards',
+    replyText: 'Wasn\'t me! Always 10× VivaSpin desalt before touching LG11 unless you enjoy staring at Kersti\'s red error light.',
+    hourHint: 14
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Checked 128.40.76.1 from 3F: 600 MHz queue is jammed behind twelve crude aromatic NMRs. Staying upstairs with tea.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Peak #Hackerman luxury, remember when we used to walk down three flights just to see "Queued"?',
+    hourHint: 14
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Reviewer 2 just asked us to run four new cancer cell lines and a 28-day mouse PK study for a methodology communication.',
+    replySenderId: 'peter_szijj',
+    replyText: 'Classic unhinged Reviewer 2!! Next they\'ll want a Phase III clinical trial in the Supporting Info!',
+    hourHint: 15
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Reviewer 1 complains "the authors omit aqueous stability at pH 7.4" — it is literally Figure 2B, Scheme 1, and Table S3.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Drafting "We thank the reviewer for this insightful comment, as shown in Figure 2B" through gritted teeth.',
+    hourHint: 15
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Abil just emailed: three uncollected NMR tubes went straight into the LG1b sample fridge. £130 fine roulette begins.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Sprinting down the stairs right now, pretty sure my diBrPD tube has been chilling there since Tuesday!',
+    hourHint: 15
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Reviewer 3 wants a single-crystal X-ray structure of a 150 kDa pegylated antibody conjugate. Should I mail them a snowglobe?',
+    replySenderId: 'daniel_richards',
+    replyText: 'Tell them we respectfully defer to molecular dynamics and hope they enjoy the 60-page SI PDF.',
+    hourHint: 16
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Checked my Premier League fantasy points mid-column — captained the wrong striker AGAIN, down twenty-four points.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Don\'t even talk to me Calise, two of my midfielders got subbed off at 58 minutes.',
+    hourHint: 15
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Benfica play tonight and I\'m already emotionally checked out of anything past 18:30. Let\'s gooo!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Meanwhile Burnley managed to make a 1–0 win feel like three days of dental surgery.',
+    hourHint: 15
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'Anyone else watching F1 qualifying highlights at their 3F desk or am I the only one procrastinating on ChemDraw?',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Ferrari strategy team runs on the same logic as unbuffered room-temp TCEP, pure comedy.',
+    hourHint: 16
+  },
+  {
+    senderId: 'charlotte_coomber',
+    text: 'Need two more big brains for Thursday night pub quiz! Currently lacking anyone who knows geography or 90s pop.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'I\'ll cover geography, Silmarillion lore, and random Spanish kings if Richard covers Yorkshire.',
+    hourHint: 15,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Walked into LG11 to smooth over a jammed autosampler needle with Kersti — gave her a chocolate biscuit, crisis averted.',
+    replySenderId: 'faiza_javaid',
+    replyText: 'diplomatic immunity unlocked!! tell her my mmae-igg4 vial is 10× desalted i swear',
+    hourHint: 14
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Reset the clock lads: Richard just slipped "proper Yorkshire water" into a casual 700 MHz shimming chat.',
+    replySenderId: 'richard_spears',
+    replyText: 'Soft Pennine water makes superior tea AND superior baseline shims, André — proven fact.',
+    hourHint: 16
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Just spotted a suspicious +69 Da acetonitrile adduct on a crude trace. #AskAntoine clinic is officially open for business.',
+    replySenderId: 'daniel_richards',
+    replyText: 'On my way up with three cursed deconvolutions and a lukewarm mug of tea.',
+    hourHint: 15
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: '15:45 slump hitting hard — is it socially acceptable to go back to Gordon\'s Café for a second iced oat latte?',
+    replySenderId: 'calise_bahou',
+    replyText: 'Doctor\'s orders Daiza, grab me an espresso shot while you\'re down there pls!',
+    hourHint: 16
+  },
+  {
+    senderId: 'marco_sabatini',
+    text: 'A quick spritz of "Sabatini by Sabatini" before heading down to Abil\'s NMR room. Presentation counts, mon ami.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Between my waistcoat and your cologne, KLB is singlehandedly raising UCL\'s style index.',
+    hourHint: 14
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Prep TLC plate finally separated those two diastereomers by 2 mm — zero shame, taking that win straight onto Slide 3.',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Prep TLC rescues PhDs where Biotage gradients fear to tread, Rich!',
+    hourHint: 16,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Wait how did this referee give a penalty for THAT?! VAR is less reliable than an uncalibrated Biotage UV detector.',
+    replySenderId: 'calise_bahou',
+    replyText: 'My fantasy clean-sheet bonus evaporated in ninety seconds flat mate, pure pain.',
+    hourHint: 14
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Thursday afternoon slump poll: finish the SiO2 plug or argue about F1 tyre compounds on 3F for 20 mins?',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Mediums into hards after safety car, AND finish the plug while we argue.',
+    hourHint: 16,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'vijay_chudasama',
+    text: 'Spurs somehow conceded in the 92nd minute again. Not even checking the football chat until Monday.',
+    replySenderId: 'faiza_javaid',
+    replyText: 'still have no idea what an offside is boss, hope your coffee helps!!',
+    hourHint: 15
+  },
+  {
+    senderId: 'archie_wall',
+    text: 'Champions League kick-off at 20:00 — anybody trying to run a last-minute 18:00 column is on their own tonight!',
+    replySenderId: 'joao_nogueira',
+    replyText: 'I feel personally attacked Archie, my Biotage rack is already loaded!',
+    hourHint: 17,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'S. typhimurium sialidase completely sulked at pH 5.0 again — strictly pH 7.0 PBS for every CiTE click from now on!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Enzymes are worse divas than Premier League wingers, Peetah.',
+    hourHint: 15
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: '11 kDa shark VNAR E4 cleaved and dialysed cleanly — zero precipitate in the cassette for once, vamos!!',
+    replySenderId: 'faiza_javaid',
+    replyText: 'rare dialysis win jcfn!! bring it over to the 2f spec if u want an a280 check',
+    hourHint: 14
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Left my lunch thermos on 3F and nearly forgot it again. Brain is 90% Fab digest stoichiometry right now.',
+    replySenderId: 'peter_szijj',
+    replyText: 'Grandad Dan memory kicking in early today, I\'ll guard it from Max!',
+    hourHint: 16
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Zero green Keck clips left on the whole 2F drying rack — who has been hoarding every B24 clip in their hood?!',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Check behind Antoine\'s Biotage, he had five clipped to his solvent trap like jewellery.',
+    hourHint: 16
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: '-78 °C TBAT aryne addition actually behaved without quenching on stray moisture. Oven-dried glassware supremacy.',
+    replySenderId: 'peter_szijj',
+    replyText: 'Don\'t tell Reviewer 2 it worked cleanly on the first go, they\'ll demand 18 substrate derivatives!',
+    hourHint: 15
+  },
+  {
+    senderId: 'nafsika_forte',
+    text: 'Someone left the -20 °C freezer drawer cracked open half an inch on 2F — pushed it shut before the alarm went.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Guardian angel of the shared bay Nafsika, saving forty antibody stocks in one push.',
+    hourHint: 16
+  },
+  {
+    senderId: 'charlotte_coomber',
+    text: 'Still collecting £2 coins at Sheppard bay for the leaving card — check your lab coat pockets lads!',
+    replySenderId: 'richard_spears',
+    replyText: 'Just found two pound coins and three Yorkshire tea bags in mine, dropping by shortly!',
+    hourHint: 16
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Note from the Q-TOF queue: if your baseline looks like the Alps, please do NOT press Submit Three More Times.',
+    hourHint: 14
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Whoever keeps stealing my 200 µL tip rack from Bay 1 — may your next silica column co-elute completely.',
+    hourHint: 16
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Reviewer 1 wrote "incremental advance" in a three-sentence report after sitting on the manuscript for eleven weeks. Lovely.',
+    hourHint: 15
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'my confocal laser literally picked friday eve energy at 14:30 on a wednesday and just refused to focus',
+    hourHint: 14,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Anyone else\'s brain turn into lukewarm PBS on Monday afternoon between 15:30 and 16:30 or just me?',
+    hourHint: 16,
+    vibe: 'monday'
+  },
+  {
+    senderId: 'charlotte_coomber',
+    text: 'Booked a big table at the Marlborough Arms for 17:30 Friday! No excuses about still running columns!',
+    replySenderId: 'calise_bahou',
+    replyText: 'Say less Charlotte!! First round at Marlborough Arms is locked in.',
+    hourHint: 17,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Thursday 17:10 slide check: who actually has four clean ChemDraw figures and who is exporting blurry phone photos of TLC plates?',
+    replySenderId: 'andre_shamsabadi',
+    replyText: '2.5 slides complete, clicker located on 3F, resting the other 1.5 slides on sheer waistcoat confidence.',
+    hourHint: 17,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'AoE2 Black Forest lobby spinning up at 17:45 on 3F — Franks Knights vs Magyar Hussars, no excuses!',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Wait for Faiza to finish her plate read so we can play FarmVille protection rules again.',
+    hourHint: 17,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Worms Armageddon tonight after 18:00 — one clean ninja-rope drop and I am sending everyone straight into the drink.',
+    replySenderId: 'peter_szijj',
+    replyText: 'Bold talk for someone who blew up his own worm with a banana bomb last Thursday!',
+    hourHint: 17,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: '17:35 and I am loading a 24 g Biotage silica cartridge for a DCM/MeOH gradient. Pray for my energy levels irmãos!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Pure madness JCFN, I am closing my lab book in twenty minutes sharp.',
+    hourHint: 17,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Who is heading to the Euston Tap beer garden after Friday\'s 09:00 audit? Need fresh air and craft pints.',
+    replySenderId: 'richard_spears',
+    replyText: 'Count me in for one civilised pint at Euston Tap, Marcos — then home in time for supper!',
+    hourHint: 17,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Wait are we starting at Marlborough Arms or Carpenter\'s Arms tonight? Asking before I pack my umbrella.',
+    replySenderId: 'charlotte_coomber',
+    replyText: 'Carpenter\'s Arms for the cosy upstairs booths first, then maybe Euston Tap for the late crew!',
+    hourHint: 18,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'slide 4 finally looks half decent!! if vijay says "suboptimal" tomorrow i am moving straight to carpenter\'s arms at 10am',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Save me a seat by the fireplace Daiza, we\'ll toast clean DAR 4.0!',
+    hourHint: 17,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'daniel_richards',
+    text: '18:00 curfew alarm just went off. Lab coat hung up, Argon shut, grandad mode activated. Night Lab 230!',
+    replySenderId: 'richard_spears',
+    replyText: 'Right behind you Dan — kettle switched off on 3F and heading toward Euston now.',
+    hourHint: 18,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'peter_szijj',
+    text: '19:10 in Lab 230 — Concerning Hobbits playing gently on the speakers while Superdex hits the final peak!',
+    replySenderId: 'nafsika_forte',
+    replyText: 'Peak evening lab peace Peter — finishing my last Baker column wash and locking up behind you.',
+    hourHint: 19,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Surviving Thursday means we\'re only one 09:00 Group Meeting away from Euston Tap pints bois!!',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Keep pushing Big C — one clean HHLL gel lane and we celebrate properly tomorrow!',
+    hourHint: 17,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: '17:17 perimeter report: coast looks suspiciously quiet near the 2F lift. Keep headphones off for two mins.',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Copy that chief scout, sliding my laptop discreetly upstairs to 3F.',
+    hourHint: 17,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Craving rich tonkotsu ramen with extra chashu and kaedama after today\'s column drama. Ippudo at 18:30?',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Locked in mon ami, washing the silica off my hands right now.',
+    hourHint: 18,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'vijay_chudasama',
+    text: 'Good momentum across the bays this week everyone — keep slides crisp for Friday 09:00 and enjoy the weekend pints!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Cheers Vijay — Marlborough Arms debrief pencilled in straight after lunch!',
+    hourHint: 17,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Wait until you hear Max and André arguing over CK3 dynasties at Carpenter\'s Arms after two pints.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Beats watching João cry over his Biotage cartridge at 18:15 mate, see you at the bar!',
+    hourHint: 18,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Closing my laptop at 18:10 before another spider claims my 3F desk. Who\'s actually at Euston Tap already?',
+    replySenderId: 'faiza_javaid',
+    replyText: 'calise and charlotte literally just grabbed an outdoor bench by the taproom door, run!!',
+    hourHint: 18,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'peter_szijj',
+    text: '19:20 and Lab 230 is dead silent except for my Superdex pump clicking. Time to grab twenty spicy nuggets on Tottenham Court Road.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Lock the 2F sash and get out before the 19:30 porter sweeps the corridor, Peetah.',
+    hourHint: 19,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Friday afternoon energy!! First round at Carpenter\'s Arms or Marlborough Arms once everyone clears LG11?',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Marlborough Arms first so the Baker and Sheppard crews can join straight from KLB!',
+    hourHint: 18,
+    vibe: 'late_week'
+  },
+  {
+    senderId: 'nafsika_forte',
+    text: '18:25 Baker bay check: left a clean aliquot of anhydrous DMF in Bay 2 if anyone is stuck doing late-shift clicks!',
+    replySenderId: 'peter_szijj',
+    replyText: 'Actual guardian angel of Lab 230 Nafsika, owe you two espressos tomorrow!',
+    hourHint: 18,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Stellaris multiplayer lobby opening at 21:00 — anybody still trapped in KLB past 19:00?',
+    replySenderId: 'peter_szijj',
+    replyText: 'Packing up my SynAb tubes now, my galactic empire will be online by 20:45!',
+    hourHint: 19,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'calise_bahou',
+    text: '17:20 fridge sweep: shut both 4 °C doors properly and rescued somebody\'s unlabelled falcon tube from tipping over!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Heroic late-afternoon citizenship Big C, now get off the bench before 18:00!',
+    hourHint: 17,
+    vibe: 'evening'
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Just stepped onto Gower Street at 18:05 — zero rain, clear sky, and quiet dinner plans before ten. Bliss.',
+    replySenderId: 'maximillian_lee',
+    replyText: 'Enjoy your slippers and Bettys tea, grandad Rich — evening shift holds the fort!',
+    hourHint: 18,
+    vibe: 'evening'
   }
 ];
 

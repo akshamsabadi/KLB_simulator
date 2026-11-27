@@ -941,8 +941,8 @@ window.KLB = window.KLB || {};
     }
 
     const speech = npc.currentTaskSpeech
-      || window.KLB.SPEECH_LINES?.[npc.id]?.casual?.[Math.floor(Math.random() * 8)]
-      || meta.quotes?.[Math.floor(Math.random() * meta.quotes.length)]
+      || window.KLB.Sim.getSpeechLineForNpc(npc, true, state)?.text
+      || window.KLB.Sim.pickQuoteForNpc(state, npc.id)
       || 'Busy shift in KLB today.';
 
     const baseTaskMeta = npc.currentTaskText ? `Activity: ${npc.currentTaskText}` : (meta.role || '');

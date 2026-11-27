@@ -83,6 +83,14 @@ window.KLB = window.KLB || {};
       { x: 11, y: 4 },
       { x: 12, y: 2 },
       { x: 8, y: 2 }
+    ],
+    cib_lg11_ms: [
+      { x: 8, y: 10 },
+      { x: 7, y: 6 }
+    ],
+    cib_lg1b_nmr: [
+      { x: 7, y: 4 },
+      { x: 4, y: 9 }
     ]
   };
 
@@ -611,6 +619,132 @@ window.KLB = window.KLB || {};
     try {
       localStorage.setItem(ARCHIVE_KEY, JSON.stringify(arch));
     } catch (_) {}
+  }
+
+  const DIALOGUE_HISTORY_KEY = 'klb_dialogue_history_v1';
+  let _dialogueHistoryCache = null;
+
+  function getDialogueStorage() {
+    try {
+      if (typeof localStorage !== 'undefined' && localStorage) return localStorage;
+      if (typeof window !== 'undefined' && window?.localStorage) return window.localStorage;
+    } catch (_) {}
+    return null;
+  }
+
+  function loadDialogueHistory() {
+    if (_dialogueHistoryCache && typeof _dialogueHistoryCache === 'object') {
+      if (!_dialogueHistoryCache.pools || typeof _dialogueHistoryCache.pools !== 'object') {
+        _dialogueHistoryCache.pools = {};
+      }
+      return _dialogueHistoryCache;
+    }
+    let parsed = null;
+    try {
+      const storage = getDialogueStorage();
+      const raw = storage?.getItem?.(DIALOGUE_HISTORY_KEY);
+      if (raw) parsed = JSON.parse(raw);
+    } catch (_) {}
+    if (!parsed || typeof parsed !== 'object' || !parsed.pools || typeof parsed.pools !== 'object') {
+      parsed = { pools: {} };
+    }
+    _dialogueHistoryCache = parsed;
+    return _dialogueHistoryCache;
+  }
+
+  function saveDialogueHistory(hist) {
+    const normalized = (hist && typeof hist === 'object') ? hist : { pools: {} };
+    if (!normalized.pools || typeof normalized.pools !== 'object') {
+      normalized.pools = {};
+    }
+    _dialogueHistoryCache = normalized;
+    try {
+      const storage = getDialogueStorage();
+      storage?.setItem?.(DIALOGUE_HISTORY_KEY, JSON.stringify(normalized));
+    } catch (_) {}
+  }
+
+  function resetDialogueHistory() {
+    _dialogueHistoryCache = null;
+    try {
+      const storage = getDialogueStorage();
+      storage?.removeItem?.(DIALOGUE_HISTORY_KEY);
+    } catch (_) {}
+  }
+
+  function getCurrentDialogueVibe(state) {
+    if (!state) return 'midday';
+    const dayIdx = Number(state.dayIdx ?? 0);
+    const hour = Number.isFinite(Number(state.timeMins)) ? Number(state.timeMins) / 60 : 12;
+    if (dayIdx === 0 && hour < 12) return 'monday';
+    if ((dayIdx === 3 && hour >= 13) || dayIdx === 4) return 'late_week';
+    if (hour < 11) return 'morning';
+    if (hour >= 17) return 'evening';
+    return 'midday';
+  }
+
+  function pickFromShuffleBag(state, poolKey, items, getIdFn, opts = {}) {
+    if (!Array.isArray(items) || !items.length) return null;
+    const isHeadless = Boolean(state && state._headlessVerify);
+    const hist = isHeadless
+      ? (state._runDialogueHistory || (state._runDialogueHistory = { pools: {} }))
+      : loadDialogueHistory();
+    if (!hist.pools || typeof hist.pools !== 'object') hist.pools = {};
+
+    let entry = hist.pools[poolKey];
+    if (!entry || typeof entry !== 'object') {
+      entry = { seen: [], last: null };
+      hist.pools[poolKey] = entry;
+    }
+    if (!Array.isArray(entry.seen)) entry.seen = [];
+
+    const idOf = (it, idx) => {
+      const raw = getIdFn ? getIdFn(it, idx) : it;
+      return raw == null ? String(idx) : String(raw);
+    };
+    const entries = items.map((item, idx) => ({ item, idx, id: idOf(item, idx) }));
+
+    const seenSet = new Set(entry.seen);
+    let unseen = entries.filter(e => !seenSet.has(e.id));
+
+    if (unseen.length === 0) {
+      const poolIds = new Set(entries.map(e => e.id));
+      entry.seen = entry.seen.filter(id => !poolIds.has(id));
+      unseen = entries.filter(e => e.id !== entry.last);
+      if (!unseen.length) unseen = entries;
+    }
+
+    let pool = unseen;
+    if (Array.isArray(opts.preferFns) && opts.preferFns.length) {
+      for (const fn of opts.preferFns) {
+        if (typeof fn !== 'function') continue;
+        const preferred = unseen.filter(e => fn(e.item, e.idx));
+        if (preferred.length) {
+          pool = preferred;
+          break;
+        }
+      }
+    } else if (typeof opts.preferFn === 'function') {
+      const preferred = unseen.filter(e => opts.preferFn(e.item, e.idx));
+      if (preferred.length) pool = preferred;
+    }
+
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    if (!entry.seen.includes(chosen.id)) {
+      entry.seen.push(chosen.id);
+    }
+    entry.last = chosen.id;
+
+    if (!isHeadless) {
+      saveDialogueHistory(hist);
+    }
+    return chosen.item;
+  }
+
+  function pickQuoteForNpc(state, npcId) {
+    const meta = window.KLB.CAST_BY_ID?.[npcId];
+    const quotes = Array.isArray(meta?.quotes) ? meta.quotes : [];
+    return pickFromShuffleBag(state, 'quotes_' + npcId, quotes, q => q);
   }
 
   function formatClock(dayIdx, minsFromMidnight) {
@@ -1302,6 +1436,7 @@ window.KLB = window.KLB || {};
       gameOver: false,
       victory: false,
       spectatorMode,
+      _headlessVerify: Boolean(options?.headlessVerify),
       cameraRoomId: 'klb_2f',
       mutators: { ...activeMutators },
 
@@ -2006,7 +2141,16 @@ window.KLB = window.KLB || {};
       const friendPool = friends.length ? friends : fallbackFriends;
       const friendId = friendPool[Math.floor(Math.random() * friendPool.length)];
       const bg = window.KLB.BIRTHDAY_GREETINGS || DEFAULT_BIRTHDAY_GREETINGS;
-      const rawWa = pickRandomTemplate(bg?.whatsapp) || DEFAULT_BIRTHDAY_GREETINGS.whatsapp[0];
+      const waPool = Array.isArray(bg?.whatsapp) && bg.whatsapp.length
+        ? bg.whatsapp
+        : DEFAULT_BIRTHDAY_GREETINGS.whatsapp;
+      const waPicked = pickFromShuffleBag(
+        state,
+        'bday_wa',
+        waPool,
+        it => (typeof it === 'string' ? it : (it?.template || it?.text || JSON.stringify(it)))
+      );
+      const rawWa = pickRandomTemplate(waPicked) || DEFAULT_BIRTHDAY_GREETINGS.whatsapp[0];
       if (friendId && rawWa) {
         const waText = rawWa
           .replace(/\{shortName\}/g, state.birthday.shortName)
@@ -2051,18 +2195,34 @@ window.KLB = window.KLB || {};
 
     const bg = window.KLB.BIRTHDAY_GREETINGS || DEFAULT_BIRTHDAY_GREETINGS;
     const npcToTargetMap = bg?.npcToTarget || DEFAULT_BIRTHDAY_GREETINGS.npcToTarget;
-    const openerPool = npcToTargetMap[greeterId] || npcToTargetMap.default || DEFAULT_BIRTHDAY_GREETINGS.npcToTarget.default;
-    const rawOpener = pickRandomTemplate(openerPool) || DEFAULT_BIRTHDAY_GREETINGS.npcToTarget.default[0];
+    const hasGreeterPool = Array.isArray(npcToTargetMap[greeterId]) && npcToTargetMap[greeterId].length > 0;
+    const openerPool = hasGreeterPool
+      ? npcToTargetMap[greeterId]
+      : (npcToTargetMap.default || DEFAULT_BIRTHDAY_GREETINGS.npcToTarget.default);
+    const openerPicked = pickFromShuffleBag(
+      state,
+      'bday_open_' + (hasGreeterPool ? greeterId : 'default'),
+      openerPool,
+      it => (typeof it === 'string' ? it : (it?.template || it?.text || JSON.stringify(it)))
+    );
+    const rawOpener = pickRandomTemplate(openerPicked) || DEFAULT_BIRTHDAY_GREETINGS.npcToTarget.default[0];
     const greeterLine = rawOpener
       .replace(/\{target\}/g, state.birthday.shortName)
       .replace(/\{name\}/g, state.birthday.name)
       .replace(/\{initials\}/g, state.birthday.initials);
 
     const replySource = bg?.replies || DEFAULT_BIRTHDAY_GREETINGS.replies;
+    const hasTargetReplyPool = !Array.isArray(replySource) && Array.isArray(replySource?.[targetId]) && replySource[targetId].length > 0;
     const replyPool = Array.isArray(replySource)
       ? replySource
-      : (replySource?.[targetId] || replySource?.default || DEFAULT_BIRTHDAY_GREETINGS.replies);
-    const rawReply = pickRandomTemplate(replyPool) || DEFAULT_BIRTHDAY_GREETINGS.replies[0];
+      : (hasTargetReplyPool ? replySource[targetId] : (replySource?.default || DEFAULT_BIRTHDAY_GREETINGS.replies));
+    const replyPicked = pickFromShuffleBag(
+      state,
+      'bday_reply_' + (hasTargetReplyPool ? targetId : 'default'),
+      replyPool,
+      it => (typeof it === 'string' ? it : (it?.template || it?.text || JSON.stringify(it)))
+    );
+    const rawReply = pickRandomTemplate(replyPicked) || DEFAULT_BIRTHDAY_GREETINGS.replies[0];
     const greeterMeta = window.KLB.CAST_BY_ID?.[greeterId];
     const replyLine = rawReply
       .replace(/\{greeter\}/g, greeterMeta?.shortName || 'mate')
@@ -2087,7 +2247,7 @@ window.KLB = window.KLB || {};
       state.social = clamp((state.social ?? 84) + 5, 0, 100);
     }
 
-    return { triggered: true, targetId, greeterId, greeterLine, replyLine, convoId };
+    return { triggered: true, targetId, greeterId, greeterLine, replyLine, turns, convoId };
   }
 
   function interpolateWeeklyText(text) {
@@ -2111,7 +2271,7 @@ window.KLB = window.KLB || {};
     if (!opts.ignoreSpacing) {
       const sameDay = state.dayIdx === state._lastWeeklySigDay;
       const gap = (state.timeMins || 0) - (state._lastWeeklySigMins ?? -999);
-      if (sameDay && gap < 75) return null;
+      if (sameDay && gap < 55) return null;
     }
 
     const { activeConvoIds, busySpeakerIds } = getActiveRoomConversationInfo(state, roomId);
@@ -2149,17 +2309,14 @@ window.KLB = window.KLB || {};
     });
     if (!eligible.length) return null;
 
-    const shuffledSigs = eligible.slice().sort(() => Math.random() - 0.5);
-    let pickedSig = null;
-    let pickedTurns = null;
-    let pickedSpkIds = null;
-
-    for (const sig of shuffledSigs) {
+    const validEligible = [];
+    for (const sig of eligible) {
       const rawVariants = Array.isArray(sig.variants) && sig.variants.length
         ? sig.variants
         : (Array.isArray(sig.turns) ? [{ turns: sig.turns }] : []);
       const validVariants = [];
-      for (const v of rawVariants) {
+      for (let varIdx = 0; varIdx < rawVariants.length; varIdx++) {
+        const v = rawVariants[varIdx];
         const vTurns = Array.isArray(v) ? v : (v?.turns || v?.lines || []);
         if (!vTurns.length) continue;
         const spkIds = [];
@@ -2187,17 +2344,35 @@ window.KLB = window.KLB || {};
           });
           if (!allNearPlayer) continue;
         }
-        validVariants.push({ turns: vTurns, spkIds });
+        validVariants.push({ varIdx: v?.varIdx ?? varIdx, turns: vTurns, spkIds, vibe: v?.vibe || null });
       }
       if (!validVariants.length) continue;
       const maxCount = Math.max(...validVariants.map(v => v.spkIds.length));
       const topVariants = validVariants.filter(v => v.spkIds.length === maxCount);
-      const chosenVar = topVariants[Math.floor(Math.random() * topVariants.length)];
-      pickedSig = sig;
-      pickedTurns = chosenVar.turns;
-      pickedSpkIds = chosenVar.spkIds;
-      break;
+      validEligible.push({ sig, topVariants });
     }
+    if (!validEligible.length) return null;
+
+    const curVibe = getCurrentDialogueVibe(state);
+    const pickedEntry = pickFromShuffleBag(
+      state,
+      'weekly_themes',
+      validEligible,
+      entry => entry.sig.weeklyKey,
+      { preferFn: entry => Boolean(curVibe && entry.sig.vibe === curVibe) }
+    );
+    const pickedSig = pickedEntry?.sig || null;
+    const chosenVar = pickedSig
+      ? pickFromShuffleBag(
+          state,
+          'wsig_var_' + pickedSig.weeklyKey,
+          pickedEntry.topVariants,
+          v => v.varIdx ?? JSON.stringify(v.turns),
+          { preferFn: v => Boolean(curVibe && v.vibe === curVibe) }
+        )
+      : null;
+    const pickedTurns = chosenVar?.turns || null;
+    const pickedSpkIds = chosenVar?.spkIds || null;
     if (!pickedSig || !pickedTurns || !pickedSpkIds) return null;
 
     const hasPlayer = !state.spectatorMode && state.player && pickedSpkIds.includes(state.player.id);
@@ -2283,7 +2458,8 @@ window.KLB = window.KLB || {};
       });
     }
 
-    const socialRes = applySocialInteraction(state, 7, npcId);
+    const isPlayerInitiated = !state.spectatorMode && state.player && pId === state.player.id;
+    const socialRes = isPlayerInitiated ? applySocialInteraction(state, 7, npcId) : null;
     const socialApplied = Boolean(socialRes?.applied);
 
     // Priority 1: Birthday
@@ -2313,7 +2489,8 @@ window.KLB = window.KLB || {};
         ? sig.variants
         : (Array.isArray(sig.turns) ? [{ turns: sig.turns }] : []);
       const matchingVars = [];
-      for (const v of rawVariants) {
+      for (let varIdx = 0; varIdx < rawVariants.length; varIdx++) {
+        const v = rawVariants[varIdx];
         const vTurns = Array.isArray(v) ? v : (v?.turns || v?.lines || []);
         if (vTurns.length < 2) continue;
         const spkIds = [];
@@ -2335,40 +2512,69 @@ window.KLB = window.KLB || {};
             Math.hypot(ent.x - player.x, ent.y - player.y) <= 4.2
           );
         });
-        if (allPresent) matchingVars.push({ turns: vTurns, spkIds });
+        if (!allPresent) continue;
+        if (!isPlayerInitiated && sig.postAction === 'smoke_break') {
+          const smokeReady = spkIds.every(id => {
+            const ent = resolveEntityById(state, id);
+            if (!ent?.sim) return true;
+            if (ent.sim.activeJob?.canOvercook) return false;
+            const k = ent.sim.currentAction?.kind;
+            return !k || k === 'tidy_bench' || k === 'socialize';
+          });
+          if (!smokeReady) continue;
+        }
+        matchingVars.push({ varIdx: v?.varIdx ?? varIdx, turns: vTurns, spkIds, vibe: v?.vibe || null });
       }
       if (matchingVars.length) {
         const maxLen = Math.max(...matchingVars.map(m => m.spkIds.length));
         const bestVars = matchingVars.filter(m => m.spkIds.length === maxLen);
-        const chosenVar = bestVars[Math.floor(Math.random() * bestVars.length)];
-        sigMatches.push({ sig, turns: chosenVar.turns, spkIds: chosenVar.spkIds });
+        sigMatches.push({ sig, topVariants: bestVars });
       }
     }
     if (sigMatches.length) {
-      const picked = sigMatches[Math.floor(Math.random() * sigMatches.length)];
-      const speakers = picked.spkIds.map(id => (id === pId ? player : state.npcs?.[id])).filter(Boolean);
-      const turns = picked.turns.map(t => ({
-        speakerId: t.speakerId || t.id || t.charId,
-        text: interpolateWeeklyText(t.text)
-      }));
-      state._weeklySigDone[picked.sig.weeklyKey] = true;
-      state._lastWeeklySigMins = state.timeMins || 0;
-      state._lastWeeklySigDay = state.dayIdx ?? 0;
-      state._weeklySigStats[picked.sig.weeklyKey] = (state._weeklySigStats[picked.sig.weeklyKey] || 0) + 1;
-      const convoId = `pair_wsig_${picked.sig.weeklyKey}_${Math.floor((state.timeMins || 0) * 10)}_${Math.random().toString(36).slice(2, 5)}`;
-      scheduleMultiTurnConversation(state, convRoomId, speakers, turns, convoId, {
-        postAction: picked.sig.postAction || null,
-        immediateFirst: true,
-        inPlace: true
-      });
-      return {
-        mode: 'weekly',
-        weeklyKey: picked.sig.weeklyKey,
-        speakers: speakers.map(s => s.id),
-        turns,
-        convoId,
-        socialApplied
-      };
+      const curVibe = getCurrentDialogueVibe(state);
+      const pickedMatch = pickFromShuffleBag(
+        state,
+        'weekly_themes',
+        sigMatches,
+        m => m.sig.weeklyKey,
+        { preferFn: m => Boolean(curVibe && m.sig.vibe === curVibe) }
+      );
+      const pickedSig = pickedMatch?.sig || null;
+      const chosenVar = pickedSig
+        ? pickFromShuffleBag(
+            state,
+            'wsig_var_' + pickedSig.weeklyKey,
+            pickedMatch.topVariants,
+            v => v.varIdx ?? JSON.stringify(v.turns),
+            { preferFn: v => Boolean(curVibe && v.vibe === curVibe) }
+          )
+        : null;
+      if (pickedSig && chosenVar) {
+        const speakers = chosenVar.spkIds.map(id => (id === pId ? player : state.npcs?.[id])).filter(Boolean);
+        const turns = chosenVar.turns.map(t => ({
+          speakerId: t.speakerId || t.id || t.charId,
+          text: interpolateWeeklyText(t.text)
+        }));
+        state._weeklySigDone[pickedSig.weeklyKey] = true;
+        state._lastWeeklySigMins = state.timeMins || 0;
+        state._lastWeeklySigDay = state.dayIdx ?? 0;
+        state._weeklySigStats[pickedSig.weeklyKey] = (state._weeklySigStats[pickedSig.weeklyKey] || 0) + 1;
+        const convoId = `pair_wsig_${pickedSig.weeklyKey}_${Math.floor((state.timeMins || 0) * 10)}_${Math.random().toString(36).slice(2, 5)}`;
+        scheduleMultiTurnConversation(state, convRoomId, speakers, turns, convoId, {
+          postAction: pickedSig.postAction || null,
+          immediateFirst: true,
+          inPlace: true
+        });
+        return {
+          mode: 'weekly',
+          weeklyKey: pickedSig.weeklyKey,
+          speakers: speakers.map(s => s.id),
+          turns,
+          convoId,
+          socialApplied
+        };
+      }
     }
 
     // Priority 3: Pair-matched GROUP_HUDDLES
@@ -2426,32 +2632,45 @@ window.KLB = window.KLB || {};
     }
 
     if (huddleMatches.length) {
-      state._recentPlayerConvos = state._recentPlayerConvos || [];
-      const nonRecent = huddleMatches.filter(m => !state._recentPlayerConvos.includes(m.huddle.id));
-      const pool = nonRecent.length ? nonRecent : huddleMatches;
-      const t1 = pool.filter(m => m.huddle.roomId === convRoomId && !m.huddle.work && !m.huddle.isWork);
-      const t2 = pool.filter(m => m.huddle.roomId === convRoomId);
-      const t3 = pool.filter(m => !m.huddle.work && !m.huddle.isWork);
-      const chosenTier = t1.length ? t1 : (t2.length ? t2 : (t3.length ? t3 : pool));
-      const picked = chosenTier[Math.floor(Math.random() * chosenTier.length)];
+      const curVibe = getCurrentDialogueVibe(state);
+      const pairKey = 'pair_' + [pId, npcId].sort().join('__');
+      const picked = pickFromShuffleBag(
+        state,
+        pairKey,
+        huddleMatches,
+        m => m.huddle.id || m.turns?.[0]?.text,
+        {
+          preferFns: [
+            m => m.huddle.roomId === convRoomId && !m.huddle.work && !m.huddle.isWork && Boolean(curVibe && m.huddle.vibe === curVibe),
+            m => m.huddle.roomId === convRoomId && Boolean(curVibe && m.huddle.vibe === curVibe),
+            m => m.huddle.roomId === convRoomId && !m.huddle.work && !m.huddle.isWork,
+            m => m.huddle.roomId === convRoomId,
+            m => !m.huddle.work && !m.huddle.isWork && Boolean(curVibe && m.huddle.vibe === curVibe),
+            m => !m.huddle.work && !m.huddle.isWork
+          ]
+        }
+      );
 
-      if (picked.huddle.id) {
-        state._recentPlayerConvos.push(picked.huddle.id);
-        if (state._recentPlayerConvos.length > 20) state._recentPlayerConvos.shift();
+      if (picked) {
+        state._recentPlayerConvos = state._recentPlayerConvos || [];
+        if (picked.huddle.id) {
+          state._recentPlayerConvos.push(picked.huddle.id);
+          if (state._recentPlayerConvos.length > 20) state._recentPlayerConvos.shift();
+        }
+        const speakers = picked.spkIds.map(id => (id === pId ? player : state.npcs?.[id])).filter(Boolean);
+        const convoId = `pair_hud_${picked.huddle.id || 'grp'}_${Math.floor((state.timeMins || 0) * 10)}_${Math.random().toString(36).slice(2, 5)}`;
+        scheduleMultiTurnConversation(state, convRoomId, speakers, picked.turns, convoId, {
+          immediateFirst: true,
+          inPlace: true
+        });
+        return {
+          mode: 'huddle',
+          huddleId: picked.huddle.id,
+          turns: picked.turns,
+          convoId,
+          socialApplied
+        };
       }
-      const speakers = picked.spkIds.map(id => (id === pId ? player : state.npcs?.[id])).filter(Boolean);
-      const convoId = `pair_hud_${picked.huddle.id || 'grp'}_${Math.floor((state.timeMins || 0) * 10)}_${Math.random().toString(36).slice(2, 5)}`;
-      scheduleMultiTurnConversation(state, convRoomId, speakers, picked.turns, convoId, {
-        immediateFirst: true,
-        inPlace: true
-      });
-      return {
-        mode: 'huddle',
-        huddleId: picked.huddle.id,
-        turns: picked.turns,
-        convoId,
-        socialApplied
-      };
     }
 
     // Priority 4: Dynamic Character Pair Fallback
@@ -2461,19 +2680,37 @@ window.KLB = window.KLB || {};
     const playerShort = playerMeta.shortName || playerMeta.name || pId;
 
     const hasRealTask = Boolean(npc.currentTaskText && npc.currentTaskText !== 'Arriving at KLB');
+    const taskTxt = npc.currentTaskText;
     const openerPool = hasRealTask
       ? [
-          `${npcShort}, how is ${npc.currentTaskText} treating you today?`,
-          `Hey ${npcShort}, making steady progress on ${npc.currentTaskText}?`,
-          `${npcShort}, fancy a quick breather after ${npc.currentTaskText}?`
+          `${npcShort}, how is ${taskTxt} going?`,
+          `Still on ${taskTxt}, ${npcShort}?`,
+          `Need a hand on ${taskTxt}, ${npcShort}?`,
+          `${npcShort}, wrap ${taskTxt} up soon?`,
+          `Is ${taskTxt} behaving, ${npcShort}?`,
+          `${npcShort}, break after ${taskTxt}?`,
+          `Progress on ${taskTxt}, ${npcShort}?`,
+          `${npcShort}, surviving ${taskTxt}?`,
+          `Tea after ${taskTxt}, ${npcShort}?`
         ]
       : [
           `Hey ${npcShort}, how is your shift going today?`,
-          `${npcShort}, fancy grabbing a coffee at Gordon's later?`,
-          `Afternoon ${npcShort}, everything behaving in KLB today?`
+          `${npcShort}, fancy a coffee at Gordon's shortly?`,
+          `Afternoon ${npcShort}, everything behaving in KLB?`,
+          `${npcShort}, surviving the lab today or hiding upstairs?`,
+          `Quick sanity check ${npcShort}, any dramas on your bench?`,
+          `${npcShort}, reckon Vijay is doing bench rounds soon?`,
+          `Got five minutes ${npcShort}, or chained to the hood?`,
+          `${npcShort}, seen anyone claim the last biscuit upstairs?`,
+          `Everything still running cleanly over there, ${npcShort}?`
         ];
-    const openText = openerPool[Math.floor(Math.random() * openerPool.length)];
-    const rawReply = getSpeechLineForNpc(npc).text;
+    const openText = pickFromShuffleBag(
+      state,
+      'fallback_openers_' + (hasRealTask ? 'task' : 'gen'),
+      openerPool,
+      s => s
+    ) || openerPool[0];
+    const rawReply = getSpeechLineForNpc(npc, null, state).text;
     const replyText = rawReply.includes(playerShort)
       ? rawReply
       : `${playerShort} — ${rawReply}`;
@@ -2548,8 +2785,20 @@ window.KLB = window.KLB || {};
     const interp = s => String(s || '')
       .replace(/\{target\}/g, responderName)
       .replace(/\{sender\}/g, senderName);
-    const askLine = interp(pickRandomTemplate(askPool) || DEFAULT_SAMPLE_RUN_LINES[kindKey].ask[0]);
-    const replyLine = interp(pickRandomTemplate(replyPool) || (gaveSample ? DEFAULT_SAMPLE_RUN_LINES[kindKey].yes[0] : DEFAULT_SAMPLE_RUN_LINES[kindKey].no[0]));
+    const rawAsk = pickFromShuffleBag(
+      state,
+      'sample_' + kindKey + '_ask',
+      askPool,
+      s => s
+    );
+    const rawReply = pickFromShuffleBag(
+      state,
+      'sample_' + kindKey + '_' + (gaveSample ? 'yes' : 'no'),
+      replyPool,
+      s => s
+    );
+    const askLine = interp(pickRandomTemplate(rawAsk) || DEFAULT_SAMPLE_RUN_LINES[kindKey].ask[0]);
+    const replyLine = interp(pickRandomTemplate(rawReply) || (gaveSample ? DEFAULT_SAMPLE_RUN_LINES[kindKey].yes[0] : DEFAULT_SAMPLE_RUN_LINES[kindKey].no[0]));
 
     state._sampleAskCooldowns[senderId] = nowMins;
     state._sampleRunAskCount = (state._sampleRunAskCount || 0) + 1;
@@ -2591,7 +2840,10 @@ window.KLB = window.KLB || {};
   function triggerGroupHuddle(state) {
     if (!state || state.fireAlarm?.active) return false;
     const viewRoom = getViewRoom(state);
-    if (!viewRoom || viewRoom.startsWith('cib_') || viewRoom === 'offsite') {
+    const ALLOWED_HUDDLE_ROOMS = new Set([
+      'klb_2f', 'klb_3f', 'gordons_cafe', 'meeting_room', 'cib_lg11_ms', 'cib_lg1b_nmr'
+    ]);
+    if (!viewRoom || !ALLOWED_HUDDLE_ROOMS.has(viewRoom)) {
       return false;
     }
 
@@ -2649,14 +2901,14 @@ window.KLB = window.KLB || {};
 
     const candidates = pool.filter(h => {
       if (!h || h.roomId !== viewRoom) return false;
-      const lines = h.lines || h.turns || h.exchanges || [];
+      const lines = (h.lines || h.turns || h.exchanges || []).slice(0, 4);
       if (lines.length < 2) return false;
       const spkIds = [];
       for (const l of lines) {
         const sid = l.speakerId || l.id || l.charId;
         if (sid && !spkIds.includes(sid)) spkIds.push(sid);
       }
-      if (spkIds.length < 2 || spkIds.length > 3) return false;
+      if (spkIds.length < 2 || spkIds.length > 4) return false;
 
       for (const sid of spkIds) {
         if (busySpeakerIds.has(sid)) return false;
@@ -2675,11 +2927,17 @@ window.KLB = window.KLB || {};
     });
 
     if (!candidates.length) return false;
-    const nonRecent = candidates.filter(h => !recent.includes(h.id));
-    const chosenPool = nonRecent.length ? nonRecent : candidates;
-    const chosen = chosenPool[Math.floor(Math.random() * chosenPool.length)];
+    const curVibe = getCurrentDialogueVibe(state);
+    const chosen = pickFromShuffleBag(
+      state,
+      'huddles_' + viewRoom,
+      candidates,
+      h => h.id || (h.turns || h.lines || h.exchanges)?.[0]?.text,
+      { preferFn: h => Boolean(curVibe && h.vibe === curVibe) }
+    );
+    if (!chosen) return false;
 
-    const lines = (chosen.lines || chosen.turns || chosen.exchanges || []).slice(0, 3);
+    const lines = (chosen.lines || chosen.turns || chosen.exchanges || []).slice(0, 4);
     const spkIds = [];
     for (const l of lines) {
       const sid = l.speakerId || l.id || l.charId;
@@ -2708,7 +2966,8 @@ window.KLB = window.KLB || {};
     return true;
   }
 
-  function getSpeechLineForNpc(npc, preferCasualOverride = null) {
+  function getSpeechLineForNpc(npc, preferCasualOverride = null, state = null) {
+    if (!npc) return { text: 'Busy shift in KLB.', kind: 'casual' };
     const id = npc.id;
     const ext = window.KLB.SPEECH_LINES?.[id];
     const def = DEFAULT_SPEECH_LINES[id];
@@ -2725,7 +2984,7 @@ window.KLB = window.KLB || {};
     }
     if (!pool.length) pool = meta?.quotes || [];
     if (!pool.length) return { text: 'Busy shift in KLB.', kind: 'casual' };
-    const text = pool[Math.floor(Math.random() * pool.length)];
+    const text = pickFromShuffleBag(state, 'speech_' + id + '_' + kind, pool, s => s) || pool[0];
     return { text, kind };
   }
 
@@ -4024,13 +4283,34 @@ window.KLB = window.KLB || {};
         faceTowards(npc, partner.x, partner.y);
         if (partner.sim) applySocialInteraction(partner.sim, 6);
         if (npc.roomId === getViewRoom(state)) {
-          const line = getSpeechLineForNpc(npc, true).text;
-          const pairIds = [npc.id, partner.id].sort();
-          pushBubble(state, npc.id, npc.roomId, line, calcBubbleTtl(line), {
-            convoId: `social_${pairIds[0]}_${pairIds[1]}`,
-            partnerIds: pairIds
-          });
-          npc.currentTaskSpeech = line;
+          const activeBubble = (state.speechBubbles || []).some(b =>
+            b && b.roomId === npc.roomId && (
+              b.entityId === npc.id ||
+              b.entityId === partner.id ||
+              (Array.isArray(b.partnerIds) && (b.partnerIds.includes(npc.id) || b.partnerIds.includes(partner.id)))
+            )
+          ) || (state._queuedBubbles || []).some(qb =>
+            qb && qb.roomId === npc.roomId && (
+              qb.entityId === npc.id ||
+              qb.entityId === partner.id ||
+              (Array.isArray(qb.partnerIds) && (qb.partnerIds.includes(npc.id) || qb.partnerIds.includes(partner.id)))
+            )
+          );
+          if (!activeBubble) {
+            let pairConvo = null;
+            if (!(npc.huddleLockTimer > 0) && !(partner.huddleLockTimer > 0) && !partner.pendingRoomTravel) {
+              pairConvo = startPairConversation(state, npc.id, partner.id, npc.roomId);
+            }
+            if (!pairConvo) {
+              const line = getSpeechLineForNpc(npc, true, state).text;
+              const pairIds = [npc.id, partner.id].sort();
+              pushBubble(state, npc.id, npc.roomId, line, calcBubbleTtl(line), {
+                convoId: `social_${pairIds[0]}_${pairIds[1]}`,
+                partnerIds: pairIds
+              });
+              npc.currentTaskSpeech = line;
+            }
+          }
         }
       }
       sim.socialCooldownMins = 35;
@@ -5719,20 +5999,25 @@ window.KLB = window.KLB || {};
     const all = window.KLB.WHATSAPP_BANTER || [];
     if (!all.length) return;
     const curHour = state.timeMins / 60;
+    const curVibe = getCurrentDialogueVibe(state);
     state._usedBanter = state._usedBanter || {};
     const playerId = state.spectatorMode ? null : state.player?.id;
 
-    const timeMatched = all.filter((b, idx) =>
-      !state._usedBanter[idx] &&
+    const hourEligible = all.filter(b =>
+      b &&
       b.senderId !== playerId &&
-      (b.hourHint === undefined || b.hourHint === null || Math.abs(b.hourHint - curHour) <= 2.25)
+      (b.hourHint === undefined || b.hourHint === null || Math.abs(b.hourHint - curHour) <= 3.5)
     );
-    const pool = timeMatched.length
-      ? timeMatched
-      : all.filter(b => b.senderId !== playerId && (b.hourHint === undefined || Math.abs(b.hourHint - curHour) <= 3.5));
-    if (!pool.length) return;
+    const allEligible = hourEligible.length ? hourEligible : all.filter(b => b && b.senderId !== playerId);
+    if (!allEligible.length) return;
 
-    const item = pool[Math.floor(Math.random() * pool.length)];
+    const item = pickFromShuffleBag(state, 'whatsapp_banter', allEligible, b => b.text, {
+      preferFns: [
+        b => (b.hourHint === undefined || b.hourHint === null || Math.abs(b.hourHint - curHour) <= 2.25) && Boolean(curVibe && b.vibe === curVibe),
+        b => b.hourHint === undefined || b.hourHint === null || Math.abs(b.hourHint - curHour) <= 2.25
+      ]
+    });
+    if (!item) return;
     const origIdx = all.indexOf(item);
     if (origIdx >= 0) state._usedBanter[origIdx] = true;
 
@@ -5923,6 +6208,15 @@ window.KLB = window.KLB || {};
       };
       npc.currentTaskText = 'Smoke break outside KLB';
       moveNpcToRoomAndPoint(state, npc, 'offsite', 0, 0, false);
+      return;
+    }
+    const meta = window.KLB.CAST_BY_ID?.[npc.id];
+    if (meta?.fixedRoom && meta?.fixedPos && npc.roomId === meta.fixedRoom) {
+      if (Math.hypot(npc.x - meta.fixedPos.x, npc.y - meta.fixedPos.y) > 0.5) {
+        npc.path = findPathBFS(meta.fixedRoom, npc.x, npc.y, meta.fixedPos.x, meta.fixedPos.y, 45, state, npc.id);
+      } else {
+        npc.dir = meta.fixedPos.dir || npc.dir;
+      }
     }
   }
 
@@ -6418,19 +6712,35 @@ window.KLB = window.KLB || {};
   const AOE2_BANTER_LINES = {
     peter_szijj: [
       'Hungarian Hussar raids incoming, guard your lumberjacks!',
-      'Wait until Imperial Age, nobody survives these Paladin waves.'
+      'Wait until Imperial Age, nobody survives these Paladin waves.',
+      'Knights hitting your woodline in sixteen mins, brace yourself!',
+      'Leaving LotR synth on while my Magyars micro around your TC.',
+      'Forgot Loom again, praying nobody drushes my gold villagers!',
+      'Send the Stellaris lobby after this, my economy is booming.'
     ],
     andre_shamsabadi: [
       'Walling the choke point now — do NOT look at my eco score!',
-      'Quick poll: Black Forest treaty 20 mins or immediate feudal rush?'
+      'Quick poll: Black Forest treaty 20 mins or immediate feudal rush?',
+      'Who hid four trebuchets behind the Black Forest tree line?!',
+      'Saving my CK3 dynastic chaos until after we win this 2v2.',
+      'Ignore the sheep I accidentally deleted at minute two, focus!',
+      'Waistcoat on, Valorant warmup done, ready to rush Feudal!'
     ],
     antoine_maruani: [
       'Windows 95 Worms ninja-rope reflexes active, watch your sheep!',
-      'Stop booming behind stone walls and fight me mid-map!'
+      'Stop booming behind stone walls and fight me mid-map!',
+      'My Franks knights will reach your gold pile before lunch.',
+      'Dropping a Holy Hand Grenade straight onto your Worm squad!',
+      'One Castle drop on your berries and it is au revoir, mon gars.',
+      'Wait until you hear the #Hackerman monk wololo rush coming.'
     ],
     maximillian_lee: [
       'Massing 60 English longbowmen behind two layers of palisades.',
-      'Hold on, a giant 3F spider nearly walked across my mousepad!'
+      'Hold on, a giant 3F spider nearly walked across my mousepad!',
+      'Zero villagers on stone, pure silverback castle rush instead.',
+      'Longbow range beats your mangonels from across the Thames.',
+      'Wait, did someone just steal my two wild boars with a scout?!',
+      'Pass the Blue Party Mix, my Britons eco is finally ticking.'
     ]
   };
 
@@ -6460,12 +6770,13 @@ window.KLB = window.KLB || {};
             const pool = rot.length ? rot : avail;
             const spk = pool[Math.floor(Math.random() * pool.length)];
             const lines = window.KLB.COFFEE_QUARTET?.chatLines?.[spk.id] || [];
-            const line = lines.length ? lines[Math.floor(Math.random() * lines.length)] : getSpeechLineForNpc(spk, true).text;
+            const line = (lines.length && pickFromShuffleBag(state, 'coffee_' + spk.id, lines, s => s))
+              || getSpeechLineForNpc(spk, true, state).text;
             const partnerIds = cqNpcs.map(n => n.id).concat(playerHere ? [state.player.id] : []);
             pushBubble(state, spk.id, 'gordons_cafe', line, calcBubbleTtl(line), { convoId: 'coffee_quartet', partnerIds });
             spk.currentTaskSpeech = line;
             state._lastCoffeeSpeakerId = spk.id;
-            state._coffeeConvoCooldownSec = 2.2 + Math.random() * 1.8;
+            state._coffeeConvoCooldownSec = 3.6 + Math.random() * 2.2;
             activeConvoIds.add('coffee_quartet');
             partnerIds.forEach(id => busySpeakerIds.add(id));
           }
@@ -6493,12 +6804,12 @@ window.KLB = window.KLB || {};
             const pool = rot.length ? rot : avail;
             const spk = pool[Math.floor(Math.random() * pool.length)];
             const lines = AOE2_BANTER_LINES[spk.id] || ['GGs on Black Forest!'];
-            const line = lines[Math.floor(Math.random() * lines.length)];
+            const line = pickFromShuffleBag(state, 'aoe2_' + spk.id, lines, s => s) || lines[0];
             const partnerIds = gamingNpcs.map(n => n.id).concat(playerHere ? [state.player.id] : []);
             pushBubble(state, spk.id, viewRoom, line, calcBubbleTtl(line), { convoId: 'aoe2_lobby', partnerIds });
             spk.currentTaskSpeech = line;
             state._lastAoe2SpeakerId = spk.id;
-            state._aoe2ConvoCooldownSec = 2.2 + Math.random() * 1.8;
+            state._aoe2ConvoCooldownSec = 3.6 + Math.random() * 2.2;
             activeConvoIds.add('aoe2_lobby');
             partnerIds.forEach(id => busySpeakerIds.add(id));
           }
@@ -6527,12 +6838,12 @@ window.KLB = window.KLB || {};
             const rot = avail.filter(n => n.id !== state._lastLunchSpeakerId);
             const pool = rot.length ? rot : avail;
             const spk = pool[Math.floor(Math.random() * pool.length)];
-            const line = getSpeechLineForNpc(spk, true).text;
+            const line = getSpeechLineForNpc(spk, true, state).text;
             const partnerIds = lunchNpcs.map(n => n.id).concat(playerAtLunch ? [state.player.id] : []);
             pushBubble(state, spk.id, viewRoom, line, calcBubbleTtl(line), { convoId: 'lunch_convo', partnerIds });
             spk.currentTaskSpeech = line;
             state._lastLunchSpeakerId = spk.id;
-            state._lunchConvoCooldownSec = 2.2 + Math.random() * 1.8;
+            state._lunchConvoCooldownSec = 3.6 + Math.random() * 2.2;
           }
         }
       }
@@ -6653,7 +6964,7 @@ window.KLB = window.KLB || {};
       tickGroupRoomConversations(state, dt, viewRoom);
       state.huddleCooldownSec = (state.huddleCooldownSec ?? 2.5) - dt;
       if (state.huddleCooldownSec <= 0) {
-        state.huddleCooldownSec = 8 + Math.random() * 5;
+        state.huddleCooldownSec = 5.5 + Math.random() * 3.5;
         triggerGroupHuddle(state);
       }
 
@@ -6835,13 +7146,25 @@ window.KLB = window.KLB || {};
     if (specsOk && (hasRunning || (state.completedSteps || []).length > state.dayIdx)) {
       state.patience = Math.min(100, state.patience + 10);
       state.morale = Math.min(100, state.morale + 6);
-      const vLine = 'Good momentum! Keep those controls tight for Friday.';
+      const goodLines = [
+        'Good momentum! Keep those controls tight for Friday.',
+        'Tidy sash, specs on, reactions ticking. Carry on!',
+        'Strong bench pace today, looking sharp for Group Meeting.',
+        'Clean hood, clear storyline in sight. Keep pushing!'
+      ];
+      const vLine = pickFromShuffleBag(state, 'vijay_bench_good', goodLines, s => s) || goodLines[0];
       pushBubble(state, 'vijay_chudasama', 'klb_2f', vLine, calcBubbleTtl(vLine), convoMeta);
       if (callbacks.onToast) callbacks.onToast('Vijay impressed by your active, tidy hood! (+10 Patience, +6 Morale)');
     } else {
       state.patience = Math.max(0, state.patience - 10);
       state.morale = Math.max(0, state.morale - 6);
-      const vLine = 'That is suboptimal — one word. Pick up the pace!';
+      const subLines = [
+        'That is suboptimal — one word. Pick up the pace!',
+        'Idle hood, specs check, Friday 09:00 is rushing closer.',
+        'Needs real urgency here if we want four clean figures!',
+        'Slightly behind the curve today, tighten up the bench.'
+      ];
+      const vLine = pickFromShuffleBag(state, 'vijay_bench_suboptimal', subLines, s => s) || subLines[0];
       pushBubble(state, 'vijay_chudasama', 'klb_2f', vLine, calcBubbleTtl(vLine), convoMeta);
       if (callbacks.onToast) callbacks.onToast('Vijay raised an eyebrow at your bench progress (-10 Patience).');
     }
@@ -6875,7 +7198,8 @@ window.KLB = window.KLB || {};
   // ==================== 13. HEADLESS MULTI-WEEK AUTONOMOUS VERIFICATION ====================
   function runAutonomousVerification(numDays = 200) {
     const t0 = Date.now();
-    const state = createRunState('spectator', {}, { spectatorMode: true });
+    const state = createRunState('spectator', {}, { spectatorMode: true, headlessVerify: true });
+    state._headlessVerify = true;
     const rareCounts = {
       safety_sweep: 0,
       fire_alarm_test: 0,
@@ -7196,6 +7520,13 @@ window.KLB = window.KLB || {};
     PERMADEATH_MESSAGES,
     loadArchive,
     saveArchive,
+    loadDialogueHistory,
+    saveDialogueHistory,
+    resetDialogueHistory,
+    getCurrentDialogueVibe,
+    pickFromShuffleBag,
+    pickQuoteForNpc,
+    getSpeechLineForNpc,
     formatClock,
     formatHHMM,
     isCellWalkable,
@@ -7242,6 +7573,7 @@ window.KLB = window.KLB || {};
     triggerGroupHuddle,
     triggerLcmsDownHazard,
     triggerAoe2Event,
+    triggerAmbientBanter,
     getVisibleNPCReactions,
     getVisibleNPCActions,
     syncNPCSchedules,
