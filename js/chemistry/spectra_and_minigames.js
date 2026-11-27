@@ -1,4 +1,4 @@
-// KLB Simulator — Procedural Analytical Spectra/Gels, 5 Wet-Lab Minigames & 4-Slide Vijay Auditor
+// KLB Simulator — Procedural Analytical Spectra/Gels, 6 Wet-Lab Minigames & 4-Slide Vijay Auditor
 // Classic browser script attaching to window.KLB.Spectra, window.KLB.Minigames, window.KLB.SlideBuilder
 window.KLB = window.KLB || {};
 
@@ -1724,13 +1724,25 @@ window.KLB = window.KLB || {};
   };
 
   // =========================================================================
-  // B. 5 WET-LAB & CORRIDOR MICRO-MINIGAMES (window.KLB.Minigames)
+  // B. 6 WET-LAB & CORRIDOR MICRO-MINIGAMES (window.KLB.Minigames)
   // =========================================================================
   (() => {
     let activeCleanup = null;
+    const mgSpriteCache = new Map();
+
+    function getMgSprite(charId) {
+      if (typeof Image === 'undefined') return null;
+      const cleanId = String(charId || 'daniel_richards').replace(/[^a-z0-9_-]/gi, '') || 'daniel_richards';
+      if (mgSpriteCache.has(cleanId)) return mgSpriteCache.get(cleanId);
+      const img = new Image();
+      img.src = `assets/sprites/${cleanId}.png`;
+      mgSpriteCache.set(cleanId, img);
+      return img;
+    }
 
     function normalizeMinigameType(rawType) {
       const t = String(rawType || 'biotage').toLowerCase();
+      if (t.includes('buchi') || t.includes('rotavap') || t.includes('bump') || t.includes('evap') || t.includes('vac')) return 'buchi_bump';
       if (t.includes('biotage') || t.includes('column') || t.includes('uv')) return 'biotage';
       if (t.includes('gel') || t.includes('pipet') || t.includes('well')) return 'gel_load';
       if (t.includes('syringe') || t.includes('cryo') || t.includes('fridge') || t.includes('cold') || t.includes('78')) return 'syringe_cryo';
@@ -1739,7 +1751,13 @@ window.KLB = window.KLB || {};
       return 'biotage';
     }
 
-    function openModal(rawType, mountEl, config, onFinish) {
+    function openModal(arg1, arg2, config, onFinish) {
+      let rawType = arg1;
+      let mountEl = arg2;
+      if (typeof arg1 !== 'string' && typeof arg2 === 'string') {
+        mountEl = arg1;
+        rawType = arg2;
+      }
       if (typeof config === 'function') {
         onFinish = config;
         config = {};
@@ -1754,6 +1772,8 @@ window.KLB = window.KLB || {};
       }
 
       const type = normalizeMinigameType(rawType);
+      const isSyringeCryoBadge = type === 'syringe_cryo'
+        && /-78|cryo|dry[- ]?ice|acetone|bromomalonate/i.test(`${config.title || ''} ${config.subtitle || ''} ${config.tempLabel || ''}`);
       const metaByType = {
         biotage: {
           icon: 'flask-conical',
@@ -1771,7 +1791,7 @@ window.KLB = window.KLB || {};
         },
         syringe_cryo: {
           icon: 'snowflake',
-          badge: 'SYRINGE PUMP CONTROL',
+          badge: isSyringeCryoBadge ? 'CRYO SYRINGE PUMP (-78 °C)' : 'SYRINGE PUMP CONTROL',
           defaultTitle: 'Syringe Pump Flow Control',
           defaultSubtitle: 'Keep addition rate steady inside the target zone',
           controls: 'Hold [Space] or [Mouse] to increase feed; release to settle inside the green zone.',
@@ -1783,6 +1803,14 @@ window.KLB = window.KLB || {};
           defaultTitle: 'Catch Flasks and Lemons',
           controls: 'Move tray with [A/D], [Arrows], or [Mouse] — catch Flasks and Lemons, avoid silica dust.',
           durationSec: 8.0
+        },
+        buchi_bump: {
+          icon: 'gauge',
+          badge: 'BÜCHI ROTAVAP VACUUM',
+          defaultTitle: 'Büchi Bump-Trap Vacuum Control',
+          defaultSubtitle: 'Keep vacuum in the 220–420 mbar sweet spot without bumping product into the trap',
+          controls: 'Hold [Space] or [Left-Click] to pull vacuum; release to vent bleed valve before foam breaches the trap.',
+          durationSec: 13.0
         },
         alex_stealth: {
           icon: 'compass',
@@ -1816,7 +1844,7 @@ window.KLB = window.KLB || {};
 
         <section style="background:#070b14;border:1px solid #334155;border-radius:10px;padding:8px;position:relative;display:flex;justify-content:center;box-shadow:0 8px 24px rgba(2,6,23,0.6), inset 0 1px 0 rgba(148,163,184,0.08);">
           <canvas id="mg-canvas" width="680" height="310" style="width:100%;max-width:680px;height:auto;border-radius:6px;cursor:crosshair;"></canvas>
-          <div id="mg-finish-banner" style="display:none;position:absolute;inset:12px;background:rgba(9,14,26,0.90);border:1px solid #4b6394;border-radius:8px;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;box-shadow:0 16px 36px rgba(2,6,23,0.78), inset 0 1px 0 rgba(148,163,184,0.12);">
+          <div id="mg-finish-banner" style="display:none;position:absolute;inset:12px;background:rgba(9,14,26,0.90);border:1px solid #4b6394;border-radius:8px;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;cursor:pointer;box-shadow:0 16px 36px rgba(2,6,23,0.78), inset 0 1px 0 rgba(148,163,184,0.12);">
             <h3 id="mg-finish-title" style="margin:0;display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:600;color:#86efac;"></h3>
             <div id="mg-finish-sub" style="font-size:13px;color:#e2e8f0;max-width:480px;"></div>
             <button id="mg-finish-btn" class="rpg-btn primary" style="margin-top:4px;padding:7px 18px;font-size:13px;font-weight:500;">Continue [Space / Click]</button>
@@ -1854,6 +1882,7 @@ window.KLB = window.KLB || {};
         mouseX: W / 2,
         mouseY: H / 2,
         hasMouseMoved: false,
+        justMouseMoved: false,
         justPressedAction: false,
         justClickedOnCanvas: false
       };
@@ -1871,12 +1900,15 @@ window.KLB = window.KLB || {};
         return false;
       }
 
-      function updatePointerCoords(e) {
+      function updatePointerCoords(e, markMoved = false) {
         const rect = canvas.getBoundingClientRect();
         if (rect.width > 0 && rect.height > 0) {
           input.mouseX = clamp(((e.clientX - rect.left) / rect.width) * W, 0, W);
           input.mouseY = clamp(((e.clientY - rect.top) / rect.height) * H, 0, H);
-          input.hasMouseMoved = true;
+          if (markMoved) {
+            input.hasMouseMoved = true;
+            input.justMouseMoved = true;
+          }
         }
       }
 
@@ -1916,7 +1948,11 @@ window.KLB = window.KLB || {};
 
       function onMouseDown(e) {
         if (closed || e.button !== 0) return;
-        updatePointerCoords(e);
+        if (finished) {
+          if (performance.now() - finishedAt >= 450) finalizeAndExit();
+          return;
+        }
+        updatePointerCoords(e, false);
         input.mouseDown = true;
         input.justPressedAction = true;
         input.justClickedOnCanvas = true;
@@ -1924,7 +1960,7 @@ window.KLB = window.KLB || {};
 
       function onMouseMove(e) {
         if (closed) return;
-        updatePointerCoords(e);
+        updatePointerCoords(e, true);
       }
 
       function onMouseUp() {
@@ -1957,6 +1993,7 @@ window.KLB = window.KLB || {};
         window.removeEventListener('mouseup', onMouseUp);
         if (closeBtn) closeBtn.onclick = null;
         if (finishBtn) finishBtn.onclick = null;
+        if (finishBanner) finishBanner.onclick = null;
         if (type === 'alex_stealth' && window.KLB.Audio?.setRoomAmbience) {
           window.KLB.Audio.setRoomAmbience({ alexPursuitOn: false });
         }
@@ -1990,9 +2027,16 @@ window.KLB = window.KLB || {};
         finishTitle.style.color = cleanScore >= 80 ? '#86efac' : cleanScore >= 55 ? '#fde68a' : '#fca5a5';
         finishSub.textContent = summary;
         finishBanner.style.display = 'flex';
-        finishBtn.onclick = () => {
+        const handleBannerContinue = () => {
           if (performance.now() - finishedAt >= 450) finalizeAndExit();
         };
+        if (finishBanner) finishBanner.onclick = handleBannerContinue;
+        if (finishBtn) {
+          finishBtn.onclick = e => {
+            if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+            handleBannerContinue();
+          };
+        }
 
         // Auto-advance cleanly after 2.4s if player doesn't click earlier (guarded against modal abort/detach)
         autoCloseTimer = setTimeout(() => {
@@ -2024,6 +2068,7 @@ window.KLB = window.KLB || {};
           const stepState = runner.update(dt, elapsed, input, holding);
           input.justPressedAction = false;
           input.justClickedOnCanvas = false;
+          input.justMouseMoved = false;
 
           runner.render(ctx);
           scoreEl.textContent = `Score: ${clamp(Math.round(stepState.liveScore), 0, 100)}%`;
@@ -2256,41 +2301,48 @@ window.KLB = window.KLB || {};
 
     // -------------------- 2. SDS-PAGE MICROPIPETTE STEADY-HAND --------------------
     if (type === 'gel_load') {
-      const wells = [0, 1, 2, 3].map(i => ({
-        idx: i,
-        label: ['Well 1 (Ctrl)', 'Well 2 (Red.)', 'Well 3 (Crude)', 'Well 4 (Prod)'][i],
-        cx: 130 + i * 140,
-        halfW: 22,
-        filled: false,
-        punctured: false,
-        score: 0
-      }));
+      const defaultLaneLabels = ['Ctrl', 'Red.', 'Crude', 'Prod'];
+      const rawLaneLabels = Array.isArray(config?.laneLabels) ? config.laneLabels : [];
+      const wells = [0, 1, 2, 3].map(i => {
+        const shortLbl = String(rawLaneLabels[i] ?? defaultLaneLabels[i]).trim() || defaultLaneLabels[i];
+        const label = /^well\s*\d/i.test(shortLbl) ? shortLbl : `Well ${i + 1} (${shortLbl})`;
+        return {
+          idx: i,
+          shortLabel: shortLbl,
+          label,
+          cx: 130 + i * 140,
+          halfW: 22,
+          filled: false,
+          punctured: false,
+          score: 0
+        };
+      });
       let currentWell = 0;
+      let lastInputMode = 'keyboard';
       let baseX = wells[0].cx;
       let tipX = baseX;
       let dipAnim = 0;
 
       return {
         update(dt, elapsed, input) {
-          // Natural P20 pipette hand micro-tremor
-          const tremor = Math.sin(elapsed * 11.5) * 7.5 + Math.cos(elapsed * 19.3) * 4.2;
+          // Natural P20 pipette hand micro-tremor (peak 14.2 px)
+          const tremor = Math.sin(elapsed * 11.5) * 9.2 + Math.cos(elapsed * 19.3) * 5.0;
 
-          if (input.justClickedOnCanvas) {
-            // Snap baseX immediately to clicked pointer before evaluating dispense
-            baseX = clamp(input.mouseX, 60, W - 60);
-            tipX = clamp(baseX + tremor, 45, W - 45);
-          } else {
-            if (input.hasMouseMoved) {
-              baseX += (input.mouseX - baseX) * Math.min(1, dt * 14);
-            }
-            const moveDir = (input.keys.has('KeyD') || input.keys.has('ArrowRight') ? 1 : 0)
-                          - (input.keys.has('KeyA') || input.keys.has('ArrowLeft') ? 1 : 0);
-            if (moveDir !== 0) {
-              input.hasMouseMoved = false;
-              baseX = clamp(baseX + moveDir * 270 * dt, 60, W - 60);
-            }
-            tipX = clamp(baseX + tremor, 45, W - 45);
+          const moveDir = (input.keys.has('KeyD') || input.keys.has('ArrowRight') ? 1 : 0)
+                        - (input.keys.has('KeyA') || input.keys.has('ArrowLeft') ? 1 : 0);
+          if (moveDir !== 0) {
+            lastInputMode = 'keyboard';
+            input.hasMouseMoved = false;
+          } else if (input.justMouseMoved || input.hasMouseMoved) {
+            lastInputMode = 'mouse';
           }
+
+          if (lastInputMode === 'mouse') {
+            baseX += (clamp(input.mouseX, 60, W - 60) - baseX) * Math.min(1, dt * 13);
+          } else if (moveDir !== 0) {
+            baseX = clamp(baseX + moveDir * 270 * dt, 60, W - 60);
+          }
+          tipX = clamp(baseX + tremor, 45, W - 45);
 
           if (dipAnim > 0) dipAnim = Math.max(0, dipAnim - dt * 4);
 
@@ -2299,10 +2351,10 @@ window.KLB = window.KLB || {};
             const err = Math.abs(tipX - w.cx);
             dipAnim = 1.0;
             w.filled = true;
-            if (err <= w.halfW * 0.65) {
+            if (err <= w.halfW * 0.50) {
               w.score = 100 - Math.round((err / w.halfW) * 18);
               playSfxSafe('pipette');
-            } else if (err <= w.halfW * 1.18) {
+            } else if (err <= w.halfW * 1.12) {
               w.score = 68;
               w.punctured = true;
               playSfxSafe('warning');
@@ -2312,7 +2364,7 @@ window.KLB = window.KLB || {};
               playSfxSafe('error');
             }
             currentWell++;
-            if (currentWell < wells.length && !input.hasMouseMoved) {
+            if (currentWell < wells.length && lastInputMode === 'keyboard') {
               baseX = wells[currentWell].cx - 28;
             }
           }
@@ -2351,8 +2403,9 @@ window.KLB = window.KLB || {};
             ctx.strokeRect(w.cx - w.halfW, gelTop, w.halfW * 2, wellBottom - gelTop);
 
             if (isTarget) {
-              ctx.fillStyle = 'rgba(74, 222, 128, 0.25)';
-              ctx.fillRect(w.cx - 8, wellBottom - 18, 16, 18);
+              const cleanHalf = w.halfW * 0.50;
+              ctx.fillStyle = 'rgba(74, 222, 128, 0.28)';
+              ctx.fillRect(w.cx - cleanHalf, wellBottom - 18, cleanHalf * 2, 18);
               drawVectorDownArrow(ctx, w.cx - 46, gelTop - 13, 4.2, '#86efac');
               drawVectorDownArrow(ctx, w.cx + 46, gelTop - 13, 4.2, '#86efac');
               ctx.fillStyle = '#86efac';
@@ -2415,18 +2468,18 @@ window.KLB = window.KLB || {};
     if (type === 'syringe_cryo') {
       const cryoTitle = String(config?.title || 'Syringe Pump Flow Control').trim();
       const cryoSubtitle = String(config?.subtitle || 'Keep addition rate steady inside the target zone').trim();
-      const contextStr = `${cryoTitle} ${cryoSubtitle}`;
+      const rawRateCfg = String(config?.rateLabel || '').trim();
+      const rawTempCfg = String(config?.tempLabel || '').trim();
+      const contextStr = `${cryoTitle} ${cryoSubtitle} ${rawTempCfg}`;
       const isCryoContext = /-78|cryo|dry[- ]?ice|acetone|bromomalonate/i.test(contextStr);
 
       // Parse dynamic rateLabel / tempLabel if supplied
-      const rawRateCfg = String(config?.rateLabel || '').trim();
       const rateMatch = rawRateCfg.match(/^([+-]?\d+(?:\.\d+)?)\s*(.*)$/);
       const defaultRate = /emulsif|plga|dropwise/i.test(contextStr) ? 25.0 : (/herceptin|staple/i.test(contextStr) ? 4.0 : 5.7);
       const baseRateVal = rateMatch ? parseFloat(rateMatch[1]) : defaultRate;
       const rateUnit = (rateMatch && rateMatch[2]) ? rateMatch[2] : 'µL/min';
 
-      const rawTempCfg = String(config?.tempLabel || '').trim();
-      const tempMatch = rawTempCfg.match(/^([+-]?\d+(?:\.\d+)?)\s*(.*)$/);
+      const tempMatch = rawTempCfg.match(/([+-]?\d+(?:\.\d+)?)\s*(°C|C|K)?/i);
       const baseTempVal = tempMatch ? parseFloat(tempMatch[1]) : (isCryoContext ? -78 : 21);
       const tempUnit = (tempMatch && tempMatch[2]) ? tempMatch[2] : '°C';
 
@@ -2444,9 +2497,11 @@ window.KLB = window.KLB || {};
       let totalTime = 0;
       let wasInBand = true;
       let warnCooldown = 0;
+      let simElapsed = 0;
 
       return {
         update(dt, elapsed, _input, holding) {
+          simElapsed = elapsed;
           totalTime += dt;
           warnCooldown = Math.max(0, warnCooldown - dt);
           bandCenter = 0.5 + 0.24 * Math.sin(elapsed * freq1 + phase1) + 0.10 * Math.cos(elapsed * freq2 + phase2);
@@ -2471,28 +2526,40 @@ window.KLB = window.KLB || {};
           return { liveScore, done: false };
         },
         render(ctx) {
-          ctx.fillStyle = '#08111f';
+          ctx.fillStyle = isCryoContext ? '#061020' : '#08111f';
           ctx.fillRect(0, 0, W, H);
 
-          ctx.fillStyle = '#111e36';
-          ctx.strokeStyle = '#334155';
+          if (isCryoContext) {
+            const cryoPanelGrad = ctx.createLinearGradient(24, 24, 24, H - 24);
+            cryoPanelGrad.addColorStop(0, '#0c2340');
+            cryoPanelGrad.addColorStop(1, '#09192e');
+            ctx.fillStyle = cryoPanelGrad;
+            ctx.strokeStyle = '#38bdf8';
+          } else {
+            ctx.fillStyle = '#111e36';
+            ctx.strokeStyle = '#334155';
+          }
           ctx.lineWidth = 1.5;
           ctx.fillRect(24, 24, 308, H - 48);
           ctx.strokeRect(24, 24, 308, H - 48);
 
           const inBand = Math.abs(marker - bandCenter) <= bandHalf;
           const zoneStability = clamp(Math.round((1 - Math.abs(marker - bandCenter) / 0.5) * 100), 0, 100);
+          const liveRateVal = baseRateVal + (marker - bandCenter) * Math.max(1.2, Math.abs(baseRateVal) * 0.45);
           const rateDisp = (rawRateCfg && !rateMatch)
             ? rawRateCfg
-            : `${(baseRateVal + (marker - bandCenter) * Math.max(1.2, Math.abs(baseRateVal) * 0.45)).toFixed(baseRateVal >= 10 ? 1 : 2)} ${rateUnit}`;
+            : `${liveRateVal.toFixed(baseRateVal >= 10 ? 1 : 2)} ${rateUnit}`;
+          const liveTempVal = baseTempVal + (marker - bandCenter) * 10;
           const tempDisp = (rawTempCfg && !tempMatch)
-            ? rawTempCfg
-            : (rawTempCfg || isCryoContext)
-              ? `Temp: ${(baseTempVal + (marker - bandCenter) * 10).toFixed(1)} ${tempUnit}${rawTempCfg ? ` (${rawTempCfg})` : ''}`
-              : `Stability: ${zoneStability}%`;
+            ? `Bath: ${rawTempCfg}`
+            : rawTempCfg
+              ? `Temp: ${liveTempVal.toFixed(1)} ${tempUnit} (${rawTempCfg})`
+              : isCryoContext
+                ? `Cryo Bath: ${liveTempVal.toFixed(1)} ${tempUnit}`
+                : `Stability: ${zoneStability}%`;
 
           ctx.textAlign = 'left';
-          ctx.fillStyle = '#93c5fd';
+          ctx.fillStyle = isCryoContext ? '#7dd3fc' : '#93c5fd';
           ctx.font = 'bold 11.5px Consolas, monospace';
           const titleLines = drawWrappedCanvasText(ctx, cryoTitle, 36, 46, 284, 15, 2);
 
@@ -2501,21 +2568,103 @@ window.KLB = window.KLB || {};
           const subY = 46 + titleLines * 15 + 3;
           const subLines = drawWrappedCanvasText(ctx, cryoSubtitle, 36, subY, 284, 14, 2);
 
-          const metricY = Math.max(106, subY + subLines * 14 + 14);
+          const metricY = Math.max(104, subY + subLines * 14 + 12);
           ctx.fillStyle = inBand ? '#4ade80' : '#f87171';
-          ctx.font = 'bold 21px Consolas, monospace';
-          ctx.fillText(fitCanvasText(ctx, rateDisp, 284), 36, metricY);
+          ctx.font = 'bold 20px Consolas, monospace';
+          ctx.fillText(fitCanvasText(ctx, rateDisp, rawRateCfg && rateMatch ? 175 : 284), 36, metricY);
 
-          ctx.fillStyle = inBand ? '#38bdf8' : '#fbbf24';
-          ctx.font = 'bold 14px Consolas, monospace';
-          ctx.fillText(fitCanvasText(ctx, tempDisp, 284), 36, metricY + 26);
+          if (rawRateCfg && rateMatch) {
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 10px Consolas, monospace';
+            ctx.fillText(fitCanvasText(ctx, `Set: ${rawRateCfg}`, 110), 320, metricY - 2);
+            ctx.textAlign = 'left';
+          }
 
-          const vesselY = metricY + 42;
-          const vesselH = Math.max(46, 256 - vesselY);
-          ctx.fillStyle = inBand ? 'rgba(56, 189, 248, 0.28)' : 'rgba(239, 68, 68, 0.32)';
-          ctx.fillRect(72, vesselY, 200, vesselH);
-          ctx.strokeStyle = '#94a3b8';
-          ctx.strokeRect(72, vesselY, 200, vesselH);
+          ctx.fillStyle = isCryoContext ? (inBand ? '#7dd3fc' : '#fbbf24') : (inBand ? '#38bdf8' : '#fbbf24');
+          ctx.font = 'bold 13px Consolas, monospace';
+          ctx.fillText(fitCanvasText(ctx, tempDisp, 284), 36, metricY + 23);
+
+          const vesselY = metricY + 38;
+          const vesselH = Math.max(52, 254 - vesselY);
+          const vx = 58;
+          const vw = 240;
+
+          if (isCryoContext) {
+            // Frosty blue dry-ice/acetone Dewar cryo bath visual mode
+            const bathGrad = ctx.createLinearGradient(vx, vesselY, vx, vesselY + vesselH);
+            bathGrad.addColorStop(0, 'rgba(125, 211, 252, 0.24)');
+            bathGrad.addColorStop(0.45, 'rgba(14, 165, 233, 0.44)');
+            bathGrad.addColorStop(1, 'rgba(3, 105, 161, 0.65)');
+            ctx.fillStyle = bathGrad;
+            ctx.fillRect(vx, vesselY + 10, vw, vesselH - 10);
+
+            // Insulated Dewar rim + ice-crystal frost sheen
+            ctx.strokeStyle = '#7dd3fc';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(vx, vesselY + 10, vw, vesselH - 10);
+
+            // Floating frosty dry-ice chunks & rising cold vapor plumes
+            for (let i = 0; i < 6; i++) {
+              const bx = vx + 18 + i * 38 + Math.sin(simElapsed * 1.8 + i) * 3;
+              const by = vesselY + 16 + (i % 2) * 5;
+              ctx.fillStyle = 'rgba(224, 242, 254, 0.72)';
+              ctx.fillRect(bx, by, 14, 6);
+              const vaporLift = ((simElapsed * 16 + i * 11) % 16);
+              ctx.fillStyle = `rgba(186, 230, 253, ${(0.38 - vaporLift / 48).toFixed(2)})`;
+              ctx.beginPath();
+              ctx.arc(bx + 7, vesselY + 10 - vaporLift * 0.65, 5 + (i % 2) * 2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Submerged reaction flask inside the cryo bath
+            const fx = vx + vw / 2;
+            const fy = vesselY + vesselH - 22;
+            ctx.fillStyle = inBand ? 'rgba(186, 230, 253, 0.35)' : 'rgba(248, 113, 113, 0.48)';
+            ctx.beginPath();
+            ctx.arc(fx, fy, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = inBand ? '#e0f2fe' : '#fca5a5';
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+
+            // Overhead syringe needle + animated reagent drop
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(fx, vesselY - 6);
+            ctx.lineTo(fx, vesselY + 12);
+            ctx.stroke();
+            const dropFrac = (simElapsed * (1.5 + marker * 2.2)) % 1;
+            ctx.fillStyle = inBand ? '#38bdf8' : '#fb923c';
+            ctx.beginPath();
+            ctx.arc(fx, vesselY + 14 + dropFrac * (fy - vesselY - 22), 2.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#bae6fd';
+            ctx.font = 'bold 9.5px Consolas, monospace';
+            ctx.fillText('CRYO BATH', vx + 8, vesselY + vesselH - 6);
+          } else {
+            // Standard bench syringe-pump vessel
+            ctx.fillStyle = inBand ? 'rgba(56, 189, 248, 0.25)' : 'rgba(239, 68, 68, 0.30)';
+            ctx.fillRect(vx + 14, vesselY + 8, vw - 28, vesselH - 8);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(vx + 14, vesselY + 8, vw - 28, vesselH - 8);
+
+            const fx = vx + vw / 2;
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(fx, vesselY - 4);
+            ctx.lineTo(fx, vesselY + 12);
+            ctx.stroke();
+            const dropFrac = (simElapsed * (1.5 + marker * 2.2)) % 1;
+            ctx.fillStyle = inBand ? '#4ade80' : '#fb923c';
+            ctx.beginPath();
+            ctx.arc(fx, vesselY + 14 + dropFrac * Math.max(12, vesselH - 26), 2.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
 
           if (inBand) {
             drawVectorCheck(ctx, 44, 270, 4.8, '#4ade80');
@@ -2717,9 +2866,735 @@ window.KLB = window.KLB || {};
       };
     }
 
-    // -------------------- 5. 17:18 CORRIDOR EVASION (ALEX KING) --------------------
-    const player = { x: 64, y: 165, r: 12 };
-    const alex = { x: 355, y: 155, angle: Math.PI, sweepDir: 1, coneLen: 175, coneHalf: 0.44 };
+    // -------------------- 5. BÜCHI ROTAVAP BUMP-TRAP VACUUM CONTROL --------------------
+    if (type === 'buchi_bump') {
+      const buchiTitle = String(config?.title || 'Büchi Bump-Trap Vacuum Control').trim();
+      const solventName = String(config?.solvent || 'DCM / EtOAc').trim();
+      let pressure = 850; // mbar (range 120..850)
+      let evapPct = 0; // 0..100%
+      let foam = 0.06; // 0..1.0 (>= 1.0 triggers BUMP!)
+      let bumps = 0;
+      let sweetTime = 0;
+      let finishElapsed = totalSec;
+      let completed = false;
+      let flaskAngle = 0;
+      let simElapsed = 0;
+      let bumpFlash = 0;
+      let trapStain = 0;
+      let dripOffset = 0;
+      let lastEvapRate = 0;
+      let lastHolding = false;
+      let sfxCooldown = 0;
+
+      const splashDrops = [];
+      const boilSeeds = Array.from({ length: 14 }, (_, idx) => ({
+        phase: (idx * 0.37) % 1,
+        xOff: ((idx * 19) % 44) - 22,
+        r: 1.8 + (idx % 3) * 1.05
+      }));
+
+      function computeFinalScore() {
+        const speedBonus = evapPct >= 100 ? clamp((totalSec - finishElapsed) * 2.2, 0, 10) : 0;
+        const base = evapPct >= 100
+          ? 90 + speedBonus
+          : 22 + (evapPct / 100) * 66 + clamp(sweetTime * 0.6, 0, 4);
+        return clamp(Math.round(base - bumps * 22), 0, 100);
+      }
+
+      return {
+        update(dt, elapsed, _input, holding) {
+          simElapsed = elapsed;
+          lastHolding = Boolean(holding);
+          sfxCooldown = Math.max(0, sfxCooldown - dt);
+          bumpFlash = Math.max(0, bumpFlash - dt * 1.4);
+
+          // Hold Space or Left-Click pulls vacuum (850 -> 120 mbar); release vents bleed valve
+          const vacRate = holding ? -310 : 235;
+          pressure = clamp(pressure + vacRate * dt, 120, 850);
+
+          // Evaporation rate + foam dynamics across vacuum regimes
+          const inSweetZone = pressure >= 220 && pressure <= 420;
+          let evapRate = 0.4;
+          if (inSweetZone) {
+            const centerFactor = 1 - Math.abs(pressure - 320) / 100;
+            evapRate = 12.2 + centerFactor * 2.4; // Sweet-zone +evap bonus
+            sweetTime += dt;
+            // Zero foam surge inside sweet zone; settles smoothly toward calm meniscus
+            if (foam > 0.16) foam = Math.max(0.16, foam - dt * 0.28);
+            else foam = clamp(foam + (0.14 - foam) * Math.min(1, dt * 3), 0.06, 0.20);
+          } else if (pressure < 200) {
+            // Below 200 mbar: foam surges rapidly up into the glass bump trap!
+            evapRate = 10.2;
+            const surgeDepth = (200 - pressure) / 80; // 0..1
+            foam += (0.60 + surgeDepth * 0.88) * dt;
+          } else if (pressure < 220) {
+            // Borderline transition zone (200..220 mbar)
+            evapRate = 11.0;
+            foam += (holding ? 0.16 : -0.22) * dt;
+            foam = clamp(foam, 0.08, 0.99);
+          } else {
+            // Gentle/high pressure (> 420 mbar): slower distillation, foam settles rapidly
+            if (pressure <= 650) {
+              evapRate = 0.8 + ((650 - pressure) / 230) * 6.4;
+            } else {
+              evapRate = 0.4;
+            }
+            const settleRate = 0.48 + ((pressure - 420) / 430) * 0.48;
+            foam = Math.max(0.05, foam - settleRate * dt);
+          }
+
+          lastEvapRate = evapRate;
+          evapPct = clamp(evapPct + evapRate * dt, 0, 100);
+          flaskAngle += dt * (2.6 + (evapRate / 14) * 2.2);
+          dripOffset = (dripOffset + dt * (0.4 + evapRate * 0.19)) % 1;
+
+          // Update animated splash droplets inside bump trap
+          for (let i = splashDrops.length - 1; i >= 0; i--) {
+            const d = splashDrops[i];
+            d.life -= dt * 1.4;
+            d.x += d.vx * dt;
+            d.y += d.vy * dt;
+            d.vy += 45 * dt;
+            if (d.life <= 0) splashDrops.splice(i, 1);
+          }
+
+          // Check bump-trap breach!
+          if (foam >= 1.0) {
+            bumps += 1;
+            pressure = 700; // Vent reset to 700 mbar
+            foam = 0.22;
+            bumpFlash = 1.0;
+            trapStain = Math.min(1, trapStain + 0.42);
+            playSfxSafe('warning');
+            for (let k = 0; k < 12; k++) {
+              const ang = (k / 12) * Math.PI * 2 + 0.2;
+              const spd = 24 + (k % 4) * 14;
+              splashDrops.push({
+                x: (k % 3 - 1) * 4,
+                y: 0,
+                vx: Math.cos(ang) * spd,
+                vy: Math.sin(ang) * spd - 12,
+                r: 2.0 + (k % 3) * 0.9,
+                life: 1.0
+              });
+            }
+          } else if (holding && sfxCooldown <= 0) {
+            sfxCooldown = 1.15;
+            playSfxSafe(inSweetZone ? 'buchi' : 'pipette');
+          }
+
+          if (evapPct >= 100) {
+            evapPct = 100;
+            completed = true;
+            finishElapsed = elapsed;
+            return { liveScore: computeFinalScore(), done: true };
+          }
+
+          const expectedPace = elapsed > 1.5 ? Math.min(100, (elapsed - 1.0) * 9.5) : 0;
+          const paceRatio = expectedPace > 1 ? clamp(evapPct / expectedPace, 0, 1) : 1;
+          const liveScore = clamp(Math.round(42 + paceRatio * 50 + (evapPct / 100) * 8 - bumps * 22), 0, 100);
+          return { liveScore, done: false };
+        },
+        render(ctx) {
+          ctx.fillStyle = '#08111f';
+          ctx.fillRect(0, 0, W, H);
+
+          // Subtle lab blueprint grid
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
+          ctx.lineWidth = 1;
+          for (let gx = 20; gx < 444; gx += 32) {
+            ctx.beginPath(); ctx.moveTo(gx, 10); ctx.lineTo(gx, 282); ctx.stroke();
+          }
+          for (let gy = 20; gy < 282; gy += 32) {
+            ctx.beginPath(); ctx.moveTo(12, gy); ctx.lineTo(444, gy); ctx.stroke();
+          }
+
+          // Fume-hood bench deck
+          ctx.fillStyle = '#142033';
+          ctx.fillRect(0, 282, 446, H - 282);
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(0, 282);
+          ctx.lineTo(446, 282);
+          ctx.stroke();
+
+          // Top apparatus title bar
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#93c5fd';
+          ctx.font = 'bold 11px Consolas, monospace';
+          ctx.fillText(`KLB 2F BÜCHI R-300  |  ${solventName}`, 16, 24);
+
+          // ---- 1. ELEVATOR STAND & MOTOR DRIVE UNIT ----
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(204, 270, 74, 12);
+          ctx.strokeStyle = '#475569';
+          ctx.strokeRect(204, 270, 74, 12);
+
+          const mastGrad = ctx.createLinearGradient(228, 0, 252, 0);
+          mastGrad.addColorStop(0, '#334155');
+          mastGrad.addColorStop(0.45, '#64748b');
+          mastGrad.addColorStop(1, '#1e293b');
+          ctx.fillStyle = mastGrad;
+          ctx.fillRect(230, 56, 20, 214);
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(230, 56, 20, 214);
+
+          // ---- 2. WARM SHIMMERING 40 °C WATER BATH ----
+          const bathX = 34, bathY = 214, bathW = 154, bathH = 68;
+          // Rising thermal shimmer wisps above warm water bath
+          for (let i = 0; i < 5; i++) {
+            const sx = bathX + 20 + i * 28 + Math.sin(simElapsed * 2.4 + i) * 4;
+            const rise = (simElapsed * 18 + i * 9) % 24;
+            ctx.strokeStyle = `rgba(251, 191, 36, ${(0.28 - rise / 95).toFixed(2)})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(sx, bathY - 2 - rise * 0.4);
+            ctx.quadraticCurveTo(sx + 4, bathY - 9 - rise * 0.6, sx - 2, bathY - 16 - rise * 0.8);
+            ctx.stroke();
+          }
+
+          // Water bath interior warm fluid
+          const waterGrad = ctx.createLinearGradient(bathX, bathY, bathX, bathY + 46);
+          waterGrad.addColorStop(0, 'rgba(56, 189, 248, 0.34)');
+          waterGrad.addColorStop(0.55, 'rgba(14, 165, 233, 0.44)');
+          waterGrad.addColorStop(1, 'rgba(245, 158, 11, 0.36)');
+          ctx.fillStyle = waterGrad;
+          ctx.fillRect(bathX + 6, bathY + 4, bathW - 12, 42);
+
+          // Animated shimmering water surface wave
+          ctx.strokeStyle = 'rgba(254, 243, 199, 0.65)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          for (let wx = bathX + 6; wx <= bathX + bathW - 6; wx += 6) {
+            const wy = bathY + 7 + Math.sin(wx * 0.14 + simElapsed * 4.5) * 1.8;
+            if (wx === bathX + 6) ctx.moveTo(wx, wy);
+            else ctx.lineTo(wx, wy);
+          }
+          ctx.stroke();
+
+          // ---- 3. TILTED SPINNING ROUND-BOTTOM FLASK, NECK & GLASS BUMP TRAP ----
+          const flaskCx = 112;
+          const flaskCy = 208;
+          const tiltRad = -0.59; // tilted up-right into rotary drive
+
+          ctx.save();
+          ctx.translate(flaskCx, flaskCy);
+          ctx.rotate(tiltRad);
+
+          // Neck + Bump-Trap interior path (in local coordinates along +X axis)
+          const trapCx = 86;
+          const trapRx = 26;
+          const trapRy = 20;
+          const breachX = 114;
+
+          // Draw rising frothy foam clipped to neck + bump trap
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(34, -9, 28, 18); // flask neck
+          ctx.ellipse(trapCx, 0, trapRx - 1.5, trapRy - 1.5, 0, 0, Math.PI * 2); // bump trap bulb
+          ctx.rect(108, -8, 22, 16); // upper vapor duct
+          ctx.clip();
+
+          // Persistent amber residue stain on trap glass after any bump
+          if (trapStain > 0) {
+            ctx.fillStyle = `rgba(245, 158, 11, ${(trapStain * 0.42).toFixed(2)})`;
+            ctx.beginPath();
+            ctx.ellipse(trapCx + 4, 0, trapRx - 2, trapRy - 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Rising foam column from d = 34 to d = breachX (114)
+          const foamTopX = 34 + clamp(foam, 0, 1.05) * (breachX - 34);
+          const foamGrad = ctx.createLinearGradient(34, 0, foamTopX + 8, 0);
+          foamGrad.addColorStop(0, 'rgba(251, 191, 36, 0.82)');
+          foamGrad.addColorStop(0.55, 'rgba(254, 243, 199, 0.88)');
+          foamGrad.addColorStop(1, foam > 0.65 ? 'rgba(254, 202, 202, 0.94)' : 'rgba(255, 255, 255, 0.92)');
+          ctx.fillStyle = foamGrad;
+          ctx.fillRect(34, -22, Math.max(0, foamTopX - 34), 44);
+
+          // Effervescent foam bubbles inside neck & trap
+          const bubbleCount = Math.floor(6 + foam * 18);
+          for (let b = 0; b < bubbleCount; b++) {
+            const frac = ((b / Math.max(1, bubbleCount)) + (simElapsed * 0.35)) % 1;
+            const bx = 36 + frac * Math.max(6, foamTopX - 36);
+            const spread = bx > 60 && bx < 110 ? 14 : 6;
+            const by = Math.sin(b * 3.7 + simElapsed * 6.5) * spread;
+            const br = 2.0 + (b % 3) * 1.15;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.78)';
+            ctx.beginPath();
+            ctx.arc(bx, by, br, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(217, 119, 6, 0.35)';
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+          }
+
+          // Bump splash droplets flying inside bump trap
+          splashDrops.forEach(d => {
+            ctx.fillStyle = `rgba(251, 146, 60, ${clamp(d.life, 0, 1).toFixed(2)})`;
+            ctx.beginPath();
+            ctx.arc(trapCx + d.x, d.y, d.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.restore();
+
+          // Glass outline of neck, bump trap bulb, and upper duct
+          ctx.strokeStyle = bumpFlash > 0.1 ? '#ef4444' : (foam > 0.65 ? '#fbbf24' : '#cbd5e1');
+          ctx.lineWidth = bumpFlash > 0.1 ? 2.4 : 1.7;
+          ctx.fillStyle = 'rgba(186, 230, 253, 0.10)';
+          // Flask neck tube
+          ctx.fillRect(34, -9, 28, 18);
+          ctx.strokeRect(34, -9, 28, 18);
+          // Bump trap bulb
+          ctx.beginPath();
+          ctx.ellipse(trapCx, 0, trapRx, trapRy, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          // Upper vapor duct into drive hub
+          ctx.fillRect(110, -8, 30, 16);
+          ctx.strokeRect(110, -8, 30, 16);
+
+          // Red breach line across top of bump trap
+          ctx.save();
+          ctx.setLineDash([3, 3]);
+          ctx.strokeStyle = '#f87171';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(breachX - 2, -16);
+          ctx.lineTo(breachX - 2, 16);
+          ctx.stroke();
+          ctx.restore();
+
+          // Spinning round-bottom flask glass cavity + swirling shrinking organic liquid
+          const flaskR = 39;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(0, 0, flaskR - 2, 0, Math.PI * 2);
+          ctx.clip();
+
+          // Un-rotate slightly so liquid gravity pools at the true bottom of the flask!
+          ctx.rotate(-tiltRad);
+          const fillFrac = clamp(0.80 - (evapPct / 100) * 0.66, 0.12, 0.80);
+          const liqTopY = flaskR - fillFrac * (flaskR * 1.85);
+          const liqGrad = ctx.createLinearGradient(0, liqTopY, 0, flaskR);
+          liqGrad.addColorStop(0, '#fbbf24');
+          liqGrad.addColorStop(0.55, '#d97706');
+          liqGrad.addColorStop(1, '#92400e');
+          ctx.fillStyle = liqGrad;
+          ctx.beginPath();
+          ctx.moveTo(-flaskR - 4, flaskR + 4);
+          for (let lx = -flaskR - 4; lx <= flaskR + 4; lx += 5) {
+            const swirlAmp = 2.6 + (lastEvapRate / 14) * 2.4;
+            const ly = liqTopY + Math.sin(lx * 0.15 + flaskAngle * 2.1) * swirlAmp;
+            ctx.lineTo(lx, ly);
+          }
+          ctx.lineTo(flaskR + 4, flaskR + 4);
+          ctx.closePath();
+          ctx.fill();
+
+          // Swirling highlight streak across liquid surface
+          ctx.strokeStyle = 'rgba(254, 243, 199, 0.72)';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.ellipse(Math.sin(flaskAngle) * 8, liqTopY + 3, 18, 3.2, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Boiling bubbles inside flask liquid
+          const boilIntensity = clamp((550 - pressure) / 380, 0.15, 1);
+          boilSeeds.forEach(bs => {
+            const cyc = (bs.phase + simElapsed * (0.6 + boilIntensity * 1.6)) % 1;
+            const by = flaskR - 4 - cyc * Math.max(8, flaskR - liqTopY + 6);
+            const bx = bs.xOff * 0.85 + Math.sin(flaskAngle + bs.phase * 9) * 5;
+            if (by >= liqTopY - 6) {
+              ctx.fillStyle = `rgba(254, 249, 195, ${(0.25 + boilIntensity * 0.55).toFixed(2)})`;
+              ctx.beginPath();
+              ctx.arc(bx, by, bs.r * (0.65 + boilIntensity * 0.45), 0, Math.PI * 2);
+              ctx.fill();
+            }
+          });
+          ctx.restore();
+
+          // Flask outer glass contour + rotating graduation arcs
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, flaskR, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Rotating swirl marks on the glass body to make rotation unmistakable
+          ctx.strokeStyle = 'rgba(224, 242, 254, 0.45)';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(0, 0, flaskR - 7, flaskAngle, flaskAngle + 0.95);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(0, 0, flaskR - 7, flaskAngle + Math.PI, flaskAngle + Math.PI + 0.75);
+          ctx.stroke();
+          ctx.restore();
+
+          // Water bath stainless front shell (drawn OVER lower submerged flask for 3D immersion!)
+          const shellGrad = ctx.createLinearGradient(bathX, bathY + 24, bathX, bathY + bathH);
+          shellGrad.addColorStop(0, '#334155');
+          shellGrad.addColorStop(1, '#1e293b');
+          ctx.fillStyle = shellGrad;
+          ctx.fillRect(bathX, bathY + 26, bathW, bathH - 26);
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 1.6;
+          ctx.strokeRect(bathX, bathY, bathW, bathH);
+
+          // Bath heater readout screen
+          ctx.fillStyle = '#090f1d';
+          ctx.fillRect(bathX + 12, bathY + 38, 62, 20);
+          ctx.strokeStyle = '#475569';
+          ctx.strokeRect(bathX + 12, bathY + 38, 62, 20);
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 11px Consolas, monospace';
+          ctx.fillText('40.0 °C', bathX + 18, bathY + 52);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 9.5px Consolas, monospace';
+          ctx.fillText('WATER BATH', bathX + 86, bathY + 52);
+
+          // ---- 4. MOTORIZED ROTARY DRIVE HOUSING ----
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(216, 102, 50, 48);
+          ctx.fillStyle = '#14b8a6';
+          ctx.fillRect(216, 102, 50, 7);
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(216, 102, 50, 48);
+          // Spinning rotor indicator dot
+          const rotorCx = 241, rotorCy = 128;
+          ctx.strokeStyle = '#5eead4';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(rotorCx, rotorCy, 9, flaskAngle, flaskAngle + Math.PI * 1.35);
+          ctx.stroke();
+          ctx.fillStyle = '#cbd5e1';
+          ctx.font = 'bold 8.5px Consolas, monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('120 RPM', rotorCx, 146);
+
+          // ---- 5. SPIRAL DIAGONAL CONDENSER (-4 °C COIL) ----
+          const condX0 = 266, condY0 = 122;
+          const condAng = -0.56;
+          const condLen = 148;
+          ctx.save();
+          ctx.translate(condX0, condY0);
+          ctx.rotate(condAng);
+
+          // Outer frosted glass condenser jacket
+          ctx.fillStyle = 'rgba(125, 211, 252, 0.14)';
+          ctx.fillRect(0, -18, condLen, 36);
+          if (lastEvapRate > 2) {
+            ctx.fillStyle = `rgba(186, 230, 253, ${clamp(lastEvapRate / 38, 0.06, 0.30).toFixed(2)})`;
+            ctx.fillRect(6, -15, condLen - 12, 30);
+          }
+
+          // Spiral cooling coil loops inside jacket
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2.1;
+          ctx.beginPath();
+          for (let sx = 10; sx <= condLen - 12; sx += 2) {
+            const sy = Math.sin((sx - 10) * 0.28) * 11;
+            if (sx === 10) ctx.moveTo(sx, sy);
+            else ctx.lineTo(sx, sy);
+          }
+          ctx.stroke();
+
+          // Jacket contour & top vacuum port
+          ctx.strokeStyle = '#93c5fd';
+          ctx.lineWidth = 1.6;
+          ctx.strokeRect(0, -18, condLen, 36);
+          ctx.fillStyle = lastHolding ? '#22c55e' : '#64748b';
+          ctx.fillRect(condLen, -5, 10, 10);
+          ctx.restore();
+
+          // Condenser spout + animated dripping solvent into receiving flask
+          const spoutX = 360, spoutY = 84;
+          ctx.strokeStyle = '#93c5fd';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(spoutX, spoutY);
+          ctx.lineTo(spoutX, spoutY + 32);
+          ctx.stroke();
+
+          // Dripping droplets falling when evaporating
+          if (lastEvapRate > 0.6) {
+            const dropCount = lastEvapRate > 9 ? 3 : (lastEvapRate > 4 ? 2 : 1);
+            for (let d = 0; d < dropCount; d++) {
+              const frac = (dripOffset + d / dropCount) % 1;
+              const dy = spoutY + 34 + frac * 84;
+              ctx.fillStyle = '#7dd3fc';
+              ctx.beginPath();
+              ctx.arc(spoutX, dy, 2.7, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // ---- 6. RECEIVING FLASK (FILLS WITH CONDENSED SOLVENT) ----
+          const recCx = 360, recCy = 238, recR = 34;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(recCx, recCy, recR - 2, 0, Math.PI * 2);
+          ctx.clip();
+          const distFill = clamp(0.06 + (evapPct / 100) * 0.78, 0.06, 0.84);
+          const distTopY = recCy + recR - distFill * (recR * 1.9);
+          const distGrad = ctx.createLinearGradient(0, distTopY, 0, recCy + recR);
+          distGrad.addColorStop(0, 'rgba(125, 211, 252, 0.75)');
+          distGrad.addColorStop(1, 'rgba(14, 165, 233, 0.88)');
+          ctx.fillStyle = distGrad;
+          ctx.fillRect(recCx - recR, distTopY, recR * 2, recR * 2);
+          ctx.strokeStyle = 'rgba(224, 242, 254, 0.85)';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(recCx - recR, distTopY);
+          ctx.lineTo(recCx + recR, distTopY);
+          ctx.stroke();
+          ctx.restore();
+
+          // Receiving flask neck + glass outline + cradle ring
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1.8;
+          ctx.strokeRect(recCx - 7, recCy - recR - 14, 14, 16);
+          ctx.beginPath();
+          ctx.arc(recCx, recCy, recR, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(recCx - 24, 272, 48, 10);
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 9.5px Consolas, monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('RECEIVING FLASK', recCx, 297);
+
+          // Bump-trap callout & live warning banner
+          ctx.fillStyle = foam > 0.65 ? '#fde047' : '#cbd5e1';
+          ctx.font = 'bold 10px Consolas, monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('BUMP TRAP', 152, 114);
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.55)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(156, 118);
+          ctx.lineTo(176, 142);
+          ctx.stroke();
+
+          if (bumpFlash > 0.05) {
+            ctx.fillStyle = 'rgba(185, 28, 28, 0.90)';
+            ctx.fillRect(14, 34, 418, 26);
+            ctx.strokeStyle = '#fca5a5';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(14, 34, 418, 26);
+            drawVectorWarning(ctx, 30, 47, 5, '#fde047', '#7f1d1d');
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px Consolas, monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('BUMP! -22% YIELD PENALTY (VACUUM RESET 700 mbar)', 42, 51);
+          } else if (foam > 0.62) {
+            ctx.fillStyle = 'rgba(146, 64, 14, 0.88)';
+            ctx.fillRect(14, 34, 304, 24);
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 1.4;
+            ctx.strokeRect(14, 34, 304, 24);
+            drawVectorWarning(ctx, 29, 46, 4.5, '#fde047', '#451a03');
+            ctx.fillStyle = '#fef3c7';
+            ctx.font = 'bold 10.5px Consolas, monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('FOAM RISING INTO TRAP — RELEASE TO VENT!', 40, 50);
+          }
+
+          // ---- 7. RIGHT INSTRUMENT PANEL: LIVE mbar DIAL + EVAPORATION GAUGE ----
+          const px = 454, py = 12, pw = 214, ph = H - 24;
+          ctx.fillStyle = '#0d1729';
+          ctx.fillRect(px, py, pw, ph);
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(px, py, pw, ph);
+
+          const dialCx = px + pw / 2;
+          const dialCy = 107;
+          const dialR = 56;
+          const startAng = Math.PI * 0.80;
+          const endAng = Math.PI * 2.20;
+          const arcSpan = endAng - startAng;
+          const logMax = Math.log(850 / 120);
+          const mbarToAng = p => startAng + (Math.log(850 / clamp(p, 120, 850)) / logMax) * arcSpan;
+
+          // Dial title
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 10px Consolas, monospace';
+          ctx.fillText('VACUUM CONTROLLER', dialCx, 27);
+
+          // Dial background track
+          ctx.lineWidth = 10;
+          ctx.lineCap = 'butt';
+          ctx.strokeStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.arc(dialCx, dialCy, dialR, startAng, endAng);
+          ctx.stroke();
+
+          // Highlighted sweet zone arc (420..220 mbar)
+          ctx.strokeStyle = '#22c55e';
+          ctx.beginPath();
+          ctx.arc(dialCx, dialCy, dialR, mbarToAng(420), mbarToAng(220));
+          ctx.stroke();
+
+          // Transition caution arc (220..200 mbar)
+          ctx.strokeStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.arc(dialCx, dialCy, dialR, mbarToAng(220), mbarToAng(200));
+          ctx.stroke();
+
+          // Crimson bump-surge danger arc (200..120 mbar)
+          ctx.strokeStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(dialCx, dialCy, dialR, mbarToAng(200), mbarToAng(120));
+          ctx.stroke();
+
+          // Dial tick labels (850, 600, 420, 220, 120)
+          ctx.font = 'bold 8.5px Consolas, monospace';
+          ctx.fillStyle = '#94a3b8';
+          [850, 600, 420, 220, 120].forEach(val => {
+            const a = mbarToAng(val);
+            const tx0 = dialCx + Math.cos(a) * (dialR - 7);
+            const ty0 = dialCy + Math.sin(a) * (dialR - 7);
+            const tx1 = dialCx + Math.cos(a) * (dialR + 5);
+            const ty1 = dialCy + Math.sin(a) * (dialR + 5);
+            ctx.strokeStyle = val === 420 || val === 220 ? '#86efac' : (val === 120 ? '#fca5a5' : '#64748b');
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(tx0, ty0);
+            ctx.lineTo(tx1, ty1);
+            ctx.stroke();
+
+            const lx = dialCx + Math.cos(a) * (dialR + 15);
+            const ly = dialCy + Math.sin(a) * (dialR + 15) + 3;
+            ctx.fillStyle = val === 420 || val === 220 ? '#86efac' : (val === 120 ? '#fca5a5' : '#94a3b8');
+            ctx.fillText(String(val), lx, ly);
+          });
+
+          // Live dial needle
+          const needleAng = mbarToAng(pressure);
+          ctx.strokeStyle = '#f8fafc';
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(dialCx, dialCy);
+          ctx.lineTo(dialCx + Math.cos(needleAng) * (dialR - 10), dialCy + Math.sin(needleAng) * (dialR - 10));
+          ctx.stroke();
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(dialCx, dialCy, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Digital mbar readout below hub
+          const inSweetNow = pressure >= 220 && pressure <= 420;
+          ctx.fillStyle = pressure < 200 ? '#f87171' : (inSweetNow ? '#4ade80' : '#38bdf8');
+          ctx.font = 'bold 18px Consolas, monospace';
+          ctx.fillText(`${Math.round(pressure)} mbar`, dialCx, dialCy + 32);
+
+          // Zone status badge
+          const pillX = px + 12, pillY = 156, pillW = pw - 24, pillH = 22;
+          const pillBg = pressure < 200 ? '#7f1d1d' : (inSweetNow ? '#14532d' : (pressure < 220 ? '#78350f' : '#1e293b'));
+          const pillBorder = pressure < 200 ? '#f87171' : (inSweetNow ? '#4ade80' : (pressure < 220 ? '#fbbf24' : '#475569'));
+          ctx.fillStyle = pillBg;
+          ctx.fillRect(pillX, pillY, pillW, pillH);
+          ctx.strokeStyle = pillBorder;
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(pillX, pillY, pillW, pillH);
+
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = 'bold 10px Consolas, monospace';
+          if (pressure < 200) {
+            drawVectorWarning(ctx, pillX + 14, pillY + 11, 4, '#fde047', '#7f1d1d');
+            ctx.fillText('BUMP SURGE — RELEASE!', dialCx + 6, pillY + 15);
+          } else if (inSweetNow) {
+            drawVectorCheck(ctx, pillX + 14, pillY + 11, 4.2, '#86efac');
+            ctx.fillText('SWEET ZONE (+EVAP)', dialCx + 6, pillY + 15);
+          } else if (pressure < 220) {
+            ctx.fillText('CAUTION — HIGH VACUUM', dialCx, pillY + 15);
+          } else {
+            ctx.fillText('HOLD TO PULL VACUUM', dialCx, pillY + 15);
+          }
+
+          // Evaporation % progress bar
+          const barX = px + 14, barW = pw - 28;
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#cbd5e1';
+          ctx.font = 'bold 10px Consolas, monospace';
+          ctx.fillText('EVAPORATION', barX, 196);
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#4ade80';
+          ctx.fillText(`${Math.round(evapPct)}%`, barX + barW, 196);
+
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(barX, 202, barW, 14);
+          const evGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+          evGrad.addColorStop(0, '#0ea5e9');
+          evGrad.addColorStop(1, '#22c55e');
+          ctx.fillStyle = evGrad;
+          ctx.fillRect(barX, 202, Math.round((evapPct / 100) * barW), 14);
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(barX, 202, barW, 14);
+
+          // Foam level progress bar
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillText('TRAP FOAM', barX, 236);
+          ctx.textAlign = 'right';
+          ctx.fillStyle = foam > 0.65 ? '#f87171' : '#fde68a';
+          ctx.fillText(`${Math.round(clamp(foam, 0, 1) * 100)}%`, barX + barW, 236);
+
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(barX, 242, barW, 11);
+          ctx.fillStyle = foam > 0.65 ? '#ef4444' : (foam > 0.35 ? '#f59e0b' : '#38bdf8');
+          ctx.fillRect(barX, 242, Math.round(clamp(foam, 0, 1) * barW), 11);
+          ctx.strokeStyle = '#475569';
+          ctx.strokeRect(barX, 242, barW, 11);
+
+          // Bottom telemetry line: Bumps & Valve state
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 10.5px Consolas, monospace';
+          ctx.fillStyle = bumps === 0 ? '#86efac' : '#fca5a5';
+          ctx.fillText(bumps === 0 ? 'BUMPS: 0' : `BUMPS: ${bumps} (-${bumps * 22}%)`, barX, 276);
+          ctx.textAlign = 'right';
+          ctx.fillStyle = lastHolding ? '#38bdf8' : '#94a3b8';
+          ctx.fillText(lastHolding ? 'VALVE: PULL' : 'VALVE: VENT', barX + barW, 276);
+          ctx.textAlign = 'left';
+        },
+        finish() {
+          const score = computeFinalScore();
+          const evapInt = Math.round(evapPct);
+          if (evapInt >= 100 && bumps === 0) {
+            return {
+              score,
+              summary: `${buchiTitle}: concentrated 100% of ${solventName} cleanly in ${finishElapsed.toFixed(1)}s with zero bump-trap losses!`
+            };
+          }
+          if (evapInt >= 100) {
+            return {
+              score,
+              summary: `${buchiTitle}: reached 100% evaporation in ${finishElapsed.toFixed(1)}s with ${bumps} bump-trap splash${bumps === 1 ? '' : 'es'} (-${bumps * 22}% yield penalty).`
+            };
+          }
+          return {
+            score,
+            summary: `${buchiTitle}: evaporated ${evapInt}% of ${solventName} (${bumps} bump${bumps === 1 ? '' : 's'}) — hold closer to the 220–420 mbar sweet zone.`
+          };
+        }
+      };
+    }
+
+    // -------------------- 6. 17:18 CORRIDOR EVASION (ALEX KING) --------------------
+    const playerSpriteId = String(config?.playerId || 'daniel_richards').trim() || 'daniel_richards';
+    const alexSpriteImg = getMgSprite('alex_king');
+    const playerSpriteImg = getMgSprite(playerSpriteId);
+
+    const player = { x: 64, y: 165, r: 12, dirRow: 2, moving: false, walkTime: 0 };
+    const alex = { x: 355, y: 155, angle: Math.PI, sweepDir: 1, coneLen: 175, coneHalf: 0.44, dirRow: 1, walkTime: 0 };
     const stairs3F = { x: 255, y: 10, w: 150, h: 42 };
     const cibExit = { x: W - 122, y: H - 86, w: 104, h: 68 };
     const pillars = [
@@ -2735,6 +3610,43 @@ window.KLB = window.KLB || {};
       const nx = clamp(cx, rx, rx + rw);
       const ny = clamp(cy, ry, ry + rh);
       return Math.hypot(cx - nx, cy - ny) < cr;
+    }
+
+    // 4x4 sprite sheet row convention: 0=S (down), 1=W (left), 2=E (right), 3=N (up)
+    function dirRowFromVec(dx, dy, fallbackRow) {
+      if (Math.hypot(dx, dy) < 0.05) return fallbackRow;
+      if (Math.abs(dx) > Math.abs(dy)) return dx < 0 ? 1 : 2;
+      return dy < 0 ? 3 : 0;
+    }
+
+    function drawStealthActorSprite(ctx, img, x, y, dirRow, col, ringColor, fallbackFn) {
+      // Ground shadow + crisp tactical ring
+      ctx.save();
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.58)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 11, 13, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = ringColor;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.ellipse(x, y + 11, 13, 5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      if (img && img.complete && img.naturalWidth > 0) {
+        const fw = img.naturalWidth >= 256 ? 64 : Math.max(1, Math.floor(img.naturalWidth / 4));
+        const fh = img.naturalHeight >= 384 ? 96 : Math.max(1, Math.floor(img.naturalHeight / 4));
+        const drawW = 32;
+        const drawH = 48;
+        const drawX = Math.round(x - drawW / 2);
+        const drawY = Math.round(y - drawH + 14);
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, (col & 3) * fw, (dirRow & 3) * fh, fw, fh, drawX, drawY, drawW, drawH);
+        ctx.restore();
+      } else {
+        fallbackFn();
+      }
     }
 
     return {
@@ -2755,16 +3667,32 @@ window.KLB = window.KLB || {};
           vx /= d; vy /= d;
         }
 
+        const prevPx = player.x;
+        const prevPy = player.y;
         const speed = 185;
         const nx = clamp(player.x + vx * speed * dt, 24, W - 24);
         const ny = clamp(player.y + vy * speed * dt, 24, H - 24);
         if (!pillars.some(p => rectContainsCircle(p.x, p.y, p.w, p.h, nx, player.y, player.r))) player.x = nx;
         if (!pillars.some(p => rectContainsCircle(p.x, p.y, p.w, p.h, player.x, ny, player.r))) player.y = ny;
 
+        const moveDx = player.x - prevPx;
+        const moveDy = player.y - prevPy;
+        if (Math.hypot(moveDx, moveDy) > 0.12) {
+          player.moving = true;
+          player.walkTime += dt;
+          player.dirRow = dirRowFromVec(moveDx, moveDy, player.dirRow);
+        } else {
+          player.moving = false;
+        }
+
         // Alex King patrols corridor & sweeps green-eyed vision cone
+        const prevAx = alex.x;
+        const prevAy = alex.y;
         alex.x = 345 + Math.sin(elapsed * 1.35) * 68;
         alex.y = 152 + Math.cos(elapsed * 1.9) * 44;
         alex.angle = Math.PI + Math.sin(elapsed * 2.35) * 1.25;
+        alex.dirRow = dirRowFromVec(alex.x - prevAx, alex.y - prevAy, alex.dirRow);
+        alex.walkTime += dt;
 
         // Check forbidden 3F stairs!
         if (rectContainsCircle(stairs3F.x, stairs3F.y, stairs3F.w, stairs3F.h, player.x, player.y, player.r)) {
@@ -2869,32 +3797,77 @@ window.KLB = window.KLB || {};
         ctx.fill();
         ctx.restore();
 
-        ctx.fillStyle = '#451a03';
-        ctx.beginPath();
-        ctx.arc(alex.x, alex.y, 14, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#fde68a';
-        ctx.beginPath();
-        ctx.arc(alex.x, alex.y + 1, 9, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#22c55e';
-        ctx.fillRect(alex.x - 5, alex.y - 1, 3, 3);
-        ctx.fillRect(alex.x + 2, alex.y - 1, 3, 3);
+        const alexCol = Math.floor(alex.walkTime * 6.5) % 4;
+        const playerCol = player.moving ? (Math.floor(player.walkTime * 7.5) % 4) : 0;
 
-        ctx.fillStyle = '#bbf7d0';
-        ctx.font = 'bold 10.5px Segoe UI, sans-serif';
-        ctx.fillText('"Heading to Gordon\'s Café?"', alex.x, alex.y - 20);
+        const drawAlex = () => {
+          drawStealthActorSprite(
+            ctx,
+            alexSpriteImg,
+            alex.x,
+            alex.y,
+            alex.dirRow,
+            alexCol,
+            exposure > 0.05 ? '#f87171' : '#4ade80',
+            () => {
+              ctx.fillStyle = '#451a03';
+              ctx.beginPath();
+              ctx.arc(alex.x, alex.y, 14, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#fde68a';
+              ctx.beginPath();
+              ctx.arc(alex.x, alex.y + 1, 9, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#22c55e';
+              ctx.fillRect(alex.x - 5, alex.y - 1, 3, 3);
+              ctx.fillRect(alex.x + 2, alex.y - 1, 3, 3);
+            }
+          );
+          const tagY = Math.max(18, alex.y - 38);
+          ctx.fillStyle = 'rgba(9, 14, 26, 0.78)';
+          ctx.fillRect(alex.x - 74, tagY - 11, 148, 15);
+          ctx.fillStyle = '#bbf7d0';
+          ctx.font = 'bold 10px Segoe UI, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('"Heading to Gordon\'s Café?"', alex.x, tagY);
+        };
 
-        ctx.fillStyle = '#3b82f6';
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 9.5px Consolas, monospace';
-        ctx.fillText('YOU', player.x, player.y + 3);
+        const drawPlayer = () => {
+          drawStealthActorSprite(
+            ctx,
+            playerSpriteImg,
+            player.x,
+            player.y,
+            player.dirRow,
+            playerCol,
+            '#60a5fa',
+            () => {
+              ctx.fillStyle = '#3b82f6';
+              ctx.beginPath();
+              ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            }
+          );
+          const badgeY = Math.min(H - 6, player.y + 23);
+          ctx.fillStyle = 'rgba(30, 58, 138, 0.88)';
+          ctx.fillRect(player.x - 16, badgeY - 10, 32, 13);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px Consolas, monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('YOU', player.x, badgeY);
+        };
+
+        // Depth-sort sprites cleanly by vertical anchor
+        if (alex.y <= player.y) {
+          drawAlex();
+          drawPlayer();
+        } else {
+          drawPlayer();
+          drawAlex();
+        }
         ctx.textAlign = 'left';
       },
       finish() {
@@ -3449,10 +4422,22 @@ window.KLB = window.KLB || {};
       hygieneRaw += 0.10;
     }
 
-    const curTimeMins = Number.isFinite(Number(state.timeMins)) ? Number(state.timeMins) : 540;
-    const onTime = isFinalPhase
-      ? (typeof state.lastAuditResult?.onTime === 'boolean' ? state.lastAuditResult.onTime : (curTimeMins <= 575 || curTimeMins >= 1065))
-      : curTimeMins <= 575;
+    const hasTimeMins = state.timeMins !== undefined && state.timeMins !== null && Number.isFinite(Number(state.timeMins));
+    const curTimeMins = hasTimeMins ? Number(state.timeMins) : 540;
+    let onTime;
+    if (isFinalPhase) {
+      if (typeof state.fridayMorningPresented === 'boolean') {
+        onTime = state.fridayMorningPresented
+          ? (typeof state.lastAuditResult?.onTime === 'boolean' ? state.lastAuditResult.onTime : true)
+          : false;
+      } else if (typeof state.lastAuditResult?.onTime === 'boolean') {
+        onTime = state.lastAuditResult.onTime;
+      } else {
+        onTime = false;
+      }
+    } else {
+      onTime = state.fridayMorningPresented === true || curTimeMins < 600;
+    }
     hygieneRaw += onTime ? 0.45 : 0.15;
 
     const hasClicker = playerId === 'andre_shamsabadi'
@@ -3461,7 +4446,10 @@ window.KLB = window.KLB || {};
     if (hasClicker) hygieneRaw += 0.30;
 
     const hygieneScore = Math.round(clamp(hygieneRaw, 0, 1.5) * 10) / 10;
-    const hygieneReason = `${deckHygieneTxt}, ${onTime ? 'on time' : 'late'}, ${hasClicker ? 'clicker ready' : 'missing clicker'}`;
+    const punctualityTxt = onTime
+      ? 'on time'
+      : (isFinalPhase && state.fridayMorningPresented === false ? 'skipped 09:00 meeting' : 'late');
+    const hygieneReason = `${deckHygieneTxt}, ${punctualityTxt}, ${hasClicker ? 'clicker ready' : 'missing clicker'}`;
 
     // 6) KLB LAB CITIZENSHIP, LAB CONDITION & VIJAY PATIENCE RUBRIC SCORE (0.0 - 1.0)
     const rawPatience = (state.patience !== undefined && state.patience !== null)
@@ -3600,7 +4588,11 @@ window.KLB = window.KLB || {};
     if (!hasClicker && playerId === 'andre_shamsabadi') {
       vijayVerdictLines.push(`And André, having to tap the spacebar at the lectern because your laser clicker is still sitting upstairs on the 3rd floor costs you Slide Hygiene!`);
     } else if (!onTime) {
-      vijayVerdictLines.push(`Watch the clock on Fridays — Group Meeting starts at 09:00 sharp.`);
+      vijayVerdictLines.push(
+        isFinalPhase && state.fridayMorningPresented === false
+          ? `Skipping Friday 09:00 Group Meeting costs you punctuality on the final rubric — I expect you in the Seminar Room at 09:00 sharp.`
+          : `Watch the clock on Fridays — Group Meeting starts at 09:00 sharp.`
+      );
     }
 
     if (safeLabCond < 40) {

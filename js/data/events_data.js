@@ -110,6 +110,7 @@ window.KLB.RANDOM_EVENTS = [
     category: 'inspection',
     weight: 9,
     minDay: 0,
+    beforeFridayAudit: true,
     validRooms: ['klb_2f'],
     actorId: 'vijay_chudasama',
     spawnActorOnTrigger: true,
@@ -446,6 +447,8 @@ window.KLB.RANDOM_EVENTS = [
     category: 'social',
     weight: 10,
     minDay: 0,
+    minHour: 9.75,
+    maxHour: 11.25,
     validRooms: ['klb_2f', 'klb_3f'],
     actorId: 'joao_nogueira',
     whatsappSender: 'joao_nogueira',
@@ -494,6 +497,8 @@ window.KLB.RANDOM_EVENTS = [
     isRareSignature: true,
     weight: 8,
     minDay: 0,
+    minHour: 16.75,
+    maxHour: 18.0,
     validRooms: ['klb_2f'],
     actorId: 'alex_king',
     whatsappSender: 'daniel_richards',
@@ -558,6 +563,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 4,
         favourDelta: 2,
         timeCostMins: 0,
+        clearsPrep: ['thiol_dirty'],
         resultText: 'Hypochlorite kills the thiol stench instantly as all three bays cheer.'
       },
       {
@@ -570,6 +576,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 4,
         favourDelta: 0,
         timeCostMins: 0,
+        clearsPrep: ['thiol_dirty'],
         resultText: 'A baymate dons thick nitrile gloves and neutralises the thiol pipette in Hood Bleach Bath.'
       },
       {
@@ -618,6 +625,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 3,
         favourDelta: 2,
         timeCostMins: 0,
+        setsPrep: { tcep_buffered: true },
         resultText: 'Antoine beams at your dated pH 8.0 stock and Max owes you a favour.'
       },
       {
@@ -630,6 +638,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
+        setsPrep: { tcep_buffered: true },
         resultText: 'A baymate slides over a fresh 20 mM pH 8.0 BBS TCEP aliquot so you skip buffer prep.'
       },
       {
@@ -709,6 +718,8 @@ window.KLB.RANDOM_EVENTS = [
     category: 'social',
     weight: 7,
     minDay: 1,
+    minHour: 16.5,
+    maxHour: 19.25,
     validRooms: ['klb_2f'],
     actorId: 'nafsika_forte',
     whatsappSender: 'peter_szijj',
@@ -762,6 +773,7 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 5,
         favourDelta: 0,
         timeCostMins: 0,
+        setsPrep: { sabatini_spritz: true, sabatini_tlc_jar: true },
         resultText: 'Dead-straight Rf spots appear while Kersti and Abil greet you warmly.'
       },
       {
@@ -782,6 +794,7 @@ window.KLB.RANDOM_EVENTS = [
     category: 'social',
     weight: 8,
     minDay: 0,
+    beforeFridayAudit: true,
     validRooms: ['klb_2f'],
     actorId: 'charlotte_coomber',
     whatsappSender: 'daniel_richards',
@@ -877,9 +890,10 @@ window.KLB.RANDOM_EVENTS = [
     minDay: 0,
     validRooms: ['klb_2f'],
     actorId: 'calise_bahou',
+    allowAsPlayer: true,
     whatsappSender: 'calise_bahou',
-    whatsappMsg: 'FFS the net bag split near the central balance bay — 14 lemons are rolling across Lab 230! (DAN BOUGHT THEM I JUST CARRIED THEM)',
-    bannerText: 'Fourteen lemons burst from Calise\'s bag near the central balance bay and are rolling across Lab 230.',
+    whatsappMsg: 'A net bag of 14 reduced bargain lemons just split near the central balance bay — citrus rolling across Lab 230! Lemon Boy folklore strikes again!',
+    bannerText: 'A bag of fourteen reduced bargain lemons just burst across the central balance bay and citrus is rolling across Lab 230.',
     durationMins: 15,
     effectType: 'lemon_spill',
     choices: [
@@ -892,10 +906,10 @@ window.KLB.RANDOM_EVENTS = [
         favourDelta: 1,
         timeCostMins: 0,
         triggersMinigame: 'lemons',
-        resultText: 'Zero slip hazards near the central balance bay and Calise gifts you a lucky lemon.'
+        resultText: 'Zero slip hazards near the central balance bay and you pocket a lucky lemon intact.'
       },
       {
-        label: 'Tease Lemon Boy in the lab chat',
+        label: 'Drop a Lemon Boy quip in the lab chat',
         moraleDelta: 8,
         safetyDelta: -2,
         energyDelta: 2,
@@ -986,6 +1000,8 @@ window.KLB.RANDOM_EVENTS = [
     category: 'social',
     weight: 8,
     minDay: 0,
+    minHour: 16.5,
+    maxHour: 19.0,
     validRooms: ['klb_2f'],
     actorId: 'peter_szijj',
     whatsappSender: 'peter_szijj',
@@ -1002,6 +1018,7 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 4,
         favourDelta: 1,
         timeCostMins: 0,
+        setsLotrPlaying: true,
         resultText: 'Tin whistles carry your evening Biotage fractions cleanly home.'
       },
       {
@@ -1012,6 +1029,7 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 6,
         favourDelta: 1,
         timeCostMins: 0,
+        setsLotrPlaying: true,
         resultText: 'Peter and Marcos debate First Age lore beside the spinning centrifuge.'
       }
     ]
@@ -1022,6 +1040,8 @@ window.KLB.RANDOM_EVENTS = [
     category: 'social',
     weight: 7,
     minDay: 1,
+    minHour: 16.5,
+    maxHour: 18.25,
     validRooms: ['klb_2f', 'klb_3f'],
     actorId: 'andre_shamsabadi',
     whatsappSender: 'andre_shamsabadi',
@@ -1124,6 +1144,7 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 3,
         favourDelta: 1,
         timeCostMins: 0,
+        setsPrep: { knows_1965: true, knows_2145: true },
         resultText: 'You verify 1965 and 2145 on the 2F clipboard and save a wasted trip.'
       },
       {
@@ -1134,6 +1155,7 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 5,
         favourDelta: 0,
         timeCostMins: 0,
+        setsPrep: { knows_1965: true, knows_2145: true },
         resultText: 'Antoine confirms 1965 and 2145 instantly without leaving his 3F desk.'
       }
     ]
@@ -1146,9 +1168,11 @@ window.KLB.RANDOM_EVENTS = [
     minDay: 0,
     validRooms: ['gordons_cafe'],
     actorId: 'antoine_maruani',
+    allowAsPlayer: true,
+    antoineMoraleHit: -15,
     whatsappSender: 'antoine_maruani',
-    whatsappMsg: '*God has joined the chat* WHO ordered a croissant sliced flat like sandwich bread with plastic cheese at Gordon\'s Café?! End of discussion.',
-    bannerText: 'A horizontally sliced croissant at Gordon\'s Café just triggered Antoine and João.',
+    whatsappMsg: 'Someone just ordered a croissant sliced flat like sandwich bread with plastic cheese at Gordon\'s Café! Absolute culinary heresy.',
+    bannerText: 'A horizontally sliced ham-and-cheese croissant just appeared on the Gordon\'s Café counter, provoking immediate pastry outrage.',
     durationMins: 15,
     effectType: 'croissant_trauma',
     choices: [
@@ -1170,7 +1194,7 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 2,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'João fires off a lively manifesto abolishing flat pressed pastries.'
+        resultText: 'A lively Franco-Portuguese manifesto abolishing flat pressed pastries erupts across the café counter.'
       }
     ]
   },
@@ -1265,6 +1289,8 @@ window.KLB.RANDOM_EVENTS = [
     category: 'social',
     weight: 7,
     minDay: 0,
+    minHour: 11.5,
+    maxHour: 14.5,
     validRooms: ['klb_2f', 'klb_3f'],
     actorId: 'andre_shamsabadi',
     whatsappSender: 'andre_shamsabadi',
@@ -1389,11 +1415,14 @@ window.KLB.RANDOM_EVENTS = [
     category: 'inspection',
     weight: 10,
     minDay: 3,
+    dayOnly: 3,
+    minHour: 14.0,
+    beforeFridayAudit: true,
     validRooms: ['klb_2f', 'klb_3f', 'meeting_room'],
     actorId: 'faiza_javaid',
     whatsappSender: 'faiza_javaid',
-    whatsappMsg: 'WAIT guys is the Group Meeting Room projector working before Friday 09:00 Group Meeting?? Also André do u have the laser clicker??',
-    bannerText: 'Check the Group Meeting Room projector, grab the 3F clicker, and polish your slides before 09:00.',
+    whatsappMsg: 'WAIT guys is the Group Meeting Room projector working ahead of tomorrow\'s Friday 09:00 Group Meeting?? Also André do u have the laser clicker??',
+    bannerText: 'Thursday afternoon prep: test the Group Meeting Room projector, grab the 3F clicker, and polish your slides before tomorrow\'s 09:00 Group Meeting.',
     durationMins: 20,
     effectType: 'meeting_prep',
     choices: [
@@ -1406,10 +1435,11 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 6,
         favourDelta: 1,
         timeCostMins: 0,
-        resultText: 'The Group Meeting Room projector syncs cleanly and error bars look sharp.'
+        setsPrep: { has_clicker: true },
+        resultText: 'The Group Meeting Room projector syncs cleanly, the clicker is pocketed, and your slides look sharp for Friday 09:00.'
       },
       {
-        label: 'Wing the projector setup at 09:00',
+        label: 'Wing the projector setup at 09:00 tomorrow',
         moraleDelta: -8,
         safetyDelta: 0,
         energyDelta: -4,
@@ -1417,7 +1447,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: -8,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'You wrestle with the Group Meeting Room cables while Vijay checks his watch.'
+        resultText: 'You skip the Thursday dry run and leave tomorrow\'s Group Meeting Room cables to luck.'
       }
     ]
   }

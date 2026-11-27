@@ -3,8 +3,9 @@ window.KLB = window.KLB || {};
 
 (() => {
   const ARCHIVE_KEY = 'klb_simulator_archive_v1';
+  const ACTIVE_RUN_KEY = 'klb_active_run_v1';
   const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
-  const CLOCK_MINS_PER_REAL_SEC = 2.0 / 1.1; // ~1.8181818 (1.1x slower timer)
+  const CLOCK_MINS_PER_REAL_SEC = 2.5; // ~21m active clock (~25m/week with modals & minigames)
   const CURFEW_MINS = 19.5 * 60; // 19:30 KLB Security Lockup
   const WALKABLE_TILES = new Set([1, 2, 3, 4, 7, 8]);
   const NON_BLOCKING_OBJS = new Set([
@@ -595,9 +596,18 @@ window.KLB = window.KLB || {};
     return state.player?.roomId || 'klb_2f';
   }
 
+  function getStorage() {
+    try {
+      if (typeof localStorage !== 'undefined' && localStorage) return localStorage;
+      if (typeof window !== 'undefined' && window?.localStorage) return window.localStorage;
+    } catch (_) {}
+    return null;
+  }
+
   function loadArchive() {
     try {
-      const raw = localStorage.getItem(ARCHIVE_KEY);
+      const storage = getStorage();
+      const raw = storage?.getItem?.(ARCHIVE_KEY);
       if (raw) return JSON.parse(raw);
     } catch (_) {}
     return {
@@ -617,8 +627,85 @@ window.KLB = window.KLB || {};
 
   function saveArchive(arch) {
     try {
-      localStorage.setItem(ARCHIVE_KEY, JSON.stringify(arch));
+      const storage = getStorage();
+      storage?.setItem?.(ARCHIVE_KEY, JSON.stringify(arch));
     } catch (_) {}
+  }
+
+  function reconcileArchive(mutatorFn) {
+    const arch = loadArchive();
+    if (typeof mutatorFn === 'function') mutatorFn(arch);
+    saveArchive(arch);
+    return arch;
+  }
+
+  function saveRunSnapshot(state) {
+    if (!state || state.spectatorMode || state.gameOver || state._headlessVerify) return false;
+    const storage = getStorage();
+    if (!storage) return false;
+    const charId = state.player?.id || state.charId;
+    if (!charId || typeof state.dayIdx !== 'number' || !state.player || !state.npcs) return false;
+    try {
+      const copy = {};
+      for (const [k, v] of Object.entries(state)) {
+        if (k === '_activeCallbacks' || k === '_tickingRealTime' || typeof v === 'function') continue;
+        copy[k] = v;
+      }
+      copy.charId = charId;
+      copy.version = 1;
+      copy.savedAt = Date.now();
+      const serialized = JSON.stringify(copy, (key, val) => {
+        if (key === '_activeCallbacks' || key === '_tickingRealTime' || typeof val === 'function') return undefined;
+        return val;
+      });
+      storage.setItem(ACTIVE_RUN_KEY, serialized);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function loadRunSnapshot() {
+    const storage = getStorage();
+    if (!storage) return null;
+    try {
+      const raw = storage.getItem(ACTIVE_RUN_KEY);
+      if (!raw) return null;
+      const snap = JSON.parse(raw);
+      if (!snap || typeof snap !== 'object') return null;
+      const charId = snap.charId || snap.player?.id;
+      if (
+        typeof charId !== 'string' ||
+        !charId ||
+        typeof snap.dayIdx !== 'number' ||
+        !Number.isFinite(snap.dayIdx) ||
+        snap.dayIdx < 0 ||
+        snap.dayIdx > 4 ||
+        !snap.player ||
+        typeof snap.player !== 'object' ||
+        typeof snap.player.id !== 'string' ||
+        !snap.npcs ||
+        typeof snap.npcs !== 'object' ||
+        Array.isArray(snap.npcs)
+      ) {
+        return null;
+      }
+      snap.charId = charId;
+      return snap;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function clearRunSnapshot() {
+    const storage = getStorage();
+    if (!storage) return false;
+    try {
+      storage.removeItem(ACTIVE_RUN_KEY);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   const DIALOGUE_HISTORY_KEY = 'klb_dialogue_history_v1';
@@ -1309,12 +1396,15 @@ window.KLB = window.KLB || {};
     return delta;
   }
 
-  function applyFridayAuditPatience(target, auditResult) {
+  function applyFridayAuditPatience(target, auditResult, opts = {}) {
     const t = resolveMeterTarget(target);
     if (!t || !auditResult) return 0;
     const delta = Number(auditResult.patienceDelta) || 0;
-    t.patience = clamp((t.patience != null ? Number(t.patience) : 82) + delta, 0, 100);
-    return delta;
+    const hasPrev = Boolean(opts && opts.prevAuditResult);
+    const prevDelta = hasPrev ? (Number(opts.prevAuditResult.patienceDelta) || 0) : 0;
+    const netDelta = hasPrev ? (delta - prevDelta) : delta;
+    t.patience = clamp((t.patience != null ? Number(t.patience) : 82) + netDelta, 0, 100);
+    return netDelta;
   }
 
   function satisfyHabit() {
@@ -1415,6 +1505,22 @@ window.KLB = window.KLB || {};
     };
   }
 
+  function rollDailyWeather(state) {
+    if (!state) return;
+    if (state.mutators?.eternal_heatwave) {
+      state.weatherMode = 'heatwave';
+      state.tempC = 30.2;
+    } else if (Math.random() < 0.25) {
+      state.weatherMode = 'rain';
+      state.tempC = 14.0;
+    } else {
+      state.weatherMode = 'normal';
+      state.tempC = 21.0;
+    }
+    state._weatherStats = state._weatherStats || { normal: 0, rain: 0, heatwave: 0, cold_230: 0 };
+    state._weatherStats[state.weatherMode] = (state._weatherStats[state.weatherMode] || 0) + 1;
+  }
+
   function createRunState(playerCharId, activeMutators = {}, options = {}) {
     const spectatorMode = Boolean(options && options.spectatorMode) || playerCharId === 'spectator';
     const resolvedPlayerId = spectatorMode ? 'spectator' : (playerCharId || 'daniel_richards');
@@ -1427,6 +1533,7 @@ window.KLB = window.KLB || {};
       : getPreferencesSpec(charMeta);
 
     const state = {
+      charId: resolvedPlayerId,
       weekNum: 1,
       dayIdx: 0,
       timeMins: startMins,
@@ -1442,6 +1549,7 @@ window.KLB = window.KLB || {};
 
       tempC: activeMutators.eternal_heatwave ? 30.2 : 21.0,
       weatherMode: activeMutators.eternal_heatwave ? 'heatwave' : 'normal',
+      _weatherStats: { normal: 0, rain: 0, heatwave: 0, cold_230: 0 },
 
       morale: 50,
       labCondition: 95,
@@ -1614,6 +1722,7 @@ window.KLB = window.KLB || {};
       marcosBombUsed: false
     };
 
+    rollDailyWeather(state);
     initNPCs(state);
     rollDailyBirthday(state, options?.callbacks || options);
     seedOpeningWhatsApp(state);
@@ -1732,7 +1841,14 @@ window.KLB = window.KLB || {};
       isSelf: !state.spectatorMode && resolvedId === state.player?.id
     });
     if (state.whatsapp.length > 90) state.whatsapp.shift();
-    if (typeof window !== 'undefined' && window.KLB.Audio && !state.spectatorMode && resolvedId !== state.player?.id) {
+    if (
+      typeof window !== 'undefined' &&
+      window.KLB.Audio &&
+      typeof window.KLB.Audio.playSfx === 'function' &&
+      !state.spectatorMode &&
+      !state._headlessVerify &&
+      resolvedId !== state.player?.id
+    ) {
       window.KLB.Audio.playSfx('whatsapp');
     }
     const cb = callbacks || state._activeCallbacks;
@@ -3759,7 +3875,7 @@ window.KLB = window.KLB || {};
     act.elapsedMins = (act.elapsedMins || 0) + deltaMins;
 
     if (act.kind === 'weekly_report') {
-      const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 0.75;
+      const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 1.14;
       const rate = baseRate * getWriteupEnergyFactor(state.energy);
       state.weeklyReportProgress = clamp((Number(state.weeklyReportProgress) || 0) + deltaMins * rate, 0, 100);
       state.energy = clamp((state.energy ?? 80) - 0.045 * deltaMins, 0, 100);
@@ -3773,7 +3889,7 @@ window.KLB = window.KLB || {};
     }
 
     if (act.kind === 'manuscript_draft') {
-      const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 0.58;
+      const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 0.88;
       const rate = baseRate * getWriteupEnergyFactor(state.energy);
       state.manuscriptProgress = clamp((Number(state.manuscriptProgress) || 0) + deltaMins * rate, 0, 100);
       state.energy = clamp((state.energy ?? 80) - 0.045 * deltaMins, 0, 100);
@@ -3869,7 +3985,7 @@ window.KLB = window.KLB || {};
       if (act && atActionStation && !npc.pendingRoomTravel && (!npc.path || npc.path.length === 0)) {
         act.elapsedMins = (act.elapsedMins || 0) + deltaMins;
         if (act.kind === 'weekly_report') {
-          const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 0.75;
+          const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 1.14;
           const rate = baseRate * getWriteupEnergyFactor(sim.energy);
           sim.weeklyReportProgress = clamp((sim.weeklyReportProgress || 0) + deltaMins * rate, 0, 100);
           sim.energy = clamp((sim.energy ?? 80) - 0.035 * deltaMins, 0, 100);
@@ -3878,7 +3994,7 @@ window.KLB = window.KLB || {};
             act.elapsedMins = Math.max(act.elapsedMins, Number(act.targetMins) || 0);
           }
         } else if (act.kind === 'manuscript_draft') {
-          const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 0.58;
+          const baseRate = Number(act.ratePerMin) > 0 ? Number(act.ratePerMin) : 0.88;
           const rate = baseRate * getWriteupEnergyFactor(sim.energy);
           sim.manuscriptProgress = clamp((sim.manuscriptProgress || 0) + deltaMins * rate, 0, 100);
           sim.energy = clamp((sim.energy ?? 80) - 0.035 * deltaMins, 0, 100);
@@ -4952,8 +5068,8 @@ window.KLB = window.KLB || {};
       }
     }
 
-    // H) Weekly Report (Mon-Thu) & Manuscript Draft (All week, 3x longer + energy-scaled)
-    const tiredSkipWriteup = (sim.toughWeek && Math.random() < (wrUrgentThu || msUrgentFri ? 0.62 : 0.48))
+    // H) Weekly Report (Mon-Thu) & Manuscript Draft (All week, 66% duration + energy-scaled)
+    const tiredSkipWriteup = (sim.toughWeek && Math.random() < (wrUrgentThu || msUrgentFri ? 0.72 : 0.56))
       || (!wrUrgentThu && !msUrgentFri && sim.energy < 28 && Math.random() < 0.45);
     const wrTargets = [24, 50, 74, 100, 100];
     const msTargets = [22, 46, 70, 88, 100];
@@ -4968,7 +5084,7 @@ window.KLB = window.KLB || {};
         const doWeeklyReport = state.dayIdx <= 3 && sim.weeklyReportProgress < 100 && (wrUrgentThu || sim.weeklyReportProgress <= sim.manuscriptProgress + 16 || needWeeklyReport);
         const kind = doWeeklyReport ? 'weekly_report' : 'manuscript_draft';
         const label = doWeeklyReport ? 'Writing Weekly Report' : 'Drafting Manuscript';
-        const paceMult = sim.toughWeek ? 0.65 : 1.0;
+        const paceMult = sim.toughWeek ? 0.45 : 1.0;
         const jobRem = (sim.activeJob && sim.activeJob.canOvercook)
           ? Math.max(8, Math.floor((sim.activeJob.targetMins - sim.activeJob.elapsedMins) - 3))
           : 30;
@@ -4981,7 +5097,7 @@ window.KLB = window.KLB || {};
           y: picked.obj.y,
           elapsedMins: 0,
           targetMins: sim.activeJob ? Math.min(24, jobRem) : 32,
-          ratePerMin: (doWeeklyReport ? 0.75 : 0.58) * paceMult
+          ratePerMin: (doWeeklyReport ? 1.14 : 0.88) * paceMult
         };
         npc.currentTaskText = doWeeklyReport
           ? `Writing Weekly Report (${Math.round(sim.weeklyReportProgress)}%)`
@@ -5429,13 +5545,15 @@ window.KLB = window.KLB || {};
       ];
 
       const vj = state.npcs?.vijay_chudasama;
-      if (vj && !state.mutators?.vijays_not_in) {
-        vj.departAtMins = null;
+      if (vj) {
+        vj.departAtMins = state.mutators?.vijays_not_in ? 586 : null;
         vj.busyObjId = null;
         vj.huddleLockTimer = 0;
         vj.huddleTarget = null;
         vj.specsOn = false;
-        vj.currentTaskText = 'Friday 09:00 Group Meeting';
+        vj.currentTaskText = state.mutators?.vijays_not_in
+          ? 'Friday 09:00 Group Meeting (Back from Conference)'
+          : 'Friday 09:00 Group Meeting';
         if (teleport) {
           vj.pendingRoomTravel = null;
           vj.roomId = mRoom;
@@ -5669,10 +5787,10 @@ window.KLB = window.KLB || {};
       countdownMins: Math.round(countdownSec * CLOCK_MINS_PER_REAL_SEC * 10) / 10
     };
 
-    const arch = loadArchive();
-    arch.discoveredEvents = arch.discoveredEvents || {};
-    arch.discoveredEvents.safety_sweep = (arch.discoveredEvents.safety_sweep || 0) + 1;
-    saveArchive(arch);
+    reconcileArchive(arch => {
+      arch.discoveredEvents = arch.discoveredEvents || {};
+      arch.discoveredEvents.safety_sweep = (arch.discoveredEvents.safety_sweep || 0) + 1;
+    });
 
     state._rareEventCounts = state._rareEventCounts || { safety_sweep: 0, fire_alarm_test: 0, alex_king_1718: 0 };
     state._rareEventCounts.safety_sweep += 1;
@@ -5691,16 +5809,18 @@ window.KLB = window.KLB || {};
   function triggerLcmsDownHazard(state, callbacks = {}) {
     state._lcmsHazardToday = true;
     state.lcmsBroken = true;
+    state._seenEventsThisWeek = state._seenEventsThisWeek || {};
+    state._seenEventsThisWeek.kersti_lcms_down = true;
     state._lcmsDownEvents = (state._lcmsDownEvents || 0) + 1;
     state._rareEventCounts = state._rareEventCounts || {
       safety_sweep: 0, fire_alarm_test: 0, alex_king_1718: 0, lcms_down: 0, aoe2_event: 0
     };
     state._rareEventCounts.lcms_down = (state._rareEventCounts.lcms_down || 0) + 1;
 
-    const arch = loadArchive();
-    arch.discoveredEvents = arch.discoveredEvents || {};
-    arch.discoveredEvents.kersti_lcms_down = (arch.discoveredEvents.kersti_lcms_down || 0) + 1;
-    saveArchive(arch);
+    reconcileArchive(arch => {
+      arch.discoveredEvents = arch.discoveredEvents || {};
+      arch.discoveredEvents.kersti_lcms_down = (arch.discoveredEvents.kersti_lcms_down || 0) + 1;
+    });
 
     const ev = (window.KLB.RANDOM_EVENTS || []).find(e => e.id === 'kersti_lcms_down');
     const waSender = pickNonPlayerBigChud(state, ev?.whatsappSender || 'antoine_maruani', 'daniel_richards');
@@ -5728,6 +5848,8 @@ window.KLB = window.KLB || {};
   function triggerAoe2Event(state, callbacks = {}) {
     if (!state || state.fireAlarm?.active) return false;
     state._aoe2CheckedDayKey = `${state.weekNum || 1}_${state.dayIdx}`;
+    state._seenEventsThisWeek = state._seenEventsThisWeek || {};
+    state._seenEventsThisWeek.aoe2_1700_invite = true;
     state.aoe2Event = { active: true, endMins: 18 * 60 };
     state._aoe2EventCount = (state._aoe2EventCount || 0) + 1;
     state._rareEventCounts = state._rareEventCounts || {
@@ -5809,10 +5931,10 @@ window.KLB = window.KLB || {};
       elapsedMins: 0
     };
 
-    const arch = loadArchive();
-    arch.discoveredEvents = arch.discoveredEvents || {};
-    arch.discoveredEvents.fire_alarm_test = (arch.discoveredEvents.fire_alarm_test || 0) + 1;
-    saveArchive(arch);
+    reconcileArchive(arch => {
+      arch.discoveredEvents = arch.discoveredEvents || {};
+      arch.discoveredEvents.fire_alarm_test = (arch.discoveredEvents.fire_alarm_test || 0) + 1;
+    });
 
     state._rareEventCounts = state._rareEventCounts || { safety_sweep: 0, fire_alarm_test: 0, alex_king_1718: 0 };
     state._rareEventCounts.fire_alarm_test += 1;
@@ -5843,10 +5965,10 @@ window.KLB = window.KLB || {};
       ak.currentTaskText = 'Hovering outside Lab 230';
     }
 
-    const arch = loadArchive();
-    arch.discoveredEvents = arch.discoveredEvents || {};
-    arch.discoveredEvents.alex_king_1718 = (arch.discoveredEvents.alex_king_1718 || 0) + 1;
-    saveArchive(arch);
+    reconcileArchive(arch => {
+      arch.discoveredEvents = arch.discoveredEvents || {};
+      arch.discoveredEvents.alex_king_1718 = (arch.discoveredEvents.alex_king_1718 || 0) + 1;
+    });
 
     state._rareEventCounts = state._rareEventCounts || { safety_sweep: 0, fire_alarm_test: 0, alex_king_1718: 0 };
     state._rareEventCounts.alex_king_1718 += 1;
@@ -6002,13 +6124,18 @@ window.KLB = window.KLB || {};
     const curVibe = getCurrentDialogueVibe(state);
     state._usedBanter = state._usedBanter || {};
     const playerId = state.spectatorMode ? null : state.player?.id;
+    const vijayOut = Boolean(state.mutators?.vijays_not_in);
+
+    const banterAllowed = b =>
+      Boolean(b) &&
+      b.senderId !== playerId &&
+      (!vijayOut || (b.senderId !== 'vijay_chudasama' && b.replySenderId !== 'vijay_chudasama'));
 
     const hourEligible = all.filter(b =>
-      b &&
-      b.senderId !== playerId &&
+      banterAllowed(b) &&
       (b.hourHint === undefined || b.hourHint === null || Math.abs(b.hourHint - curHour) <= 3.5)
     );
-    const allEligible = hourEligible.length ? hourEligible : all.filter(b => b && b.senderId !== playerId);
+    const allEligible = hourEligible.length ? hourEligible : all.filter(banterAllowed);
     if (!allEligible.length) return;
 
     const item = pickFromShuffleBag(state, 'whatsapp_banter', allEligible, b => b.text, {
@@ -6035,26 +6162,36 @@ window.KLB = window.KLB || {};
   }
 
   const SPAWN_ON_TRIGGER_EVENT_IDS = new Set(['vijay_bench_round', 'jamie_specs_check', 'door_pls']);
+  const ALLOW_AS_PLAYER_EVENT_IDS = new Set(['calise_lemons_spill']);
 
   function triggerRandomKLBEvent(state, callbacks = {}) {
     if (!state || state.spectatorMode || state.fireAlarm?.active) return false;
     const playerRoom = state.player?.roomId;
     const playerId = state.player?.id;
+    const hour = (state.timeMins || 0) / 60;
     state._seenEventsThisWeek = state._seenEventsThisWeek || {};
 
-    const candidates = (window.KLB.RANDOM_EVENTS || []).filter(ev => {
+    const eligible = (window.KLB.RANDOM_EVENTS || []).filter(ev => {
       if (!ev) return false;
       if (ev.isRareSignature || RARE_SIGNATURE_IDS.has(ev.id)) return false;
       if (ev.id === 'vijay_bench_round' && state.mutators?.vijays_not_in) return false;
+      if (ev.id === 'cold_in_230' && state.mutators?.eternal_heatwave) return false;
       if (!Array.isArray(ev.validRooms) || !ev.validRooms.includes(playerRoom)) return false;
       if (state.dayIdx < (ev.minDay || 0)) return false;
+      if (ev.dayOnly != null && state.dayIdx !== ev.dayOnly) return false;
+      if (ev.minHour != null && hour < ev.minHour) return false;
+      if (ev.maxHour != null && hour > ev.maxHour) return false;
+      if (ev.beforeFridayAudit && state.fridayAuditDone) return false;
       if (state._seenEventsThisWeek[ev.id]) return false;
-      if (ev.whatsappSender === playerId) return false;
+
+      const allowAsPlayer = ev.allowAsPlayer === true || (ev.allowAsPlayer !== false && ALLOW_AS_PLAYER_EVENT_IDS.has(ev.id));
+      if (!allowAsPlayer && ev.whatsappSender === playerId) return false;
 
       const canSpawnActor = Boolean(ev.spawnActorOnTrigger === true || SPAWN_ON_TRIGGER_EVENT_IDS.has(ev.id));
       if (ev.actorId) {
-        if (ev.actorId === playerId) return false;
-        if (!canSpawnActor) {
+        if (ev.actorId === playerId) {
+          if (!allowAsPlayer) return false;
+        } else if (!canSpawnActor) {
           const actor = state.npcs?.[ev.actorId];
           if (!actor || actor.roomId !== playerRoom) return false;
           if (Math.hypot(actor.x - state.player.x, actor.y - state.player.y) > 9.0) return false;
@@ -6063,24 +6200,16 @@ window.KLB = window.KLB || {};
       return true;
     });
 
-    if (!candidates.length) return false;
+    if (!eligible.length) return false;
 
-    const totalWeight = candidates.reduce((sum, ev) => sum + (Number(ev.weight) || 1), 0);
-    let roll = Math.random() * totalWeight;
-    let ev = candidates[candidates.length - 1];
-    for (const c of candidates) {
-      roll -= (Number(c.weight) || 1);
-      if (roll <= 0) {
-        ev = c;
-        break;
-      }
-    }
+    const ev = pickFromShuffleBag(state, 'random_events', eligible, e => e.id);
+    if (!ev) return false;
 
     state._seenEventsThisWeek[ev.id] = true;
-    const arch = loadArchive();
-    arch.discoveredEvents = arch.discoveredEvents || {};
-    arch.discoveredEvents[ev.id] = (arch.discoveredEvents[ev.id] || 0) + 1;
-    saveArchive(arch);
+    reconcileArchive(arch => {
+      arch.discoveredEvents = arch.discoveredEvents || {};
+      arch.discoveredEvents[ev.id] = (arch.discoveredEvents[ev.id] || 0) + 1;
+    });
 
     if (ev.id === 'vijay_bench_round' && !state.mutators?.vijays_not_in) {
       state.vijayRound = { active: true, checkedPlayer: false };
@@ -6182,7 +6311,10 @@ window.KLB = window.KLB || {};
     }
 
     if (ev.whatsappSender && ev.whatsappMsg) {
-      const sEv = pickNonPlayerBigChud(state, ev.whatsappSender, 'daniel_richards');
+      const allowAsPlayer = ev.allowAsPlayer === true || (ev.allowAsPlayer !== false && ALLOW_AS_PLAYER_EVENT_IDS.has(ev.id));
+      const sEv = (allowAsPlayer && ev.whatsappSender === playerId)
+        ? ev.whatsappSender
+        : pickNonPlayerBigChud(state, ev.whatsappSender, 'daniel_richards');
       pushWhatsApp(state, sEv, ev.whatsappMsg, callbacks);
     }
     if (ev.choices && ev.choices.length && callbacks.onChoiceEvent) {
@@ -6260,6 +6392,7 @@ window.KLB = window.KLB || {};
       state._quartetWaToday = false;
       state._eveningToastToday = false;
       state._sampleAskCooldowns = {};
+      rollDailyWeather(state);
       rollDailyBirthday(state, callbacks);
     }
   }
@@ -6351,8 +6484,6 @@ window.KLB = window.KLB || {};
     const isFridayRollout = state.dayIdx === 4;
     const startHour = isFridayRollout ? 9.0 : (state.spectatorMode ? 7.75 : (charMeta?.arriveHour || 9.0));
     state.timeMins = Math.round(startHour * 60);
-    state.weatherMode = state.mutators?.eternal_heatwave ? 'heatwave' : 'normal';
-    state.tempC = state.mutators?.eternal_heatwave ? 30.2 : 21.0;
 
     if (!state.spectatorMode) {
       state.energy = forcedCurfew ? 78 : 95;
@@ -6448,7 +6579,10 @@ window.KLB = window.KLB || {};
         state._quartetWaToday = true;
         state._coffeePingToday = true;
         const sender = pickNonPlayerBigChud(state, 'joao_nogueira', 'faiza_javaid');
-        pushWhatsApp(state, sender, "10:30 Gordon's coffee run leaving now — heading over with Nafsika and Vijay for twenty minutes.", callbacks);
+        const coffeeMsg = state.mutators?.vijays_not_in
+          ? "Coffee Quartet heading to Gordon's Café — grab a flat white!"
+          : "10:30 Gordon's coffee run leaving now — heading over with Nafsika and Vijay for twenty minutes.";
+        pushWhatsApp(state, sender, coffeeMsg, callbacks);
       }
 
       // 5. 18:15 Evening Shift Toast
@@ -6981,7 +7115,7 @@ window.KLB = window.KLB || {};
           const next = npc.path[0];
           const npcEnergy = npc.sim?.energy ?? 85;
           const energyFactor = 0.75 + 0.25 * (clamp(npcEnergy, 0, 100) / 100);
-          const speed = (state.mutators?.infinite_espresso ? 3.4 : 2.8) * energyFactor * dt;
+          const speed = (state.mutators?.infinite_espresso ? 4.1 : 3.3) * energyFactor * dt;
           const dx = next.x - npc.x;
           const dy = next.y - npc.y;
           const dist = Math.hypot(dx, dy);
@@ -7505,6 +7639,7 @@ window.KLB = window.KLB || {};
         patienceDeltaAvg: totalAudits ? Number((auditPatienceSum / totalAudits).toFixed(2)) : 0
       },
       coffeeQuartetTicks: coffeeQuartetChecks,
+      weather: { ...(state._weatherStats || { normal: 0, rain: 0, heatwave: 0, cold_230: 0 }) },
       birthdays: { ...(state._birthdayStats || { days: 0, greetings: 0 }) },
       weeklySignatures: { ...(state._weeklySigStats || {}) },
       sampleRunAsks: state._sampleRunAskCount || 0,
@@ -7515,11 +7650,17 @@ window.KLB = window.KLB || {};
 
   window.KLB.Sim = {
     DAYS,
+    ACTIVE_RUN_KEY,
     CLOCK_MINS_PER_REAL_SEC,
     CURFEW_MINS,
     PERMADEATH_MESSAGES,
     loadArchive,
     saveArchive,
+    reconcileArchive,
+    saveRunSnapshot,
+    loadRunSnapshot,
+    clearRunSnapshot,
+    rollDailyWeather,
     loadDialogueHistory,
     saveDialogueHistory,
     resetDialogueHistory,
@@ -7574,6 +7715,7 @@ window.KLB = window.KLB || {};
     triggerLcmsDownHazard,
     triggerAoe2Event,
     triggerAmbientBanter,
+    triggerRandomKLBEvent,
     getVisibleNPCReactions,
     getVisibleNPCActions,
     syncNPCSchedules,

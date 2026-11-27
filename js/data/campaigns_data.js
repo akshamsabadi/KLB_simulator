@@ -24,7 +24,7 @@ window.KLB.CAMPAIGNS = {
         prepRequired: [],
         durationMins: 24,
         sweetSpotMins: 69,
-        minigame: 'gel_load',
+        minigame: null,
         subTasks: [
           {
             id: 'dan_1_1',
@@ -97,7 +97,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: 'gel_load',
+            minigame: null,
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -223,6 +223,21 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'dan_2_4',
+            label: 'Concentrate fractions on Büchi',
+            roomId: 'klb_2f',
+            stationTypes: ['buchi'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 10,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: 'buchi_bump',
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'dan_2_5',
             label: 'Prepare NMR tube (CDCl3)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
@@ -237,13 +252,13 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'dan_2_5',
+            id: 'dan_2_6',
             label: 'Submit sample to NMR',
             roomId: 'cib_lg1b_nmr',
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 13,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -252,7 +267,7 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'dan_2_6',
+            id: 'dan_2_7',
             label: 'View NMR on PC',
             roomId: 'cib_lg1b_nmr',
             stationTypes: ['pc_terminal'],
@@ -518,6 +533,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'Bare AuNP', 'PBS Fail', 'BSA-TCO'], gelMode: 'aunp_ruby' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -815,7 +831,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: null,
+            minigame: 'buchi_bump',
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -1071,6 +1087,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: true,
             triggersChoice: true,
             minigame: 'syringe_cryo',
+            minigameConfig: { tempLabel: '4 °C Ice-Water Bath', rateLabel: '4.0 µL/min Slow Add' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -1115,7 +1132,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: 'gel_load',
+            minigame: null,
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -1386,6 +1403,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'Herceptin', 'mAb+HER2', 'ADC+HER2'], gelMode: 'native_shift' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -1518,7 +1536,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: null,
+            minigame: 'buchi_bump',
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -2074,6 +2092,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'Herceptin', 'Dox4 mAb', 'Dox4-Cy5'], gelMode: 'dual_fluor' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -2298,7 +2317,7 @@ window.KLB.CAMPAIGNS = {
         prepRequired: [],
         durationMins: 30,
         sweetSpotMins: 69,
-        minigame: null,
+        minigame: 'buchi_bump',
         subTasks: [
           {
             id: 'and_2_1',
@@ -2356,7 +2375,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: null,
+            minigame: 'buchi_bump',
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -2492,6 +2511,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: true,
             triggersChoice: true,
             minigame: 'syringe_cryo',
+            minigameConfig: { tempLabel: '-78 °C Dry Ice/Acetone', rateLabel: '5.7 µL/min Dropwise' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -2851,7 +2871,7 @@ window.KLB.CAMPAIGNS = {
         prepRequired: [],
         durationMins: 25,
         sweetSpotMins: 69,
-        minigame: 'gel_load',
+        minigame: null,
         subTasks: [
           {
             id: 'pet_1_1',
@@ -2924,7 +2944,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: 'gel_load',
+            minigame: null,
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -3050,6 +3070,21 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'pet_2_4',
+            label: 'Concentrate hub on Büchi',
+            roomId: 'klb_2f',
+            stationTypes: ['buchi'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 10,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: 'buchi_bump',
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'pet_2_5',
             label: 'Prepare NMR tube (CDCl3)',
             roomId: 'klb_2f',
             stationTypes: ['lab_bench'],
@@ -3064,13 +3099,13 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'pet_2_5',
+            id: 'pet_2_6',
             label: 'Submit sample to NMR',
             roomId: 'cib_lg1b_nmr',
             stationTypes: ['nmr_magnet'],
             cupboardHint: null,
             mode: 'wait',
-            durationMins: 18,
+            durationMins: 13,
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
@@ -3079,7 +3114,7 @@ window.KLB.CAMPAIGNS = {
             requiresJobFromPrev: false
           },
           {
-            id: 'pet_2_6',
+            id: 'pet_2_7',
             label: 'View NMR on PC',
             roomId: 'cib_lg1b_nmr',
             stationTypes: ['pc_terminal'],
@@ -3345,6 +3380,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'Fab Input', 'Crude Mix', 'Pure SynAb'], gelMode: 'hhll' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -3883,6 +3919,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: true,
             triggersChoice: true,
             minigame: 'syringe_cryo',
+            minigameConfig: { tempLabel: '-78 °C Cryo Bath', rateLabel: '0.15 mL/min Dropwise' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -4048,6 +4085,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'VNAR In', 'Ctrl NP', 'N3-NP Sup'], gelMode: 'vnar_tricine' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -4616,6 +4654,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'IgG4 Ctrl', '+TCEP Red', 'Maga-MMAE'], gelMode: 'hhll' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -5003,7 +5042,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: null,
+            minigame: 'buchi_bump',
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -5110,7 +5149,7 @@ window.KLB.CAMPAIGNS = {
         prepRequired: [],
         durationMins: 23,
         sweetSpotMins: 69,
-        minigame: 'gel_load',
+        minigame: null,
         subTasks: [
           {
             id: 'cal_2_1',
@@ -5183,7 +5222,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: 'gel_load',
+            minigame: null,
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -5604,6 +5643,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'mAb Ctrl', 'pH 6.0 Bind', 'pH 7.4 Free'], gelMode: 'native_shift' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -5781,7 +5821,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: null,
+            minigame: 'buchi_bump',
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -6187,6 +6227,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'Native mAb', 'Red Ctrl', 'HC Dha mAb'], gelMode: 'reducing' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -6411,7 +6452,7 @@ window.KLB.CAMPAIGNS = {
         prepRequired: [],
         durationMins: 28,
         sweetSpotMins: 69,
-        minigame: null,
+        minigame: 'buchi_bump',
         subTasks: [
           {
             id: 'mar_1_1',
@@ -6484,7 +6525,7 @@ window.KLB.CAMPAIGNS = {
             sweetSpotMins: 225,
             canOvercook: false,
             triggersChoice: false,
-            minigame: null,
+            minigame: 'buchi_bump',
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -7025,6 +7066,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'HSA Ctrl', 'HSA+SMDC', '5 mM GSH'], gelMode: 'dual_fluor' },
             viewOutput: null,
             requiresJobFromPrev: false
           },

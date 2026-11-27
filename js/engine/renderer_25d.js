@@ -50,6 +50,10 @@
     lab_speakers:  'Lab Speakers (LotR Synth)',
     writeup_desk:  'Write-Up Desk',
     pc_terminal:   'PC Terminal',
+    whiteboard:    'Group Whiteboard',
+    bookshelf:     'Chemistry Bookshelf',
+    thesis_printer:'Departmental Laser Printer',
+    locker:        'Departmental Steel Lockers',
     meeting_table: 'Seminar Table',
     chair:         'Chair',
     projector:     'Projector Screen & Podium',
@@ -101,6 +105,10 @@
     lab_speakers: 14,
     writeup_desk: 15,
     pc_terminal: 18,
+    whiteboard: 18,
+    bookshelf: 30,
+    thesis_printer: 20,
+    locker: 32,
     spiral_stairs: 22,
     lift: 30,
     specs_holder: 24,
@@ -532,6 +540,8 @@
   // STATIC ROOM FLOOR + AO + DECALS OFFSCREEN CACHE
   // ============================================================================
   const roomFloorCache = new Map();
+  const windowBayCache = new Map();
+  const surfaceParentCache = new Map();
 
   function computeRoomBounds(room) {
     let minX = room.w, minY = room.h, maxX = 0, maxY = 0;
@@ -848,8 +858,9 @@
     return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
 
-  function isAboveGroundWindowRoom(room) {
-    return Boolean(room && (room.id === 'klb_2f' || room.id === 'klb_3f' || room.id === 'gordons_cafe'));
+  function isAboveGroundWindowRoom(roomOrId) {
+    const id = typeof roomOrId === 'string' ? roomOrId : (roomOrId && roomOrId.id);
+    return id === 'klb_2f' || id === 'klb_3f' || id === 'gordons_cafe';
   }
 
   function getAtmosphereProfile(timeMins, weather) {
@@ -857,6 +868,7 @@
     const hour = ((mins / 60) % 24 + 24) % 24;
     const w = String(weather || '').toLowerCase();
     const isRain = w.includes('rain') || w.includes('storm');
+    const isCold = w.includes('cold') || w.includes('frost') || w.includes('chill');
     const isHeatwave = w.includes('heat');
 
     // Golden-Hour bell curve: 16:45 (16.75) -> peak ~17:45-18:15 -> 18:45 (18.75)
@@ -881,12 +893,12 @@
     else if (hour >= 18.45) nightFactor = clamp((hour - 18.45) / 0.55, 0, 1);
     else if (hour < 6.5) nightFactor = clamp((6.5 - hour) / 0.5, 0, 1);
 
-    let skyTop = isRain ? '#64748b' : (isHeatwave ? '#38bdf8' : '#7dd3fc');
-    let skyBot = isRain ? '#cbd5e1' : (isHeatwave ? '#fef3c7' : '#e0f2fe');
-    let beamRgb = '224, 242, 254';
-    let floorAlpha = isRain ? 0.04 : 0.09;
-    let airAlpha = isRain ? 0.02 : 0.04;
-    let dustAlpha = 0.08;
+    let skyTop = isRain ? '#64748b' : (isCold ? '#93c5fd' : (isHeatwave ? '#38bdf8' : '#7dd3fc'));
+    let skyBot = isRain ? '#cbd5e1' : (isCold ? '#dbeafe' : (isHeatwave ? '#fef3c7' : '#e0f2fe'));
+    let beamRgb = isCold ? '186, 230, 253' : (isHeatwave ? '253, 224, 71' : '224, 242, 254');
+    let floorAlpha = isRain ? 0.04 : (isHeatwave ? 0.12 : 0.09);
+    let airAlpha = isRain ? 0.02 : (isHeatwave ? 0.055 : 0.04);
+    let dustAlpha = isHeatwave ? 0.14 : 0.08;
     let beamDx = 1.1;
     let beamDy = 0.85;
 
@@ -924,6 +936,7 @@
     return {
       hour,
       isRain,
+      isCold,
       isHeatwave,
       goldenFactor,
       dawnFactor,
@@ -945,13 +958,14 @@
     if (!southIsIndoor) return false;
     const isExteriorTop = tN === 0 || (isWallLike(tN) && getTileSafe(room, gx, gy - 2) === 0);
     if (!isExteriorTop) return false;
-    // Skip walls directly behind tall equipment (projector, fume hood, tall fridge/cupboard)
+    // Skip walls directly behind tall equipment (projector, fume hood, tall fridge/cupboard/office fixtures)
     const objs = room.objects || [];
     for (let i = 0; i < objs.length; i++) {
       const o = objs[i];
       if (gx >= o.x && gx < o.x + o.w && (o.y === gy || o.y === gy + 1)) {
         if (o.type === 'projector' || o.type === 'fumehood' || o.type === 'chem_cupboard' ||
-            o.type === 'fridge_4c' || o.type === 'freezer_20c') {
+            o.type === 'fridge_4c' || o.type === 'freezer_20c' ||
+            o.type === 'whiteboard' || o.type === 'bookshelf' || o.type === 'locker') {
           return false;
         }
       }
@@ -967,7 +981,8 @@
     for (let i = 0; i < objs.length; i++) {
       const o = objs[i];
       if (o.x === gx + 1 && gy >= o.y && gy < o.y + o.h) {
-        if (o.type === 'fumehood' || o.type === 'chem_cupboard' || o.type === 'biotage' || o.type === 'buchi') {
+        if (o.type === 'fumehood' || o.type === 'chem_cupboard' || o.type === 'biotage' || o.type === 'buchi' ||
+            o.type === 'whiteboard' || o.type === 'bookshelf' || o.type === 'locker') {
           return false;
         }
       }
@@ -987,7 +1002,8 @@
       const o = objs[i];
       if (gx >= o.x && gx < o.x + o.w && (o.y === gy || o.y === gy + 1)) {
         if (o.type === 'projector' || o.type === 'fumehood' || o.type === 'chem_cupboard' ||
-            o.type === 'fridge_4c' || o.type === 'freezer_20c' || o.type === 'cafe_counter') {
+            o.type === 'fridge_4c' || o.type === 'freezer_20c' || o.type === 'cafe_counter' ||
+            o.type === 'whiteboard' || o.type === 'bookshelf' || o.type === 'locker') {
           return true;
         }
       }
@@ -1015,6 +1031,20 @@
       ctx.fillStyle = 'rgba(253, 224, 71, 0.72)';
       ctx.fillRect(winX + 5, winY + 3, 3, 3.5);
       ctx.fillRect(winX + 22, winY + 4, 3, 3.5);
+    }
+
+    // Cool frost-blue glass tint & condensation rim during cold_230 (16.3 °C)
+    if (atm.isCold) {
+      ctx.fillStyle = 'rgba(147, 197, 253, 0.34)';
+      ctx.fillRect(winX, winY, winW, winH);
+      ctx.fillStyle = 'rgba(224, 242, 254, 0.50)';
+      ctx.fillRect(winX + 1, winY + winH - 2.5, winW - 2, 2.2);
+      ctx.fillRect(winX + 1, winY + 1, 5, 1.8);
+      ctx.fillRect(winX + winW - 6, winY + 1, 5, 1.8);
+    } else if (atm.isHeatwave) {
+      // Subtle golden-amber solar glare inside pane during 30.1 °C heatwave
+      ctx.fillStyle = 'rgba(251, 146, 60, 0.16)';
+      ctx.fillRect(winX, winY, winW, winH);
     }
 
     // Animated diagonal rain streaks on window glass during rain
@@ -1313,6 +1343,17 @@
           wg.addColorStop(1, atm.skyBot);
           ctx.fillStyle = wg;
           ctx.fillRect(px + TILE_W - 6, cheekTop, 5, capSpanH - 4);
+          if (atm.isCold) {
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.36)';
+            ctx.fillRect(px + TILE_W - 6, cheekTop, 5, capSpanH - 4);
+          } else if (atm.isHeatwave) {
+            ctx.fillStyle = 'rgba(251, 146, 60, 0.16)';
+            ctx.fillRect(px + TILE_W - 6, cheekTop, 5, capSpanH - 4);
+          } else if (atm.isRain) {
+            ctx.fillStyle = 'rgba(226, 232, 240, 0.42)';
+            const rOff = (nowSec * 18 + gy * 7) % Math.max(4, capSpanH - 10);
+            ctx.fillRect(px + TILE_W - 5, cheekTop + 2 + rOff, 2, 4);
+          }
           ctx.fillStyle = '#f8fafc';
           ctx.fillRect(px + TILE_W - 6, cheekTop, 5, 2);
           ctx.fillRect(px + TILE_W - 6, cheekTop + Math.round(capSpanH * 0.5) - 3, 5, 2);
@@ -1605,6 +1646,64 @@
     }
   }
 
+  function drawHoodSweetGlow(ctx, x, y, w, h, nowSec) {
+    const pulse = 0.5 + 0.5 * Math.sin(nowSec * 3.6);
+    const cx = x + w * 0.5;
+    const cy = y + h * 0.5;
+    const rad = Math.max(w, h) * 0.65;
+    ctx.save();
+    const rg = ctx.createRadialGradient(cx, cy, 3, cx, cy, rad);
+    rg.addColorStop(0, 'rgba(74, 222, 128, ' + (0.24 + 0.08 * pulse).toFixed(3) + ')');
+    rg.addColorStop(0.58, 'rgba(250, 204, 21, ' + (0.12 + 0.05 * pulse).toFixed(3) + ')');
+    rg.addColorStop(1, 'rgba(74, 222, 128, 0)');
+    ctx.fillStyle = rg;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = 'rgba(74, 222, 128, ' + (0.45 + 0.25 * pulse).toFixed(3) + ')';
+    ctx.lineWidth = 1.25;
+    ctx.strokeRect(x + 0.8, y + 0.8, w - 1.6, h - 1.6);
+    ctx.restore();
+  }
+
+  function drawHoodOvercookedHazard(ctx, x, y, w, h, nowSec, seed) {
+    const pulse = 0.5 + 0.5 * Math.sin(nowSec * 6.5);
+    const cx = x + w * 0.5;
+    const cy = y + h * 0.45;
+    const rad = Math.max(w, h) * 0.68;
+    ctx.save();
+    // Pulsing crimson hazard halo around the overcooked hood bay
+    const halo = ctx.createRadialGradient(cx, cy, 6, cx, cy, rad);
+    halo.addColorStop(0, 'rgba(239, 68, 68, ' + (0.14 + 0.14 * pulse).toFixed(3) + ')');
+    halo.addColorStop(0.62, 'rgba(220, 38, 38, ' + (0.08 + 0.08 * pulse).toFixed(3) + ')');
+    halo.addColorStop(1, 'rgba(239, 68, 68, 0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pulsing crimson hazard outline
+    ctx.strokeStyle = 'rgba(248, 113, 113, ' + (0.45 + 0.40 * pulse).toFixed(3) + ')';
+    ctx.lineWidth = 1.8;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+
+    // Subtle rising dark-amber & smoky-grey vapour wisps
+    const wispCount = 5;
+    const s = seed || 0;
+    for (let i = 0; i < wispCount; i++) {
+      const phase = (nowSec * 0.62 + i * (1 / wispCount) + s * 0.17) % 1;
+      const wx = x + w * (0.22 + (i % 3) * 0.28) + Math.sin(nowSec * 2.4 + i * 1.9 + s) * 5;
+      const wy = y + 10 - phase * 26;
+      const r = 3.2 + phase * 4.6;
+      const alpha = (1 - phase) * (0.30 + 0.10 * pulse);
+      ctx.fillStyle = (i % 2 === 0)
+        ? ('rgba(120, 53, 15, ' + alpha.toFixed(3) + ')')
+        : ('rgba(71, 85, 105, ' + (alpha * 0.9).toFixed(3) + ')');
+      ctx.beginPath();
+      ctx.arc(wx, wy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
   // 1. FUME HOOD (Horizontal 2x1, North-Facing Cutaway 2x1 on South Wall, AND Side 1x2 + Animated Sash!)
   function drawFumeHood(ctx, room, obj, stackedChildren, rxn, npcRxn, nowSec, renderFixtureFn, renderState, dt) {
     const px = obj.x * TILE_W;
@@ -1614,6 +1713,13 @@
     const grp = GROUP_PALETTE[obj.group] || GROUP_PALETTE.none;
     const rise = 30;
     const deckZ = 14; // Interior work surface height
+
+    const rxStatus = rxn
+      ? classifyReactionStatus(rxn, obj)
+      : (npcRxn ? classifyReactionStatus(npcRxn, obj) : null);
+    const isOvercooked = rxStatus === 'overcooking';
+    const isSweet = rxStatus === 'sweet_spot' || (Boolean(rxn) && rxStatus === 'ready');
+    const hoodSeed = (obj.x * 7 + obj.y * 13) % 17;
 
     const isVertical = obj.h > obj.w;
     const westWall = isWallLike(getTileSafe(room, obj.x - 1, obj.y));
@@ -1639,8 +1745,11 @@
       const cavY = cutTopY + 5;
       const cavW = pw - 12;
       const cavH = (py + ph - 6) - cavY;
-      ctx.fillStyle = rxn ? '#f0fdf4' : (npcRxn ? '#ecfeff' : '#f8fafc');
+      ctx.fillStyle = isOvercooked ? '#fef2f2' : (isSweet ? '#ecfdf5' : (rxn ? '#f0fdf4' : (npcRxn ? '#ecfeff' : '#f8fafc')));
       ctx.fillRect(cavX, cavY, cavW, cavH);
+      if (isSweet) {
+        drawHoodSweetGlow(ctx, cavX, cavY, cavW, cavH, nowSec);
+      }
 
       // Dark Trespa chemical work deck inside cutaway hood
       const deckTopY = py + ph - deckZ - 16;
@@ -1664,8 +1773,7 @@
         ctx.fillStyle = '#e2e8f0';
         ctx.fillRect(stirX, stirY, 16, 7);
         if (rxn) {
-          const rxStatus = classifyReactionStatus(rxn);
-          ctx.strokeStyle = rxStatus === 'overcooking' ? '#ef4444' : (rxStatus === 'sweet_spot' ? '#f59e0b' : '#10b981');
+          ctx.strokeStyle = isOvercooked ? '#ef4444' : (isSweet ? '#4ade80' : '#f59e0b');
           ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.arc(stirX + 8, stirY + 3, 6 + Math.sin(nowSec * 7) * 1.2, 0, Math.PI * 2);
@@ -1714,12 +1822,12 @@
         ctx.fillRect(sx, rearTopY - 1.5, 2.5, 4);
       }
 
-      // Digital Airflow Monitor (0.52 m/s) with animated green LED segments on rear-right bezel
+      // Digital Airflow Monitor (0.52 m/s) with animated green LED segments (flashes red on overcooked!)
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(px + pw - 24, rearTopY - 2.5, 18, 5);
       for (let seg = 0; seg < 3; seg++) {
         const segLit = ((Math.floor(nowSec * 3.5) + seg) % 3) !== 0;
-        ctx.fillStyle = segLit ? '#4ade80' : '#166534';
+        ctx.fillStyle = isOvercooked ? (segLit ? '#f87171' : '#7f1d1d') : (segLit ? '#4ade80' : '#166534');
         ctx.fillRect(px + pw - 22 + seg * 5, rearTopY - 1, 3.5, 2);
       }
 
@@ -1745,6 +1853,10 @@
       ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 1.3;
       ctx.strokeRect(px + 1.5, cutTopY + 0.5, pw - 3, ph + 12 - 1);
+
+      if (isOvercooked) {
+        drawHoodOvercookedHazard(ctx, px + 1, cutTopY, pw - 2, ph + 12, nowSec, hoodSeed);
+      }
 
       // Draw highlighted/hovered outlines for stacked children AFTER hood sash so they stay crisp!
       if (stackedChildren && stackedChildren.length) {
@@ -1775,8 +1887,11 @@
       const cavY = topY + 12;
       const cavW = pw - 12;
       const cavH = ph + rise - deckZ - 12;
-      ctx.fillStyle = rxn ? '#f0fdf4' : (npcRxn ? '#ecfeff' : '#f8fafc');
+      ctx.fillStyle = isOvercooked ? '#fef2f2' : (isSweet ? '#ecfdf5' : (rxn ? '#f0fdf4' : (npcRxn ? '#ecfeff' : '#f8fafc')));
       ctx.fillRect(cavX, cavY, cavW, cavH);
+      if (isSweet) {
+        drawHoodSweetGlow(ctx, cavX, cavY, cavW, cavH, nowSec);
+      }
 
       // Back baffle slots + Schlenk dual-manifold glass line!
       ctx.fillStyle = '#cbd5e1';
@@ -1818,8 +1933,7 @@
         ctx.fillStyle = '#e2e8f0';
         ctx.fillRect(stirX, stirY, 16, 7);
         if (rxn) {
-          const rxStatus = classifyReactionStatus(rxn);
-          ctx.strokeStyle = rxStatus === 'overcooking' ? '#ef4444' : (rxStatus === 'sweet_spot' ? '#f59e0b' : '#10b981');
+          ctx.strokeStyle = isOvercooked ? '#ef4444' : (isSweet ? '#4ade80' : '#f59e0b');
           ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.arc(stirX + 8, stirY + 3, 6 + Math.sin(nowSec * 7) * 1.2, 0, Math.PI * 2);
@@ -1860,12 +1974,12 @@
       ctx.fillRect(px + 2, topY + 2, pw - 4, 9);
       ctx.fillStyle = grp.light;
       ctx.fillRect(px + 3, topY + 2, pw - 6, 2);
-      // Digital airflow badge with animated green LED segments
+      // Digital airflow badge with animated green LED segments (flashes red on overcooked!)
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(px + pw - 23, topY + 3.5, 17, 6);
       for (let seg = 0; seg < 3; seg++) {
         const segLit = ((Math.floor(nowSec * 3.5) + seg) % 3) !== 0;
-        ctx.fillStyle = segLit ? '#4ade80' : '#166534';
+        ctx.fillStyle = isOvercooked ? (segLit ? '#f87171' : '#7f1d1d') : (segLit ? '#4ade80' : '#166534');
         ctx.fillRect(px + pw - 21 + seg * 4.5, topY + 5.5, 3, 2);
       }
 
@@ -1898,6 +2012,10 @@
       ctx.lineWidth = 1.3;
       ctx.strokeRect(px + 1.5, topY + 0.5, pw - 3, ph + rise - 1);
 
+      if (isOvercooked) {
+        drawHoodOvercookedHazard(ctx, px + 1, topY, pw - 2, ph + rise, nowSec, hoodSeed);
+      }
+
       if (stackedChildren && stackedChildren.length) {
         for (let i = 0; i < stackedChildren.length; i++) {
           drawChildFixtureHighlightIfNeeded(ctx, stackedChildren[i], deckZ, nowSec, renderState);
@@ -1916,21 +2034,27 @@
       ctx.fillStyle = grp.main;
       ctx.fillRect(openEdgeX, topY + 2, 8, ph - 2);
       ctx.fillRect(px + 3, py + ph - rise + 1, pw - 6, 6);
-      // Animated green airflow indicator on pelmet
+      // Animated green airflow indicator on pelmet (flashes red on overcooked!)
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(px + pw - 16, py + ph - rise + 2, 10, 4);
-      ctx.fillStyle = (Math.floor(nowSec * 3.5) % 2 === 0) ? '#4ade80' : '#22c55e';
+      ctx.fillStyle = isOvercooked
+        ? ((Math.floor(nowSec * 5) % 2 === 0) ? '#f87171' : '#991b1b')
+        : ((Math.floor(nowSec * 3.5) % 2 === 0) ? '#4ade80' : '#22c55e');
       ctx.fillRect(px + pw - 14, py + ph - rise + 3, 6, 2);
 
       // Recessed glowing interior + angled glass sash facing the lab aisle!
       const bayX = opensLeft ? (px + 6) : (px + 14);
       const bayW = pw - 20;
-      ctx.fillStyle = rxn ? '#dcfce7' : (npcRxn ? '#cffafe' : '#f8fafc');
+      ctx.fillStyle = isOvercooked ? '#fef2f2' : (isSweet ? '#ecfdf5' : (rxn ? '#dcfce7' : (npcRxn ? '#cffafe' : '#f8fafc')));
       ctx.fillRect(bayX, topY + 8, bayW, ph - 12);
 
       // Dark Trespa interior strip + colourful reaction flasks visible from 3/4 view!
       ctx.fillStyle = '#1e293b';
       ctx.fillRect(bayX + 2, topY + 12, bayW - 4, ph - 18);
+
+      if (isSweet) {
+        drawHoodSweetGlow(ctx, bayX, topY + 8, bayW, ph - 12, nowSec);
+      }
 
       // Two stir plates + flasks along the 2-tile hood length
       for (let k = 0; k < 2; k++) {
@@ -1941,12 +2065,32 @@
           ? (rxn.color || '#10b981')
           : (npcRxn ? (npcRxn.color || (k === 0 ? '#14b8a6' : '#f59e0b')) : (k === 0 ? '#38bdf8' : '#fb923c'));
         drawAnimatedFlaskContents(ctx, bayX + 12, fy + 2, sideLiqCol, nowSec, obj.y + k, true);
+        // Reflux condenser neck + animated reflux bubbles matching horizontal hoods!
+        ctx.fillStyle = '#bae6fd';
+        ctx.fillRect(bayX + 10.5, fy - 9, 3, 6);
+        if (rxn || npcRxn) {
+          const bOff1 = (nowSec * 18 + k * 4.5) % 9;
+          const bOff2 = (nowSec * 14 + k * 2.5 + 4) % 8;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(bayX + 11, fy - 1 - bOff1, 2, 2);
+          ctx.fillStyle = 'rgba(224, 242, 254, 0.85)';
+          ctx.fillRect(bayX + 12.5, fy - bOff2, 1.5, 1.5);
+        }
         if (rxn) {
-          ctx.strokeStyle = classifyReactionStatus(rxn) === 'overcooking' ? '#ef4444' : '#fde047';
-          ctx.lineWidth = 1.4;
+          // Distinct status rings: sweet (#4ade80 emerald-gold) vs running (#fde047) vs overcooked (#f87171)
+          ctx.strokeStyle = isOvercooked ? '#f87171' : (isSweet ? '#4ade80' : '#fde047');
+          ctx.lineWidth = isSweet ? 1.65 : 1.4;
           ctx.beginPath();
           ctx.arc(bayX + 12, fy + 2, 6.5 + Math.sin(nowSec * 8 + k) * 1.2, 0, Math.PI * 2);
           ctx.stroke();
+          if (isSweet) {
+            // Subtle warm gold highlight arc for emerald-gold sweet-spot indicator
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.72)';
+            ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            ctx.arc(bayX + 12, fy + 2, 8.2 + Math.sin(nowSec * 5 + k) * 0.8, -0.7, 0.9);
+            ctx.stroke();
+          }
         } else if (npcRxn) {
           const npcMix = 0.5 + 0.5 * Math.sin(nowSec * 4.2 + k);
           ctx.strokeStyle = npcMix > 0.45 ? '#2dd4bf' : '#f59e0b';
@@ -1975,6 +2119,10 @@
       ctx.strokeStyle = '#64748b';
       ctx.lineWidth = 1;
       ctx.strokeRect(px + 6, py + ph - 18, pw - 12, 13);
+
+      if (isOvercooked) {
+        drawHoodOvercookedHazard(ctx, px + 2, topY, pw - 4, ph + rise, nowSec, hoodSeed);
+      }
     }
   }
 
@@ -3964,7 +4112,7 @@
     ctx.fill();
   }
 
-  // 36. TOILET / WASHROOM & CUSTOM BLOCK FALLBACKS
+  // 36. TOILET / WASHROOM, KLB 3F OFFICE FIXTURES & CUSTOM BLOCK FALLBACKS
   function drawToilet(ctx, obj) {
     const px = obj.x * TILE_W;
     const py = obj.y * TILE_H;
@@ -3975,6 +4123,394 @@
     ctx.fill();
     ctx.strokeStyle = '#64748b';
     ctx.stroke();
+  }
+
+  // 37. WHITEBOARD (Mounted Dry-Erase Board with Benzene Ring, Reaction Arrows & Marker Tray!)
+  function drawWhiteboard(ctx, room, obj) {
+    const px = obj.x * TILE_W;
+    const py = obj.y * TILE_H;
+    const pw = obj.w * TILE_W;
+    const ph = obj.h * TILE_H;
+    const onWall = isWallLike(getTileSafe(room, obj.x, obj.y));
+    const isVertical = obj.h > obj.w;
+
+    if (isVertical && !onWall) {
+      // Side-wall vertical 1x2 mounted dry-erase whiteboard
+      const eastWall = isWallLike(getTileSafe(room, obj.x + obj.w, obj.y));
+      const bx = eastWall ? (px + pw - 16) : (px + 4);
+      const by = py - 14;
+      const bw = 12;
+      const bh = ph + 6;
+      fillRoundRect(ctx, bx, by, bw, bh, 2, '#f8fafc', '#64748b', 1.4);
+      ctx.strokeStyle = '#1e3a8a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(bx + bw * 0.5, by + 18, 3.2, 0, Math.PI * 2);
+      ctx.moveTo(bx + bw * 0.5, by + 25);
+      ctx.lineTo(bx + bw * 0.5, by + 35);
+      ctx.stroke();
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(bx - 1, by + bh - 4, bw + 2, 3);
+      return;
+    }
+
+    const bx = px + 4;
+    const bw = pw - 8;
+    const bh = 27;
+    const by = onWall ? (py + 5) : (py - 17);
+
+    // Subtle mounting brackets / wall cleat shadow when placed on floor tile
+    if (!onWall) {
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(bx + 5, by + bh, 3, 14);
+      ctx.fillRect(bx + bw - 8, by + bh, 3, 14);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(bx + 3, by + bh + 12, 7, 3);
+      ctx.fillRect(bx + bw - 10, by + bh + 12, 7, 3);
+    }
+
+    // Brushed aluminium outer bezel + crisp white dry-erase enamel
+    fillRoundRect(ctx, bx - 1.5, by - 1.5, bw + 3, bh + 3, 2.5, '#cbd5e1', '#475569', 1.2);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
+
+    // Glossy enamel diagonal sheen
+    ctx.fillStyle = 'rgba(186, 230, 253, 0.22)';
+    ctx.beginPath();
+    ctx.moveTo(bx + 4, by + 1);
+    ctx.lineTo(bx + 16, by + 1);
+    ctx.lineTo(bx + 7, by + bh - 1);
+    ctx.lineTo(bx + 1, by + bh - 1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Tiny drawn organic chemistry mechanism: benzene ring + reaction arrow + product!
+    const midY = by + 13;
+    const hexCx = bx + Math.min(14, bw * 0.24);
+    const hexR = 5.2;
+    ctx.save();
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    for (let k = 0; k < 6; k++) {
+      const a = k * (Math.PI / 3) - Math.PI / 6;
+      const hx = hexCx + Math.cos(a) * hexR;
+      const hy = midY + Math.sin(a) * hexR;
+      if (k === 0) ctx.moveTo(hx, hy);
+      else ctx.lineTo(hx, hy);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    // Inscribed aromatic circle inside benzene ring
+    ctx.beginPath();
+    ctx.arc(hexCx, midY, hexR * 0.54, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Reaction arrow + red reagent tick above arrow
+    const arrStart = hexCx + 8;
+    const arrEnd = Math.min(bx + bw - 12, arrStart + (bw >= 72 ? 22 : 12));
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(arrStart, midY);
+    ctx.lineTo(arrEnd, midY);
+    ctx.lineTo(arrEnd - 3, midY - 2.3);
+    ctx.moveTo(arrEnd, midY);
+    ctx.lineTo(arrEnd - 3, midY + 2.3);
+    ctx.stroke();
+    // Red reagent conditions above arrow & blue note below
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(arrStart + 2, midY - 4.5, Math.max(4, arrEnd - arrStart - 5), 1.4);
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(arrStart + 2, midY + 3, Math.max(4, arrEnd - arrStart - 6), 1.2);
+
+    // Right-hand product ring / yield annotations
+    if (bw >= 68) {
+      const prodCx = arrEnd + 11;
+      ctx.strokeStyle = '#1d4ed8';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) {
+        const a = k * (Math.PI / 3) - Math.PI / 6;
+        const hx = prodCx + Math.cos(a) * 4.8;
+        const hy = midY + Math.sin(a) * 4.8;
+        if (k === 0) ctx.moveTo(hx, hy);
+        else ctx.lineTo(hx, hy);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      // Substituent branch + green yield check
+      ctx.strokeStyle = '#059669';
+      ctx.beginPath();
+      ctx.moveTo(prodCx + 4.5, midY - 2);
+      ctx.lineTo(prodCx + 9, midY - 5);
+      ctx.stroke();
+      if (prodCx + 15 < bx + bw - 4) {
+        ctx.fillStyle = '#059669';
+        ctx.fillRect(prodCx + 12, midY - 3, Math.min(12, bx + bw - prodCx - 16), 1.5);
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(prodCx + 12, midY + 1, Math.min(9, bx + bw - prodCx - 16), 1.3);
+      }
+    } else {
+      // Compact 1-tile product sketch
+      ctx.strokeStyle = '#1d4ed8';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(arrEnd + 3, midY - 2);
+      ctx.lineTo(arrEnd + 7, midY + 2);
+      ctx.lineTo(arrEnd + 10, midY - 3);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Protruding aluminium marker tray + dry-erase pens (red, blue, black) + felt eraser!
+    const trayY = by + bh;
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(bx + 3, trayY, bw - 6, 3.2);
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(bx + 3, trayY + 2.4, bw - 6, 1);
+    // Markers
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(bx + 6, trayY - 1.3, 6, 1.8);
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(bx + 14, trayY - 1.3, 6, 1.8);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(bx + 22, trayY - 1.3, 6, 1.8);
+    // Charcoal felt eraser on right
+    if (bw >= 36) {
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(bx + bw - 13, trayY - 2.2, 7, 2.8);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(bx + bw - 13, trayY - 2.2, 7, 1);
+    }
+  }
+
+  // 38. BOOKSHELF (Warm Wooden Academic Case Packed with Colourful Chemistry Spines — Clayden!)
+  function drawBookshelf(ctx, obj) {
+    const px = obj.x * TILE_W;
+    const py = obj.y * TILE_H;
+    const pw = obj.w * TILE_W;
+    const ph = obj.h * TILE_H;
+    const rise = 30;
+
+    // Warm oak / walnut bookcase body
+    draw3DBox(ctx, px + 2, py, pw - 4, ph, rise, '#b9834b', '#78350f', '#451a03', '#e7b98a');
+
+    const topY = py - rise;
+    const frontTopY = py + ph - rise;
+    const innerX = px + 5;
+    const innerW = pw - 10;
+
+    // Subtle decorative chemistry reference stack & bookend resting on top roof surface
+    ctx.fillStyle = '#15803d'; // Clayden green flat volume on top
+    ctx.fillRect(px + 8, topY + 6, Math.min(18, pw - 16), 9);
+    ctx.fillStyle = '#fefce8';
+    ctx.fillRect(px + 9, topY + 7, Math.min(16, pw - 18), 2);
+    if (pw >= 48) {
+      ctx.fillStyle = '#1d4ed8';
+      ctx.fillRect(px + pw - 22, topY + 5, 13, 8);
+    }
+
+    // 3 Recessed horizontal book shelves packed with Clayden green/blue/red volumes & theses
+    const spinePalette = [
+      '#16a34a', // Clayden emerald green
+      '#2563eb', // Clayden / Organic Chem royal blue
+      '#dc2626', // Crimson JACS / reference red
+      '#15803d', // Deep green volume
+      '#d97706', // Amber handbook
+      '#1e40af', // Navy thesis binder
+      '#0d9488', // Teal bioconjugation text
+      '#b91c1c', // Burgundy organic synth
+      '#fef3c7', // Cream bound volume
+      '#4f46e5'  // Indigo spectroscopy guide
+    ];
+
+    const shelfCount = 3;
+    const shelfSlotH = 8;
+    for (let s = 0; s < shelfCount; s++) {
+      const sy = frontTopY + 2 + s * 9;
+      // Dark interior shelf recess
+      ctx.fillStyle = '#3b1806';
+      ctx.fillRect(innerX, sy, innerW, shelfSlotH);
+
+      // Pack colourful books across the shelf width
+      let bx = innerX + 1;
+      let idx = 0;
+      while (bx < innerX + innerW - 3) {
+        const roll = hash2D(obj.x * 7 + idx, obj.y * 5 + s, 521);
+        const bw = roll > 0.72 ? 5 : (roll > 0.35 ? 4 : 3);
+        if (bx + bw > innerX + innerW - 1) break;
+        // Occasional narrow gap for realism
+        if (roll < 0.08 && idx > 1) {
+          bx += 3;
+          idx++;
+          continue;
+        }
+        const bh = shelfSlotH - (roll > 0.6 ? 0.8 : 1.8);
+        const col = spinePalette[Math.floor(hash2D(obj.x + idx * 3, obj.y + s * 11, 613) * spinePalette.length)];
+        ctx.fillStyle = col;
+        ctx.fillRect(bx, sy + (shelfSlotH - bh), bw - 0.5, bh);
+        // Tiny gold/white spine label band
+        ctx.fillStyle = (idx % 3 === 0) ? '#fde047' : 'rgba(248, 250, 252, 0.75)';
+        ctx.fillRect(bx + 0.5, sy + (shelfSlotH - bh) + 1.8, Math.max(1.5, bw - 1.5), 1.1);
+        bx += bw;
+        idx++;
+      }
+
+      // Warm oak shelf lip edge beneath books
+      ctx.fillStyle = '#a16207';
+      ctx.fillRect(innerX - 1, sy + shelfSlotH, innerW + 2, 1.5);
+    }
+  }
+
+  // 39. THESIS PRINTER (Compact Grey/Navy Departmental Laser Printer + Paper Tray + Blinking Green LED!)
+  function drawThesisPrinter(ctx, obj, nowSec, zOffset) {
+    const px = obj.x * TILE_W;
+    const py = obj.y * TILE_H;
+    const pw = obj.w * TILE_W;
+    const ph = obj.h * TILE_H;
+    const tSec = nowSec || 0;
+    const onDesk = Boolean(zOffset);
+
+    if (!onDesk) {
+      // Compact grey rolling departmental printer stand with spare A4 ream shelf underneath
+      draw3DBox(ctx, px + 6, py + 6, pw - 12, ph - 8, 10, '#94a3b8', '#64748b', '#1e293b');
+      // Spare white A4 thesis paper ream inside lower stand bay
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(px + 9, py + ph - 8, pw - 18, 6);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(px + 11, py + ph - 6.5, pw - 22, 4);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(px + 13, py + ph - 5.5, 6, 2);
+    }
+
+    // Printer main body (elevated slightly when on floor stand)
+    const bodyBaseY = onDesk ? (py + 8) : (py - 2);
+    const bodyH = Math.max(20, ph - 14);
+    const bodyRise = 13;
+    const bodyX = px + 6;
+    const bodyW = pw - 12;
+
+    draw3DBox(ctx, bodyX, bodyBaseY, bodyW, bodyH, bodyRise, '#e2e8f0', '#cbd5e1', '#1e293b', '#ffffff');
+
+    const topY = bodyBaseY - bodyRise;
+    const frontTopY = bodyBaseY + bodyH - bodyRise;
+
+    // Dark navy top scanner lid / ADF feeder bar
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(bodyX + 3, topY + 2, bodyW - 6, 5);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(bodyX + 5, topY + 9, bodyW - 14, 7);
+
+    // Output catch tray with freshly printed white thesis page protruding!
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(bodyX + 8, topY + 11, Math.max(12, bodyW - 22), 9);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 0.7;
+    ctx.strokeRect(bodyX + 8, topY + 11, Math.max(12, bodyW - 22), 9);
+    // Tiny printed thesis lines on page
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(bodyX + 10, topY + 13, Math.max(6, bodyW - 28), 1);
+    ctx.fillRect(bodyX + 10, topY + 15.5, Math.max(8, bodyW - 26), 1);
+    ctx.fillRect(bodyX + 10, topY + 18, Math.max(5, bodyW - 30), 1);
+
+    // Front navy trim bezel + status control panel with blinking green Ready LED!
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(bodyX + 2, frontTopY + 1, bodyW - 4, 4);
+    // Tiny monochrome LCD readout on left of bezel
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(bodyX + 5, frontTopY + 2, 8, 2);
+    // Blinking green status LED on right of bezel
+    const ledOn = Math.floor(tSec * 2.2) % 2 === 0;
+    ctx.save();
+    if (ledOn) {
+      ctx.shadowColor = '#4ade80';
+      ctx.shadowBlur = 5;
+    }
+    ctx.fillStyle = ledOn ? '#4ade80' : '#166534';
+    ctx.beginPath();
+    ctx.arc(bodyX + bodyW - 6, frontTopY + 3, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Lower pull-out A4 paper cassette tray
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(bodyX + 4, frontTopY + 6, bodyW - 8, 6);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(bodyX + 7, frontTopY + 7.5, bodyW - 14, 2);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(bodyX + bodyW * 0.5 - 4, frontTopY + 10, 8, 1.5);
+  }
+
+  // 40. LOCKER (Tall Slate Steel Departmental Lockers with Vent Slats & Label Plates!)
+  function drawLocker(ctx, obj) {
+    const px = obj.x * TILE_W;
+    const py = obj.y * TILE_H;
+    const pw = obj.w * TILE_W;
+    const ph = obj.h * TILE_H;
+    const rise = 32;
+    const grp = GROUP_PALETTE[obj.group] || GROUP_PALETTE.none;
+
+    // Tall industrial slate steel locker bank
+    draw3DBox(ctx, px + 2, py, pw - 4, ph, rise, '#64748b', '#475569', '#0f172a', '#94a3b8');
+
+    // Optional group accent bar along top edge
+    if (obj.group && obj.group !== 'none') {
+      ctx.fillStyle = grp.main;
+      ctx.fillRect(px + 3, py - rise + 2, pw - 6, 3.5);
+    }
+
+    const frontTopY = py + ph - rise;
+    const innerX = px + 4;
+    const innerW = pw - 8;
+    const numDoors = Math.max(2, obj.w * 2);
+    const doorW = innerW / numDoors;
+
+    // Dark recessed steel toe-kick plinth
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(px + 3, py + ph - 3, pw - 6, 3);
+
+    for (let d = 0; d < numDoors; d++) {
+      const dx = innerX + d * doorW;
+      const dw = doorW - 1.5;
+      const dy = frontTopY + 2;
+      const dh = rise - 6;
+
+      // Inset steel locker door panel
+      ctx.fillStyle = (d % 2 === 0) ? '#526074' : '#475569';
+      ctx.fillRect(dx + 0.8, dy, dw, dh);
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 0.9;
+      ctx.strokeRect(dx + 0.8, dy, dw, dh);
+
+      // Upper ventilation louver slats (3 crisp dark slots)
+      ctx.fillStyle = '#1e293b';
+      for (let v = 0; v < 3; v++) {
+        ctx.fillRect(dx + 3.5, dy + 2.5 + v * 2.2, Math.max(4, dw - 6), 1.1);
+      }
+
+      // White/brass metallic departmental label plate below vents
+      const plateW = Math.min(10, Math.max(5, dw - 6));
+      const plateX = dx + 0.8 + (dw - plateW) * 0.5;
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(plateX, dy + 10, plateW, 3.5);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 0.6;
+      ctx.strokeRect(plateX, dy + 10, plateW, 3.5);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(plateX + 1.5, dy + 11.4, Math.max(2, plateW - 3), 0.9);
+
+      // Recessed latch handle & key cylinder on right side of door
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(dx + dw - 3.6, dy + 15, 2.2, 4.5);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(dx + dw - 3.0, dy + 16, 1.0, 1.2);
+
+      // Lower ventilation slats near bottom of door
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(dx + 3.5, dy + dh - 4.5, Math.max(4, dw - 6), 1.0);
+      ctx.fillRect(dx + 3.5, dy + dh - 2.5, Math.max(4, dw - 6), 1.0);
+    }
   }
 
   function drawCustomBlock(ctx, obj) {
@@ -4001,6 +4537,9 @@
 
     if (obj.type === 'projector') {
       return { x: px + 4, y: py - 3, w: pw - 8, h: 41, r: 4 };
+    }
+    if (obj.type === 'whiteboard' && room && isWallLike(getTileSafe(room, obj.x, obj.y))) {
+      return { x: px + 2, y: py + 3, w: pw - 4, h: 33, r: 3 };
     }
     if (obj.type === 'nmr_magnet') {
       return { x: px + 4, y: py - 18, w: pw - 4, h: ph + 8, r: 10 };
@@ -4210,6 +4749,18 @@
       case 'projector':
         drawProjector(ctx, obj, nowSec);
         break;
+      case 'whiteboard':
+        drawWhiteboard(ctx, room, obj);
+        break;
+      case 'bookshelf':
+        drawBookshelf(ctx, obj);
+        break;
+      case 'thesis_printer':
+        drawThesisPrinter(ctx, obj, nowSec, zOffset);
+        break;
+      case 'locker':
+        drawLocker(ctx, obj);
+        break;
       case 'toilet':
         drawToilet(ctx, obj);
         break;
@@ -4292,25 +4843,71 @@
     return { seated: false, needsStool: false, nearType };
   }
 
-  function drawContextualHandProp(ctx, anchorX, anchorY, dirCode, seatDrop, breathY, charId, room, nearType, nowSec) {
-    if (dirCode === 'N') return;
-    const hx = dirCode === 'W' ? (anchorX - 9) : (dirCode === 'E' ? (anchorX + 9) : (anchorX + 10));
-    const hy = anchorY - 22 + seatDrop + breathY;
+  function normalizeCarriedPropKind(rawProp) {
+    if (!rawProp) return null;
+    const p = String(rawProp).toLowerCase().trim();
+    if (!p) return null;
+    if (p.includes('nmr')) return 'nmr_tube';
+    if (p.includes('vial') || p.includes('lcms') || p.includes('lc_ms') || p.includes('maldi') || p.includes('ms_')) return 'lcms_vial';
+    if (p.includes('coffee') || p.includes('espresso') || p.includes('latte') || p.includes('flat_white') || p === 'cup') return 'coffee';
+    if (p.includes('tea') || p.includes('mug')) return 'tea';
+    if (p.includes('clipboard') || p.includes('checklist')) return 'clipboard';
+    if (p.includes('pipette') || p.includes('gilson')) return 'pipette';
+    if (p.includes('flask') || p.includes('rbf') || p.includes('sample') || p.includes('product')) return 'flask';
+    return null;
+  }
 
-    const isCafe = room && room.id === 'gordons_cafe';
-    const isTea = (charId === 'richard_spears' && room && room.id === 'klb_3f') || nearType === 'tea_drawer';
-    const isClipboard = charId === 'safety_inspector' || charId === 'claire_carmalt';
-    const isPipette = nearType === 'tcep_bench' || nearType === 'gel_tank' || nearType === 'centrifuge' || nearType === 'heatblock';
-    const isFlask = nearType === 'fumehood' || nearType === 'buchi' || nearType === 'biotage' || nearType === 'sink' || nearType === 'base_bath';
+  function resolveCarriedProp(entity, isPlayer, room, renderState) {
+    if (isPlayer) {
+      return normalizeCarriedPropKind((entity && entity.carryingProp) || (renderState && renderState.carryingProp));
+    }
+    const explicit = normalizeCarriedPropKind(entity && entity.carryingProp);
+    if (explicit) return explicit;
+    if (room && room.id === 'cib_lg1b_nmr') return 'nmr_tube';
+    if (room && room.id === 'cib_lg11_ms') return 'lcms_vial';
+    if (room && room.id === 'gordons_cafe') return 'coffee';
+    return null;
+  }
+
+  function drawContextualHandProp(ctx, anchorX, anchorY, dirCode, seatDrop, breathY, charId, room, nearType, nowSec, carriedProp, strideOffX, strideBobY, isMoving) {
+    if (dirCode === 'N') return;
+    const bobY = strideBobY || 0;
+    const swingX = strideOffX || 0;
+    const hx = (dirCode === 'W' ? (anchorX - 9) : (dirCode === 'E' ? (anchorX + 9) : (anchorX + 10))) + swingX;
+    const hy = anchorY - 22 + seatDrop + breathY + bobY;
+
+    let propKind = carriedProp || null;
+    if (!propKind && !isMoving) {
+      const isCafe = room && room.id === 'gordons_cafe';
+      const isTea = (charId === 'richard_spears' && room && room.id === 'klb_3f') || nearType === 'tea_drawer';
+      const isClipboard = charId === 'safety_inspector' || charId === 'claire_carmalt';
+      const isPipette = nearType === 'tcep_bench' || nearType === 'gel_tank' || nearType === 'centrifuge' || nearType === 'heatblock';
+      const isFlask = nearType === 'fumehood' || nearType === 'buchi' || nearType === 'biotage' || nearType === 'sink' || nearType === 'base_bath';
+      if (isCafe) propKind = 'coffee';
+      else if (isTea) propKind = 'tea';
+      else if (isClipboard) propKind = 'clipboard';
+      else if (nearType === 'nmr_magnet') propKind = 'nmr_tube';
+      else if (nearType === 'lcms_unit' || nearType === 'maldi_unit') propKind = 'lcms_vial';
+      else if (isPipette) propKind = 'pipette';
+      else if (isFlask) propKind = 'flask';
+    }
+    if (!propKind) return;
 
     ctx.save();
-    if (isCafe || isTea) {
-      // Porcelain flat-white cup or ceramic tea mug + tiny steam wisp
-      ctx.fillStyle = isCafe ? '#f8fafc' : '#fef3c7';
+    if (propKind === 'coffee' || propKind === 'tea') {
+      // Porcelain flat-white coffee cup or ceramic tea mug + tiny steam wisp
+      const isCoffee = propKind === 'coffee';
+      ctx.fillStyle = isCoffee ? '#f8fafc' : '#fef3c7';
       ctx.strokeStyle = '#64748b';
       ctx.lineWidth = 0.8;
       ctx.fillRect(hx - 2.5, hy - 3, 5, 5);
       ctx.strokeRect(hx - 2.5, hy - 3, 5, 5);
+      // Tiny cup handle on outer side
+      ctx.strokeStyle = isCoffee ? '#e2e8f0' : '#fde68a';
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.arc(hx + (dirCode === 'W' ? -2.8 : 2.8), hy - 0.5, 1.4, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.fillStyle = '#78350f';
       ctx.fillRect(hx - 1.5, hy - 2.5, 3, 1.2);
       const sp = (nowSec * 0.95 + anchorX * 0.03) % 1;
@@ -4318,7 +4915,39 @@
       ctx.beginPath();
       ctx.arc(hx + Math.sin(nowSec * 3) * 1.2, hy - 5 - sp * 6, 1.1 + sp * 0.9, 0, Math.PI * 2);
       ctx.fill();
-    } else if (isClipboard) {
+    } else if (propKind === 'nmr_tube') {
+      // Tiny slender 5mm borosilicate glass NMR tube with yellow/blue cap
+      const tilt = dirCode === 'W' ? -0.18 : 0.18;
+      ctx.translate(hx, hy - 1);
+      ctx.rotate(tilt);
+      ctx.fillStyle = 'rgba(224, 242, 254, 0.92)';
+      ctx.fillRect(-1.3, -6.5, 2.6, 10.5);
+      // Pale deuterated solvent fill at bottom of tube
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-0.9, -0.5, 1.8, 4.0);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 0.65;
+      ctx.strokeRect(-1.3, -6.5, 2.6, 10.5);
+      // Iconic yellow or blue NMR cap
+      const useBlueCap = charId && (charId.charCodeAt(0) % 2 === 1);
+      ctx.fillStyle = useBlueCap ? '#2563eb' : '#facc15';
+      ctx.fillRect(-1.8, -8.5, 3.6, 2.4);
+      ctx.fillStyle = useBlueCap ? '#93c5fd' : '#ca8a04';
+      ctx.fillRect(-1.8, -6.5, 3.6, 0.8);
+    } else if (propKind === 'lcms_vial') {
+      // Tiny 2 mL amber LC-MS autosampler vial with white label patch & blue septum cap
+      ctx.fillStyle = '#b45309';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 0.7;
+      ctx.fillRect(hx - 2.2, hy - 2.5, 4.4, 6.2);
+      ctx.strokeRect(hx - 2.2, hy - 2.5, 4.4, 6.2);
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(hx - 1.5, hy - 0.5, 3.0, 2.6);
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(hx - 1.8, hy - 4.4, 3.6, 2.0);
+      ctx.fillStyle = '#bae6fd';
+      ctx.fillRect(hx - 1.0, hy - 4.2, 2.0, 0.8);
+    } else if (propKind === 'clipboard') {
       // Clipboard + white checklist
       ctx.fillStyle = '#92400e';
       ctx.fillRect(hx - 3, hy - 5, 6, 8);
@@ -4326,7 +4955,7 @@
       ctx.fillRect(hx - 2, hy - 3.5, 4, 5.5);
       ctx.fillStyle = '#eab308';
       ctx.fillRect(hx - 1.5, hy - 5.5, 3, 1.5);
-    } else if (isPipette) {
+    } else if (propKind === 'pipette') {
       // Sleek blue Gilson Pipetman + yellow tip
       ctx.strokeStyle = '#cbd5e1';
       ctx.lineWidth = 1.6;
@@ -4338,7 +4967,7 @@
       ctx.fillRect(hx - 1.2, hy - 7.5, 2.5, 2.5);
       ctx.fillStyle = '#facc15';
       ctx.fillRect(hx + (dirCode === 'W' ? -2.6 : 1.3), hy + 1.5, 1.3, 2.5);
-    } else if (isFlask) {
+    } else if (propKind === 'flask') {
       // Mini Erlenmeyer/RBF flask with coloured solution
       ctx.fillStyle = 'rgba(224, 242, 254, 0.88)';
       ctx.beginPath();
@@ -4479,6 +5108,7 @@
     const headOffY = seatDrop + breathY + stepBob;
     const eyeY = drawY + 23 + headOffY;
     const headTopY = drawY + 9 + headOffY;
+    const stableHeadTopY = drawY + 9 + seatDrop;
 
     const labelText = (entity.showName !== false)
       ? stripBubbleEmojis(
@@ -4496,6 +5126,7 @@
       anchorX,
       anchorY,
       headTopY,
+      stableHeadTopY,
       seated: seatCtx.seated,
       isPlayer: Boolean(isPlayer),
       label: labelText,
@@ -4556,9 +5187,16 @@
       ctx.restore();
     }
 
-    // Contextual micro-prop when idle (cup, tea mug, clipboard, Gilson pipette, or mini flask)
-    if (!anim.isMoving) {
-      drawContextualHandProp(ctx, anchorX, anchorY, anim.dirCode, seatDrop, breathY, charId, room, seatCtx.nearType, nowSec);
+    // Carried & contextual hand props (NMR tube, amber LC-MS vial, coffee cup, tea mug, clipboard, pipette, flask)
+    // Carried props render even while walking (with subtle stride bob) whenever dirCode !== 'N'!
+    const carriedProp = resolveCarriedProp(entity, isPlayer, room, state);
+    if (carriedProp || !anim.isMoving) {
+      const strideBobY = anim.isMoving ? ((anim.col === 1 || anim.col === 3) ? -1.4 : 0.5) : 0;
+      const strideOffX = anim.isMoving ? (anim.col === 1 ? -1.2 : (anim.col === 3 ? 1.2 : 0)) : 0;
+      drawContextualHandProp(
+        ctx, anchorX, anchorY, anim.dirCode, seatDrop, breathY, charId, room,
+        seatCtx.nearType, nowSec, carriedProp, strideOffX, strideBobY, anim.isMoving
+      );
     }
   }
 
@@ -4703,6 +5341,13 @@
   }
 
   function computeSurfaceParentMap(room) {
+    if (room && room.id) {
+      const sig = roomSignature(room);
+      const cached = surfaceParentCache.get(room.id);
+      if (cached && cached.sig === sig && cached.objectsRef === room.objects) {
+        return cached.value;
+      }
+    }
     const surfaces = [];
     const stackedBySurfaceId = new Map();
     const surfaceParentMap = new Map();
@@ -4729,7 +5374,15 @@
         }
       }
     }
-    return { surfaceParentMap, stackedBySurfaceId };
+    const result = { surfaceParentMap, stackedBySurfaceId };
+    if (room && room.id) {
+      surfaceParentCache.set(room.id, {
+        sig: roomSignature(room),
+        objectsRef: room.objects,
+        value: result
+      });
+    }
+    return result;
   }
 
   function findTargetStationObj(room, entry) {
@@ -5878,7 +6531,9 @@
       const meta = (targetId && entityMetaMap) ? entityMetaMap.get(targetId) : null;
       const anchorX = meta ? meta.anchorX : ((gx + 0.5) * TILE_W);
       const anchorY = meta ? meta.anchorY : ((gy + 0.86) * TILE_H);
-      const baseHeadTop = meta ? meta.headTopY : ((gy + 0.86) * TILE_H - 72);
+      const baseHeadTop = meta
+        ? (typeof meta.stableHeadTopY === 'number' ? meta.stableHeadTopY : meta.headTopY)
+        : ((gy + 0.86) * TILE_H - 72);
       const midY = (baseHeadTop + anchorY) * 0.5;
       if (anchorX < visMinX + 4 || anchorX > visMaxX - 4 ||
           midY < visMinY + 4 || midY > visMaxY - 4 ||
@@ -6044,8 +6699,15 @@
   // FLOOR SUNBEAMS, FOOTSTEPS, CLICK RIPPLES, AMBIENT LIGHTING & TIME GRADE
   // ============================================================================
   function collectRoomWindowBays(room) {
+    if (!isAboveGroundWindowRoom(room)) return [];
+    if (room && room.id) {
+      const sig = roomSignature(room);
+      const cached = windowBayCache.get(room.id);
+      if (cached && cached.sig === sig && cached.tilesRef === room.tiles && cached.objectsRef === room.objects) {
+        return cached.bays;
+      }
+    }
     const bays = [];
-    if (!isAboveGroundWindowRoom(room)) return bays;
     for (let gy = 0; gy < room.h; gy++) {
       for (let gx = 0; gx < room.w; gx++) {
         const t = getTileSafe(room, gx, gy);
@@ -6060,6 +6722,14 @@
           bays.push({ side: 'W', gx, gy });
         }
       }
+    }
+    if (room && room.id) {
+      windowBayCache.set(room.id, {
+        sig: roomSignature(room),
+        tilesRef: room.tiles,
+        objectsRef: room.objects,
+        bays
+      });
     }
     return bays;
   }
@@ -6219,6 +6889,49 @@
       }
     }
 
+    // 1b. Soft drifting translucent pale-green thiol odour wisps rising above Cupboard 5 when thiolDirty!
+    if (renderState.thiolDirty && room.id === 'klb_2f' && room.objects) {
+      ctx.save();
+      for (let i = 0; i < room.objects.length; i++) {
+        const o = room.objects[i];
+        if (o.type !== 'chem_cupboard') continue;
+        if (!/cupboard\s+5/i.test(String(o.label || ''))) continue;
+        const baseX = (o.x + o.w * 0.5) * TILE_W;
+        const baseY = o.y * TILE_H - 22;
+        const spanX = Math.max(24, o.w * TILE_W * 0.65);
+
+        const auraPulse = 0.5 + 0.5 * Math.sin(nowSec * 2.2);
+        const ag = ctx.createRadialGradient(baseX, baseY + 6, 4, baseX, baseY + 2, spanX * 0.85);
+        ag.addColorStop(0, 'rgba(134, 239, 172, ' + (0.16 + 0.06 * auraPulse).toFixed(3) + ')');
+        ag.addColorStop(1, 'rgba(134, 239, 172, 0)');
+        ctx.fillStyle = ag;
+        ctx.beginPath();
+        ctx.arc(baseX, baseY + 2, spanX * 0.85, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let w = 0; w < 5; w++) {
+          const t = (nowSec * 0.42 + w * 0.2) % 1;
+          const xOff = (w - 2) * (spanX * 0.2);
+          const sway = Math.sin(nowSec * 2.1 + w * 1.6) * 5.5;
+          const wx = baseX + xOff + sway;
+          const wy = baseY - t * 32;
+          const fade = Math.sin(t * Math.PI);
+          ctx.fillStyle = 'rgba(163, 230, 53, ' + (fade * 0.34).toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.ellipse(wx, wy, 4.2 + t * 4.5, 2.6 + t * 2.4, Math.sin(nowSec + w) * 0.3, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = 'rgba(134, 239, 172, ' + (fade * 0.42).toFixed(3) + ')';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(wx - 1.5, wy + 5);
+          ctx.quadraticCurveTo(wx + 3.5 * Math.sin(nowSec * 2.6 + w), wy, wx - 1, wy - 6);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
     // 2. Warm Cozy Espresso Pendant Light Pools in Gordon's Café (brighter in the evening!)
     if (room.id === 'gordons_cafe' && room.objects) {
       const cafeAlpha = 0.14 + atm.nightFactor * 0.09 + atm.goldenFactor * 0.04;
@@ -6308,25 +7021,43 @@
   function drawViewportTintOverlay(ctx, viewW, viewH, room, renderState, nowSec, atmo) {
     const atm = atmo || getAtmosphereProfile(renderState.timeMins, renderState.weather);
     const hour = atm.hour;
+    const roomId = room && room.id;
 
-    // Subtle time-of-day & weather tint (with warm Golden-Hour grade before twilight!)
-    let tint = null;
-    if (atm.goldenFactor > 0.05) {
-      const alpha = (0.085 * atm.goldenFactor + (room.id === 'gordons_cafe' ? 0.025 : 0)).toFixed(3);
-      tint = 'rgba(245, 158, 11, ' + alpha + ')';
-    } else if (room.id === 'gordons_cafe') {
-      tint = 'rgba(245, 158, 11, 0.05)';
-    } else if (hour >= 20.5 || hour < 6.5) {
-      tint = 'rgba(15, 23, 42, 0.16)'; // Late-night fluorescent lab shift
-    } else if (hour >= 18.45 && hour < 20.5) {
-      tint = 'rgba(99, 102, 241, 0.07)'; // Bloomsbury twilight
-    } else if (atm.isRain) {
-      tint = 'rgba(51, 65, 85, 0.07)';
-    }
-
-    if (tint) {
-      ctx.fillStyle = tint;
+    if (!isAboveGroundWindowRoom(roomId)) {
+      // Underground / windowless facilities (CIB LG11 MS, CIB LG1b NMR, interior seminar room):
+      // steady super-faint cool lab fluorescent ambiance — NEVER sunset-orange or twilight-indigo!
+      ctx.fillStyle = 'rgba(148, 197, 255, 0.03)';
       ctx.fillRect(0, 0, viewW, viewH);
+    } else {
+      // 1. Subtle time-of-day grade (above-ground windowed rooms only)
+      let tint = null;
+      if (atm.goldenFactor > 0.05 && !atm.isRain) {
+        const alpha = (0.085 * atm.goldenFactor + (roomId === 'gordons_cafe' ? 0.025 : 0)).toFixed(3);
+        tint = 'rgba(245, 158, 11, ' + alpha + ')';
+      } else if (roomId === 'gordons_cafe') {
+        tint = 'rgba(245, 158, 11, 0.05)';
+      } else if (hour >= 20.5 || hour < 6.5) {
+        tint = 'rgba(15, 23, 42, 0.16)'; // Late-night fluorescent lab shift
+      } else if (hour >= 18.45 && hour < 20.5) {
+        tint = 'rgba(99, 102, 241, 0.07)'; // Bloomsbury twilight
+      }
+
+      if (tint) {
+        ctx.fillStyle = tint;
+        ctx.fillRect(0, 0, viewW, viewH);
+      }
+
+      // 2. Weather atmosphere overlay (rain slate / cold_230 frost / heatwave warm golden-amber)
+      if (atm.isRain) {
+        ctx.fillStyle = 'rgba(71, 85, 105, 0.11)'; // Cosy Bloomsbury rain slate
+        ctx.fillRect(0, 0, viewW, viewH);
+      } else if (atm.isCold && (roomId === 'klb_2f' || roomId === 'klb_3f')) {
+        ctx.fillStyle = 'rgba(147, 197, 253, 0.08)'; // Lab 230 16.3 °C crisp cool frost tint
+        ctx.fillRect(0, 0, viewW, viewH);
+      } else if (atm.isHeatwave) {
+        ctx.fillStyle = 'rgba(251, 146, 60, 0.07)'; // 30.1 °C heatwave warm golden-amber shimmer
+        ctx.fillRect(0, 0, viewW, viewH);
+      }
     }
 
     // Emergency Red Strobe Wash when Fire Alarm is Active!
@@ -6445,10 +7176,14 @@
     let targetX = (minWorldX + maxWorldX) * 0.5;
     let targetY = (minWorldY + maxWorldY) * 0.5;
 
-    if (renderState.cameraTarget && typeof renderState.cameraTarget.x === 'number') {
+    if (renderState.cameraTarget &&
+        Number.isFinite(renderState.cameraTarget.x) &&
+        Number.isFinite(renderState.cameraTarget.y)) {
       targetX = (renderState.cameraTarget.x + 0.5) * TILE_W;
       targetY = (renderState.cameraTarget.y + 0.5) * TILE_H - 10;
-    } else if (renderState.player && typeof renderState.player.x === 'number') {
+    } else if (renderState.player &&
+               Number.isFinite(renderState.player.x) &&
+               Number.isFinite(renderState.player.y)) {
       targetX = (renderState.player.x + 0.5) * TILE_W;
       targetY = (renderState.player.y + 0.5) * TILE_H - 10;
     }
@@ -6466,7 +7201,8 @@
       targetY = clamp(targetY, minWorldY + halfWorldH, maxWorldY - halfWorldH);
     }
 
-    if (cameraState.roomId !== room.id || renderState.snapCamera) {
+    if (cameraState.roomId !== room.id || renderState.snapCamera ||
+        !Number.isFinite(cameraState.camX) || !Number.isFinite(cameraState.camY)) {
       cameraState.roomId = room.id;
       cameraState.camX = targetX;
       cameraState.camY = targetY;
@@ -6769,7 +7505,7 @@
     for (let i = 0; i < objects.length; i++) {
       const o = objects[i];
       if (FLOOR_DECAL_TYPES.has(o.type) || surfaceParentMap.has(o.id) ||
-          o.type === 'projector' || o.type === 'specs_holder') {
+          o.type === 'projector' || o.type === 'specs_holder' || o.type === 'whiteboard') {
         continue;
       }
       const opx = o.x * TILE_W;
@@ -7071,8 +7807,15 @@
   };
 
   Renderer25D.invalidateRoomCache = function (roomId) {
-    if (roomId) roomFloorCache.delete(roomId);
-    else roomFloorCache.clear();
+    if (roomId) {
+      roomFloorCache.delete(roomId);
+      windowBayCache.delete(roomId);
+      surfaceParentCache.delete(roomId);
+    } else {
+      roomFloorCache.clear();
+      windowBayCache.clear();
+      surfaceParentCache.clear();
+    }
   };
 
   Renderer25D.stripBubbleEmojis = stripBubbleEmojis;

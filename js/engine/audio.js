@@ -66,15 +66,20 @@
     alexPursuitOn: false
   };
 
-  // Continuous WebAudio nodes for extractor & facility room tone
-  let extractorNodes = null; // { src, hpFilter, lpFilter, gain }
-  let facilityNodes = null;  // { osc, gain }
+  // Continuous WebAudio nodes
+  // extractorNodes is kept permanently dormant (gain = 0, no looping static noise source)
+  let extractorNodes = null; // { src: null, hpFilter: null, lpFilter: null, gain }
+  let facilityNodes = null;  // { osc, lp, gain } — pure sine room tone (meeting_room / CIB)
+  let cafeFilter = null;     // BiquadFilterNode (420 Hz headphones / 6000 Hz open)
+  let alarmBusGain = null;   // Dedicated fire-alarm bus for instant pause silence
+  let pursuitBusGain = null; // Dedicated pursuit ostinato bus for instant pause silence
 
   // Periodic scheduler timers
+  let roomAmbientTimer = null;
+  let activeAmbientRoom = null;
   let chatterTimer = null;
   let lotrTimer = null;
   let cafeTimer = null;
-  let steamTimer = null;
   let alarmTimer = null;
   let pursuitTimer = null;
 
@@ -84,14 +89,13 @@
   let pursuitStep = 0;
   let alarmHighPhase = false;
 
-  // Create a rich 4-second seamless pink/brown lab extractor noise buffer
-  function createLabNoiseBuffer(audioCtx) {
-    const sampleRate = audioCtx.sampleRate;
-    const length = sampleRate * 4;
+  // Short filtered transient buffer used ONLY for brief one-shot SFX (never continuous ambience!)
+  function createShortSfxNoiseBuffer(audioCtx) {
+    const sampleRate = audioCtx.sampleRate || 44100;
+    const length = Math.max(4096, Math.floor(sampleRate * 1.5));
     const buffer = audioCtx.createBuffer(1, length, sampleRate);
     const data = buffer.getChannelData(0);
 
-    // Paul Kellet pink-noise filter + subtle brownian duct rumble
     let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
     let brown = 0;
     for (let i = 0; i < length; i++) {
@@ -106,16 +110,18 @@
       b6 = white * 0.115926;
 
       brown = (brown + 0.02 * white) / 1.02;
-      let sample = pink * 0.72 + brown * 1.35;
-
-      // Crossfade last 2048 samples with beginning for click-free looping
-      if (i > length - 2048) {
-        const alpha = (length - i) / 2048;
-        sample = sample * alpha + data[length - i] * (1 - alpha);
-      }
+      const sample = pink * 0.72 + brown * 1.35;
       data[i] = Math.max(-0.98, Math.min(0.98, sample));
     }
     return buffer;
+  }
+
+  function ensureSfxNoiseBuffer() {
+    if (!ctx) return null;
+    if (!noiseBuffer && typeof ctx.createBuffer === 'function') {
+      noiseBuffer = createShortSfxNoiseBuffer(ctx);
+    }
+    return noiseBuffer;
   }
 
   function detachUnlockListeners() {
@@ -154,7 +160,6 @@
       } else {
         masterGain.connect(ctx.destination);
       }
-      noiseBuffer = createLabNoiseBuffer(ctx);
     }
     if (ctx.state === 'running') {
       markUnlocked();
@@ -169,14 +174,15 @@
   }
 
   function clearNonUrgentTimers() {
+    clearTimeout(roomAmbientTimer);
+    roomAmbientTimer = null;
+    activeAmbientRoom = null;
     clearTimeout(chatterTimer);
     chatterTimer = null;
     clearInterval(lotrTimer);
     lotrTimer = null;
     clearInterval(cafeTimer);
     cafeTimer = null;
-    clearTimeout(steamTimer);
-    steamTimer = null;
   }
 
   function clearUrgentTimers() {
@@ -262,40 +268,21 @@
   function syncMasterGain() {
     if (!ctx || !masterGain) return;
     const now = ctx.currentTime;
-    const target = muted ? 0.0001 : Math.max(0, Math.min(1, volume));
+    const target = muted ? 0 : Math.max(0, Math.min(1, volume));
     masterGain.gain.cancelScheduledValues(now);
-    masterGain.gain.setTargetAtTime(muted ? 0 : target, now, 0.04);
+    masterGain.gain.setTargetAtTime(target, now, 0.04);
   }
 
-  // ==================== 1. CONTINUOUS EXTRACTOR & HEADPHONE MUFFLE ====================
+  // ==================== 1. DORMANT EXTRACTOR (ZERO STATIC HISS) & PURE SINE ROOM TONE ====================
   function ensureExtractorGraph() {
-    if (!ctx || !noiseBuffer) return null;
-    if (extractorNodes) return extractorNodes;
-
-    const src = ctx.createBufferSource();
-    src.buffer = noiseBuffer;
-    src.loop = true;
-
-    const hpFilter = ctx.createBiquadFilter();
-    hpFilter.type = 'highpass';
-    hpFilter.frequency.value = 62;
-    hpFilter.Q.value = 0.7;
-
-    const lpFilter = ctx.createBiquadFilter();
-    lpFilter.type = 'lowpass';
-    lpFilter.frequency.value = ambienceState.headphonesOn ? 340 : 2800;
-    lpFilter.Q.value = 0.85;
-
-    const gain = ctx.createGain();
-    gain.gain.value = 0.0;
-
-    src.connect(hpFilter);
-    hpFilter.connect(lpFilter);
-    lpFilter.connect(gain);
-    gain.connect(masterGain);
-    src.start();
-
-    extractorNodes = { src, hpFilter, lpFilter, gain };
+    // Permanently dormant: never create or start a looping static noise buffer.
+    // Keeps extractorNodes safely dormant with gain = 0 so zero constant white/pink/brown hiss ever plays.
+    if (!ctx) return null;
+    if (!extractorNodes) {
+      const gain = ctx.createGain();
+      gain.gain.value = 0.0;
+      extractorNodes = { src: null, hpFilter: null, lpFilter: null, gain };
+    }
     return extractorNodes;
   }
 
@@ -304,12 +291,12 @@
     if (facilityNodes) return facilityNodes;
 
     const osc = ctx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.value = 100; // UK 50 Hz mains harmonic instrument hum
+    osc.type = 'sine'; // Pure sine — zero broadband noise or harmonic buzz
+    osc.frequency.value = getTargetFacilityFreq() || 92;
 
     const lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
-    lp.frequency.value = 240;
+    lp.frequency.value = 220;
 
     const gain = ctx.createGain();
     gain.gain.value = 0.0;
@@ -323,15 +310,259 @@
     return facilityNodes;
   }
 
-  // ==================== 2. CHARLOTTE'S BENCH CHATTER BURSTS (KLB 2F) ====================
+  function ensureCafeFilter() {
+    if (!ctx || !masterGain) return null;
+    if (!cafeFilter) {
+      cafeFilter = ctx.createBiquadFilter();
+      cafeFilter.type = 'lowpass';
+      cafeFilter.frequency.value = ambienceState.headphonesOn ? 420 : 6000;
+      cafeFilter.Q.value = 0.75;
+      cafeFilter.connect(masterGain);
+    }
+    return cafeFilter;
+  }
+
+  function ensureAlarmBusGain() {
+    if (!ctx || !masterGain) return null;
+    if (!alarmBusGain) {
+      alarmBusGain = ctx.createGain();
+      alarmBusGain.gain.value = 1.0;
+      alarmBusGain.connect(masterGain);
+    }
+    return alarmBusGain;
+  }
+
+  function ensurePursuitBusGain() {
+    if (!ctx || !masterGain) return null;
+    if (!pursuitBusGain) {
+      pursuitBusGain = ctx.createGain();
+      pursuitBusGain.gain.value = 1.0;
+      pursuitBusGain.connect(masterGain);
+    }
+    return pursuitBusGain;
+  }
+
+  function createMuffledOutput(normalCutoff, headphoneCutoff = 420) {
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = ambienceState.headphonesOn ? headphoneCutoff : normalCutoff;
+    lp.connect(masterGain);
+    return lp;
+  }
+
+  function playAmbientTone(dest, type, freqStart, freqEnd, startTime, duration, peakGain) {
+    if (!ctx || !dest || peakGain <= 0.0001) return;
+    const osc = ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(Math.max(20, freqStart), startTime);
+    if (freqEnd && freqEnd !== freqStart) {
+      osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), startTime + duration);
+    }
+
+    const env = ctx.createGain();
+    const attack = Math.min(0.012, duration * 0.25);
+    env.gain.setValueAtTime(0.0001, startTime);
+    env.gain.linearRampToValueAtTime(Math.max(0.0002, peakGain), startTime + attack);
+    env.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+    osc.connect(env);
+    env.connect(dest);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+  }
+
+  // ==================== 2. CLEAN, NON-HISSY ATMOSPHERIC SOUNDSCAPES (ALL 6 ROOMS) ====================
+
+  // 2a. KLB 2F: Sparse organic glassware clinks / quiet distant ambient pings (zero static hiss!)
+  function triggerKlb2fAmbience() {
+    if (!ctx || ctx.state !== 'running' || muted || paused || stopped) return;
+    if (ambienceState.roomId !== 'klb_2f' || ambienceState.fireAlarmOn) return;
+
+    const now = ctx.currentTime + 0.015;
+    const out = createMuffledOutput(4800, 380);
+    const scale = ambienceState.headphonesOn ? 0.30 : 1.0;
+    const roll = Math.random();
+
+    if (roll < 0.48) {
+      // Subtle borosilicate glassware clink (pure resonant sine harmonics)
+      const f1 = 2520 + Math.random() * 580;
+      playAmbientTone(out, 'sine', f1, f1 * 0.992, now, 0.11, 0.011 * scale);
+      playAmbientTone(out, 'sine', f1 * 1.52, f1 * 1.50, now, 0.065, 0.0045 * scale);
+      if (Math.random() < 0.4) {
+        const t2 = now + 0.08 + Math.random() * 0.05;
+        const f2 = f1 * 0.89;
+        playAmbientTone(out, 'sine', f2, f2 * 0.99, t2, 0.095, 0.0075 * scale);
+      }
+    } else if (roll < 0.80) {
+      // Quiet distant ambient instrument / timer ping
+      const pingFreq = Math.random() < 0.5 ? 1318.5 : 1567.98;
+      playAmbientTone(out, 'sine', pingFreq, pingFreq, now, 0.14, 0.008 * scale);
+      if (Math.random() < 0.35) {
+        playAmbientTone(out, 'sine', pingFreq * 1.25, pingFreq * 1.25, now + 0.12, 0.13, 0.006 * scale);
+      }
+    } else {
+      // Gentle distant bench stir/pipette click
+      playAmbientTone(out, 'triangle', 840, 480, now, 0.024, 0.009 * scale);
+      playAmbientTone(out, 'sine', 1620, 1280, now + 0.012, 0.022, 0.0045 * scale);
+    }
+  }
+
+  // 2b. KLB 3F: Ultra-subtle sparse soft mechanical keyboard taps + occasional distant kettle click
+  function triggerKlb3fAmbience() {
+    if (!ctx || ctx.state !== 'running' || muted || paused || stopped) return;
+    if (ambienceState.roomId !== 'klb_3f' || ambienceState.fireAlarmOn) return;
+
+    const now = ctx.currentTime + 0.015;
+    const out = createMuffledOutput(3200, 420);
+    const scale = ambienceState.headphonesOn ? 0.28 : 1.0;
+
+    if (Math.random() < 0.78) {
+      // Soft muted mechanical keyboard tap burst (2–5 gentle percussive ticks)
+      const taps = 2 + Math.floor(Math.random() * 4);
+      let t = now;
+      for (let i = 0; i < taps; i++) {
+        const bodyFreq = 320 + Math.random() * 140;
+        const clickFreq = 1650 + Math.random() * 520;
+        const amp = (0.75 + Math.random() * 0.45) * scale;
+        playAmbientTone(out, 'triangle', bodyFreq, 135, t, 0.018, 0.013 * amp);
+        playAmbientTone(out, 'sine', clickFreq, clickFreq * 0.55, t, 0.012, 0.0065 * amp);
+        t += 0.068 + Math.random() * 0.072;
+      }
+    } else {
+      // Occasional distant kettle switch click (crisp warm toggle snap — zero static!)
+      playAmbientTone(out, 'triangle', 1180, 620, now, 0.022, 0.012 * scale);
+      playAmbientTone(out, 'sine', 540, 390, now + 0.018, 0.055, 0.0065 * scale);
+    }
+  }
+
+  // 2c. Meeting Room: Occasional gentle paper/clicker rustle (paired with 110 Hz pure sine hum)
+  function triggerMeetingRoomAmbience() {
+    if (!ctx || ctx.state !== 'running' || muted || paused || stopped) return;
+    if (ambienceState.roomId !== 'meeting_room' || ambienceState.fireAlarmOn) return;
+
+    const now = ctx.currentTime + 0.015;
+    const out = createMuffledOutput(3400, 420);
+    const scale = ambienceState.headphonesOn ? 0.30 : 1.0;
+
+    if (Math.random() < 0.50) {
+      // Gentle laser slide-clicker tick
+      playAmbientTone(out, 'triangle', 1740, 1140, now, 0.017, 0.011 * scale);
+      if (Math.random() < 0.45) {
+        playAmbientTone(out, 'sine', 1240, 960, now + 0.026, 0.018, 0.006 * scale);
+      }
+    } else {
+      // Gentle organic paper page-turn rustle (soft overlapping tonal flutters — zero harsh static!)
+      const layers = 3;
+      for (let i = 0; i < layers; i++) {
+        const t = now + i * 0.032;
+        const fStart = 390 + i * 115 + Math.random() * 75;
+        const fEnd = fStart * (0.72 + Math.random() * 0.18);
+        playAmbientTone(out, 'sine', fStart, fEnd, t, 0.078, 0.0065 * scale);
+      }
+    }
+  }
+
+  // 2d. Gordon's Café: Warm crisp porcelain cup & saucer clinks (ZERO espresso steam hiss!)
+  function triggerCafeCupClink() {
+    if (!ctx || ctx.state !== 'running' || muted || paused || stopped) return;
+    if (ambienceState.roomId !== 'gordons_cafe' || ambienceState.fireAlarmOn) return;
+
+    const out = ensureCafeFilter();
+    if (!out) return;
+    const now = ctx.currentTime + 0.015;
+    const baseFreq = 2680 + Math.random() * 440;
+
+    playAmbientTone(out, 'sine', baseFreq, baseFreq * 0.992, now, 0.15, 0.016);
+    playAmbientTone(out, 'sine', baseFreq * 1.54, baseFreq * 1.52, now, 0.085, 0.0055);
+    if (Math.random() < 0.55) {
+      const t2 = now + 0.095 + Math.random() * 0.05;
+      const f2 = baseFreq * 0.84;
+      playAmbientTone(out, 'sine', f2, f2 * 0.99, t2, 0.12, 0.010);
+    }
+  }
+
+  // 2e. CIB LG11 Mass Spec: Occasional subtle autosampler click (ZERO broadband noise!)
+  function triggerLg11MsAmbience() {
+    if (!ctx || ctx.state !== 'running' || muted || paused || stopped) return;
+    if (ambienceState.roomId !== 'cib_lg11_ms' || ambienceState.fireAlarmOn) return;
+
+    const now = ctx.currentTime + 0.015;
+    const out = createMuffledOutput(3600, 420);
+    const scale = ambienceState.headphonesOn ? 0.35 : 1.0;
+
+    // Precision autosampler carousel step + vial seat click
+    playAmbientTone(out, 'triangle', 1260, 720, now, 0.018, 0.012 * scale);
+    playAmbientTone(out, 'sine', 1840, 1420, now + 0.075, 0.022, 0.0085 * scale);
+    if (Math.random() < 0.45) {
+      playAmbientTone(out, 'sine', 2360, 2320, now + 0.13, 0.055, 0.006 * scale);
+    }
+  }
+
+  // 2f. CIB LG1b NMR: Occasional gentle pneumatic valve chirp (ZERO broadband noise!)
+  function triggerLg1bNmrAmbience() {
+    if (!ctx || ctx.state !== 'running' || muted || paused || stopped) return;
+    if (ambienceState.roomId !== 'cib_lg1b_nmr' || ambienceState.fireAlarmOn) return;
+
+    const now = ctx.currentTime + 0.015;
+    const out = createMuffledOutput(3600, 420);
+    const scale = ambienceState.headphonesOn ? 0.35 : 1.0;
+
+    // Soft pneumatic sample-lift / shim valve pure sine chirp
+    playAmbientTone(out, 'sine', 430, 680, now, 0.078, 0.0105 * scale);
+    playAmbientTone(out, 'sine', 860, 740, now + 0.06, 0.095, 0.0055 * scale);
+  }
+
+  function getRoomAmbientDelayMs(roomId) {
+    switch (roomId) {
+      case 'klb_2f':       return 3600 + Math.random() * 4000; // 3.6–7.6s
+      case 'klb_3f':       return 2500 + Math.random() * 3500; // 2.5–6.0s
+      case 'meeting_room': return 5000 + Math.random() * 5000; // 5.0–10.0s
+      case 'gordons_cafe': return 4800 + Math.random() * 5000; // 4.8–9.8s
+      case 'cib_lg11_ms':  return 3800 + Math.random() * 4400; // 3.8–8.2s
+      case 'cib_lg1b_nmr': return 4200 + Math.random() * 4600; // 4.2–8.8s
+      default:             return 5000;
+    }
+  }
+
+  function triggerCurrentRoomAmbience(roomId) {
+    switch (roomId) {
+      case 'klb_2f':       triggerKlb2fAmbience(); break;
+      case 'klb_3f':       triggerKlb3fAmbience(); break;
+      case 'meeting_room': triggerMeetingRoomAmbience(); break;
+      case 'gordons_cafe': triggerCafeCupClink(); break;
+      case 'cib_lg11_ms':  triggerLg11MsAmbience(); break;
+      case 'cib_lg1b_nmr': triggerLg1bNmrAmbience(); break;
+      default: break;
+    }
+  }
+
+  function scheduleNextRoomAmbience() {
+    clearTimeout(roomAmbientTimer);
+    roomAmbientTimer = null;
+    if (paused || stopped || muted || ambienceState.fireAlarmOn) {
+      activeAmbientRoom = null;
+      return;
+    }
+    const targetRoom = ambienceState.roomId;
+    activeAmbientRoom = targetRoom;
+    const delayMs = getRoomAmbientDelayMs(targetRoom);
+    roomAmbientTimer = setTimeout(() => {
+      roomAmbientTimer = null;
+      if (paused || stopped || muted || ambienceState.fireAlarmOn || ambienceState.roomId !== targetRoom) return;
+      triggerCurrentRoomAmbience(targetRoom);
+      scheduleNextRoomAmbience();
+    }, delayMs);
+  }
+
+  // ==================== 2g. CHARLOTTE'S BENCH CHATTER BURSTS (KLB 2F, NON-NOISE FORMANTS) ====================
   function triggerChatterBurst() {
     if (!ctx || ctx.state !== 'running' || muted || paused || stopped) return;
     if (ambienceState.roomId !== 'klb_2f' || ambienceState.fireAlarmOn) return;
 
     const now = ctx.currentTime;
-    const syllables = 4 + Math.floor(Math.random() * 5);
+    const syllables = 4 + Math.floor(Math.random() * 4);
     // Drop chatter gain by 85% when Headphones are on!
-    const baseGain = ambienceState.headphonesOn ? (0.042 * 0.15) : 0.042;
+    const baseGain = ambienceState.headphonesOn ? (0.032 * 0.15) : 0.032;
 
     const muffleFilter = ctx.createBiquadFilter();
     muffleFilter.type = 'lowpass';
@@ -373,9 +604,10 @@
   function scheduleNextChatter() {
     clearTimeout(chatterTimer);
     chatterTimer = null;
-    if (paused || stopped || ambienceState.roomId !== 'klb_2f' || ambienceState.fireAlarmOn) return;
-    const delayMs = 2800 + Math.random() * 3600;
+    if (paused || stopped || muted || ambienceState.roomId !== 'klb_2f' || ambienceState.fireAlarmOn) return;
+    const delayMs = 4200 + Math.random() * 4400;
     chatterTimer = setTimeout(() => {
+      chatterTimer = null;
       triggerChatterBurst();
       scheduleNextChatter();
     }, delayMs);
@@ -400,18 +632,21 @@
     if (!ctx || ctx.state !== 'running' || muted || paused || stopped || !ambienceState.lotrOn) return;
     if (ambienceState.fireAlarmOn) return;
 
-    const roomScale = ambienceState.roomId === 'klb_2f' ? 1.0
+    const baseRoomScale = ambienceState.roomId === 'klb_2f' ? 1.0
       : (ambienceState.roomId === 'klb_3f' ? 0.55 : 0.0);
-    if (roomScale <= 0) return;
+    if (baseRoomScale <= 0) return;
+
+    const headphoneScale = ambienceState.headphonesOn ? 0.55 : 1.0;
+    const roomScale = baseRoomScale * headphoneScale;
 
     const now = ctx.currentTime + 0.015;
     const idx = lotrStep % 16;
     lotrStep++;
 
-    // Gentle acoustic room / headphone filter
+    // Gentle acoustic room / headphone muffle filter
     const outFilter = ctx.createBiquadFilter();
     outFilter.type = 'lowpass';
-    outFilter.frequency.value = (ambienceState.roomId === 'klb_2f' && ambienceState.headphonesOn) ? 950 : 3400;
+    outFilter.frequency.value = ambienceState.headphonesOn ? 580 : 3400;
     outFilter.connect(masterGain);
 
     // 1) Warm plucked harp arpeggio note
@@ -464,7 +699,7 @@
     }
   }
 
-  // ==================== 4. GORDON'S CAFÉ JAZZ RHODES & ESPRESSO STEAM ====================
+  // ==================== 4. GORDON'S CAFÉ JAZZ RHODES (HEADPHONE-MUFFLED, ZERO STEAM HISS) ====================
   const CAFE_CHORDS = [
     [293.66, 349.23, 440.00, 523.25, 659.25], // Dm9
     [196.00, 329.63, 349.23, 493.88, 587.33], // G13
@@ -474,15 +709,14 @@
 
   function playCafeChordStep() {
     if (!ctx || ctx.state !== 'running' || muted || paused || stopped || ambienceState.roomId !== 'gordons_cafe') return;
+    if (ambienceState.fireAlarmOn) return;
+
+    const lp = ensureCafeFilter();
+    if (!lp) return;
 
     const now = ctx.currentTime + 0.02;
     const chord = CAFE_CHORDS[cafeStep % CAFE_CHORDS.length];
     cafeStep++;
-
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = 1650;
-    lp.connect(masterGain);
 
     chord.forEach((freq, i) => {
       const t = now + i * 0.038; // Soft rolled Rhodes strum
@@ -517,64 +751,16 @@
     });
   }
 
-  function playEspressoSteam() {
-    if (!ctx || ctx.state !== 'running' || muted || paused || stopped || ambienceState.roomId !== 'gordons_cafe' || !noiseBuffer) return;
-
-    const now = ctx.currentTime + 0.02;
-    const src = ctx.createBufferSource();
-    src.buffer = noiseBuffer;
-    src.loop = true;
-
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.setValueAtTime(2450, now);
-    bp.Q.value = 1.4;
-
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0.0001, now);
-    env.gain.linearRampToValueAtTime(0.035, now + 0.16);
-    env.gain.setTargetAtTime(0.022, now + 0.25, 0.25);
-    env.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
-
-    src.connect(bp);
-    bp.connect(env);
-    env.connect(masterGain);
-
-    src.start(now);
-    src.stop(now + 1.1);
-
-    // Subtle porcelain espresso cup clink 40% of the time
-    if (Math.random() < 0.45) {
-      const clink = ctx.createOscillator();
-      clink.type = 'sine';
-      clink.frequency.setValueAtTime(2780 + Math.random() * 350, now + 0.55);
-      const cg = ctx.createGain();
-      cg.gain.setValueAtTime(0.0001, now + 0.55);
-      cg.gain.linearRampToValueAtTime(0.018, now + 0.555);
-      cg.gain.exponentialRampToValueAtTime(0.0001, now + 0.72);
-      clink.connect(cg);
-      cg.connect(masterGain);
-      clink.start(now + 0.55);
-      clink.stop(now + 0.74);
-    }
-  }
-
-  function scheduleEspressoSteam() {
-    clearTimeout(steamTimer);
-    steamTimer = null;
-    if (paused || stopped || ambienceState.roomId !== 'gordons_cafe') return;
-    steamTimer = setTimeout(() => {
-      playEspressoSteam();
-      scheduleEspressoSteam();
-    }, 6500 + Math.random() * 6500);
-  }
-
-  // ==================== 5. UK LAB TWIN-TONE FIRE ALARM (800 / 970 Hz) ====================
+  // ==================== 5. UK LAB TWIN-TONE FIRE ALARM (800 / 970 Hz — PAUSES WHEN PAUSED) ====================
   function playFireAlarmPulse() {
-    if (!ctx || ctx.state !== 'running' || muted || stopped || !ambienceState.fireAlarmOn) return;
+    if (!ambienceState.fireAlarmOn || paused || muted || stopped) return;
+    if (!ctx || ctx.state !== 'running') return;
+
+    const alarmOut = ensureAlarmBusGain();
+    if (!alarmOut) return;
 
     const now = ctx.currentTime + 0.01;
-    // Intermittent twin-tone burst: 4 alternating pulses (800 Hz / 970 Hz) then brief gap
+    // Intermittent twin-tone burst: 5 alternating pulses (800 Hz / 970 Hz) then brief gap
     const freq = alarmHighPhase ? 970 : 800;
     alarmHighPhase = !alarmHighPhase;
 
@@ -605,7 +791,7 @@
     osc2.connect(mix2);
     mix2.connect(lp);
     lp.connect(env);
-    env.connect(masterGain);
+    env.connect(alarmOut);
 
     osc.start(now);
     osc2.start(now);
@@ -613,11 +799,15 @@
     osc2.stop(now + 0.26);
   }
 
-  // ==================== 6. 17:18 ALEX KING STEALTH BASS OSTINATO ====================
+  // ==================== 6. 17:18 ALEX KING STEALTH BASS OSTINATO (PAUSES WHEN PAUSED) ====================
   const PURSUIT_BASS = [82.41, 82.41, 87.31, 82.41, 98.00, 87.31, 82.41, 77.78]; // E2 minor-second stealth pulse
 
   function playPursuitStep() {
-    if (!ctx || ctx.state !== 'running' || muted || stopped || !ambienceState.alexPursuitOn) return;
+    if (!ambienceState.alexPursuitOn || paused || muted || stopped) return;
+    if (!ctx || ctx.state !== 'running') return;
+
+    const pursuitOut = ensurePursuitBusGain();
+    if (!pursuitOut) return;
 
     const now = ctx.currentTime + 0.01;
     const freq = PURSUIT_BASS[pursuitStep % PURSUIT_BASS.length];
@@ -641,7 +831,7 @@
 
     osc.connect(lp);
     lp.connect(env);
-    env.connect(masterGain);
+    env.connect(pursuitOut);
 
     osc.start(now);
     osc.stop(now + 0.21);
@@ -649,69 +839,118 @@
 
   // ==================== SYNC ALL AMBIENCE LAYERS ====================
   function getTargetExtractorGain() {
-    if (ambienceState.roomId === 'klb_2f') {
-      return ambienceState.headphonesOn ? 0.055 : 0.085;
-    }
+    // Zero constant white/pink/brown static noise across ALL 6 rooms
+    return 0;
+  }
+
+  function getTargetFacilityFreq() {
+    if (ambienceState.roomId === 'cib_lg11_ms') return 92;
+    if (ambienceState.roomId === 'cib_lg1b_nmr') return 68;
+    if (ambienceState.roomId === 'meeting_room') return 110;
+    return 0;
+  }
+
+  function getTargetFacilityGain() {
     if (ambienceState.roomId === 'cib_lg11_ms' || ambienceState.roomId === 'cib_lg1b_nmr') {
-      return ambienceState.headphonesOn ? 0.025 : 0.048;
+      return ambienceState.headphonesOn ? 0.003 : 0.009;
     }
-    if (ambienceState.roomId === 'klb_3f') {
-      return 0.012;
+    if (ambienceState.roomId === 'meeting_room') {
+      return ambienceState.headphonesOn ? 0.0025 : 0.006;
     }
     return 0.0;
   }
 
-  function getTargetFacilityGain() {
-    const inFacility = ambienceState.roomId === 'cib_lg11_ms' || ambienceState.roomId === 'cib_lg1b_nmr';
-    return inFacility ? 0.024 : 0.0;
+  function silenceContinuousBuses(timeConstant = 0.06) {
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    if (extractorNodes && extractorNodes.gain) {
+      extractorNodes.gain.gain.cancelScheduledValues(now);
+      extractorNodes.gain.gain.setTargetAtTime(0, now, timeConstant);
+    }
+    if (facilityNodes && facilityNodes.gain) {
+      facilityNodes.gain.gain.cancelScheduledValues(now);
+      facilityNodes.gain.gain.setTargetAtTime(0, now, timeConstant);
+    }
+    if (alarmBusGain) {
+      alarmBusGain.gain.cancelScheduledValues(now);
+      alarmBusGain.gain.setTargetAtTime(0, now, 0.015);
+    }
+    if (pursuitBusGain) {
+      pursuitBusGain.gain.cancelScheduledValues(now);
+      pursuitBusGain.gain.setTargetAtTime(0, now, 0.015);
+    }
   }
 
   function syncAllAmbienceLayers() {
     if (!ctx) return;
     if (stopped) {
       clearAmbientTimers();
+      silenceContinuousBuses(0.06);
       return;
     }
     const now = ctx.currentTime;
     const activeAudio = !muted && ctx.state === 'running';
 
-    // 1. Extractor roar & Headphone 2800 Hz -> 340 Hz smooth filter ramp
+    // 1. Dormant extractor graph — always strictly 0 (zero constant static noise!)
     const ext = ensureExtractorGraph();
-    if (ext) {
-      const targetCutoff = ambienceState.headphonesOn ? 340 : 2800;
-      ext.lpFilter.frequency.cancelScheduledValues(now);
-      ext.lpFilter.frequency.setTargetAtTime(targetCutoff, now, 0.14);
-
-      const baseNoiseGain = getTargetExtractorGain();
-      const targetNoiseGain = paused ? 0 : baseNoiseGain;
+    if (ext && ext.gain) {
+      const targetNoiseGain = getTargetExtractorGain(); // always 0
       ext.gain.gain.cancelScheduledValues(now);
-      ext.gain.gain.setTargetAtTime(targetNoiseGain, now, 0.16);
+      ext.gain.gain.setTargetAtTime(targetNoiseGain, now, 0.08);
     }
 
-    // Subtle CIB spectrometer / vacuum pump hum
-    const fac = ensureFacilityHumGraph();
-    if (fac) {
-      const baseFacGain = getTargetFacilityGain();
-      const targetFacGain = paused ? 0 : baseFacGain;
-      fac.osc.frequency.setTargetAtTime(ambienceState.roomId === 'cib_lg11_ms' ? 92 : 68, now, 0.2);
-      fac.gain.gain.cancelScheduledValues(now);
-      fac.gain.gain.setTargetAtTime(targetFacGain, now, 0.2);
+    // 2. Ultra-soft pure sine room tone (meeting_room: 110 Hz / LG11: 92 Hz / LG1b: 68 Hz)
+    const baseFacGain = getTargetFacilityGain();
+    const targetFacFreq = getTargetFacilityFreq();
+    const targetFacGain = (paused || !activeAudio) ? 0 : baseFacGain;
+    if (targetFacGain > 0 || facilityNodes) {
+      const fac = ensureFacilityHumGraph();
+      if (fac) {
+        if (targetFacFreq > 0) {
+          fac.osc.frequency.cancelScheduledValues(now);
+          fac.osc.frequency.setTargetAtTime(targetFacFreq, now, 0.16);
+        }
+        fac.gain.gain.cancelScheduledValues(now);
+        fac.gain.gain.setTargetAtTime(targetFacGain, now, 0.18);
+      }
+    }
+
+    // 3. Gordon's Café headphone lowpass muffle filter (420 Hz ON / 6000 Hz OFF)
+    if (ambienceState.roomId === 'gordons_cafe' || cafeFilter) {
+      const cf = ensureCafeFilter();
+      if (cf) {
+        const targetCafeCutoff = ambienceState.headphonesOn ? 420 : 6000;
+        cf.frequency.cancelScheduledValues(now);
+        cf.frequency.setTargetAtTime(targetCafeCutoff, now, 0.12);
+      }
     }
 
     if (paused || !activeAudio) {
-      // Fade/stop normal room chatter, music & kettle/cafe loops while paused
+      // Stop all room ambience, chatter, music, and café timers while paused or inactive
       clearNonUrgentTimers();
     } else {
-      // 2. Charlotte's Bench Chatter scheduler
+      // Sparse non-hissy room-specific atmospheric soundscape (all 6 rooms)
+      if (!ambienceState.fireAlarmOn) {
+        if (!roomAmbientTimer || activeAmbientRoom !== ambienceState.roomId) {
+          scheduleNextRoomAmbience();
+        }
+      } else if (roomAmbientTimer) {
+        clearTimeout(roomAmbientTimer);
+        roomAmbientTimer = null;
+        activeAmbientRoom = null;
+      }
+
+      // Charlotte's Bench Chatter scheduler (KLB 2F)
       if (ambienceState.roomId === 'klb_2f' && !ambienceState.fireAlarmOn) {
         if (!chatterTimer) scheduleNextChatter();
-      } else {
+      } else if (chatterTimer) {
         clearTimeout(chatterTimer);
         chatterTimer = null;
       }
 
-      // 3. Shire / Rivendell Lab Speakers synth loop
-      if (ambienceState.lotrOn && !ambienceState.fireAlarmOn) {
+      // Shire / Rivendell Lab Speakers synth loop (KLB 2F + soft bleed into 3F)
+      const lotrAudibleRoom = ambienceState.roomId === 'klb_2f' || ambienceState.roomId === 'klb_3f';
+      if (ambienceState.lotrOn && !ambienceState.fireAlarmOn && lotrAudibleRoom) {
         if (!lotrTimer) {
           playLotrStep();
           lotrTimer = setInterval(playLotrStep, 340);
@@ -721,25 +960,25 @@
         lotrTimer = null;
       }
 
-      // 4. Gordon's Café Jazz Chords + Espresso Steam
+      // Gordon's Café Rhodes Jazz Chords (routed through headphone-muffled cafeFilter)
       if (ambienceState.roomId === 'gordons_cafe' && !ambienceState.fireAlarmOn) {
         if (!cafeTimer) {
           playCafeChordStep();
           cafeTimer = setInterval(playCafeChordStep, 2500);
         }
-        if (!steamTimer) scheduleEspressoSteam();
-      } else {
-        if (cafeTimer) {
-          clearInterval(cafeTimer);
-          cafeTimer = null;
-        }
-        clearTimeout(steamTimer);
-        steamTimer = null;
+      } else if (cafeTimer) {
+        clearInterval(cafeTimer);
+        cafeTimer = null;
       }
     }
 
-    // 5. UK Lab Twin-Tone Fire Alarm (active urgent alert — stays running when paused)
-    if (activeAudio && ambienceState.fireAlarmOn) {
+    // 4. UK Lab Twin-Tone Fire Alarm (pauses cleanly when game is paused)
+    if (activeAudio && !paused && ambienceState.fireAlarmOn) {
+      const alarmOut = ensureAlarmBusGain();
+      if (alarmOut) {
+        alarmOut.gain.cancelScheduledValues(now);
+        alarmOut.gain.setTargetAtTime(1.0, now, 0.02);
+      }
       if (!alarmTimer) {
         let tickCount = 0;
         playFireAlarmPulse();
@@ -749,20 +988,37 @@
           if (tickCount < 5) playFireAlarmPulse();
         }, 280);
       }
-    } else if (alarmTimer) {
-      clearInterval(alarmTimer);
-      alarmTimer = null;
+    } else {
+      if (alarmTimer) {
+        clearInterval(alarmTimer);
+        alarmTimer = null;
+      }
+      if (alarmBusGain) {
+        alarmBusGain.gain.cancelScheduledValues(now);
+        alarmBusGain.gain.setTargetAtTime(0, now, 0.015);
+      }
     }
 
-    // 6. Alex King 17:18 Stealth Bass Ostinato (active urgent alert — stays running when paused)
-    if (activeAudio && ambienceState.alexPursuitOn) {
+    // 5. Alex King 17:18 Stealth Bass Ostinato (pauses cleanly when game is paused)
+    if (activeAudio && !paused && ambienceState.alexPursuitOn) {
+      const pursuitOut = ensurePursuitBusGain();
+      if (pursuitOut) {
+        pursuitOut.gain.cancelScheduledValues(now);
+        pursuitOut.gain.setTargetAtTime(1.0, now, 0.02);
+      }
       if (!pursuitTimer) {
         playPursuitStep();
         pursuitTimer = setInterval(playPursuitStep, 225);
       }
-    } else if (pursuitTimer) {
-      clearInterval(pursuitTimer);
-      pursuitTimer = null;
+    } else {
+      if (pursuitTimer) {
+        clearInterval(pursuitTimer);
+        pursuitTimer = null;
+      }
+      if (pursuitBusGain) {
+        pursuitBusGain.gain.cancelScheduledValues(now);
+        pursuitBusGain.gain.setTargetAtTime(0, now, 0.015);
+      }
     }
   }
 
@@ -788,37 +1044,19 @@
     ambienceState.alexPursuitOn = false;
     paused = false;
     stopped = true;
-
-    if (ctx) {
-      const now = ctx.currentTime;
-      if (extractorNodes && extractorNodes.gain) {
-        extractorNodes.gain.gain.cancelScheduledValues(now);
-        extractorNodes.gain.gain.setTargetAtTime(0, now, 0.06);
-      }
-      if (facilityNodes && facilityNodes.gain) {
-        facilityNodes.gain.gain.cancelScheduledValues(now);
-        facilityNodes.gain.gain.setTargetAtTime(0, now, 0.06);
-      }
-    }
+    silenceContinuousBuses(0.06);
   }
 
   function setPaused(isPaused) {
     paused = Boolean(isPaused);
     if (paused) {
-      clearNonUrgentTimers();
+      // Stop both non-urgent room ambience AND urgent alarm/pursuit timers immediately
+      clearAmbientTimers();
     }
     if (!stopped && ctx && ctx.state === 'running') {
       syncAllAmbienceLayers();
     } else if (paused && ctx) {
-      const now = ctx.currentTime;
-      if (extractorNodes && extractorNodes.gain) {
-        extractorNodes.gain.gain.cancelScheduledValues(now);
-        extractorNodes.gain.gain.setTargetAtTime(0, now, 0.08);
-      }
-      if (facilityNodes && facilityNodes.gain) {
-        facilityNodes.gain.gain.cancelScheduledValues(now);
-        facilityNodes.gain.gain.setTargetAtTime(0, now, 0.08);
-      }
+      silenceContinuousBuses(0.08);
     }
     return paused;
   }
@@ -827,7 +1065,7 @@
   function playTone(type, freqStart, freqEnd, startTime, duration, peakGain) {
     const osc = ctx.createOscillator();
     osc.type = type;
-    osc.frequency.setValueAtTime(freqStart, startTime);
+    osc.frequency.setValueAtTime(Math.max(20, freqStart), startTime);
     if (freqEnd && freqEnd !== freqStart) {
       osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), startTime + duration);
     }
@@ -844,9 +1082,10 @@
   }
 
   function playNoiseBurst(startTime, duration, filterType, freq, q, peakGain) {
-    if (!noiseBuffer) return;
+    const buf = ensureSfxNoiseBuffer();
+    if (!buf) return;
     const src = ctx.createBufferSource();
-    src.buffer = noiseBuffer;
+    src.buffer = buf;
     src.playbackRate.value = 0.9 + Math.random() * 0.25;
 
     const filter = ctx.createBiquadFilter();
@@ -862,7 +1101,8 @@
     src.connect(filter);
     filter.connect(env);
     env.connect(masterGain);
-    src.start(startTime, Math.random() * 2.0);
+    const maxOffset = Math.max(0, (buf.duration || 1.0) - duration - 0.05);
+    src.start(startTime, Math.random() * maxOffset);
     src.stop(startTime + duration + 0.015);
   }
 
@@ -986,6 +1226,129 @@
         // Büchi rotary evaporator vacuum pull + spinning flask hum
         playNoiseBurst(now, 0.26, 'bandpass', 620, 1.4, 0.085);
         playTone('triangle', 190, 340, now + 0.02, 0.25, 0.075);
+        break;
+      }
+      case 'rotavap_whoosh': {
+        // Soft warm rising/settling rotary vacuum whoosh — pure warm tonal sweep, zero harsh static
+        const lp = audioCtx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.setValueAtTime(240, now);
+        lp.frequency.exponentialRampToValueAtTime(640, now + 0.18);
+        lp.frequency.exponentialRampToValueAtTime(260, now + 0.42);
+        lp.Q.value = 1.6;
+        lp.connect(masterGain);
+
+        const body = audioCtx.createOscillator();
+        body.type = 'sine';
+        body.frequency.setValueAtTime(135, now);
+        body.frequency.exponentialRampToValueAtTime(260, now + 0.18);
+        body.frequency.exponentialRampToValueAtTime(165, now + 0.42);
+
+        const bodyEnv = audioCtx.createGain();
+        bodyEnv.gain.setValueAtTime(0.0001, now);
+        bodyEnv.gain.linearRampToValueAtTime(0.075, now + 0.07);
+        bodyEnv.gain.setTargetAtTime(0.052, now + 0.16, 0.08);
+        bodyEnv.gain.exponentialRampToValueAtTime(0.0001, now + 0.43);
+
+        body.connect(bodyEnv);
+        bodyEnv.connect(lp);
+        body.start(now);
+        body.stop(now + 0.45);
+
+        const swirl = audioCtx.createOscillator();
+        swirl.type = 'triangle';
+        swirl.frequency.setValueAtTime(202, now);
+        swirl.frequency.exponentialRampToValueAtTime(390, now + 0.18);
+        swirl.frequency.exponentialRampToValueAtTime(248, now + 0.40);
+
+        const swirlEnv = audioCtx.createGain();
+        swirlEnv.gain.setValueAtTime(0.0001, now);
+        swirlEnv.gain.linearRampToValueAtTime(0.032, now + 0.09);
+        swirlEnv.gain.exponentialRampToValueAtTime(0.0001, now + 0.41);
+
+        swirl.connect(swirlEnv);
+        swirlEnv.connect(lp);
+        swirl.start(now);
+        swirl.stop(now + 0.43);
+        break;
+      }
+      case 'centrifuge_hum': {
+        // Short smooth spin-up tonal sweep (160 -> 420 Hz)
+        const lp = audioCtx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = 1150;
+        lp.connect(masterGain);
+
+        const rotor = audioCtx.createOscillator();
+        rotor.type = 'sine';
+        rotor.frequency.setValueAtTime(160, now);
+        rotor.frequency.exponentialRampToValueAtTime(420, now + 0.34);
+
+        const rEnv = audioCtx.createGain();
+        rEnv.gain.setValueAtTime(0.0001, now);
+        rEnv.gain.linearRampToValueAtTime(0.082, now + 0.045);
+        rEnv.gain.setTargetAtTime(0.068, now + 0.18, 0.06);
+        rEnv.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+
+        rotor.connect(rEnv);
+        rEnv.connect(lp);
+        rotor.start(now);
+        rotor.stop(now + 0.40);
+
+        const harm = audioCtx.createOscillator();
+        harm.type = 'triangle';
+        harm.frequency.setValueAtTime(320, now);
+        harm.frequency.exponentialRampToValueAtTime(840, now + 0.33);
+
+        const hEnv = audioCtx.createGain();
+        hEnv.gain.setValueAtTime(0.0001, now);
+        hEnv.gain.linearRampToValueAtTime(0.024, now + 0.055);
+        hEnv.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+        harm.connect(hEnv);
+        hEnv.connect(lp);
+        harm.start(now);
+        harm.stop(now + 0.37);
+        break;
+      }
+      case 'nmr_lock': {
+        // Clean twin high-tech resonant ping (880 -> 1320 Hz)
+        playTone('sine', 880, 880, now, 0.16, 0.085);
+        playTone('sine', 1760, 1760, now, 0.085, 0.022);
+        playTone('sine', 1320, 1320, now + 0.085, 0.24, 0.095);
+        playTone('sine', 2640, 2640, now + 0.085, 0.11, 0.022);
+        break;
+      }
+      case 'stairs_step': {
+        // 3 quick ascending hollow metal spiral-stair taps
+        const bases = [310, 365, 430];
+        bases.forEach((baseFreq, i) => {
+          const t = now + i * 0.072;
+          playTone('triangle', baseFreq, baseFreq * 0.86, t, 0.055, 0.068);
+          playTone('sine', baseFreq * 2.38, baseFreq * 2.24, t, 0.042, 0.026);
+          playTone('sine', 148, 68, t, 0.024, 0.045);
+        });
+        break;
+      }
+      case 'door_open': {
+        // Soft wooden/latch click + subtle warm swoosh
+        playTone('triangle', 920, 480, now, 0.022, 0.065);
+        playTone('sine', 185, 95, now + 0.012, 0.036, 0.055);
+        playTone('sine', 210, 125, now + 0.028, 0.125, 0.035);
+        playNoiseBurst(now + 0.028, 0.09, 'lowpass', 420, 0.8, 0.022);
+        break;
+      }
+      case 'ui_click': {
+        // Crisp soft UI click (520 Hz, 25ms)
+        playTone('triangle', 520, 440, now, 0.025, 0.065);
+        playTone('sine', 1040, 880, now, 0.015, 0.018);
+        break;
+      }
+      case 'pause_toggle': {
+        // Gentle two-tone soft chime
+        playTone('sine', 493.88, 493.88, now, 0.09, 0.072);
+        playTone('sine', 659.25, 659.25, now + 0.07, 0.15, 0.078);
+        playTone('triangle', 1318.5, 1318.5, now + 0.07, 0.08, 0.016);
         break;
       }
       case 'kettle': {

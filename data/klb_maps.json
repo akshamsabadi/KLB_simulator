@@ -2993,6 +2993,83 @@
           "dir": "S",
           "group": "none",
           "label": "Richard's Kettle"
+        },
+        {
+          "id": "obj_3f_whiteboard",
+          "type": "whiteboard",
+          "x": 14,
+          "y": 1,
+          "w": 2,
+          "h": 1,
+          "dir": "S",
+          "group": "none",
+          "label": "3F Reaction Scheme Whiteboard"
+        },
+        {
+          "id": "obj_3f_bookshelf",
+          "type": "bookshelf",
+          "x": 14,
+          "y": 5,
+          "w": 1,
+          "h": 1,
+          "dir": "N",
+          "group": "none",
+          "label": "Organic Synthesis & Clayden Shelf"
+        },
+        {
+          "id": "obj_3f_printer",
+          "type": "thesis_printer",
+          "x": 21,
+          "y": 3,
+          "w": 1,
+          "h": 1,
+          "dir": "E",
+          "group": "none",
+          "label": "3F Colour Laser Printer"
+        },
+        {
+          "id": "obj_3f_lockers",
+          "type": "locker",
+          "x": 21,
+          "y": 4,
+          "w": 1,
+          "h": 1,
+          "dir": "E",
+          "group": "chudasama",
+          "label": "Postdoc Thesis & PPE Lockers"
+        },
+        {
+          "id": "obj_3f_bookshelf2",
+          "type": "bookshelf",
+          "x": 26,
+          "y": 3,
+          "w": 1,
+          "h": 1,
+          "dir": "W",
+          "group": "chudasama",
+          "label": "Chudasama Bound Theses (2012–2019)"
+        },
+        {
+          "id": "obj_3f_lockers2",
+          "type": "locker",
+          "x": 26,
+          "y": 4,
+          "w": 1,
+          "h": 1,
+          "dir": "W",
+          "group": "chudasama",
+          "label": "Group Lab Coat & Archive Lockers"
+        },
+        {
+          "id": "obj_3f_pc",
+          "type": "pc_terminal",
+          "x": 23,
+          "y": 1,
+          "w": 1,
+          "h": 1,
+          "dir": "S",
+          "group": "chudasama",
+          "label": "MestReNova & ChemDraw PC"
         }
       ]
     },
