@@ -1,0 +1,1 @@
+User notified on 2026-11-26T19:05:15Z to check the terms at https://europepmc.org/ and to always check the license of the papers retrieved by the literature-search-europepmc skill for any restrictions.

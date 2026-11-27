@@ -1,0 +1,1 @@
+User notified on 2026-11-26T19:10:00Z to check the terms at https://help.openalex.org/ and to always check the license of the papers retrieved by the literature-search-openalex skill for any restrictions.

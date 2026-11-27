@@ -1,0 +1,156 @@
+[
+  {
+    "id": "daniel_richards",
+    "name": "Daniel Richards",
+    "group": "chudasama",
+    "sprite": "assets/sprites/daniel_richards.png",
+    "portrait": "assets/portraits/daniel_richards.png"
+  },
+  {
+    "id": "maximillian_lee",
+    "name": "Maximillian Lee",
+    "group": "chudasama",
+    "sprite": "assets/sprites/maximillian_lee.png",
+    "portrait": "assets/portraits/maximillian_lee.png"
+  },
+  {
+    "id": "antoine_maruani",
+    "name": "Antoine Maruani",
+    "group": "chudasama",
+    "sprite": "assets/sprites/antoine_maruani.png",
+    "portrait": "assets/portraits/antoine_maruani.png"
+  },
+  {
+    "id": "andre_shamsabadi",
+    "name": "André Shamsabadi",
+    "group": "chudasama",
+    "sprite": "assets/sprites/andre_shamsabadi.png",
+    "portrait": "assets/portraits/andre_shamsabadi.png"
+  },
+  {
+    "id": "peter_szijj",
+    "name": "Peter Szijj",
+    "group": "chudasama",
+    "sprite": "assets/sprites/peter_szijj.png",
+    "portrait": "assets/portraits/peter_szijj.png"
+  },
+  {
+    "id": "joao_nogueira",
+    "name": "João Nogueira",
+    "group": "chudasama",
+    "sprite": "assets/sprites/joao_nogueira.png",
+    "portrait": "assets/portraits/joao_nogueira.png"
+  },
+  {
+    "id": "faiza_javaid",
+    "name": "Faiza Javaid",
+    "group": "chudasama",
+    "sprite": "assets/sprites/faiza_javaid.png",
+    "portrait": "assets/portraits/faiza_javaid.png"
+  },
+  {
+    "id": "calise_bahou",
+    "name": "Calise Bahou",
+    "group": "chudasama",
+    "sprite": "assets/sprites/calise_bahou.png",
+    "portrait": "assets/portraits/calise_bahou.png"
+  },
+  {
+    "id": "richard_spears",
+    "name": "Richard Spears",
+    "group": "chudasama",
+    "sprite": "assets/sprites/richard_spears.png",
+    "portrait": "assets/portraits/richard_spears.png"
+  },
+  {
+    "id": "marcos_fernandez",
+    "name": "Marcos Fernández",
+    "group": "chudasama",
+    "sprite": "assets/sprites/marcos_fernandez.png",
+    "portrait": "assets/portraits/marcos_fernandez.png"
+  },
+  {
+    "id": "vijay_chudasama",
+    "name": "Prof. Vijay Chudasama",
+    "group": "chudasama",
+    "sprite": "assets/sprites/vijay_chudasama.png",
+    "portrait": "assets/portraits/vijay_chudasama.png"
+  },
+  {
+    "id": "jamie_baker",
+    "name": "Prof. Jamie Baker",
+    "group": "baker",
+    "sprite": "assets/sprites/jamie_baker.png",
+    "portrait": "assets/portraits/jamie_baker.png"
+  },
+  {
+    "id": "tom_sheppard",
+    "name": "Prof. Tom Sheppard",
+    "group": "sheppard",
+    "sprite": "assets/sprites/tom_sheppard.png",
+    "portrait": "assets/portraits/tom_sheppard.png"
+  },
+  {
+    "id": "nafsika_forte",
+    "name": "Nafsika Forte",
+    "group": "baker",
+    "sprite": "assets/sprites/nafsika_forte.png",
+    "portrait": "assets/portraits/nafsika_forte.png"
+  },
+  {
+    "id": "archie_wall",
+    "name": "Archie Wall",
+    "group": "baker",
+    "sprite": "assets/sprites/archie_wall.png",
+    "portrait": "assets/portraits/archie_wall.png"
+  },
+  {
+    "id": "marco_sabatini",
+    "name": "Marco Sabatini",
+    "group": "sheppard",
+    "sprite": "assets/sprites/marco_sabatini.png",
+    "portrait": "assets/portraits/marco_sabatini.png"
+  },
+  {
+    "id": "charlotte_coomber",
+    "name": "Charlotte Coomber",
+    "group": "sheppard",
+    "sprite": "assets/sprites/charlotte_coomber.png",
+    "portrait": "assets/portraits/charlotte_coomber.png"
+  },
+  {
+    "id": "kersti_karu",
+    "name": "Dr Kersti Karu",
+    "group": "facility",
+    "sprite": "assets/sprites/kersti_karu.png",
+    "portrait": "assets/portraits/kersti_karu.png"
+  },
+  {
+    "id": "abil_aliev",
+    "name": "Dr Abil Aliev",
+    "group": "facility",
+    "sprite": "assets/sprites/abil_aliev.png",
+    "portrait": "assets/portraits/abil_aliev.png"
+  },
+  {
+    "id": "claire_carmalt",
+    "name": "Prof. Claire Carmalt",
+    "group": "facility",
+    "sprite": "assets/sprites/claire_carmalt.png",
+    "portrait": "assets/portraits/claire_carmalt.png"
+  },
+  {
+    "id": "safety_inspector",
+    "name": "Safety Inspector",
+    "group": "facility",
+    "sprite": "assets/sprites/safety_inspector.png",
+    "portrait": "assets/portraits/safety_inspector.png"
+  },
+  {
+    "id": "alex_king",
+    "name": "Alex King",
+    "group": "facility",
+    "sprite": "assets/sprites/alex_king.png",
+    "portrait": "assets/portraits/alex_king.png"
+  }
+]

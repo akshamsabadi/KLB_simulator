@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KLB Simulator — Grid &amp; Asset Map Designer</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+      --secondary: #273549;
+      --primary: #3b82f6;
+      --primary-foreground: #ffffff;
+      --error: #f87171;
+    }
+    * { box-sizing: border-box; user-select: none; }
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 12px;
+    }
+    input, textarea, select { user-select: text; color: var(--foreground); }
+    button { cursor: pointer; }
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    canvas { image-rendering: crisp-edges; touch-action: none; }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-3 space-y-2.5">
+
+  <!-- Top Header & Room Tabs -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-2.5 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2.5">
+      <div class="font-bold text-sm tracking-tight">KLB Simulator — Floorplan &amp; Asset Grid Designer</div>
+      <span id="autosave-badge" class="text-xs px-2 py-0.5 rounded bg-[var(--secondary)] text-[var(--muted-foreground)] font-mono">Autosaved</span>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-1.5">
+      <button id="btn-undo" title="Undo (Ctrl+Z)" class="px-2.5 py-1 text-xs rounded border border-[var(--border)] bg-[var(--secondary)] hover:opacity-80">↶ Undo</button>
+      <button id="btn-redo" title="Redo (Ctrl+Y)" class="px-2.5 py-1 text-xs rounded border border-[var(--border)] bg-[var(--secondary)] hover:opacity-80">↷ Redo</button>
+      <button id="btn-sample" title="Restore this room to the saved vetted KLB layout" class="px-2.5 py-1 text-xs rounded border border-[var(--border)] bg-[var(--secondary)] hover:opacity-80">Restore Vetted Room</button>
+      <button id="btn-clear" title="Reset current room to blank grid" class="px-2.5 py-1 text-xs rounded border border-[var(--border)] bg-[var(--secondary)] text-[var(--error)] hover:opacity-80">Clear Room</button>
+      <label class="px-2.5 py-1 text-xs rounded border border-[var(--border)] bg-[var(--secondary)] hover:opacity-80 cursor-pointer">
+        Import JSON
+        <input id="input-import" type="file" accept=".json,application/json" class="hidden" />
+      </label>
+      <button id="btn-copy-json" class="px-2.5 py-1 text-xs rounded border border-[var(--border)] bg-[var(--secondary)] font-medium hover:opacity-80">Copy JSON</button>
+      <button id="btn-export-json" class="px-3 py-1 text-xs rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold hover:opacity-90">Download klb_maps.json</button>
+    </div>
+  </div>
+
+  <!-- Room Selector Bar + Grid Controls -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-2 flex flex-wrap items-center justify-between gap-2">
+    <div id="room-tabs" class="flex flex-wrap items-center gap-1"></div>
+
+    <div class="flex flex-wrap items-center gap-2 text-xs">
+      <span class="text-[var(--muted-foreground)]">Grid:</span>
+      <label class="flex items-center gap-1 font-mono">
+        W <input id="grid-w" type="number" min="8" max="80" class="w-14 px-1.5 py-0.5 rounded bg-[var(--background)] border border-[var(--border)] text-xs font-mono" />
+      </label>
+      <label class="flex items-center gap-1 font-mono">
+        H <input id="grid-h" type="number" min="8" max="60" class="w-14 px-1.5 py-0.5 rounded bg-[var(--background)] border border-[var(--border)] text-xs font-mono" />
+      </label>
+      <button id="btn-resize-grid" class="px-2 py-0.5 rounded border border-[var(--border)] bg-[var(--secondary)] hover:opacity-80">Apply Size</button>
+      <span class="text-[var(--border)]">|</span>
+      <span class="text-[var(--muted-foreground)]">Zoom:</span>
+      <button id="btn-zoom-out" class="px-2 py-0.5 rounded border border-[var(--border)] bg-[var(--secondary)] font-mono">−</button>
+      <span id="zoom-label" class="font-mono w-10 text-center">28px</span>
+      <button id="btn-zoom-in" class="px-2 py-0.5 rounded border border-[var(--border)] bg-[var(--secondary)] font-mono">+</button>
+      <button id="btn-fit" class="px-2 py-0.5 rounded border border-[var(--border)] bg-[var(--secondary)]">Center</button>
+    </div>
+  </div>
+
+  <!-- Main 3-Column Editor Workspace -->
+  <div class="grid grid-cols-12 gap-2.5" style="min-height: 640px;">
+
+    <!-- Left Sidebar: Tool Mode + Categorized Tile & Asset Palette -->
+    <div class="col-span-3 bg-[var(--card)] border border-[var(--border)] rounded-lg p-2.5 flex flex-col gap-2.5 max-h-[720px] overflow-y-auto">
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">1. Active Tool</div>
+        <div id="tool-buttons" class="grid grid-cols-2 gap-1 text-xs">
+          <button data-tool="brush" class="tool-btn px-2 py-1.5 rounded border border-[var(--border)] text-left font-medium">🖌️ Paint Tile (B)</button>
+          <button data-tool="roombox" class="tool-btn px-2 py-1.5 rounded border border-[var(--border)] text-left font-medium">⬜ Room Box (W)</button>
+          <button data-tool="place" class="tool-btn px-2 py-1.5 rounded border border-[var(--border)] text-left font-medium">📦 Place Block (P)</button>
+          <button data-tool="select" class="tool-btn px-2 py-1.5 rounded border border-[var(--border)] text-left font-medium">👆 Select / Edit (V)</button>
+          <button data-tool="erase" class="tool-btn px-2 py-1.5 rounded border border-[var(--border)] text-left font-medium col-span-2">🧹 Eraser (E or Right-Click)</button>
+        </div>
+      </div>
+
+      <div class="border-t border-[var(--border)] pt-2">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">2. Walls &amp; Floor Tiles</span>
+        </div>
+        <div id="tile-palette" class="grid grid-cols-2 gap-1 text-xs"></div>
+      </div>
+
+      <div class="border-t border-[var(--border)] pt-2 flex-1 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">3. Asset Blocks</span>
+          <button id="btn-rotate" title="Rotate Block 90° (R)" class="px-2 py-0.5 text-xs rounded border border-[var(--border)] bg-[var(--secondary)] font-mono hover:opacity-80">↻ Rotate (R)</button>
+        </div>
+        <input id="palette-search" type="text" placeholder="Filter assets (e.g. hood, buchi, stair)..." class="w-full px-2 py-1 text-xs rounded bg-[var(--background)] border border-[var(--border)]" />
+        <div id="asset-palette" class="space-y-2.5"></div>
+      </div>
+    </div>
+
+    <!-- Center: Interactive Grid Canvas -->
+    <div class="col-span-6 bg-[var(--card)] border border-[var(--border)] rounded-lg flex flex-col overflow-hidden">
+      <div class="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between text-xs bg-[var(--secondary)]">
+        <div id="status-bar" class="font-mono text-[var(--foreground)]">Cell: (-, -)</div>
+        <div class="text-[var(--muted-foreground)]">Left-drag: Paint/Place • Right-click: Erase • R: Rotate • Space+Drag: Pan</div>
+      </div>
+      <div id="canvas-wrap" class="relative flex-1 overflow-hidden" style="min-height: 600px;">
+        <canvas id="grid-canvas" class="block w-full h-full cursor-crosshair"></canvas>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Selected Block Inspector + Group Bay Tag + Room Inventory -->
+    <div class="col-span-3 bg-[var(--card)] border border-[var(--border)] rounded-lg p-2.5 flex flex-col gap-3 max-h-[720px] overflow-y-auto">
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">Default Group Bay Tag</div>
+        <p class="text-xs text-[var(--muted-foreground)] mb-1.5">Applied automatically when placing new hoods, benches, or desks:</p>
+        <div id="default-group-btns" class="grid grid-cols-2 gap-1 text-xs">
+          <button data-group="none" class="grp-btn px-2 py-1 rounded border border-[var(--border)]">Shared / None</button>
+          <button data-group="chudasama" class="grp-btn px-2 py-1 rounded border border-[var(--border)]">🔵 Chudasama</button>
+          <button data-group="baker" class="grp-btn px-2 py-1 rounded border border-[var(--border)]">🟢 Baker</button>
+          <button data-group="sheppard" class="grp-btn px-2 py-1 rounded border border-[var(--border)]">🟠 Sheppard</button>
+        </div>
+      </div>
+
+      <!-- Inspector for Selected Block -->
+      <div class="border-t border-[var(--border)] pt-2.5">
+        <div class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">Selected Block Inspector</div>
+        <div id="inspector-empty" class="text-xs text-[var(--muted-foreground)] italic p-2 rounded bg-[var(--secondary)]">
+          Click any placed block with <b>Select / Edit (V)</b> (or click a block in the list below) to rename, resize, tag group bay, rotate, or move it.
+        </div>
+        <div id="inspector-panel" class="hidden space-y-2 text-xs bg-[var(--secondary)] p-2.5 rounded border border-[var(--border)]">
+          <div class="flex items-center justify-between">
+            <span id="insp-type" class="font-bold"></span>
+            <span id="insp-coords" class="font-mono text-[var(--muted-foreground)]"></span>
+          </div>
+          <label class="block space-y-0.5">
+            <span class="text-[var(--muted-foreground)]">Custom Label / Owner (shown on grid):</span>
+            <input id="insp-label" type="text" placeholder="e.g. Cupboard 19, 700 MHz, Richard's Kettle" class="w-full px-2 py-1 rounded bg-[var(--background)] border border-[var(--border)]" />
+          </label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <label class="block space-y-0.5">
+              <span class="text-[var(--muted-foreground)]">Width</span>
+              <input id="insp-w" type="number" min="1" max="20" class="w-full px-1.5 py-1 rounded bg-[var(--background)] border border-[var(--border)] font-mono" />
+            </label>
+            <label class="block space-y-0.5">
+              <span class="text-[var(--muted-foreground)]">Height</span>
+              <input id="insp-h" type="number" min="1" max="20" class="w-full px-1.5 py-1 rounded bg-[var(--background)] border border-[var(--border)] font-mono" />
+            </label>
+            <label class="block space-y-0.5">
+              <span class="text-[var(--muted-foreground)]">Facing</span>
+              <select id="insp-dir" class="w-full px-1 py-1 rounded bg-[var(--background)] border border-[var(--border)] font-mono">
+                <option value="S">▼ S</option>
+                <option value="E">▶ E</option>
+                <option value="N">▲ N</option>
+                <option value="W">◀ W</option>
+              </select>
+            </label>
+          </div>
+          <label class="block space-y-0.5">
+            <span class="text-[var(--muted-foreground)]">Group Bay Territory:</span>
+            <select id="insp-group" class="w-full px-2 py-1 rounded bg-[var(--background)] border border-[var(--border)]">
+              <option value="none">Shared / Unassigned</option>
+              <option value="chudasama">Chudasama Group (Blue)</option>
+              <option value="baker">Baker Group (Green)</option>
+              <option value="sheppard">Sheppard Group (Amber)</option>
+            </select>
+          </label>
+          <div class="flex items-center gap-1.5 pt-1">
+            <button id="insp-rotate" class="flex-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--card)] hover:opacity-80">↻ Rotate 90°</button>
+            <button id="insp-delete" class="flex-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--card)] text-[var(--error)] font-semibold hover:opacity-80">🗑 Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2F <-> 3F Alignment Helper Notice -->
+      <div id="floor-sync-hint" class="border-t border-[var(--border)] pt-2 text-xs text-[var(--muted-foreground)]">
+        💡 <b>2F ↔ 3F Sync</b>: Placing <b>Spiral Stairs</b> or <b>Lift</b> on KLB 2nd Floor shows a dashed alignment outline at the exact same `(x, y)` coordinates on KLB 3rd Floor (and vice versa).
+      </div>
+
+      <!-- Placed Assets Summary List -->
+      <div class="border-t border-[var(--border)] pt-2 flex-1 flex flex-col min-h-[160px]">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Placed Blocks in Room</span>
+          <span id="placed-count" class="text-xs font-mono text-[var(--muted-foreground)]">0</span>
+        </div>
+        <div id="placed-list" class="space-y-1 overflow-y-auto text-xs flex-1 pr-1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick JSON Preview / Copy Drawer -->
+  <details class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-2.5 text-xs">
+    <summary class="cursor-pointer font-semibold text-[var(--muted-foreground)]">Live JSON Output Preview (Click to expand or paste JSON directly)</summary>
+    <div class="mt-2 space-y-2">
+      <textarea id="json-textarea" rows="8" class="w-full p-2 font-mono text-xs rounded bg-[var(--background)] border border-[var(--border)]"></textarea>
+      <div class="flex justify-end gap-2">
+        <button id="btn-load-textarea" class="px-3 py-1 rounded border border-[var(--border)] bg-[var(--secondary)] font-medium">Apply Pasted JSON</button>
+      </div>
+    </div>
+  </details>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'klb_simulator_maps_v3';
+
+  // Tile definitions (base grid layer)
+  const TILES = [
+    { id: 0, key: 'void',    name: 'Void / Empty',        fillDark: '#111418', fillLight: '#e5e7eb' },
+    { id: 1, key: 'lab',     name: 'Lab Vinyl Floor',     fillDark: '#26323f', fillLight: '#dbeafe' },
+    { id: 2, key: 'office',  name: 'Office Carpet',       fillDark: '#2a283b', fillLight: '#ede9fe' },
+    { id: 3, key: 'corr',    name: 'Corridor / Tile',     fillDark: '#2f353d', fillLight: '#f3f4f6' },
+    { id: 4, key: 'cafe',    name: 'Café Wood Floor',     fillDark: '#3b2d23', fillLight: '#fef3c7' },
+    { id: 5, key: 'wall',    name: 'Solid Wall',          fillDark: '#64748b', fillLight: '#334155', isWall: true },
+    { id: 6, key: 'glass',   name: 'Glass Partition',     fillDark: '#38bdf8', fillLight: '#0284c7', isGlass: true },
+    { id: 7, key: 'door',    name: 'Standard Door',       fillDark: '#d97706', fillLight: '#d97706', isDoor: true },
+    { id: 8, key: 'lockdoor',name: 'Fire Exit / Locked Door', fillDark: '#dc2626', fillLight: '#dc2626', isDoor: true },
+  ];
+
+  // Approved Vetted Asset Block Definitions (Zero SPS, Zero George!)
+  const ASSETS = [
+    // Category: Connections & Safety
+    { type: 'spiral_stairs', cat: 'Stairs, Doors & Safety', name: 'Spiral Stairs (2F↔3F)', code: 'SPIRAL', w: 2, h: 2, color: '#8b5cf6', syncFloors: true },
+    { type: 'lift',          cat: 'Stairs, Doors & Safety', name: 'Lift (2F↔3F)',          code: 'LIFT',   w: 2, h: 2, color: '#6366f1', syncFloors: true },
+    { type: 'exit_stairs',   cat: 'Stairs, Doors & Safety', name: 'Main Stairs / Exit',    code: 'EXIT',   w: 2, h: 1, color: '#ef4444' },
+    { type: 'specs_holder',  cat: 'Stairs, Doors & Safety', name: 'Safety-Specs Holder',   code: 'SPECS',  w: 1, h: 1, color: '#10b981', stackable: true },
+    { type: 'fire_ext',      cat: 'Stairs, Doors & Safety', name: 'Fire Extinguisher',     code: 'EXT',    w: 1, h: 1, color: '#dc2626', stackable: true },
+    { type: 'black_tub_key', cat: 'Stairs, Doors & Safety', name: 'Black Tub Key Stash',   code: 'KEY',    w: 1, h: 1, color: '#eab308', stackable: true },
+
+    // Category: Wet-Lab Benches, Hoods & Storage
+    { type: 'fumehood',      cat: 'Lab Benches, Hoods & Storage', name: 'Fume Hood',                  code: 'HOOD',   w: 2, h: 1, color: '#0284c7', isSurface: true },
+    { type: 'lab_bench',     cat: 'Lab Benches, Hoods & Storage', name: 'Lab Bench / Island',         code: 'BENCH',  w: 3, h: 1, color: '#475569', isSurface: true },
+    { type: 'sink',          cat: 'Lab Benches, Hoods & Storage', name: 'Lab Sink',                   code: 'SINK',   w: 1, h: 1, color: '#0ea5e9', stackable: true },
+    { type: 'chem_cupboard', cat: 'Lab Benches, Hoods & Storage', name: 'Chemical Storage Cupboard',  code: 'CUPB',   w: 2, h: 1, color: '#b45309' },
+    { type: 'fridge_4c',     cat: 'Lab Benches, Hoods & Storage', name: '4 °C Fridge',                code: '4°C',    w: 1, h: 1, color: '#06b6d4' },
+    { type: 'freezer_20c',   cat: 'Lab Benches, Hoods & Storage', name: '-20 °C Freezer',             code: '-20°C',  w: 1, h: 1, color: '#2563eb' },
+    { type: 'waste_bin',     cat: 'Lab Benches, Hoods & Storage', name: 'Waste Winchesters / Silica', code: 'WASTE',  w: 1, h: 1, color: '#ca8a04' },
+
+    // Category: Synthetic & Bioconjugation Equipment
+    { type: 'buchi',         cat: 'Lab Equipment & Instruments', name: 'Büchi (Rotary Evaporator)',   code: 'BÜCHI',  w: 1, h: 1, color: '#14b8a6', stackable: true },
+    { type: 'biotage',       cat: 'Lab Equipment & Instruments', name: 'Biotage (Flash Column)',      code: 'BIOT',   w: 2, h: 1, color: '#0d9488', stackable: true },
+    { type: 'tlc_station',   cat: 'Lab Equipment & Instruments', name: 'UV TLC Box + KMnO4 Heatgun',  code: 'TLC/UV', w: 1, h: 1, color: '#a855f7', stackable: true },
+    { type: 'drying_oven',   cat: 'Lab Equipment & Instruments', name: 'Glassware Drying Oven',       code: 'OVEN',   w: 1, h: 1, color: '#ea580c', stackable: true },
+    { type: 'base_bath',     cat: 'Lab Equipment & Instruments', name: 'Base / Acetone / Bleach Bath',code: 'BATH',   w: 1, h: 1, color: '#84cc16', stackable: true },
+    { type: 'argon_cyl',     cat: 'Lab Equipment & Instruments', name: 'Argon Cylinder',              code: 'Ar',     w: 1, h: 1, color: '#059669' },
+    { type: 'balance_table', cat: 'Lab Equipment & Instruments', name: 'Balance Table / Balances',    code: 'BAL',    w: 2, h: 1, color: '#64748b' },
+    { type: 'tcep_bench',    cat: 'Lab Equipment & Instruments', name: 'TCEP / Buffer Station',       code: 'TCEP',   w: 2, h: 1, color: '#16a34a', stackable: true },
+    { type: 'gel_tank',      cat: 'Lab Equipment & Instruments', name: 'SDS-PAGE Gel Tank',           code: 'GEL',    w: 1, h: 1, color: '#3b82f6', stackable: true },
+    { type: 'centrifuge',    cat: 'Lab Equipment & Instruments', name: 'Benchtop Centrifuge',         code: 'SPIN',   w: 1, h: 1, color: '#ec4899', stackable: true },
+    { type: 'heatblock',     cat: 'Lab Equipment & Instruments', name: 'Heatblock / Shaker (37°C)',   code: '37°C',   w: 1, h: 1, color: '#f97316', stackable: true },
+    { type: 'syringe_pump',  cat: 'Lab Equipment & Instruments', name: 'Syringe Pump',                code: 'PUMP',   w: 1, h: 1, color: '#06b6d4', stackable: true },
+    { type: 'lab_speakers',  cat: 'Lab Equipment & Instruments', name: 'Lab Speakers (LotR)',         code: 'SPKR',   w: 1, h: 1, color: '#7c3aed', stackable: true },
+
+    // Category: 3rd-Floor Office, "The Room" & Off-Site Facilities
+    { type: 'writeup_desk',  cat: 'Office, Meeting & Off-Site', name: 'Write-Up Desk + PC',           code: 'DESK',   w: 2, h: 1, color: '#78716c', isSurface: true },
+    { type: 'pc_terminal',   cat: 'Office, Meeting & Off-Site', name: 'Computer / PC Terminal',       code: 'PC',     w: 1, h: 1, color: '#0284c7', stackable: true },
+    { type: 'meeting_table', cat: 'Office, Meeting & Off-Site', name: 'Meeting Table ("The Room")',   code: 'TABLE',  w: 3, h: 2, color: '#57534e', isSurface: true },
+    { type: 'chair',         cat: 'Office, Meeting & Off-Site', name: 'Chair / Seat',                 code: 'SEAT',   w: 1, h: 1, color: '#6366f1', stackable: true },
+    { type: 'projector',     cat: 'Office, Meeting & Off-Site', name: 'Projector Screen / Board',     code: 'SCREEN', w: 3, h: 1, color: '#4f46e5' },
+    { type: 'tea_drawer',    cat: 'Office, Meeting & Off-Site', name: 'Kettle / Biscuit Drawer',      code: 'TEA',    w: 1, h: 1, color: '#d97706', stackable: true },
+    { type: 'toilet',        cat: 'Office, Meeting & Off-Site', name: 'Toilet / Washroom',            code: 'WC',     w: 1, h: 1, color: '#64748b' },
+    { type: 'lcms_unit',     cat: 'Office, Meeting & Off-Site', name: 'Waters / Agilent LC-MS',       code: 'LC-MS',  w: 2, h: 1, color: '#be123c' },
+    { type: 'maldi_unit',    cat: 'Office, Meeting & Off-Site', name: 'MALDI-TOF MS',                 code: 'MALDI',  w: 1, h: 1, color: '#9f1239' },
+    { type: 'nmr_magnet',    cat: 'Office, Meeting & Off-Site', name: 'Bruker NMR Magnet',            code: 'NMR',    w: 2, h: 2, color: '#4338ca' },
+    { type: 'cafe_counter',  cat: 'Office, Meeting & Off-Site', name: 'Gordon\'s Café Counter',       code: 'BAR',    w: 4, h: 1, color: '#92400e' },
+    { type: 'cafe_table',    cat: 'Office, Meeting & Off-Site', name: 'Café Table & Chairs',          code: 'CAFÉ',   w: 2, h: 2, color: '#b45309' },
+    { type: 'npc_marker',    cat: 'Office, Meeting & Off-Site', name: 'Person / Spawn Marker',        code: 'NPC',    w: 1, h: 1, color: '#db2777', stackable: true },
+    { type: 'custom_block',  cat: 'Office, Meeting & Off-Site', name: 'Custom Labeled Block',         code: 'CUSTOM', w: 2, h: 1, color: '#6b7280', stackable: true },
+  ];
+
+  const ASSET_MAP = Object.fromEntries(ASSETS.map(a => [a.type, a]));
+
+  const GROUP_COLORS = {
+    none: null,
+    chudasama: '#3b82f6',
+    baker: '#10b981',
+    sheppard: '#f59e0b',
+  };
+
+  function makeEmptyGrid(w, h, defaultTile = 0) {
+    return Array.from({ length: h }, () => Array(w).fill(defaultTile));
+  }
+
+  const PACKED_ROOMS = {"klb_2f":{"name":"1. KLB 2nd Floor (Wet Lab)","w":40,"h":26,"f":1,"r":["0000000005555555551155555500000000000000","0000000005111111111111115500000000000000","0000000008111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111155555555111500000000000000","0000000005111151111115111555550000000000","0000000005111151111115111111110000000000","0000000005111151111117111111110000000000","0000000005111151111115111111110000000000","0000000005111151111115111555550000000000","0000000005111155555555111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005111111111111111500000000000000","0000000005555555555555555500000000000000"],"o":[["obj_bench_16_4","lab_bench",16,4,3,1,"S"],["obj_bench_19_4","lab_bench",19,4,3,1,"S"],["obj_x6rzzjv","balance_table",17,10,2,1,"S"],["obj_6x280z6","freezer_20c",16,14,1,1,"S"],["obj_wquwc64","freezer_20c",17,14,1,1,"S"],["obj_ipo41kt","fridge_4c",18,14,1,1,"S"],["obj_xgzqnwf","fridge_4c",19,14,1,1,"S"],["obj_xdk1ejh","fumehood",19,8,2,1,"S","chudasama"],["obj_ego3i19","fumehood",15,8,2,1,"S","chudasama"],["obj_8ofuwge","chem_cupboard",17,8,2,1,"S","chudasama","Cupboard 6 (PD Reagents)"],["obj_pfzvkzh","chem_cupboard",17,16,2,1,"S","none","Cupboard 19 (Mystery)"],["obj_gifiw0x","fumehood",15,16,2,1,"S","baker"],["obj_fx2oii4","fumehood",19,16,2,1,"S","baker"],["obj_eavzn3o","lab_bench",19,5,3,1,"S"],["obj_iw3r2ug","lab_bench",16,5,3,1,"S"],["obj_kpbabra","lab_bench",13,5,3,1,"S"],["obj_b279wlq","lab_bench",13,4,3,1,"S"],["obj_6rvyir4","lab_bench",19,19,3,1,"S"],["obj_637esyp","lab_bench",19,20,3,1,"S"],["obj_4cn91lr","lab_bench",16,20,3,1,"S"],["obj_4d1sriv","lab_bench",16,19,3,1,"S"],["obj_ulamle6","lab_bench",13,19,3,1,"S"],["obj_q7zgn41","lab_bench",13,20,3,1,"S"],["obj_vivi6ou","lab_bench",13,9,1,3,"E"],["obj_cx3z7kb","lab_bench",13,13,1,3,"E"],["obj_7v0nuyg","writeup_desk",20,1,2,1,"S","chudasama"],["obj_zrzfxjs","writeup_desk",22,1,2,1,"S","chudasama"],["obj_6c2ae29","writeup_desk",16,1,2,1,"S","chudasama"],["obj_286tz7n","writeup_desk",14,1,2,1,"S","chudasama"],["obj_rpjpgd9","writeup_desk",12,1,2,1,"S","chudasama"],["obj_wa2kenf","spiral_stairs",18,0,2,2,"S","none","Spiral Stairs"],["obj_t3d25ms","fumehood",10,3,1,2,"E","sheppard"],["obj_b32em1y","buchi",10,11,1,1,"S"],["obj_8m6xk04","buchi",10,13,1,1,"S"],["obj_1jn2lfy","chem_cupboard",10,9,1,2,"E","none","Cupboard 9 (Column Solv.)"],["obj_8gj92cp","chem_cupboard",10,14,1,2,"E","none","Cupboard 11 (Acids/Bases)"],["obj_silu1mh","heatblock",19,4,1,1,"S"],["obj_n6w2g3o","lab_speakers",17,1,1,1,"S"],["obj_dzgs9ex","tcep_bench",20,4,2,1,"S"],["obj_6rg0f7t","tlc_station",13,5,1,1,"S"],["obj_3ylcwk8","gel_tank",13,4,1,1,"S"],["obj_s1po975","centrifuge",14,4,1,1,"S"],["obj_t50efdr","writeup_desk",13,23,1,2,"E","sheppard"],["obj_mxkwbst","pc_terminal",16,1,1,1,"S"],["obj_0tcigot","fumehood",24,2,1,2,"E","chudasama"],["obj_l8cf5pf","fumehood",24,6,1,2,"E","chudasama"],["obj_fdwlhp1","fumehood",10,17,1,2,"E","sheppard"],["obj_db1f38m","fumehood",10,21,1,2,"E","sheppard"],["obj_139ef0f","fumehood",24,17,1,2,"E","baker"],["obj_c6c1xy9","fumehood",24,21,1,2,"E","baker"],["obj_k8lzbrj","writeup_desk",21,23,1,2,"E","baker"],["obj_xq0eo3b","writeup_desk",14,23,1,2,"E","sheppard"],["obj_s2eh9cm","writeup_desk",17,23,1,2,"E","baker"],["obj_dt8a4ii","writeup_desk",18,23,1,2,"E","baker"],["obj_8leaszw","sink",17,4,1,1,"S"],["obj_b8ar0ss","sink",17,5,1,1,"S"],["obj_thp4jz7","sink",17,19,1,1,"S"],["obj_rsbgfwk","sink",17,20,1,1,"S"],["obj_7wmxhh3","chem_cupboard",13,16,2,1,"S","baker","Cupboard 17 (Maleimides)"],["obj_pcwi4gx","chem_cupboard",13,8,2,1,"S","chudasama","Cupboard 5 (Thiols)"],["obj_d8vtm3s","chem_cupboard",10,19,1,2,"E","sheppard","Cupboard 14 (Borates)"],["obj_2tb4qug","chem_cupboard",24,19,1,2,"E","baker","Cupboard 20 (Flammables)"],["obj_f4tldi1","chem_cupboard",24,4,1,2,"E","chudasama","Cupboard 1 (Dry Solvents)"],["obj_vz3lfqh","drying_oven",18,4,1,1,"S"],["obj_fn1tlgk","balance_table",10,7,1,2,"E","sheppard"],["obj_7hk47ag","biotage",10,5,1,2,"E"],["obj_azriinj","waste_bin",10,12,1,1,"S"],["obj_hq6b2g0","fire_ext",10,16,1,1,"S"],["obj_58ejdx4","argon_cyl",21,8,1,1,"S"],["obj_aqtg4w0","argon_cyl",21,16,1,1,"S"],["obj_86lw0vr","heatblock",16,4,1,1,"S"],["obj_hmm9r4n","writeup_desk",10,1,2,1,"S","chudasama"],["obj_bpd1cov","exit_stairs",29,12,1,2,"E"],["obj_ifzhrbg","specs_holder",29,11,1,1,"S"],["obj_chud_base_bath","base_bath",15,8,1,1,"N","chudasama","Base/Bleach Bath"],["obj_chud_syr_pump","syringe_pump",20,8,1,1,"N","chudasama","Syringe Pump"]]},"klb_3f":{"name":"2. KLB 3rd Floor (Office)","w":40,"h":22,"f":2,"r":["0000000000005555552255555555000000000000","0000000000005555552252222225000000000000","0000000000005222272272222225000000000000","0000000000005222225552222225000000000000","0000000000005222225552222225000000000000","0000000000005222225552222225000000000000","0000000000005555555555555555000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000","0000000000000000000000000000000000000000"],"o":[["obj_0tcd25p","writeup_desk",17,3,1,2,"E"],["obj_pjv697n","writeup_desk",13,2,1,2,"E"],["obj_9oop0r0","writeup_desk",13,4,1,2,"E"],["obj_d9tf7fv","writeup_desk",21,1,2,1,"N","chudasama"],["obj_5fa63xl","writeup_desk",23,1,2,1,"S","chudasama"],["obj_mbftfmd","writeup_desk",25,1,2,1,"S","chudasama"],["obj_w2de2un","writeup_desk",25,5,2,1,"S","chudasama"],["obj_wgwmq87","writeup_desk",23,5,2,1,"S","chudasama"],["obj_ik7e7la","writeup_desk",21,5,2,1,"S","chudasama"],["obj_3f_spiral","spiral_stairs",18,0,2,2,"S","none","Spiral Stairs"],["obj_g4ct3n0","tea_drawer",17,5,1,1,"S","none","Richard's Kettle"]]},"gordons_cafe":{"name":"3. Gordon's Café","w":22,"h":16,"f":4,"r":["0000000555555555000000","0000000544444445000000","0000000544444445000000","0000000544444445000000","0000000544444445000000","0000000544444445000000","0000000544444445000000","0000000544444445000000","0055555544444445000000","0054444444444445000000","0054444444444445000000","0054444444444445000000","0054444444444445000000","0054455555555555000000","0000000000000000000000","0000000000000000000000"],"o":[["obj_uq590yz","cafe_counter",9,1,4,1,"S"],["obj_d27mctc","cafe_table",13,4,2,2,"S"],["obj_rm6sq5d","cafe_table",13,8,2,2,"S"],["obj_kp93vei","cafe_table",10,11,2,2,"S"],["obj_a07nbrd","cafe_table",6,11,2,2,"S"],["obj_94zh0hc","exit_stairs",3,13,2,1,"S"]]},"cib_lg11_ms":{"name":"4. CIB LG11 (LC-MS)","w":22,"h":16,"f":1,"r":["0000000000000000000000","0000000000000000000000","0000000000000000000000","0000000000000000000000","0000000000000000000000","0005555555555555550000","0005111111111111150000","0005111111111111150000","0005111111111111150000","0005111111111111150000","0005111111111111150000","0005111111111111150000","0005111111111111150000","0005111111111111150000","0005111111111111150000","0005555555555551150000"],"o":[["obj_0e5rwwa","lcms_unit",6,8,1,2,"E"],["obj_0kze9bu","lcms_unit",7,8,1,2,"E"],["obj_xhumrlw","lab_bench",6,10,1,3,"E"],["obj_up9wm64","lab_bench",7,10,1,3,"E"],["obj_vn3tzk7","lab_bench",11,8,3,1,"N"],["obj_9b6rfku","lab_bench",11,9,3,1,"N"],["obj_rxaed76","exit_stairs",15,15,2,1,"S"],["obj_ffr2vm2","maldi_unit",11,11,1,1,"S"],["obj_qyz35u5","maldi_unit",13,11,1,1,"S"],["obj_kersti_desk","writeup_desk",14,6,2,1,"S","none","Kersti's Desk"],["obj_kersti_npc","npc_marker",15,7,1,1,"S","none","Dr Kersti Karu"],["obj_ms_pc","pc_terminal",6,10,1,1,"W","none","uplc2011 PC"]]},"cib_lg1b_nmr":{"name":"5. CIB LG1b (NMR)","w":22,"h":16,"f":1,"r":["0000000000000000000000","0000000000000000000000","0000000000000000000000","0005555555555555500000","0005111111111522500000","0005111111111522500000","0005111111111522500000","0005111111111522500000","0005111111111575500000","0005111111111111500000","0005111111111111100000","0005111111111111100000","0005111111111111500000","0005555555555555500000","0000000000000000000000","0000000000000000000000"],"o":[["obj_pze9pfs","exit_stairs",16,10,1,2,"E"],["obj_7q7hye4","nmr_magnet",6,6,2,2,"S","none","400 MHz"],["obj_hu36t0a","nmr_magnet",6,9,2,2,"S","none","600 MHz"],["obj_fppdox2","nmr_magnet",9,6,2,2,"S","none","500 MHz"],["obj_0fiazuk","nmr_magnet",9,9,2,2,"S","none","700 MHz"],["obj_abil_desk","writeup_desk",14,4,2,1,"S","none","Abil's Desk"],["obj_abil_npc","npc_marker",15,5,1,1,"S","none","Dr Abil Aliev"],["obj_nmr_fridge","fridge_4c",12,5,1,1,"W","none","Sample Fridge"]]},"meeting_room":{"name":"6. Group Meeting Room","w":24,"h":16,"f":2,"r":["000000000000000000000000","000055555555555555550000","000052222222222222250000","000052222222222222250000","000052222222222222250000","000052222222222222250000","000052222222222222250000","000052255555555555550000","000000000000000000000000","000000000000000000000000","000000000000000000000000","000000000000000000000000","000000000000000000000000","000000000000000000000000","000000000000000000000000","000000000000000000000000"],"o":[["obj_iej3nj3","projector",11,1,3,1,"S"],["obj_zgqk5m5","exit_stairs",5,7,2,1,"S"],["obj_mt_tbl1","meeting_table",7,3,4,1,"N","none","Front Table L"],["obj_mt_tbl2","meeting_table",13,3,4,1,"N","none","Front Table R"],["obj_mt_seat1","chair",8,4,1,1,"N","none","Seat"],["obj_mt_seat2","chair",10,4,1,1,"N","chudasama","Vijay"],["obj_mt_seat3","chair",13,4,1,1,"N","none","Seat"],["obj_mt_seat4","chair",15,4,1,1,"N","none","Seat"],["obj_mt_tbl3","meeting_table",7,5,4,1,"N","none","Back Table L"],["obj_mt_tbl4","meeting_table",13,5,4,1,"N","none","Back Table R"],["obj_mt_seat5","chair",8,6,1,1,"N","none","Seat"],["obj_mt_seat6","chair",10,6,1,1,"N","none","Seat"],["obj_mt_seat7","chair",13,6,1,1,"N","none","Seat"],["obj_mt_seat8","chair",15,6,1,1,"N","none","Seat"]]}};
+
+  function unpackRoom(id, p) {
+    return {
+      id,
+      name: p.name,
+      w: p.w,
+      h: p.h,
+      defaultFloor: p.f,
+      tiles: p.r.map(row => Array.from(row, Number)),
+      objects: p.o.map(a => ({
+        id: a[0], type: a[1], x: a[2], y: a[3], w: a[4], h: a[5], dir: a[6],
+        group: a[7] || 'none', label: a[8] || ''
+      }))
+    };
+  }
+
+  function createInitialState() {
+    const rooms = {};
+    for (const [id, p] of Object.entries(PACKED_ROOMS)) rooms[id] = unpackRoom(id, p);
+    return { version: 1, rooms };
+  }
+
+  function buildSampleDraft(roomId) {
+    const p = PACKED_ROOMS[roomId];
+    if (!p) return { tiles: makeEmptyGrid(22, 16, 0), objects: [] };
+    const u = unpackRoom(roomId, p);
+    return { tiles: u.tiles, objects: u.objects };
+  }
+
+  // Editor Runtime State
+  let state = createInitialState();
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.rooms) state = parsed;
+    }
+  } catch (_) {}
+
+  let activeRoomId = 'klb_2f';
+  let activeTool = 'select'; // 'brush', 'roombox', 'place', 'select', 'erase'
+  let activeTileId = 5;       // Solid Wall default
+  let activeAssetType = 'fumehood';
+  let placementRotation = 0;  // 0:S, 1:E, 2:N, 3:W
+  let defaultGroup = 'none';
+  let selectedObjId = null;
+
+  let cellSize = 26;
+  let panX = 28, panY = 28;
+  let hoverCell = null;
+  let isSpaceDown = false;
+  let dragState = null;
+
+  const undoStacks = {};
+  const redoStacks = {};
+
+  function currentRoom() { return state.rooms[activeRoomId]; }
+
+  function pushUndo() {
+    const r = currentRoom();
+    if (!undoStacks[activeRoomId]) undoStacks[activeRoomId] = [];
+    undoStacks[activeRoomId].push(JSON.stringify({ w: r.w, h: r.h, tiles: r.tiles, objects: r.objects }));
+    if (undoStacks[activeRoomId].length > 50) undoStacks[activeRoomId].shift();
+    redoStacks[activeRoomId] = [];
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const badge = document.getElementById('autosave-badge');
+      badge.textContent = 'Saved ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    } catch (_) {}
+    document.getElementById('json-textarea').value = JSON.stringify(state, null, 2);
+  }
+
+  // DOM Elements
+  const canvas = document.getElementById('grid-canvas');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('canvas-wrap');
+
+  function getDirCode(rot) { return ['S', 'E', 'N', 'W'][rot % 4]; }
+  function getPlacementDims() {
+    const def = ASSET_MAP[activeAssetType];
+    if (!def) return { w: 1, h: 1 };
+    return (placementRotation % 2 === 1) ? { w: def.h, h: def.w } : { w: def.w, h: def.h };
+  }
+
+  // Build Room Tabs
+  function renderRoomTabs() {
+    const container = document.getElementById('room-tabs');
+    container.innerHTML = '';
+    Object.values(state.rooms).forEach(rm => {
+      const btn = document.createElement('button');
+      const isAct = rm.id === activeRoomId;
+      btn.className = 'px-2.5 py-1 text-xs rounded border font-medium transition ' +
+        (isAct ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]'
+               : 'bg-[var(--secondary)] text-[var(--foreground)] border-[var(--border)] hover:opacity-80');
+      btn.textContent = rm.name;
+      btn.onclick = () => {
+        activeRoomId = rm.id;
+        selectedObjId = null;
+        document.getElementById('grid-w').value = rm.w;
+        document.getElementById('grid-h').value = rm.h;
+        renderRoomTabs();
+        syncInspector();
+        renderPlacedList();
+        centerView();
+      };
+      container.appendChild(btn);
+    });
+    document.getElementById('grid-w').value = currentRoom().w;
+    document.getElementById('grid-h').value = currentRoom().h;
+  }
+
+  // Build Tile Palette
+  function renderTilePalette() {
+    const pal = document.getElementById('tile-palette');
+    pal.innerHTML = '';
+    TILES.forEach(t => {
+      const btn = document.createElement('button');
+      const isSel = (activeTool === 'brush' || activeTool === 'roombox') && activeTileId === t.id;
+      btn.className = 'px-2 py-1 rounded border text-left flex items-center gap-1.5 truncate ' +
+        (isSel ? 'border-[var(--primary)] bg-[var(--secondary)] font-bold' : 'border-[var(--border)] hover:bg-[var(--secondary)]');
+      const sw = document.createElement('span');
+      sw.className = 'w-3 h-3 rounded-sm shrink-0 border border-black/30';
+      sw.style.background = t.fillDark;
+      btn.appendChild(sw);
+      const lbl = document.createElement('span');
+      lbl.className = 'truncate';
+      lbl.textContent = t.name;
+      btn.appendChild(lbl);
+      btn.onclick = () => {
+        activeTileId = t.id;
+        if (activeTool !== 'roombox') activeTool = 'brush';
+        syncToolUI();
+      };
+      pal.appendChild(btn);
+    });
+  }
+
+  // Build Asset Block Palette
+  function renderAssetPalette() {
+    const q = document.getElementById('palette-search').value.trim().toLowerCase();
+    const container = document.getElementById('asset-palette');
+    container.innerHTML = '';
+    const cats = [...new Set(ASSETS.map(a => a.cat))];
+    cats.forEach(cat => {
+      const items = ASSETS.filter(a => a.cat === cat && (!q || a.name.toLowerCase().includes(q) || a.code.toLowerCase().includes(q)));
+      if (!items.length) return;
+      const sec = document.createElement('div');
+      const hdr = document.createElement('div');
+      hdr.className = 'text-xs font-semibold text-[var(--muted-foreground)] mb-1';
+      hdr.textContent = cat;
+      sec.appendChild(hdr);
+
+      const grid = document.createElement('div');
+      grid.className = 'grid grid-cols-1 gap-1';
+      items.forEach(a => {
+        const btn = document.createElement('button');
+        const isSel = activeTool === 'place' && activeAssetType === a.type;
+        btn.className = 'px-2 py-1 rounded border text-xs flex items-center justify-between gap-1.5 text-left ' +
+          (isSel ? 'border-[var(--primary)] bg-[var(--secondary)] font-semibold ring-1 ring-[var(--primary)]'
+                 : 'border-[var(--border)] hover:bg-[var(--secondary)]');
+        btn.innerHTML = `<span class="flex items-center gap-1.5 truncate">
+            <span class="w-3 h-3 rounded-sm shrink-0" style="background:${a.color}"></span>
+            <span class="truncate">${a.name}</span>
+          </span>
+          <span class="font-mono text-[var(--muted-foreground)] shrink-0">${a.w}×${a.h}</span>`;
+        btn.onclick = () => {
+          activeAssetType = a.type;
+          activeTool = 'place';
+          placementRotation = 0;
+          syncToolUI();
+        };
+        grid.appendChild(btn);
+      });
+      sec.appendChild(grid);
+      container.appendChild(sec);
+    });
+  }
+
+  function syncToolUI() {
+    document.querySelectorAll('.tool-btn').forEach(b => {
+      const act = b.dataset.tool === activeTool;
+      b.className = 'tool-btn px-2 py-1.5 rounded border text-left font-medium ' +
+        (b.dataset.tool === 'erase' ? 'col-span-2 ' : '') +
+        (act ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]'
+             : 'border-[var(--border)] hover:bg-[var(--secondary)]');
+    });
+    document.querySelectorAll('.grp-btn').forEach(b => {
+      const act = b.dataset.group === defaultGroup;
+      b.className = 'grp-btn px-2 py-1 rounded border ' +
+        (act ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)] font-semibold'
+             : 'border-[var(--border)] hover:bg-[var(--secondary)]');
+    });
+    renderTilePalette();
+    renderAssetPalette();
+    render();
+  }
+
+  // Inspector & Placed List
+  function syncInspector() {
+    const r = currentRoom();
+    const obj = r.objects.find(o => o.id === selectedObjId);
+    const emptyEl = document.getElementById('inspector-empty');
+    const panelEl = document.getElementById('inspector-panel');
+    if (!obj) {
+      emptyEl.classList.remove('hidden');
+      panelEl.classList.add('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    panelEl.classList.remove('hidden');
+    const def = ASSET_MAP[obj.type] || { name: obj.type };
+    document.getElementById('insp-type').textContent = def.name;
+    document.getElementById('insp-coords').textContent = `(${obj.x}, ${obj.y})`;
+    document.getElementById('insp-label').value = obj.label || '';
+    document.getElementById('insp-w').value = obj.w;
+    document.getElementById('insp-h').value = obj.h;
+    document.getElementById('insp-dir').value = obj.dir || 'S';
+    document.getElementById('insp-group').value = obj.group || 'none';
+  }
+
+  function renderPlacedList() {
+    const r = currentRoom();
+    document.getElementById('placed-count').textContent = String(r.objects.length);
+    const list = document.getElementById('placed-list');
+    list.innerHTML = '';
+    r.objects.slice().reverse().forEach(obj => {
+      const def = ASSET_MAP[obj.type] || { name: obj.type, color: '#6b7280', code: 'BLK' };
+      const row = document.createElement('div');
+      const isSel = obj.id === selectedObjId;
+      row.className = 'px-2 py-1 rounded border flex items-center justify-between gap-1 cursor-pointer ' +
+        (isSel ? 'border-[var(--primary)] bg-[var(--secondary)] font-semibold' : 'border-[var(--border)] hover:bg-[var(--secondary)]');
+      const gDot = GROUP_COLORS[obj.group] ? `<span class="w-2 h-2 rounded-full inline-block" style="background:${GROUP_COLORS[obj.group]}"></span>` : '';
+      row.innerHTML = `<span class="flex items-center gap-1.5 truncate">
+          <span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:${def.color}"></span>
+          ${gDot}
+          <span class="truncate">${obj.label || def.name}</span>
+        </span>
+        <span class="font-mono text-[var(--muted-foreground)] shrink-0">(${obj.x},${obj.y})</span>`;
+      row.onclick = () => {
+        selectedObjId = obj.id;
+        activeTool = 'select';
+        syncToolUI();
+        syncInspector();
+        renderPlacedList();
+      };
+      list.appendChild(row);
+    });
+  }
+
+  // Hit-test objects (prefer non-surface top items first so benchtop gear on benches is easy to click!)
+  function findObjectAt(gx, gy) {
+    const r = currentRoom();
+    const hits = r.objects.filter(o => gx >= o.x && gx < o.x + o.w && gy >= o.y && gy < o.y + o.h);
+    if (!hits.length) return null;
+    const topEquip = hits.filter(o => !(ASSET_MAP[o.type] && ASSET_MAP[o.type].isSurface));
+    return topEquip.length ? topEquip[topEquip.length - 1] : hits[hits.length - 1];
+  }
+
+  function canPlaceBlock(type, x, y, w, h, ignoreId = null) {
+    const r = currentRoom();
+    if (x < 0 || y < 0 || x + w > r.w || y + h > r.h) return false;
+    const def = ASSET_MAP[type] || {};
+    for (const o of r.objects) {
+      if (o.id === ignoreId) continue;
+      const overlap = !(x + w <= o.x || x >= o.x + o.w || y + h <= o.y || y >= o.y + o.h);
+      if (!overlap) continue;
+      const oDef = ASSET_MAP[o.type] || {};
+      // Allow stackable benchtop gear on top of surface blocks (benches/desks/tables)
+      if ((def.stackable && oDef.isSurface) || (def.isSurface && oDef.stackable)) continue;
+      return false;
+    }
+    return true;
+  }
+
+  // Canvas Resize & Coordinate Math
+  function resizeCanvas() {
+    const rect = wrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(300, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(300, Math.floor(rect.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    render();
+  }
+
+  function centerView() {
+    const r = currentRoom();
+    const rect = wrap.getBoundingClientRect();
+    panX = Math.max(24, Math.floor((rect.width - r.w * cellSize) / 2));
+    panY = Math.max(24, Math.floor((rect.height - r.h * cellSize) / 2));
+    render();
+  }
+
+  function screenToCell(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const sx = clientX - rect.left - panX;
+    const sy = clientY - rect.top - panY;
+    return { gx: Math.floor(sx / cellSize), gy: Math.floor(sy / cellSize), rawX: clientX - rect.left, rawY: clientY - rect.top };
+  }
+
+  // Main Canvas Renderer
+  function render() {
+    const rect = wrap.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const isLight = document.documentElement.classList.contains('light');
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = isLight ? '#f8fafc' : '#0b0e14';
+    ctx.fillRect(0, 0, W, H);
+
+    const r = currentRoom();
+
+    // 1. Draw Tiles
+    for (let y = 0; y < r.h; y++) {
+      for (let x = 0; x < r.w; x++) {
+        const tId = r.tiles[y][x] || 0;
+        const t = TILES[tId] || TILES[0];
+        const px = panX + x * cellSize;
+        const py = panY + y * cellSize;
+        ctx.fillStyle = isLight ? t.fillLight : t.fillDark;
+        ctx.fillRect(px, py, cellSize, cellSize);
+
+        if (t.isWall) {
+          ctx.fillStyle = isLight ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.12)';
+          ctx.fillRect(px, py, cellSize, Math.max(2, cellSize * 0.18));
+        } else if (t.isGlass) {
+          ctx.strokeStyle = '#bae6fd';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(px + 2, py + 2, cellSize - 4, cellSize - 4);
+        } else if (t.isDoor) {
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.font = `bold ${Math.max(8, Math.floor(cellSize * 0.34))}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(tId === 8 ? 'FIRE' : 'DR', px + cellSize / 2, py + cellSize / 2);
+        }
+      }
+    }
+
+    // 2. Grid Lines & Coordinate Rulers
+    ctx.strokeStyle = isLight ? 'rgba(15,23,42,0.14)' : 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x <= r.w; x++) {
+      const px = panX + x * cellSize + 0.5;
+      ctx.moveTo(px, panY);
+      ctx.lineTo(px, panY + r.h * cellSize);
+    }
+    for (let y = 0; y <= r.h; y++) {
+      const py = panY + y * cellSize + 0.5;
+      ctx.moveTo(panX, py);
+      ctx.lineTo(panX + r.w * cellSize, py);
+    }
+    ctx.stroke();
+
+    // Ruler numbers every 5 cells
+    ctx.fillStyle = isLight ? '#64748b' : '#94a3b8';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    for (let x = 0; x < r.w; x += 5) {
+      ctx.fillText(String(x), panX + x * cellSize + cellSize / 2, panY - 3);
+    }
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let y = 0; y < r.h; y += 5) {
+      ctx.fillText(String(y), panX - 4, panY + y * cellSize + cellSize / 2);
+    }
+
+    // 3. Draw 2F <-> 3F Sync Ghosts (Spiral Stairs & Lift from paired KLB floor)
+    if (activeRoomId === 'klb_2f' || activeRoomId === 'klb_3f') {
+      const otherRoom = state.rooms[activeRoomId === 'klb_2f' ? 'klb_3f' : 'klb_2f'];
+      if (otherRoom) {
+        otherRoom.objects.filter(o => ASSET_MAP[o.type] && ASSET_MAP[o.type].syncFloors).forEach(ghost => {
+          const gx = panX + ghost.x * cellSize;
+          const gy = panY + ghost.y * cellSize;
+          const gw = ghost.w * cellSize;
+          const gh = ghost.h * cellSize;
+          ctx.save();
+          ctx.setLineDash([5, 4]);
+          ctx.strokeStyle = '#a855f7';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(gx + 2, gy + 2, gw - 4, gh - 4);
+          ctx.fillStyle = 'rgba(168, 85, 247, 0.14)';
+          ctx.fillRect(gx + 2, gy + 2, gw - 4, gh - 4);
+          ctx.fillStyle = '#c084fc';
+          ctx.font = 'bold 9px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText((activeRoomId === 'klb_2f' ? '3F ' : '2F ') + (ASSET_MAP[ghost.type]?.code || ''), gx + gw / 2, gy + gh / 2);
+          ctx.restore();
+        });
+      }
+    }
+
+    // 4. Draw Placed Objects (Surfaces first, then Benchtop/Standalone Equipment on top)
+    const sortedObjs = r.objects.slice().sort((a, b) => {
+      const sa = ASSET_MAP[a.type]?.isSurface ? 0 : 1;
+      const sb = ASSET_MAP[b.type]?.isSurface ? 0 : 1;
+      return sa - sb;
+    });
+
+    for (const obj of sortedObjs) {
+      drawAssetBlock(obj, obj.id === selectedObjId, 1.0);
+    }
+
+    // 5. Draw Active Drag Preview (Room Box or Block Placement Hover)
+    if (dragState && dragState.mode === 'roombox' && hoverCell) {
+      const x0 = Math.max(0, Math.min(dragState.startX, hoverCell.gx));
+      const y0 = Math.max(0, Math.min(dragState.startY, hoverCell.gy));
+      const x1 = Math.min(r.w - 1, Math.max(dragState.startX, hoverCell.gx));
+      const y1 = Math.min(r.h - 1, Math.max(dragState.startY, hoverCell.gy));
+      ctx.save();
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.22)';
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.fillRect(panX + x0 * cellSize, panY + y0 * cellSize, (x1 - x0 + 1) * cellSize, (y1 - y0 + 1) * cellSize);
+      ctx.strokeRect(panX + x0 * cellSize, panY + y0 * cellSize, (x1 - x0 + 1) * cellSize, (y1 - y0 + 1) * cellSize);
+      ctx.restore();
+    } else if (activeTool === 'place' && hoverCell && hoverCell.gx >= 0 && hoverCell.gy >= 0 && hoverCell.gx < r.w && hoverCell.gy < r.h) {
+      const dims = getPlacementDims();
+      const valid = canPlaceBlock(activeAssetType, hoverCell.gx, hoverCell.gy, dims.w, dims.h);
+      drawAssetBlock({
+        type: activeAssetType,
+        x: hoverCell.gx,
+        y: hoverCell.gy,
+        w: dims.w,
+        h: dims.h,
+        dir: getDirCode(placementRotation),
+        group: defaultGroup,
+        label: ''
+      }, false, valid ? 0.65 : 0.3, !valid);
+    }
+  }
+
+  function drawAssetBlock(obj, isSelected, alpha = 1.0, isInvalid = false) {
+    const def = ASSET_MAP[obj.type] || { code: 'BLK', color: '#6b7280', name: obj.type };
+    const inset = def.stackable ? 3 : 1.5;
+    const px = panX + obj.x * cellSize + inset;
+    const py = panY + obj.y * cellSize + inset;
+    const pw = obj.w * cellSize - inset * 2;
+    const ph = obj.h * cellSize - inset * 2;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = isInvalid ? '#ef4444' : def.color;
+    ctx.fillRect(px, py, pw, ph);
+
+    // Group territory color stripe along top-left
+    const gCol = GROUP_COLORS[obj.group];
+    if (gCol) {
+      ctx.fillStyle = gCol;
+      ctx.fillRect(px, py, pw, Math.max(4, Math.floor(cellSize * 0.16)));
+    }
+
+    ctx.strokeStyle = isSelected ? '#facc15' : 'rgba(0,0,0,0.55)';
+    ctx.lineWidth = isSelected ? 2.5 : 1.2;
+    ctx.strokeRect(px, py, pw, ph);
+
+    // Text label inside block
+    const displayTxt = (obj.label && obj.label.trim()) ? obj.label.trim() : def.code;
+    ctx.fillStyle = '#ffffff';
+    const fontSize = Math.max(9, Math.min(12, Math.floor(cellSize * 0.36)));
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Clip text inside block
+    ctx.beginPath();
+    ctx.rect(px + 2, py + 2, pw - 4, ph - 4);
+    ctx.clip();
+    ctx.fillText(displayTxt, px + pw / 2, py + ph / 2);
+
+    // Facing arrow indicator
+    const arrowMap = { N: '▲', E: '▶', S: '▼', W: '◀' };
+    if (obj.dir && cellSize >= 20) {
+      ctx.font = '8px sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      const ax = obj.dir === 'E' ? px + pw - 6 : obj.dir === 'W' ? px + 6 : px + pw / 2;
+      const ay = obj.dir === 'N' ? py + 6 : obj.dir === 'S' ? py + ph - 6 : py + ph / 2;
+      ctx.fillText(arrowMap[obj.dir] || '', ax, ay);
+    }
+    ctx.restore();
+  }
+
+  // Mouse & Keyboard Interactions
+  function applyTileAt(gx, gy, tileId) {
+    const r = currentRoom();
+    if (gx < 0 || gy < 0 || gx >= r.w || gy >= r.h) return;
+    r.tiles[gy][gx] = tileId;
+  }
+
+  function eraseAt(gx, gy) {
+    const r = currentRoom();
+    const hit = findObjectAt(gx, gy);
+    if (hit) {
+      r.objects = r.objects.filter(o => o.id !== hit.id);
+      if (selectedObjId === hit.id) selectedObjId = null;
+      syncInspector();
+      renderPlacedList();
+    } else if (gx >= 0 && gy >= 0 && gx < r.w && gy < r.h) {
+      r.tiles[gy][gx] = 0;
+    }
+  }
+
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  canvas.addEventListener('mousedown', e => {
+    const pos = screenToCell(e.clientX, e.clientY);
+    hoverCell = pos;
+
+    // Middle click or Space+LeftClick => Pan
+    if (e.button === 1 || (e.button === 0 && isSpaceDown)) {
+      dragState = { mode: 'pan', startRawX: pos.rawX, startRawY: pos.rawY, origPanX: panX, origPanY: panY };
+      return;
+    }
+
+    // Right click => Quick Erase
+    if (e.button === 2) {
+      pushUndo();
+      eraseAt(pos.gx, pos.gy);
+      dragState = { mode: 'erase' };
+      saveState();
+      render();
+      return;
+    }
+
+    if (e.button !== 0) return;
+
+    const r = currentRoom();
+    if (activeTool === 'brush') {
+      pushUndo();
+      applyTileAt(pos.gx, pos.gy, activeTileId);
+      dragState = { mode: 'brush' };
+      saveState();
+      render();
+    } else if (activeTool === 'roombox') {
+      dragState = { mode: 'roombox', startX: pos.gx, startY: pos.gy };
+      render();
+    } else if (activeTool === 'erase') {
+      pushUndo();
+      eraseAt(pos.gx, pos.gy);
+      dragState = { mode: 'erase' };
+      saveState();
+      render();
+    } else if (activeTool === 'place') {
+      const dims = getPlacementDims();
+      if (canPlaceBlock(activeAssetType, pos.gx, pos.gy, dims.w, dims.h)) {
+        pushUndo();
+        const newObj = {
+          id: 'obj_' + Math.random().toString(36).slice(2, 9),
+          type: activeAssetType,
+          x: pos.gx,
+          y: pos.gy,
+          w: dims.w,
+          h: dims.h,
+          dir: getDirCode(placementRotation),
+          group: defaultGroup,
+          label: ''
+        };
+        r.objects.push(newObj);
+        selectedObjId = newObj.id;
+        syncInspector();
+        renderPlacedList();
+        saveState();
+        render();
+      }
+    } else if (activeTool === 'select') {
+      const hit = findObjectAt(pos.gx, pos.gy);
+      selectedObjId = hit ? hit.id : null;
+      syncInspector();
+      renderPlacedList();
+      if (hit) {
+        pushUndo();
+        dragState = { mode: 'move_obj', objId: hit.id, offsetX: pos.gx - hit.x, offsetY: pos.gy - hit.y };
+      }
+      render();
+    }
+  });
+
+  window.addEventListener('mousemove', e => {
+    const pos = screenToCell(e.clientX, e.clientY);
+    hoverCell = pos;
+    const r = currentRoom();
+    const hit = (pos.gx >= 0 && pos.gy >= 0 && pos.gx < r.w && pos.gy < r.h) ? findObjectAt(pos.gx, pos.gy) : null;
+    const hitInfo = hit ? ` • Block: ${hit.label || ASSET_MAP[hit.type]?.name || hit.type}` : '';
+    document.getElementById('status-bar').textContent = `Room: ${r.name} (${r.w}×${r.h}) • Cell: (${pos.gx}, ${pos.gy})${hitInfo}`;
+
+    if (!dragState) {
+      if (activeTool === 'place') render();
+      return;
+    }
+
+    if (dragState.mode === 'pan') {
+      panX = dragState.origPanX + (pos.rawX - dragState.startRawX);
+      panY = dragState.origPanY + (pos.rawY - dragState.startRawY);
+      render();
+    } else if (dragState.mode === 'brush') {
+      applyTileAt(pos.gx, pos.gy, activeTileId);
+      render();
+    } else if (dragState.mode === 'erase') {
+      eraseAt(pos.gx, pos.gy);
+      render();
+    } else if (dragState.mode === 'roombox') {
+      render();
+    } else if (dragState.mode === 'move_obj') {
+      const obj = r.objects.find(o => o.id === dragState.objId);
+      if (obj) {
+        const nx = pos.gx - dragState.offsetX;
+        const ny = pos.gy - dragState.offsetY;
+        if (canPlaceBlock(obj.type, nx, ny, obj.w, obj.h, obj.id)) {
+          obj.x = nx;
+          obj.y = ny;
+          syncInspector();
+          renderPlacedList();
+          render();
+        }
+      }
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!dragState) return;
+    if (dragState.mode === 'roombox' && hoverCell) {
+      const r = currentRoom();
+      const x0 = Math.max(0, Math.min(dragState.startX, hoverCell.gx));
+      const y0 = Math.max(0, Math.min(dragState.startY, hoverCell.gy));
+      const x1 = Math.min(r.w - 1, Math.max(dragState.startX, hoverCell.gx));
+      const y1 = Math.min(r.h - 1, Math.max(dragState.startY, hoverCell.gy));
+      if (x1 >= x0 && y1 >= y0) {
+        pushUndo();
+        const fillFloor = (activeTileId >= 1 && activeTileId <= 4) ? activeTileId : (r.defaultFloor || 1);
+        for (let y = y0; y <= y1; y++) {
+          for (let x = x0; x <= x1; x++) {
+            const border = (x === x0 || x === x1 || y === y0 || y === y1);
+            r.tiles[y][x] = border ? 5 : fillFloor;
+          }
+        }
+      }
+    }
+    dragState = null;
+    saveState();
+    render();
+  });
+
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 2 : -2;
+    cellSize = Math.max(14, Math.min(56, cellSize + delta));
+    document.getElementById('zoom-label').textContent = cellSize + 'px';
+    render();
+  }, { passive: false });
+
+  // Keyboard Shortcuts
+  window.addEventListener('keydown', e => {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+    if (e.code === 'Space') { isSpaceDown = true; e.preventDefault(); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); doUndo(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); doRedo(); return; }
+    const k = e.key.toLowerCase();
+    if (k === 'b') { activeTool = 'brush'; syncToolUI(); }
+    else if (k === 'w') { activeTool = 'roombox'; syncToolUI(); }
+    else if (k === 'p') { activeTool = 'place'; syncToolUI(); }
+    else if (k === 'v') { activeTool = 'select'; syncToolUI(); }
+    else if (k === 'e') { activeTool = 'erase'; syncToolUI(); }
+    else if (k === 'r') { rotateActiveOrSelected(); }
+    else if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (selectedObjId) {
+        pushUndo();
+        currentRoom().objects = currentRoom().objects.filter(o => o.id !== selectedObjId);
+        selectedObjId = null;
+        syncInspector();
+        renderPlacedList();
+        saveState();
+        render();
+      }
+    }
+  });
+  window.addEventListener('keyup', e => { if (e.code === 'Space') isSpaceDown = false; });
+
+  function rotateActiveOrSelected() {
+    if (activeTool === 'select' && selectedObjId) {
+      const obj = currentRoom().objects.find(o => o.id === selectedObjId);
+      if (obj) {
+        const dirs = ['S', 'E', 'N', 'W'];
+        const nextDir = dirs[(dirs.indexOf(obj.dir || 'S') + 1) % 4];
+        if (canPlaceBlock(obj.type, obj.x, obj.y, obj.h, obj.w, obj.id)) {
+          pushUndo();
+          const tmp = obj.w; obj.w = obj.h; obj.h = tmp;
+          obj.dir = nextDir;
+          syncInspector();
+          saveState();
+          render();
+        }
+      }
+    } else {
+      placementRotation = (placementRotation + 1) % 4;
+      render();
+    }
+  }
+
+  function doUndo() {
+    const st = undoStacks[activeRoomId];
+    if (!st || !st.length) return;
+    const r = currentRoom();
+    if (!redoStacks[activeRoomId]) redoStacks[activeRoomId] = [];
+    redoStacks[activeRoomId].push(JSON.stringify({ w: r.w, h: r.h, tiles: r.tiles, objects: r.objects }));
+    const prev = JSON.parse(st.pop());
+    r.w = prev.w; r.h = prev.h; r.tiles = prev.tiles; r.objects = prev.objects;
+    selectedObjId = null;
+    syncInspector(); renderPlacedList(); saveState(); render();
+  }
+
+  function doRedo() {
+    const st = redoStacks[activeRoomId];
+    if (!st || !st.length) return;
+    const r = currentRoom();
+    undoStacks[activeRoomId].push(JSON.stringify({ w: r.w, h: r.h, tiles: r.tiles, objects: r.objects }));
+    const nxt = JSON.parse(st.pop());
+    r.w = nxt.w; r.h = nxt.h; r.tiles = nxt.tiles; r.objects = nxt.objects;
+    selectedObjId = null;
+    syncInspector(); renderPlacedList(); saveState(); render();
+  }
+
+  // UI Button Bindings
+  document.querySelectorAll('.tool-btn').forEach(b => {
+    b.onclick = () => { activeTool = b.dataset.tool; syncToolUI(); };
+  });
+  document.querySelectorAll('.grp-btn').forEach(b => {
+    b.onclick = () => { defaultGroup = b.dataset.group; syncToolUI(); };
+  });
+  document.getElementById('palette-search').addEventListener('input', renderAssetPalette);
+  document.getElementById('btn-rotate').onclick = rotateActiveOrSelected;
+  document.getElementById('btn-undo').onclick = doUndo;
+  document.getElementById('btn-redo').onclick = doRedo;
+  document.getElementById('btn-zoom-in').onclick = () => { cellSize = Math.min(56, cellSize + 4); document.getElementById('zoom-label').textContent = cellSize + 'px'; render(); };
+  document.getElementById('btn-zoom-out').onclick = () => { cellSize = Math.max(14, cellSize - 4); document.getElementById('zoom-label').textContent = cellSize + 'px'; render(); };
+  document.getElementById('btn-fit').onclick = centerView;
+
+  document.getElementById('btn-resize-grid').onclick = () => {
+    const nw = Math.max(8, Math.min(80, parseInt(document.getElementById('grid-w').value, 10) || 40));
+    const nh = Math.max(8, Math.min(60, parseInt(document.getElementById('grid-h').value, 10) || 26));
+    const r = currentRoom();
+    pushUndo();
+    const newTiles = makeEmptyGrid(nw, nh, 0);
+    for (let y = 0; y < Math.min(r.h, nh); y++) {
+      for (let x = 0; x < Math.min(r.w, nw); x++) newTiles[y][x] = r.tiles[y][x];
+    }
+    r.w = nw; r.h = nh; r.tiles = newTiles;
+    r.objects = r.objects.filter(o => o.x + o.w <= nw && o.y + o.h <= nh);
+    saveState(); renderPlacedList(); centerView();
+  };
+
+  document.getElementById('btn-sample').onclick = () => {
+    pushUndo();
+    const draft = buildSampleDraft(activeRoomId);
+    currentRoom().tiles = draft.tiles;
+    currentRoom().objects = draft.objects;
+    selectedObjId = null;
+    syncInspector(); renderPlacedList(); saveState(); centerView();
+  };
+
+  document.getElementById('btn-clear').onclick = () => {
+    pushUndo();
+    const r = currentRoom();
+    r.tiles = makeEmptyGrid(r.w, r.h, 0);
+    r.objects = [];
+    selectedObjId = null;
+    syncInspector(); renderPlacedList(); saveState(); render();
+  };
+
+  // Inspector input bindings
+  document.getElementById('insp-label').addEventListener('input', e => {
+    const obj = currentRoom().objects.find(o => o.id === selectedObjId);
+    if (obj) { obj.label = e.target.value; renderPlacedList(); saveState(); render(); }
+  });
+  ['insp-w', 'insp-h'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+      const obj = currentRoom().objects.find(o => o.id === selectedObjId);
+      if (!obj) return;
+      const nw = Math.max(1, Math.min(20, parseInt(document.getElementById('insp-w').value, 10) || 1));
+      const nh = Math.max(1, Math.min(20, parseInt(document.getElementById('insp-h').value, 10) || 1));
+      if (canPlaceBlock(obj.type, obj.x, obj.y, nw, nh, obj.id)) {
+        pushUndo(); obj.w = nw; obj.h = nh; saveState(); render();
+      } else {
+        document.getElementById('insp-w').value = obj.w;
+        document.getElementById('insp-h').value = obj.h;
+      }
+    });
+  });
+  document.getElementById('insp-dir').addEventListener('change', e => {
+    const obj = currentRoom().objects.find(o => o.id === selectedObjId);
+    if (obj) { obj.dir = e.target.value; saveState(); render(); }
+  });
+  document.getElementById('insp-group').addEventListener('change', e => {
+    const obj = currentRoom().objects.find(o => o.id === selectedObjId);
+    if (obj) { obj.group = e.target.value; renderPlacedList(); saveState(); render(); }
+  });
+  document.getElementById('insp-rotate').onclick = rotateActiveOrSelected;
+  document.getElementById('insp-delete').onclick = () => {
+    if (!selectedObjId) return;
+    pushUndo();
+    currentRoom().objects = currentRoom().objects.filter(o => o.id !== selectedObjId);
+    selectedObjId = null;
+    syncInspector(); renderPlacedList(); saveState(); render();
+  };
+
+  // Import / Export JSON
+  document.getElementById('btn-copy-json').onclick = async () => {
+    const txt = JSON.stringify(state, null, 2);
+    try {
+      await navigator.clipboard.writeText(txt);
+      const b = document.getElementById('btn-copy-json');
+      const old = b.textContent; b.textContent = '✓ Copied!';
+      setTimeout(() => b.textContent = old, 1500);
+    } catch (_) {
+      document.getElementById('json-textarea').select();
+      document.execCommand('copy');
+    }
+  };
+
+  document.getElementById('btn-export-json').onclick = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'klb_maps.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  document.getElementById('input-import').addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        if (parsed && parsed.rooms) {
+          state = parsed;
+          activeRoomId = Object.keys(state.rooms)[0];
+          selectedObjId = null;
+          renderRoomTabs(); syncInspector(); renderPlacedList(); saveState(); centerView();
+        }
+      } catch (err) { alert('Invalid JSON file: ' + err.message); }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('btn-load-textarea').onclick = () => {
+    try {
+      const parsed = JSON.parse(document.getElementById('json-textarea').value);
+      if (parsed && parsed.rooms) {
+        state = parsed;
+        selectedObjId = null;
+        renderRoomTabs(); syncInspector(); renderPlacedList(); saveState(); centerView();
+      }
+    } catch (err) { alert('Invalid JSON: ' + err.message); }
+  };
+
+  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('themechange', render);
+
+  // Boot
+  renderRoomTabs();
+  syncToolUI();
+  syncInspector();
+  renderPlacedList();
+  saveState();
+  setTimeout(() => { resizeCanvas(); centerView(); }, 30);
+})();
+</script>
+</body>
+</html>

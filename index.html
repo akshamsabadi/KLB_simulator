@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KLB Simulator — UCL Chemistry Lab Simulation</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ==================== 1. CHARACTER SELECTION & TITLE SCREEN ==================== -->
+  <section id="title-screen">
+    <header class="title-header">
+      <div class="title-brand">
+        <h1>
+          <span class="icon-inline" data-lucide="flask-conical" data-size="22"></span>
+          <span>KLB Simulator</span>
+        </h1>
+        <p>UCL Chemistry survival across KLB 2nd Floor, 3rd Floor, Gordon's Cafe, and CIB facilities while the Big-Chuds, Baker, and Sheppard groups operate autonomously.</p>
+      </div>
+
+      <div class="title-controls">
+        <div class="control-group">
+          <label for="select-mutator">Run Modifier</label>
+          <select id="select-mutator" class="ui-select">
+            <option value="none">Standard KLB Week (No Modifier)</option>
+          </select>
+        </div>
+        <button id="btn-spectator-mode" class="btn-secondary" title="Observe all 10 Big-Chuds and neighbours run autonomously with no playable character">
+          <span class="icon-inline" data-lucide="users" data-size="15"></span>
+          <span>Watch Autonomous Lab</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="char-select-layout">
+      <section aria-labelledby="hdr-cast-select" class="cast-panel">
+        <div class="sec-hdr">
+          <h3 id="hdr-cast-select">Playable Big-Chuds (10 Unlocked)</h3>
+          <span id="archive-progress-lbl" class="mono-muted">0 / 10 Audited</span>
+        </div>
+        <div id="char-grid" class="char-grid"></div>
+      </section>
+
+      <aside id="char-dossier" class="char-dossier" aria-label="Selected Researcher Dossier"></aside>
+    </div>
+  </section>
+
+  <!-- ==================== 2. MAIN WIDESCREEN GAMEPLAY SHELL ==================== -->
+  <main id="game-shell" class="hidden">
+
+    <!-- Left/Center (~70%): Pokemon 3/4 Oblique 2.5D Viewport -->
+    <section id="viewport-col">
+      <header id="top-hud-bar">
+        <div class="hud-toolbar">
+          <button id="btn-toggle-specs" class="hud-btn on" title="Toggle Safety Specs (G) — Specs OFF slows Morale drain; Specs ON required for inspections">
+            <span class="icon-inline" data-lucide="glasses" data-size="15"></span>
+            <span id="lbl-specs">Specs ON</span>
+          </button>
+          <button id="btn-toggle-headphones" class="hud-btn" title="Toggle Headphones (H) — Headphones ON slows Energy/Focus drain; Headphones OFF required for inspections">
+            <span class="icon-inline" data-lucide="headphones" data-size="15"></span>
+            <span id="lbl-headphones">Headphones</span>
+          </button>
+
+          <div id="spectator-room-wrap" class="spectator-room-wrap hidden">
+            <select id="select-travel" class="ui-select compact" aria-label="Observer Room"></select>
+          </div>
+
+          <select id="select-zoom" class="ui-select compact" aria-label="Camera Zoom">
+            <option value="1">Zoom 100%</option>
+            <option value="1.25">Zoom 125%</option>
+            <option value="0.8">Zoom 80%</option>
+          </select>
+
+          <button id="btn-mute" class="hud-btn" title="Mute / Unmute WebAudio">
+            <span class="icon-inline" data-lucide="volume-2" data-size="15"></span>
+            <span id="lbl-mute">Audio</span>
+          </button>
+
+          <button id="btn-new-run" class="hud-btn" title="Return to Character Select">
+            <span class="icon-inline" data-lucide="rotate-ccw" data-size="14"></span>
+            <span>Menu</span>
+          </button>
+        </div>
+      </header>
+
+      <div id="canvas-stage">
+        <canvas id="world-canvas"></canvas>
+        <div id="live-alert-banner" class="hidden" role="status"></div>
+
+        <!-- Classic Pokemon Bottom RPG Dialogue & Workstation Box -->
+        <article id="rpg-dialogue-box" class="hidden" aria-live="polite">
+          <img id="rpg-portrait" class="pixel-art" src="" alt="Speaker portrait" />
+          <div class="rpg-body">
+            <header class="rpg-head">
+              <h3 id="rpg-speaker" class="rpg-speaker"></h3>
+              <span id="rpg-task-meta" class="rpg-task-meta hidden"></span>
+            </header>
+            <p id="rpg-text" class="rpg-text"></p>
+            <div id="rpg-actions" class="rpg-actions"></div>
+          </div>
+        </article>
+      </div>
+
+      <footer id="controls-strip">
+        <span id="controls-hint-text">WASD / Arrows / Click: Move  |  Space: Pause  |  E / Click: Interact  |  G: Specs  |  H: Headphones  |  Esc: Close</span>
+        <span id="hud-hover-hint">Facing: -</span>
+      </footer>
+    </section>
+
+    <!-- Right (~30%): Permanent Command Deck -->
+    <aside id="command-deck">
+
+      <!-- Clock, Pause Control & HVAC -->
+      <section class="deck-clock-card" aria-label="Simulation Clock and HVAC">
+        <div class="clock-row">
+          <div class="clock-cluster">
+            <button id="btn-pause-toggle" class="pause-btn" title="Pause or Resume Timer (Spacebar)">
+              <span id="pause-btn-icon" class="icon-inline" data-lucide="pause" data-size="14"></span>
+              <span id="pause-btn-label">Pause</span>
+            </button>
+            <h3 id="clock-readout" class="clock-readout">MON 08:45</h3>
+          </div>
+          <span id="hvac-readout" class="hvac-readout">21 °C Normal</span>
+        </div>
+      </section>
+
+      <!-- Lab Status: Exact 5 Core Meters -->
+      <section id="meters-section" class="meters-section">
+        <div class="sec-hdr">
+          <h4>Lab Status</h4>
+          <span id="favours-readout" class="mono-accent">1 Favour</span>
+        </div>
+
+        <div id="player-meters-wrap">
+          <div class="meter-grid">
+            <div class="meter-item">
+              <div class="meter-lbl">
+                <span class="meter-name">
+                  <span class="icon-inline" data-lucide="zap" data-size="13"></span>
+                  <span>Energy / Focus</span>
+                  <span id="lbl-energy-tag" class="meter-subtag"></span>
+                </span>
+                <span id="val-energy" class="meter-val">92</span>
+              </div>
+              <div class="meter-track"><div id="bar-energy" class="meter-fill energy"></div></div>
+            </div>
+
+            <div class="meter-item">
+              <div class="meter-lbl">
+                <span class="meter-name">
+                  <span class="icon-inline" data-lucide="smile" data-size="13"></span>
+                  <span>Morale</span>
+                  <span id="lbl-morale-pref" class="meter-subtag"></span>
+                </span>
+                <span id="val-morale" class="meter-val">86</span>
+              </div>
+              <div class="meter-track"><div id="bar-morale" class="meter-fill morale"></div></div>
+            </div>
+
+            <div class="meter-item">
+              <div class="meter-lbl">
+                <span class="meter-name">
+                  <span class="icon-inline" data-lucide="users" data-size="13"></span>
+                  <span>Social</span>
+                </span>
+                <span id="val-social" class="meter-val">78</span>
+              </div>
+              <div class="meter-track"><div id="bar-social" class="meter-fill social"></div></div>
+            </div>
+
+            <div class="meter-item">
+              <div class="meter-lbl">
+                <span class="meter-name">
+                  <span class="icon-inline" data-lucide="gauge" data-size="13"></span>
+                  <span>Vijay Patience</span>
+                </span>
+                <span id="val-patience" class="meter-val">82</span>
+              </div>
+              <div class="meter-track"><div id="bar-patience" class="meter-fill patience"></div></div>
+            </div>
+          </div>
+
+          <div class="meter-item meter-wide">
+            <div class="meter-lbl">
+              <span class="meter-name">
+                <span class="icon-inline" data-lucide="sparkles" data-size="13"></span>
+                <span>Lab Condition</span>
+              </span>
+              <span id="val-condition" class="meter-val">95</span>
+            </div>
+            <div class="meter-track"><div id="bar-condition" class="meter-fill condition"></div></div>
+          </div>
+        </div>
+
+        <div id="spectator-summary" class="spectator-summary hidden">
+          <p id="spectator-stats-line" class="spectator-stats-line">All 10 Big-Chuds running autonomously at real-time pace.</p>
+        </div>
+      </section>
+
+      <!-- Tasks, Sub-Tasks & Active Equipment Timers -->
+      <section class="reactions-section" aria-label="Tasks and Equipment Timers">
+        <h4 class="sr-only">Tasks and Active Equipment Timers</h4>
+        <div id="pinned-objective" class="pinned-objective">
+          <div class="pinned-title-row">
+            <span class="icon-inline" data-lucide="list-checks" data-size="14"></span>
+            <span class="pinned-title-text">Current Task</span>
+          </div>
+          <ol id="subtask-list" class="subtask-list"></ol>
+        </div>
+
+        <div id="active-timers-wrap" class="active-timers-wrap hidden">
+          <div class="sec-hdr sub-hdr">
+            <h5>Active Equipment Timers</h5>
+            <span id="rxn-count-lbl" class="mono-muted">0 running</span>
+          </div>
+          <div id="reactions-list"></div>
+        </div>
+      </section>
+
+      <!-- Fixed Weekly Deliverables -->
+      <section id="weekly-deliverables" class="weekly-deliverables-section" aria-label="Weekly Deliverables">
+        <div class="sec-hdr sub-hdr">
+          <h5>Weekly Deliverables</h5>
+          <span id="deliverables-hint" class="mono-muted">Mon–Fri</span>
+        </div>
+
+        <div id="row-weekly-report" class="deliverable-row">
+          <div class="meter-lbl">
+            <span class="meter-name">
+              <span class="icon-inline" data-lucide="file-text" data-size="12"></span>
+              <span>Weekly Report</span>
+              <span id="due-weekly-report" class="due-tag">Due Thu 18:00</span>
+            </span>
+            <span id="val-weekly-report" class="meter-val">0%</span>
+          </div>
+          <div class="meter-track"><div id="bar-weekly-report" class="meter-fill weekly-report"></div></div>
+        </div>
+
+        <div id="row-manuscript" class="deliverable-row">
+          <div class="meter-lbl">
+            <span class="meter-name">
+              <span class="icon-inline" data-lucide="pen-tool" data-size="12"></span>
+              <span id="lbl-manuscript-title">Manuscript Draft</span>
+              <span id="due-manuscript" class="due-tag">Due Fri 18:00</span>
+            </span>
+            <span id="val-manuscript" class="meter-val">0%</span>
+          </div>
+          <div class="meter-track"><div id="bar-manuscript" class="meter-fill manuscript"></div></div>
+        </div>
+      </section>
+
+      <!-- 3-Tab Bottom Panel -->
+      <nav class="deck-tabs" aria-label="Command Deck Panels">
+        <button class="deck-tab active" data-tab="whatsapp">
+          <span class="icon-inline" data-lucide="message-square" data-size="14"></span>
+          <span>Big-Chuds</span>
+          <span id="wa-unread-count" class="unread-num hidden">0</span>
+        </button>
+        <button class="deck-tab" data-tab="labbook">
+          <span class="icon-inline" data-lucide="book-open" data-size="14"></span>
+          <span id="tab-lbl-labbook">Lab Book</span>
+        </button>
+        <button class="deck-tab" data-tab="archive">
+          <span class="icon-inline" data-lucide="archive" data-size="14"></span>
+          <span>Archive</span>
+        </button>
+      </nav>
+
+      <!-- Pane 1: Live Big-Chuds WhatsApp -->
+      <section id="pane-whatsapp" class="deck-pane">
+        <div id="wa-feed" class="wa-feed"></div>
+        <div class="wa-actions">
+          <select id="select-wa-action" class="ui-select" aria-label="Big-Chuds WhatsApp Action">
+            <option value="ask">/AskBigChuds protocol hint (-10m)</option>
+            <option value="coffee">Remind Coffee Quartet / Check Café</option>
+            <option value="poll">Drop a group chat joke (+Social)</option>
+            <option value="rescue">Ask Nafsika to fridge reaction (1 Favour)</option>
+          </select>
+          <button id="btn-wa-send" class="hud-btn primary">
+            <span class="icon-inline" data-lucide="send" data-size="13"></span>
+            <span>Send</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Pane 2: Lab Book (or Live Autonomous Roster in Spectator Mode) -->
+      <section id="pane-labbook" class="deck-pane hidden">
+        <div id="labbook-scroll" class="labbook-scroll"></div>
+      </section>
+
+      <!-- Pane 3: KLB Archive Logbook -->
+      <section id="pane-archive" class="deck-pane hidden">
+        <div id="archive-scroll" class="labbook-scroll"></div>
+      </section>
+    </aside>
+  </main>
+
+  <!-- ==================== 3. SHARED WIDESCREEN MODAL OVERLAY ==================== -->
+  <div id="modal-backdrop" class="hidden" role="dialog" aria-modal="true">
+    <div id="modal-box"></div>
+  </div>
+
+  <!-- Ordered Classic Scripts (Zero file:// CORS issues, zero build step) -->
+  <script defer src="js/ui/icons.js"></script>
+  <script defer src="js/data/world_data.js"></script>
+  <script defer src="js/data/cast_data.js"></script>
+  <script defer src="js/data/campaigns_data.js"></script>
+  <script defer src="js/data/events_data.js"></script>
+  <script defer src="js/engine/audio.js"></script>
+  <script defer src="js/engine/renderer_25d.js"></script>
+  <script defer src="js/chemistry/spectra_and_minigames.js"></script>
+  <script defer src="js/engine/sim_and_ai.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>
