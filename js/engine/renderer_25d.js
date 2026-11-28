@@ -3995,16 +3995,41 @@
     }
   }
 
-  // 34. CHAIR / SEMINAR SEAT (Including Vijay's Front-Row Auditor Seat, Split Base/Backrest for Z-Order!)
+  // 34. CHAIR / SEMINAR & DESK SWIVEL SEAT (4-Way N/S/E/W + Vijay/Jamie/Baker/Desk Variants, Split Base/Backrest for Z-Order!)
   function drawChair(ctx, obj, part) {
     const px = obj.x * TILE_W;
     const py = obj.y * TILE_H;
     const cx = px + TILE_W * 0.5;
     const cy = py + TILE_H * 0.5 + 3;
-    const isVijaySeat = obj.group === 'chudasama' || String(obj.label || '').toLowerCase().includes('vijay');
+    const dir = String(obj.dir || 'N').toUpperCase();
+    const labelLower = String(obj.label || '').toLowerCase();
 
-    const seatMain = isVijaySeat ? '#2563eb' : '#4f46e5';
-    const seatDark = isVijaySeat ? '#1e3a8a' : '#312e81';
+    const isVijaySeat = labelLower.includes('vijay') || obj.group === 'chudasama';
+    const isJamieSeat = labelLower.includes('jamie');
+    const isBakerSeat = obj.group === 'baker' && !isJamieSeat;
+    const isDeskChair = obj.group === 'desk_chair';
+
+    let seatMain = '#4f46e5';
+    let seatDark = '#312e81';
+    let trimColor = null;
+
+    if (isVijaySeat) {
+      seatMain = '#2563eb';
+      seatDark = '#1e3a8a';
+      trimColor = '#fde047';
+    } else if (isJamieSeat) {
+      seatMain = '#059669';
+      seatDark = '#064e3b';
+      trimColor = '#a7f3d0';
+    } else if (isBakerSeat) {
+      seatMain = '#10b981';
+      seatDark = '#065f46';
+    } else if (isDeskChair) {
+      seatMain = '#475569';
+      seatDark = '#1e293b';
+      trimColor = '#64748b';
+    }
+
     const drawBase = part !== 'backrest';
     const drawBack = part !== 'base';
 
@@ -4018,28 +4043,74 @@
       ctx.moveTo(cx, cy + 2);
       ctx.lineTo(cx, cy + 9);
       ctx.stroke();
+      if (isDeskChair) {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(cx - 10, cy + 7.5, 2.5, 2.5);
+        ctx.fillRect(cx + 7.5, cy + 7.5, 2.5, 2.5);
+        ctx.fillRect(cx - 1.25, cy + 8.5, 2.5, 2);
+      }
+
+      if (dir === 'S') {
+        // South-facing chair: North backrest sits behind seated character head/torso
+        const sFill = isDeskChair ? seatDark : seatMain;
+        const sStroke = isDeskChair ? '#0f172a' : seatDark;
+        fillRoundRect(ctx, cx - 10, cy - 16, 20, 11, 3, sFill, sStroke, 1.2);
+        if (isDeskChair) {
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(cx - 6, cy - 13.5, 12, 1.5);
+          ctx.fillRect(cx - 6, cy - 10.5, 12, 1.5);
+        } else if (trimColor) {
+          ctx.fillStyle = trimColor;
+          ctx.fillRect(cx - 5, cy - 13, 10, 2);
+        }
+      }
 
       // Cushioned seat pad
       fillRoundRect(ctx, cx - 11, cy - 7, 22, 13, 4, seatMain, seatDark, 1.2);
+
+      if (dir === 'E') {
+        // East-facing chair: West/left backrest sits behind seated character's left shoulder
+        const eFill = isDeskChair ? seatDark : seatMain;
+        const eStroke = isDeskChair ? '#0f172a' : seatDark;
+        fillRoundRect(ctx, cx - 13, cy - 12, 7, 18, 3, eFill, eStroke, 1.2);
+        if (isDeskChair) {
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(cx - 10.5, cy - 8, 2, 10);
+        } else if (trimColor) {
+          ctx.fillStyle = trimColor;
+          ctx.fillRect(cx - 10.5, cy - 7, 2, 8);
+        }
+      } else if (dir === 'W') {
+        // West-facing chair: East/right backrest sits behind seated character's right shoulder
+        const wFill = isDeskChair ? seatDark : seatMain;
+        const wStroke = isDeskChair ? '#0f172a' : seatDark;
+        fillRoundRect(ctx, cx + 6, cy - 12, 7, 18, 3, wFill, wStroke, 1.2);
+        if (isDeskChair) {
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(cx + 8.5, cy - 8, 2, 10);
+        } else if (trimColor) {
+          ctx.fillStyle = trimColor;
+          ctx.fillRect(cx + 8.5, cy - 7, 2, 8);
+        }
+      }
     }
 
-    if (drawBack) {
-      // Backrest (chair faces North toward projector when dir === 'N')
-      if (obj.dir === 'N') {
-        // Seen from behind/3/4: tall curved backrest at south edge of seat (renders in front of seated occupant!)
-        fillRoundRect(ctx, cx - 10, cy - 3, 20, 11, 3, seatDark, '#0f172a', 1.2);
-        if (isVijaySeat) {
-          ctx.fillStyle = '#fde047';
-          ctx.fillRect(cx - 5, cy + 1, 10, 2);
-        }
-      } else {
-        fillRoundRect(ctx, cx - 10, cy - 16, 20, 11, 3, seatMain, seatDark, 1.2);
+    if (drawBack && dir === 'N') {
+      // North-facing chair: South backrest renders in front of seated leg/hip in separate Z-order pass!
+      fillRoundRect(ctx, cx - 10, cy - 3, 20, 11, 3, seatDark, '#0f172a', 1.2);
+      if (isDeskChair) {
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(cx - 6, cy, 12, 1.5);
+        ctx.fillRect(cx - 6, cy + 3, 12, 1.5);
+      } else if (trimColor) {
+        ctx.fillStyle = trimColor;
+        ctx.fillRect(cx - 5, cy + 1, 10, 2);
       }
     }
   }
 
   // 35. PROJECTOR SCREEN & PODIUM (Mounted on North Wall of Meeting Room with 4-Slide Audit Diagram!)
-  function drawProjector(ctx, obj, nowSec) {
+  function drawProjector(ctx, obj, nowSec, renderState) {
     const px = obj.x * TILE_W;
     const py = obj.y * TILE_H;
     const pw = obj.w * TILE_W;
@@ -4062,14 +4133,21 @@
     fillRoundRect(ctx, scrX, scrY, scrW, scrH, 2, '#f8fafc', '#475569', 1.3);
     ctx.restore();
 
-    //UCL Chudasama Group Slide Header Bar
+    // KLB Chudasama & Baker Friday Group Slide Header Bar
     ctx.fillStyle = '#1d4ed8';
     ctx.fillRect(scrX + 2, scrY + 2, scrW - 4, 6);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 6px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText('CHUDASAMA GROUP FRIDAY UPDATE — diBrPD & DAR 2.0', scrX + 6, scrY + 5.2);
+    const isBakerPlayer = Boolean(
+      renderState && renderState.player &&
+      (renderState.player.id === 'archie_wall' || renderState.player.group === 'baker')
+    );
+    const headerText = isBakerPlayer
+      ? 'KLB FRIDAY GROUP UPDATE — BAKER & CHUDASAMA'
+      : 'KLB FRIDAY GROUP UPDATE — CHUDASAMA & BAKER';
+    ctx.fillText(headerText, scrX + 6, scrY + 5.2, scrW - 12);
 
     // Left panel: Pyridazinedione ring diagram
     ctx.strokeStyle = '#0f172a';
@@ -4747,7 +4825,7 @@
         drawChair(ctx, obj, chairPart);
         break;
       case 'projector':
-        drawProjector(ctx, obj, nowSec);
+        drawProjector(ctx, obj, nowSec, state);
         break;
       case 'whiteboard':
         drawWhiteboard(ctx, room, obj);
@@ -4817,7 +4895,7 @@
       const o = room.objects[i];
       if (o.type === 'npc_marker') continue;
       if (o.type === 'chair') {
-        const dChair = Math.hypot((o.x + 0.5) - (ex + 0.5), (o.y + 0.5) - (ey + 0.5));
+        const dChair = Math.hypot((o.x + (o.w || 1) * 0.5) - (ex + 0.5), (o.y + (o.h || 1) * 0.5) - (ey + 0.5));
         if (dChair <= 0.55) onChair = true;
       }
       const dx = Math.max(0, o.x - ex, ex - (o.x + o.w - 1));
@@ -7133,15 +7211,23 @@
   }
 
   function resolveEffectiveCameraZoom(room, bounds, renderState, viewW, viewH) {
+    const vW = viewW || 800;
+    const vH = viewH || 600;
+    const rawCameraZoom = renderState && renderState.cameraZoom;
+    if (typeof rawCameraZoom === 'string' && rawCameraZoom.trim().toLowerCase() === 'fit') {
+      const roomB = bounds || (room ? computeRoomBounds(room) : null);
+      if (!roomB) return 1.0;
+      const spanW = Math.max(TILE_W, (roomB.pxMaxX - roomB.pxMinX) + TILE_W * 1.8);
+      const spanH = Math.max(TILE_H, (roomB.pxMaxY - roomB.pxMinY) + TILE_H * 2.2 + WALL_H * 0.4);
+      return clamp(Math.min((vW - 12) / spanW, (vH - 12) / spanH), 0.35, 1.35);
+    }
     const rawZoom = (renderState && renderState.cameraZoom !== undefined)
       ? Number(renderState.cameraZoom)
       : 1.0;
-    const baseZoom = clamp(rawZoom || 1.0, 0.75, 1.5);
-    if (baseZoom === 1 && room && (room.id === 'klb_3f' || room.id === 'meeting_room')) {
+    const baseZoom = clamp(rawZoom || 1.0, 0.45, 1.5);
+    if (baseZoom === 1 && room && room.id === 'klb_3f') {
       const roomB = bounds || computeRoomBounds(room);
       const rawH = roomB.pxMaxY - roomB.pxMinY;
-      const vW = viewW || 800;
-      const vH = viewH || 600;
       if (vW >= 680 && vH >= (rawH + 64) * 1.22) {
         return 1.22;
       }
@@ -7154,9 +7240,10 @@
     const halfWorldW = (viewW * 0.5) / zoom;
     const halfWorldH = (viewH * 0.5) / zoom;
 
-    const isTinyRoom = Boolean(room && (room.id === 'klb_3f' || room.id === 'meeting_room'));
+    const isTinyRoom = Boolean(room && room.id === 'klb_3f');
     const isCompactRoom = Boolean(room && (
       room.id === 'gordons_cafe' ||
+      room.id === 'meeting_room' ||
       room.id === 'cib_lg11_ms' ||
       room.id === 'cib_lg1b_nmr' ||
       (room.id && room.id.indexOf('cib_') === 0)
@@ -7605,6 +7692,7 @@
           chairPart: null
         });
       } else if (o.type === 'chair') {
+        const chairDir = String(o.dir || 'N').toUpperCase();
         renderQueue.push({
           sortY: (o.y + 0.78) * TILE_H,
           order: 1,
@@ -7613,9 +7701,9 @@
           obj: o,
           children: null,
           zOffset: 0,
-          chairPart: o.dir === 'N' ? 'base' : 'all'
+          chairPart: chairDir === 'N' ? 'base' : 'all'
         });
-        if (o.dir === 'N') {
+        if (chairDir === 'N') {
           renderQueue.push({
             sortY: (o.y + 0.98) * TILE_H,
             order: 4,
@@ -7803,8 +7891,17 @@
   Renderer25D.triggerClickRipple = triggerClickRipple;
 
   Renderer25D.getCameraState = function () {
-    return Object.assign({}, cameraState);
+    return {
+      camX: cameraState.camX,
+      camY: cameraState.camY,
+      zoom: cameraState.zoom,
+      viewW: cameraState.viewW,
+      viewH: cameraState.viewH,
+      roomId: cameraState.roomId
+    };
   };
+  Renderer25D.prototype.getCameraState = Renderer25D.getCameraState;
+  Renderer25D.resolveEffectiveCameraZoom = resolveEffectiveCameraZoom;
 
   Renderer25D.invalidateRoomCache = function (roomId) {
     if (roomId) {

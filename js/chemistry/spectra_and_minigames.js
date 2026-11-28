@@ -3954,10 +3954,16 @@ window.KLB = window.KLB || {};
       honestDisclosure: cur.honestDisclosure !== undefined ? Boolean(cur.honestDisclosure) : true
     };
 
-    const playerMeta = window.KLB.CAST_BY_ID?.[gameState.player?.id] || { name: 'Researcher', shortName: 'Chud' };
-    const campTitle = window.KLB.CAMPAIGNS?.[gameState.player?.id]?.title || 'Chudasama Group Weekly Update';
-    const isRichard = gameState.player?.id === 'richard_spears';
-    const missingClicker = gameState.player?.id === 'andre_shamsabadi' && !gameState.prep?.has_clicker;
+    const modalPlayerId = gameState.player?.id || gameState.charId || 'daniel_richards';
+    const playerMeta = window.KLB.CAST_BY_ID?.[modalPlayerId] || {
+      name: modalPlayerId === 'archie_wall' ? 'Archie Wall' : 'Researcher',
+      shortName: modalPlayerId === 'archie_wall' ? 'Archie' : 'Chud'
+    };
+    const isArchieModal = modalPlayerId === 'archie_wall' || playerMeta?.supervisorId === 'jamie_baker';
+    const campTitle = window.KLB.CAMPAIGNS?.[modalPlayerId]?.title
+      || (isArchieModal ? 'Baker Group Weekly Update' : 'Chudasama Group Weekly Update');
+    const isRichard = modalPlayerId === 'richard_spears';
+    const missingClicker = modalPlayerId === 'andre_shamsabadi' && !gameState.prep?.has_clicker;
     const weeklyReportPct = clamp(Math.round(Number(gameState.weeklyReportProgress) || 0), 0, 100);
     const manuscriptPct = clamp(Math.round(Number(gameState.manuscriptProgress) || 0), 0, 100);
     const labCond = Number(gameState.labCondition != null ? gameState.labCondition : (gameState.safety ?? 85));
@@ -4249,14 +4255,22 @@ window.KLB = window.KLB || {};
     renderModalUI();
   }
 
-  // -------------------- SOLO VIJAY 0.0-10.0 FRIDAY SCORE-CARD AUDITOR --------------------
+  // -------------------- SOLO PI 0.0-10.0 FRIDAY SCORE-CARD AUDITOR --------------------
   function evaluateFridayAudit(gameState, opts = {}) {
     const state = gameState || {};
     const auditOpts = opts || {};
     const phase = auditOpts.phase || 'morning';
     const isFinalPhase = phase === 'final';
-    const playerId = state.player?.id || 'daniel_richards';
-    const playerMeta = window.KLB.CAST_BY_ID?.[playerId] || { name: 'Researcher', shortName: 'Chud' };
+    const playerId = state.player?.id || state.charId || 'daniel_richards';
+    const playerMeta = window.KLB.CAST_BY_ID?.[playerId] || {
+      name: playerId === 'archie_wall' ? 'Archie Wall' : 'Researcher',
+      shortName: playerId === 'archie_wall' ? 'Archie' : 'Chud'
+    };
+    const isArchie = playerId === 'archie_wall' || playerMeta?.supervisorId === 'jamie_baker';
+    const supervisorId = isArchie ? 'jamie_baker' : 'vijay_chudasama';
+    const supervisorName = isArchie ? 'Prof. Jamie Baker' : 'Prof. Vijay Chudasama';
+    const supShort = isArchie ? 'Jamie' : 'Vijay';
+    const patienceLabel = isArchie ? 'Jamie Patience' : 'Vijay Patience';
     const totalSteps = window.KLB.CAMPAIGNS?.[playerId]?.steps?.length || 5;
     const doneSteps = Array.isArray(state.completedSteps) ? state.completedSteps.length : 0;
     const labBook = Array.isArray(state.labBook) ? state.labBook : [];
@@ -4368,18 +4382,33 @@ window.KLB = window.KLB || {};
         rigorRaw -= 1.40;
         const slideNum = slideFlawedFig.id === fig1?.id ? 2 : 3;
         const figType = figTypeOf(slideFlawedFig);
-        rigorReason = `Slide ${slideNum} flaw hidden (-1.40 Vijay callout)`;
-        if (figType === 'nmr' || slideFlawedFig.hasSolventPeak) {
-          vijayCalloutLine = `Wait — is that 5.30 ppm DCM on Slide ${slideNum}?! That's suboptimal — one word.`;
-        } else if (figType === 'gel' || slideFlawedFig.hasOverReduction || slideFlawedFig.hasBlueDyeMishap) {
-          vijayCalloutLine = slideFlawedFig.hasBlueDyeMishap
-            ? `Hold on — go back to Slide ${slideNum}. Is that a blue LDS loading-dye smear down the gel lane you tried to gloss over?! That's suboptimal — one word.`
-            : `Hold on — go back to Slide ${slideNum}. Is that an over-reduced 75 kDa half-antibody gel band you tried to gloss over?! That's suboptimal — one word.`;
-        } else if (figType === 'lcms' || slideFlawedFig.hasAdduct) {
-          vijayCalloutLine = `Hold on — go back to Slide ${slideNum}. Is that a +69 Da adduct and +44 Da PEG comb in the LC-MS you tried to gloss over?! That's suboptimal — one word.`;
+        rigorReason = `Slide ${slideNum} flaw hidden (-1.40 ${supShort} callout)`;
+        if (isArchie) {
+          if (figType === 'nmr' || slideFlawedFig.hasSolventPeak) {
+            vijayCalloutLine = `Hold on, ${playerMeta.shortName} — look closely at Slide ${slideNum}. There is an unflagged 5.30 ppm DCM peak sitting beside your product signals that needed noting upfront.`;
+          } else if (figType === 'gel' || slideFlawedFig.hasOverReduction || slideFlawedFig.hasBlueDyeMishap) {
+            vijayCalloutLine = slideFlawedFig.hasBlueDyeMishap
+              ? `Just pause on Slide ${slideNum}, ${playerMeta.shortName} — that blue LDS loading-dye smear down the lane should have been disclosed openly rather than brushed past.`
+              : `Just pause on Slide ${slideNum}, ${playerMeta.shortName} — what are those stray cleavage bands on the gel? Always declare non-specific fragments on Slide 4 rather than glossing over them.`;
+          } else if (figType === 'lcms' || slideFlawedFig.hasAdduct) {
+            vijayCalloutLine = `Let's stay on Slide ${slideNum} a moment, ${playerMeta.shortName} — there is an unflagged +69 Da adduct and +44 Da PEG comb on the LC-MS trace that needed honest disclosure.`;
+          } else {
+            const flawDesc = describeFigureFlaw(slideFlawedFig);
+            vijayCalloutLine = `Hold on a second on Slide ${slideNum}, ${playerMeta.shortName} — that ${flawDesc} needed an open note rather than being swept under the rug.`;
+          }
         } else {
-          const flawDesc = describeFigureFlaw(slideFlawedFig);
-          vijayCalloutLine = `Hold on — go back to Slide ${slideNum}. Is that ${flawDesc} on the TLC plate you tried to gloss over?! That's suboptimal — one word.`;
+          if (figType === 'nmr' || slideFlawedFig.hasSolventPeak) {
+            vijayCalloutLine = `Wait — is that 5.30 ppm DCM on Slide ${slideNum}?! That's suboptimal — one word.`;
+          } else if (figType === 'gel' || slideFlawedFig.hasOverReduction || slideFlawedFig.hasBlueDyeMishap) {
+            vijayCalloutLine = slideFlawedFig.hasBlueDyeMishap
+              ? `Hold on — go back to Slide ${slideNum}. Is that a blue LDS loading-dye smear down the gel lane you tried to gloss over?! That's suboptimal — one word.`
+              : `Hold on — go back to Slide ${slideNum}. Is that an over-reduced 75 kDa half-antibody gel band you tried to gloss over?! That's suboptimal — one word.`;
+          } else if (figType === 'lcms' || slideFlawedFig.hasAdduct) {
+            vijayCalloutLine = `Hold on — go back to Slide ${slideNum}. Is that a +69 Da adduct and +44 Da PEG comb in the LC-MS you tried to gloss over?! That's suboptimal — one word.`;
+          } else {
+            const flawDesc = describeFigureFlaw(slideFlawedFig);
+            vijayCalloutLine = `Hold on — go back to Slide ${slideNum}. Is that ${flawDesc} on the TLC plate you tried to gloss over?! That's suboptimal — one word.`;
+          }
         }
       }
     } else if (distinctFigures) {
@@ -4451,10 +4480,12 @@ window.KLB = window.KLB || {};
       : (isFinalPhase && state.fridayMorningPresented === false ? 'skipped 09:00 meeting' : 'late');
     const hygieneReason = `${deckHygieneTxt}, ${punctualityTxt}, ${hasClicker ? 'clicker ready' : 'missing clicker'}`;
 
-    // 6) KLB LAB CITIZENSHIP, LAB CONDITION & VIJAY PATIENCE RUBRIC SCORE (0.0 - 1.0)
+    // 6) KLB LAB CITIZENSHIP, LAB CONDITION & SUPERVISOR PATIENCE RUBRIC SCORE (0.0 - 1.0)
     const rawPatience = (state.patience !== undefined && state.patience !== null)
       ? Number(state.patience)
-      : (state.vijayPatience !== undefined && state.vijayPatience !== null ? Number(state.vijayPatience) : 80);
+      : (isArchie && state.jamiePatience !== undefined && state.jamiePatience !== null
+        ? Number(state.jamiePatience)
+        : (state.vijayPatience !== undefined && state.vijayPatience !== null ? Number(state.vijayPatience) : 80));
     const vijayPatience = clamp(Number.isFinite(rawPatience) ? rawPatience : 80, 0, 100);
 
     const labCond = Number(state.labCondition != null ? state.labCondition : (state.safety ?? 85));
@@ -4470,9 +4501,9 @@ window.KLB = window.KLB || {};
     // Fold Faiza's +0.5 PI Charm perk cleanly into citizenshipScore (capped at 1.0)
     if (playerId === 'faiza_javaid') citizenshipRaw += 0.50;
     const citizenshipScore = Math.round(clamp(citizenshipRaw, 0, 1.0) * 10) / 10;
-    const citizenshipReason = `Lab ${Math.round(safeLabCond)}%, ${Number(state.favours) || 0} favour(s), Patience ${Math.round(vijayPatience)}${playerId === 'faiza_javaid' ? ', +0.5 Faiza PI charm' : ''}${state.prep?.thiol_dirty ? ', thiol penalty' : ''}${state.abilFineOwed ? ', NMR fine' : ''}`;
+    const citizenshipReason = `Lab ${Math.round(safeLabCond)}%, ${Number(state.favours) || 0} favour(s), ${patienceLabel} ${Math.round(vijayPatience)}${playerId === 'faiza_javaid' ? ', +0.5 Faiza PI charm' : ''}${state.prep?.thiol_dirty ? ', thiol penalty' : ''}${state.abilFineOwed ? ', NMR fine' : ''}`;
 
-    // Presented Group Meeting Quality & Yield -> Vijay Patience Delta
+    // Presented Group Meeting Quality & Yield -> Supervisor Patience Delta
     const presentedFigs = slideFigs.length > 0 ? slideFigs : labBook.slice();
     let presentedAvgQuality = 0;
     let presentedAvgYield = 0;
@@ -4508,119 +4539,226 @@ window.KLB = window.KLB || {};
     ) * 10) / 10;
     const passed = total >= 6.0;
 
-    // Assemble Vijay's multi-line solo verdict (no outer quotation marks; main.js adds smart quotes)
+    // Assemble Supervisor's multi-line solo verdict (no outer quotation marks; main.js adds smart quotes)
     const vijayVerdictLines = [];
     if (vijayCalloutLine) {
       vijayVerdictLines.push(vijayCalloutLine);
     }
 
-    if (doneSteps >= totalSteps) {
-      vijayVerdictLines.push(`All ${totalSteps} campaign steps executed across the week, ${playerMeta.shortName} — very solid synthetic momentum.`);
-    } else if (!isFinalPhase && doneSteps >= totalSteps - 1) {
-      vijayVerdictLines.push(`Strong momentum with ${doneSteps} of ${totalSteps} planned steps complete by Friday morning — wrap up Step ${totalSteps} before 18:00.`);
-    } else if (doneSteps >= 3) {
-      vijayVerdictLines.push(`You pushed through ${doneSteps} of ${totalSteps} planned steps; let's close out the remaining characterisation ${isFinalPhase ? 'first thing Monday' : 'before 18:00'}.`);
-    } else {
-      vijayVerdictLines.push(`Only ${doneSteps} of ${totalSteps} steps completed by Friday Group Meeting. That's suboptimal — one word.`);
-    }
+    if (isArchie) {
+      if (doneSteps >= totalSteps) {
+        vijayVerdictLines.push(`All ${totalSteps} campaign steps executed cleanly across the week, ${playerMeta.shortName} — textbook Baker-bay albumin-maleimide momentum and balanced-rotor discipline.`);
+      } else if (!isFinalPhase && doneSteps >= totalSteps - 1) {
+        vijayVerdictLines.push(`Lovely progress with ${doneSteps} of ${totalSteps} planned steps complete by Friday morning, ${playerMeta.shortName} — Nafsika can keep an eye on the Baker hood if you finish Step ${totalSteps} before 18:00.`);
+      } else if (doneSteps >= 3) {
+        vijayVerdictLines.push(`You pushed through ${doneSteps} of ${totalSteps} planned steps, ${playerMeta.shortName} — let's wrap up the remaining HSA Cys34 selectivity checks ${isFinalPhase ? 'first thing Monday morning' : 'cleanly before 18:00'}.`);
+      } else {
+        vijayVerdictLines.push(`Only ${doneSteps} of ${totalSteps} steps are across the line by Friday Group Meeting, ${playerMeta.shortName} — let's tighten the bench plan in Baker bay and lean on Nafsika if spin filters back up next week.`);
+      }
 
-    if (slideFlawedFig && deck.honestDisclosure) {
-      vijayVerdictLines.push(
-        richardPerkTriggered
-          ? `Exemplary scientific honesty flagging the ${describeFigureFlaw(slideFlawedFig)} upfront on Slide 4, Richard — that's how we keep Chudasama manuscripts watertight.`
-          : `Good scientific rigor disclosing the ${describeFigureFlaw(slideFlawedFig)} openly on Slide 4 with a clear re-purification plan.`
-      );
-    } else if (!slideFlawedFig && distinctFigures) {
-      vijayVerdictLines.push(`Crisp orthogonal proof across your ${figTypeOf(fig1).toUpperCase()} and ${figTypeOf(fig2).toUpperCase()} slides — baseline-resolved and publication-ready.`);
-    } else if (!deck.ready) {
-      vijayVerdictLines.push(`Walking into Friday Group Meeting without saving a finished 4-slide deck is brave, I'll give you that.`);
+      if (slideFlawedFig && deck.honestDisclosure) {
+        vijayVerdictLines.push(`Appreciated the honest Slide 4 disclosure flagging the ${describeFigureFlaw(slideFlawedFig)}, ${playerMeta.shortName} — transparent kinetics and clear re-purification plans keep Baker-group manuscripts watertight.`);
+      } else if (!slideFlawedFig && distinctFigures) {
+        vijayVerdictLines.push(`Clean orthogonal proof across your ${figTypeOf(fig1).toUpperCase()} and ${figTypeOf(fig2).toUpperCase()} slides — crisp HSA Cys34 selectivity, spotless baselines, and publication-ready.`);
+      } else if (!deck.ready) {
+        vijayVerdictLines.push(`Walking into Friday Group Meeting without saving a finished 4-slide deck puts Baker bay on the back foot, ${playerMeta.shortName} — lock those slides in before 09:00 next week.`);
+      }
+    } else {
+      if (doneSteps >= totalSteps) {
+        vijayVerdictLines.push(`All ${totalSteps} campaign steps executed across the week, ${playerMeta.shortName} — very solid synthetic momentum.`);
+      } else if (!isFinalPhase && doneSteps >= totalSteps - 1) {
+        vijayVerdictLines.push(`Strong momentum with ${doneSteps} of ${totalSteps} planned steps complete by Friday morning — wrap up Step ${totalSteps} before 18:00.`);
+      } else if (doneSteps >= 3) {
+        vijayVerdictLines.push(`You pushed through ${doneSteps} of ${totalSteps} planned steps; let's close out the remaining characterisation ${isFinalPhase ? 'first thing Monday' : 'before 18:00'}.`);
+      } else {
+        vijayVerdictLines.push(`Only ${doneSteps} of ${totalSteps} steps completed by Friday Group Meeting. That's suboptimal — one word.`);
+      }
+
+      if (slideFlawedFig && deck.honestDisclosure) {
+        vijayVerdictLines.push(
+          richardPerkTriggered
+            ? `Exemplary scientific honesty flagging the ${describeFigureFlaw(slideFlawedFig)} upfront on Slide 4, Richard — that's how we keep Chudasama manuscripts watertight.`
+            : `Good scientific rigor disclosing the ${describeFigureFlaw(slideFlawedFig)} openly on Slide 4 with a clear re-purification plan.`
+        );
+      } else if (!slideFlawedFig && distinctFigures) {
+        vijayVerdictLines.push(`Crisp orthogonal proof across your ${figTypeOf(fig1).toUpperCase()} and ${figTypeOf(fig2).toUpperCase()} slides — baseline-resolved and publication-ready.`);
+      } else if (!deck.ready) {
+        vijayVerdictLines.push(`Walking into Friday Group Meeting without saving a finished 4-slide deck is brave, I'll give you that.`);
+      }
     }
 
     const wrRounded = Math.round(weeklyReportPct);
     const msRounded = Math.round(manuscriptPct);
     if (wrRounded >= 100 && msRounded >= 100) {
-      vijayVerdictLines.push(`Both your Thursday Weekly Report (100%) and Friday Manuscript Draft (100%) are complete — experimental schemes and SI characterisation tables look publication-tight.`);
+      vijayVerdictLines.push(
+        isArchie
+          ? `Both your Thursday Weekly Report (100%) and Friday Manuscript Draft (100%) landed on schedule — your maleimide schemes and SI characterisation tables read cleanly.`
+          : `Both your Thursday Weekly Report (100%) and Friday Manuscript Draft (100%) are complete — experimental schemes and SI characterisation tables look publication-tight.`
+      );
     } else {
       if (wrRounded < 100) {
-        vijayVerdictLines.push(
-          wrRounded === 0
-            ? `Your Thursday Weekly Report (Due Thu 18:00) was left unsubmitted at 0% — I expect that summary on time every Thursday.`
-            : `Your Thursday Weekly Report is incomplete at ${wrRounded}% (${100 - wrRounded}% short of the Thu 18:00 deadline).`
-        );
-      } else {
-        vijayVerdictLines.push(`Thursday Weekly Report was submitted cleanly at 100% ahead of deadline.`);
-      }
-      if (msRounded < 100) {
-        if (!isFinalPhase) {
+        if (isArchie) {
           vijayVerdictLines.push(
-            msRounded >= 50
-              ? `Manuscript Draft is off to a strong start at ${msRounded}% (due Fri 18:00 — keep writing after meeting).`
-              : msRounded > 0
-                ? `Manuscript Draft is underway at ${msRounded}% (due Fri 18:00 — keep writing after meeting).`
-                : `Manuscript Draft due Fri 18:00 — keep writing after meeting.`
+            wrRounded === 0
+              ? `Your Thursday Weekly Report (Due Thu 18:00) was left unsubmitted at 0% — make sure that short summary reaches me every Thursday evening.`
+              : `Your Thursday Weekly Report sits at ${wrRounded}% (${100 - wrRounded}% short of the Thu 18:00 deadline) — finish that write-up cleanly next week.`
           );
         } else {
-          const msMissing = 100 - msRounded;
           vijayVerdictLines.push(
-            msRounded >= 50
-              ? `Friday Manuscript Draft sits at ${msRounded}% (missing ${msMissing}% at the Fri 18:00 deadline) — finish the Supporting Information and scheme captions.`
-              : `Friday Manuscript Draft is only ${msRounded}% complete (missing ${msMissing}% at the Fri 18:00 deadline) — you need proper desk hours on 3F writing up schemes and experimental details.`
+            wrRounded === 0
+              ? `Your Thursday Weekly Report (Due Thu 18:00) was left unsubmitted at 0% — I expect that summary on time every Thursday.`
+              : `Your Thursday Weekly Report is incomplete at ${wrRounded}% (${100 - wrRounded}% short of the Thu 18:00 deadline).`
           );
         }
       } else {
-        vijayVerdictLines.push(`Friday Manuscript and Supporting Information draft is 100% ready.`);
+        vijayVerdictLines.push(
+          isArchie
+            ? `Thursday Weekly Report landed cleanly at 100% ahead of deadline.`
+            : `Thursday Weekly Report was submitted cleanly at 100% ahead of deadline.`
+        );
+      }
+      if (msRounded < 100) {
+        if (!isFinalPhase) {
+          if (isArchie) {
+            vijayVerdictLines.push(
+              msRounded >= 50
+                ? `Manuscript Draft is ticking along nicely at ${msRounded}% (due Fri 18:00 — keep writing after meeting).`
+                : msRounded > 0
+                  ? `Manuscript Draft is underway at ${msRounded}% (due Fri 18:00 — keep writing after meeting).`
+                  : `Manuscript Draft is due Fri 18:00 — carve out quiet desk hours upstairs after meeting.`
+            );
+          } else {
+            vijayVerdictLines.push(
+              msRounded >= 50
+                ? `Manuscript Draft is off to a strong start at ${msRounded}% (due Fri 18:00 — keep writing after meeting).`
+                : msRounded > 0
+                  ? `Manuscript Draft is underway at ${msRounded}% (due Fri 18:00 — keep writing after meeting).`
+                  : `Manuscript Draft due Fri 18:00 — keep writing after meeting.`
+            );
+          }
+        } else {
+          const msMissing = 100 - msRounded;
+          if (isArchie) {
+            vijayVerdictLines.push(
+              msRounded >= 50
+                ? `Friday Manuscript Draft sits at ${msRounded}% (missing ${msMissing}% at the Fri 18:00 deadline) — polish the Supporting Information and maleimide scheme captions next.`
+                : `Friday Manuscript Draft reached only ${msRounded}% (missing ${msMissing}% at the Fri 18:00 deadline) — book proper quiet desk hours on 3F for experimental write-ups.`
+            );
+          } else {
+            vijayVerdictLines.push(
+              msRounded >= 50
+                ? `Friday Manuscript Draft sits at ${msRounded}% (missing ${msMissing}% at the Fri 18:00 deadline) — finish the Supporting Information and scheme captions.`
+                : `Friday Manuscript Draft is only ${msRounded}% complete (missing ${msMissing}% at the Fri 18:00 deadline) — you need proper desk hours on 3F writing up schemes and experimental details.`
+            );
+          }
+        }
+      } else {
+        vijayVerdictLines.push(
+          isArchie
+            ? `Friday Manuscript and Supporting Information draft is 100% ready for Baker-group review.`
+            : `Friday Manuscript and Supporting Information draft is 100% ready.`
+        );
       }
     }
 
     const presentedQInt = Math.round(presentedAvgQuality);
     const presentedYInt = Math.round(presentedAvgYield);
     const deltaStr = patienceDelta >= 0 ? `+${patienceDelta}` : `${patienceDelta}`;
-    if (presentedFigs.length === 0) {
-      vijayVerdictLines.push(`No analytical figures were presented (${presentedQInt}% quality, ${presentedYInt}% yield), straining my patience (Vijay Patience ${deltaStr}).`);
-    } else if (caughtHiding) {
-      vijayVerdictLines.push(`Glossing over flawed spectra at ${presentedQInt}% quality, ${presentedYInt}% yield wears down my patience quickly (Vijay Patience ${deltaStr}).`);
-    } else if (patienceDelta >= 0) {
-      vijayVerdictLines.push(`Your presented figures (${presentedQInt}% quality, ${presentedYInt}% yield) earned solid backing (Vijay Patience ${deltaStr}).`);
+    if (isArchie) {
+      if (presentedFigs.length === 0) {
+        vijayVerdictLines.push(`No analytical figures were presented (${presentedQInt}% quality, ${presentedYInt}% yield), testing Baker-group patience (${patienceLabel} ${deltaStr}).`);
+      } else if (caughtHiding) {
+        vijayVerdictLines.push(`Glossing over flawed spectra at ${presentedQInt}% quality, ${presentedYInt}% yield erodes scientific trust quickly (${patienceLabel} ${deltaStr}).`);
+      } else if (patienceDelta >= 0) {
+        vijayVerdictLines.push(`Your presented figures (${presentedQInt}% quality, ${presentedYInt}% yield) kept Baker bay standards sharp (${patienceLabel} ${deltaStr}).`);
+      } else {
+        vijayVerdictLines.push(`Results at ${presentedQInt}% quality, ${presentedYInt}% yield need steadier rotor balance and temperature control next week (${patienceLabel} ${deltaStr}).`);
+      }
     } else {
-      vijayVerdictLines.push(`Results at ${presentedQInt}% quality, ${presentedYInt}% yield need tighter bench control next week (Vijay Patience ${deltaStr}).`);
+      if (presentedFigs.length === 0) {
+        vijayVerdictLines.push(`No analytical figures were presented (${presentedQInt}% quality, ${presentedYInt}% yield), straining my patience (Vijay Patience ${deltaStr}).`);
+      } else if (caughtHiding) {
+        vijayVerdictLines.push(`Glossing over flawed spectra at ${presentedQInt}% quality, ${presentedYInt}% yield wears down my patience quickly (Vijay Patience ${deltaStr}).`);
+      } else if (patienceDelta >= 0) {
+        vijayVerdictLines.push(`Your presented figures (${presentedQInt}% quality, ${presentedYInt}% yield) earned solid backing (Vijay Patience ${deltaStr}).`);
+      } else {
+        vijayVerdictLines.push(`Results at ${presentedQInt}% quality, ${presentedYInt}% yield need tighter bench control next week (Vijay Patience ${deltaStr}).`);
+      }
     }
 
     if (!hasClicker && playerId === 'andre_shamsabadi') {
       vijayVerdictLines.push(`And André, having to tap the spacebar at the lectern because your laser clicker is still sitting upstairs on the 3rd floor costs you Slide Hygiene!`);
     } else if (!onTime) {
-      vijayVerdictLines.push(
-        isFinalPhase && state.fridayMorningPresented === false
-          ? `Skipping Friday 09:00 Group Meeting costs you punctuality on the final rubric — I expect you in the Seminar Room at 09:00 sharp.`
-          : `Watch the clock on Fridays — Group Meeting starts at 09:00 sharp.`
-      );
+      if (isArchie) {
+        vijayVerdictLines.push(
+          isFinalPhase && state.fridayMorningPresented === false
+            ? `Skipping Friday 09:00 Group Meeting costs you punctuality on the final rubric — let's make sure you are in the Seminar Room at 09:00 sharp.`
+            : `Keep an eye on the clock on Friday mornings — Group Meeting starts at 09:00 sharp.`
+        );
+      } else {
+        vijayVerdictLines.push(
+          isFinalPhase && state.fridayMorningPresented === false
+            ? `Skipping Friday 09:00 Group Meeting costs you punctuality on the final rubric — I expect you in the Seminar Room at 09:00 sharp.`
+            : `Watch the clock on Fridays — Group Meeting starts at 09:00 sharp.`
+        );
+      }
     }
 
     if (safeLabCond < 40) {
-      vijayVerdictLines.push(`Lab Condition sits at ${Math.round(safeLabCond)}% (below the 40% inspection threshold) — keep specs on (G), headphones off (H), and your bay clean.`);
+      vijayVerdictLines.push(
+        isArchie
+          ? `Lab Condition sits at ${Math.round(safeLabCond)}% (below the 40% inspection threshold) — safety specs stay on before stepping past the blue door (G), headphones off (H), and wipe the central balance table clean.`
+          : `Lab Condition sits at ${Math.round(safeLabCond)}% (below the 40% inspection threshold) — keep specs on (G), headphones off (H), and your bay clean.`
+      );
     } else if (safeLabCond >= 85) {
-      vijayVerdictLines.push(`Lab Condition is spotless at ${Math.round(safeLabCond)}% — exemplary KLB citizenship.`);
+      vijayVerdictLines.push(
+        isArchie
+          ? `Lab Condition is spotless at ${Math.round(safeLabCond)}% — specs on, central balance table brushed clean, and exemplary Baker-bay citizenship.`
+          : `Lab Condition is spotless at ${Math.round(safeLabCond)}% — exemplary KLB citizenship.`
+      );
     }
 
     if (state.abilFineOwed) {
-      vijayVerdictLines.push(`Also, settle your uncollected NMR tube charge with Abil in CIB LG1b before next week.`);
+      vijayVerdictLines.push(
+        isArchie
+          ? `Also, remember to clear your uncollected NMR tube charge with Abil down in CIB LG1b before Monday.`
+          : `Also, settle your uncollected NMR tube charge with Abil in CIB LG1b before next week.`
+      );
     }
 
-    vijayVerdictLines.push(
-      passed
-        ? `Overall score: ${total.toFixed(1)} out of 10. Good week's graft — go enjoy a coffee or pint at Gordon's.`
-        : `Overall score: ${total.toFixed(1)} out of 10. Regroup, dry your glassware, and tighten the controls next week.`
-    );
+    if (isArchie) {
+      vijayVerdictLines.push(
+        passed
+          ? `Overall score: ${total.toFixed(1)} out of 10. Proper tidy week in Baker bay, ${playerMeta.shortName} — grab a flat white or a pint at Gordon's.`
+          : `Overall score: ${total.toFixed(1)} out of 10. Reset over the weekend, balance those rotors to 0.01 g, and we will nail the controls next week.`
+      );
+    } else {
+      vijayVerdictLines.push(
+        passed
+          ? `Overall score: ${total.toFixed(1)} out of 10. Good week's graft — go enjoy a coffee or pint at Gordon's.`
+          : `Overall score: ${total.toFixed(1)} out of 10. Regroup, dry your glassware, and tighten the controls next week.`
+      );
+    }
 
-    // Big-Chuds WhatsApp post-audit reactions (strictly playable Big-Chuds only, zero emojis)
+    // KLBchat post-audit reactions (playable Big-Chuds strictly for Big-Chuds runs; Nafsika + Baker/Big-Chud reactions for Archie; zero emojis)
     const chudReactions = [];
     if (vijayCalloutLine) {
       const flawType = String(slideFlawedFig?.type || '').toLowerCase();
       const isNmrFlaw = flawType === 'nmr' || Boolean(slideFlawedFig?.hasSolventPeak);
       chudReactions.push({
         senderId: 'richard_spears',
-        text: isNmrFlaw
-          ? `Oof, Vijay zooming 400% straight onto the 5.30 ppm peak on the projector! Always disclose flaws on Slide 4!!`
-          : `Oof, Vijay zooming 400% straight onto that ${describeFigureFlaw(slideFlawedFig)} on the projector! Always disclose flaws on Slide 4!!`
+        text: isArchie
+          ? (isNmrFlaw
+              ? `Oof, Jamie zooming right onto that 5.30 ppm peak on the projector! Always disclose flaws on Slide 4!!`
+              : `Oof, Jamie zooming right onto that ${describeFigureFlaw(slideFlawedFig)} on the projector! Always disclose flaws on Slide 4!!`)
+          : (isNmrFlaw
+              ? `Oof, Vijay zooming 400% straight onto the 5.30 ppm peak on the projector! Always disclose flaws on Slide 4!!`
+              : `Oof, Vijay zooming 400% straight onto that ${describeFigureFlaw(slideFlawedFig)} on the projector! Always disclose flaws on Slide 4!!`)
+      });
+    } else if (isArchie && slideFlawedFig && deck.honestDisclosure) {
+      chudReactions.push({
+        senderId: 'richard_spears',
+        text: `Smart move disclosing that ${describeFigureFlaw(slideFlawedFig)} upfront on Slide 4 @${playerMeta.shortName} — Jamie always backs clean caveats over hiding peaks.`
       });
     } else if (richardPerkTriggered) {
       chudReactions.push({
@@ -4639,11 +4777,45 @@ window.KLB = window.KLB || {};
     if (wrRounded < 50 || (isFinalPhase && msRounded < 50)) {
       chudReactions.push({
         senderId: 'peter_szijj',
-        text: `Don't skip the 3F Write-Up Desk next week @${playerMeta.shortName} — Vijay always checks Thursday reports and Friday SI drafts!`
+        text: isArchie
+          ? `Don't skip the 3F Write-Up Desk next week @${playerMeta.shortName} — Jamie always checks Thursday reports and Friday SI drafts!`
+          : `Don't skip the 3F Write-Up Desk next week @${playerMeta.shortName} — Vijay always checks Thursday reports and Friday SI drafts!`
       });
     }
 
-    if (passed) {
+    if (isArchie) {
+      if (passed) {
+        chudReactions.push(
+          {
+            senderId: 'nafsika_forte',
+            text: `${total.toFixed(1)}/10 — brilliant Baker-bay shift @${playerMeta.shortName}!! Celebratory flat whites and pints at Gordon's Café right now!!`
+          },
+          {
+            senderId: 'joao_nogueira',
+            text: `${total.toFixed(1)}/10 — SMASHED Jamie's audit @${playerMeta.shortName}!! Baker and Big-Chuds uniting at Gordon's Café!!`
+          },
+          {
+            senderId: 'daniel_richards',
+            text: `Clean albumin-maleimide data for Jamie today @${playerMeta.shortName} — textbook Baker-bay balanced-rotor discipline!`
+          }
+        );
+      } else {
+        chudReactions.push(
+          {
+            senderId: 'nafsika_forte',
+            text: `Rough audit today @${playerMeta.shortName} (${total.toFixed(1)}/10) — I am guarding Lab 230 till 19:15 all next week if you need late spin-filter rescues or a fresh Baker-bay hand!`
+          },
+          {
+            senderId: 'antoine_maruani',
+            text: `Tough grilling from Jamie today @${playerMeta.shortName} (${total.toFixed(1)}/10) — hit #AskAntoine early next run and lock in 2 clean spectra!`
+          },
+          {
+            senderId: 'daniel_richards',
+            text: `We have all survived a bruising Friday in Seminar Room @${playerMeta.shortName} — coffee at Gordon's first, then reset those HSA Cys34 controls Monday.`
+          }
+        );
+      }
+    } else if (passed) {
       chudReactions.push(
         {
           senderId: 'joao_nogueira',
@@ -4673,6 +4845,9 @@ window.KLB = window.KLB || {};
       phase,
       onTime,
       patienceDelta,
+      supervisorId,
+      supervisorName,
+      patienceLabel,
       avgQuality,
       avgYield,
       presentedPerf,
@@ -4693,7 +4868,8 @@ window.KLB = window.KLB || {};
         citizenshipScore: citizenshipReason
       },
       vijayVerdictLines,
-      chudReactions: chudReactions.filter(r => PLAYABLE_CHUD_IDS.has(r.senderId) && r.senderId !== playerId)
+      verdictLines: vijayVerdictLines,
+      chudReactions: chudReactions.filter(r => (PLAYABLE_CHUD_IDS.has(r.senderId) || isArchie) && r.senderId !== playerId)
     };
   }
 

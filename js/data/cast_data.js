@@ -448,8 +448,11 @@ window.KLB.CAST = [
     id: "archie_wall",
     name: "Archie Wall",
     shortName: "Archie",
-    playable: false,
+    playable: true,
+    isBonus: true,
     group: "baker",
+    supervisorId: "jamie_baker",
+    chatName: "KLBchat",
     arriveHour: 9.25,
     departHour: 18,
     habit: null,
@@ -457,6 +460,10 @@ window.KLB.CAST = [
     lunchHour: 12.2,
     lunchRoom: "klb_3f",
     role: "Baker Group Researcher • Maleimide Conjugates & Balanced-Rotor Purist",
+    perkTitle: "Balanced-Rotor Precision",
+    perkDesc: "2x faster centrifuge runs and +5% purity on albumin-maleimide bioconjugation steps.",
+    flawTitle: "0.01 g Rotor Purist",
+    flawDesc: "Rushing prep below 30% Energy triggers a -6% Morale perfectionist flare.",
     waColor: "#34d399",
     quotes: [
       "Spinning down my albumin-maleimide conjugates — leave that rotor off-balance by 0.2 g and I will find you.",
@@ -469,7 +476,9 @@ window.KLB.CAST = [
       "Büchi vacuum holding steady below 20 mbar means clean fractions before Champions League.",
       "Two minutes till halftime in the Champions League — nobody start a flash column now.",
       "Maleimide-albumin conjugates run smoothly when nobody crashes the shared spin filters."
-    ]
+    ],
+    hintSpecialty: "bioconj",
+    hintLine: "Archie: Pre-cool HSA aliquots and balance every spin filter pair to 0.01 g before starting."
   },
   {
     id: "marco_sabatini",
@@ -662,6 +671,8 @@ window.KLB.BIG_CHUDS_IDS = [
   "richard_spears",
   "marcos_fernandez"
 ];
+
+window.KLB.PLAYABLE_IDS = [...window.KLB.BIG_CHUDS_IDS, 'archie_wall'];
 
 window.KLB.COFFEE_QUARTET = {
   members: ["joao_nogueira","nafsika_forte","vijay_chudasama","faiza_javaid"],
@@ -1737,7 +1748,7 @@ window.KLB.SPEECH_LINES = {
   }
 };
 
-// Group Huddles (611 total: 313 klb_2f, 119 klb_3f, 133 gordons_cafe, 28 meeting_room, 9 cib_lg11_ms, 9 cib_lg1b_nmr)
+// Group Huddles (647 total: 329 klb_2f, 133 klb_3f, 137 gordons_cafe, 30 meeting_room, 9 cib_lg11_ms, 9 cib_lg1b_nmr)
 window.KLB.GROUP_HUDDLES = [
   {
     id: "huddle_2f_dan_max_tcep",
@@ -7346,6 +7357,390 @@ window.KLB.GROUP_HUDDLES = [
     turns: [
       { speakerId: "daniel_richards", text: "Quarter to six, last pastry sweep before they wipe counters." },
       { speakerId: "antoine_maruani", text: "Fifty percent off pain au chocolat is the noblest London law." }
+    ]
+  },
+  // 20 Seated Desk-to-Desk Huddles (10 klb_2f, 10 klb_3f)
+  {
+    id: "hdesk_001",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "archie_wall", text: "Nafsika, Jamie's Friday slide deadline always sneaks up fast." },
+      { speakerId: "nafsika_forte", text: "Still gentler than Vijay's nine am grillings next door, Archie." },
+      { speakerId: "archie_wall", text: "True, at least Baker notes spare us four decimal places." }
+    ]
+  },
+  {
+    id: "hdesk_002",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "monday",
+    turns: [
+      { speakerId: "charlotte_coomber", text: "Squeaking chair wheel is driving me mad while typing my notes." },
+      { speakerId: "marco_sabatini", text: "Your mechanical keyboard sounds like a Milanese tram too, cara." },
+      { speakerId: "charlotte_coomber", text: "At least it drowns out the extraction fans behind us!" }
+    ]
+  },
+  {
+    id: "hdesk_003",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "daniel_richards", text: "Antoine, nudge one border in this Word table and half moves." },
+      { speakerId: "antoine_maruani", text: "Switch to plain spacing Dan, Word tables have zero mercy." },
+      { speakerId: "daniel_richards", text: "My grandad eyesight cannot survive fixing page breaks twice." }
+    ]
+  },
+  {
+    id: "hdesk_004",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "late_week",
+    turns: [
+      { speakerId: "maximillian_lee", text: "Faiza, my back is shaped like a prawn over this draft." },
+      { speakerId: "faiza_javaid", text: "Sit up straight Max, and your mug went stone cold an hour ago." },
+      { speakerId: "maximillian_lee", text: "Too late, silverbacks sip lukewarm tea purely out of pride." }
+    ]
+  },
+  {
+    id: "hdesk_005",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "monday",
+    turns: [
+      { speakerId: "peter_szijj", text: "Eduroam just dropped right as my weekly report autosaved!" },
+      { speakerId: "calise_bahou", text: "Keep typing offline mate, never trust UCL Wi-Fi on Mondays." },
+      { speakerId: "peter_szijj", text: "Good shout, switching to local files before I lose whole lines." }
+    ]
+  },
+  {
+    id: "hdesk_006",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "archie_wall", text: "Charlotte, did you really drop shortbread crumbs on my mouse?" },
+      { speakerId: "charlotte_coomber", text: "Only a few! Consider it desk rent for my loud typing today." },
+      { speakerId: "marco_sabatini", text: "And please guard my espresso cup from flying pastry flakes!" }
+    ]
+  },
+  {
+    id: "hdesk_007",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "late_week",
+    turns: [
+      { speakerId: "joao_nogueira", text: "André, did your citation manager scramble every footnote too?" },
+      { speakerId: "andre_shamsabadi", text: "Changed one comma and EndNote renumbered my whole section." },
+      { speakerId: "joao_nogueira", text: "Honestly faster typing references by hand before five pm." }
+    ]
+  },
+  {
+    id: "hdesk_008",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "richard_spears", text: "Forgot my tea beside the monitor again, completely stone cold." },
+      { speakerId: "marcos_fernandez", text: "Same here, plus this desk chair keeps sinking every ten mins." },
+      { speakerId: "richard_spears", text: "Time for a quick stretch and fresh brew upstairs before four." }
+    ]
+  },
+  {
+    id: "hdesk_009",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "late_week",
+    turns: [
+      { speakerId: "nafsika_forte", text: "Faiza, how far along is your Friday manuscript table today?" },
+      { speakerId: "faiza_javaid", text: "Half formatted, half crying at two columns that refuse alignment." },
+      { speakerId: "nafsika_forte", text: "Swap screens after tea, two pairs of eyes fix stubborn margins." }
+    ]
+  },
+  {
+    id: "hdesk_010",
+    roomId: "klb_2f",
+    deskChat: true,
+    vibe: "monday",
+    turns: [
+      { speakerId: "archie_wall", text: "Max, you hammer that spacebar like it owes you money mate." },
+      { speakerId: "maximillian_lee", text: "Silverback fingers require firm mechanical switches, Archie!" },
+      { speakerId: "archie_wall", text: "At least raise your chair before your shoulders touch your ears." }
+    ]
+  },
+  {
+    id: "hdesk_011",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "nafsika_forte", text: "Archie, Chudasama lot look terrified every Thursday afternoon." },
+      { speakerId: "archie_wall", text: "While Baker deadlines sit gently on Monday, calm as tea time." },
+      { speakerId: "nafsika_forte", text: "Wait till Jamie asks for crisp figure schemes by noon tomorrow." }
+    ]
+  },
+  {
+    id: "hdesk_012",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "monday",
+    turns: [
+      { speakerId: "daniel_richards", text: "Swear my Yorkshire mug freezes in four minutes by this window." },
+      { speakerId: "richard_spears", text: "Radiator clicks like a kettle then blows Arctic air straight out." },
+      { speakerId: "daniel_richards", text: "Wearing my fleece over two jumpers until these pages finish." }
+    ]
+  },
+  {
+    id: "hdesk_013",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "late_week",
+    turns: [
+      { speakerId: "antoine_maruani", text: "Peter, typing a novel or just punishing that poor keyboard?" },
+      { speakerId: "peter_szijj", text: "Trying to finish these draft pages before five, sorry Antoine!" },
+      { speakerId: "antoine_maruani", text: "Fair play, slipping my headphones on while fixing page margins." }
+    ]
+  },
+  {
+    id: "hdesk_014",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "calise_bahou", text: "Dragged one table column and my whole draft jumped three pages." },
+      { speakerId: "joao_nogueira", text: "Always lock row heights Calise, or Word rebels in silence." },
+      { speakerId: "calise_bahou", text: "Good tip mate, plus my neck is stiff from staring down all day." }
+    ]
+  },
+  {
+    id: "hdesk_015",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "late_week",
+    turns: [
+      { speakerId: "andre_shamsabadi", text: "Faiza, did UCL Wi-Fi kick you off the journal portal too?" },
+      { speakerId: "faiza_javaid", text: "Yes! Right while downloading references for my methods table." },
+      { speakerId: "andre_shamsabadi", text: "Quick tea while Eduroam catches its breath again?" }
+    ]
+  },
+  {
+    id: "hdesk_016",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "marcos_fernandez", text: "Stacked three old textbooks under my screen to save my neck." },
+      { speakerId: "marco_sabatini", text: "Zero Italian elegance Marcos, though clever posture rescue." },
+      { speakerId: "marcos_fernandez", text: "Beats booking physio before my final write-up even starts." }
+    ]
+  },
+  {
+    id: "hdesk_017",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "monday",
+    turns: [
+      { speakerId: "archie_wall", text: "Richard, that third mug on your desk looks from Tuesday." },
+      { speakerId: "richard_spears", text: "Guilty, kept getting pulled into formatting table borders." },
+      { speakerId: "archie_wall", text: "Rinse it out while I boil fresh water for proper tea." }
+    ]
+  },
+  {
+    id: "hdesk_018",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "charlotte_coomber", text: "SORRY FOR SHOUTING, MY BUS STORY NEEDED FULL VOLUME!" },
+      { speakerId: "maximillian_lee", text: "Charlotte, three desks rattled while I aligned figure captions." },
+      { speakerId: "charlotte_coomber", text: "Whisper mode activated now, good luck with those captions!" }
+    ]
+  },
+  {
+    id: "hdesk_019",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "late_week",
+    turns: [
+      { speakerId: "peter_szijj", text: "Dan, how many words left before your weekly report is done?" },
+      { speakerId: "daniel_richards", text: "Three paragraphs and one stubborn summary table, nearly free." },
+      { speakerId: "archie_wall", text: "Race you both to five pm, Baker write-up nearly wrapped too." }
+    ]
+  },
+  {
+    id: "hdesk_020",
+    roomId: "klb_3f",
+    deskChat: true,
+    vibe: "late_week",
+    turns: [
+      { speakerId: "antoine_maruani", text: "Someone queued eighty draft pages on the 3F printer right now." },
+      { speakerId: "calise_bahou", text: "Probably someone printing every supporting table in duplex." },
+      { speakerId: "faiza_javaid", text: "Give it ten minutes and grab biscuits by the kettle meanwhile." }
+    ]
+  },
+  // 16 Archie / Jamie Baker / Nafsika / Big-Chud Huddles (6 klb_2f, 4 klb_3f, 4 gordons_cafe, 2 meeting_room)
+  {
+    id: "hbak_001",
+    roomId: "klb_2f",
+    vibe: "morning",
+    turns: [
+      { speakerId: "archie_wall", text: "Jamie Baker, spotted two stray coats by the door without specs." },
+      { speakerId: "jamie_baker", text: "Appreciate the sharp eyes Archie, eye protection stays first." },
+      { speakerId: "archie_wall", text: "Baker bay leads by example, goggles on before touching benches." }
+    ]
+  },
+  {
+    id: "hbak_002",
+    roomId: "klb_2f",
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "jamie_baker", text: "Archie, heard the shared centrifuge humming dead silent today." },
+      { speakerId: "archie_wall", text: "Matched every tube pair to 0.01 g before spinning, Jamie." },
+      { speakerId: "jamie_baker", text: "That rotor discipline saves bearings across half the floor." }
+    ]
+  },
+  {
+    id: "hbak_003",
+    roomId: "klb_2f",
+    vibe: "evening",
+    turns: [
+      { speakerId: "nafsika_forte", text: "Rescued a drying flask off the pump before seven, long night!" },
+      { speakerId: "archie_wall", text: "You keep half of Lab 230 afloat after six o'clock, Nafsika." },
+      { speakerId: "nafsika_forte", text: "Team effort, though somebody owes me a big pastry tomorrow." }
+    ]
+  },
+  {
+    id: "hbak_004",
+    roomId: "klb_2f",
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "marcos_fernandez", text: "Nafsika, any chance Baker bay has spare dry ice pellets tonight?" },
+      { speakerId: "nafsika_forte", text: "Top box under our bench Marcos, just log what you borrow!" },
+      { speakerId: "archie_wall", text: "And keep Chudasama hands off my pre-balanced Falcon pairs." }
+    ]
+  },
+  {
+    id: "hbak_005",
+    roomId: "klb_2f",
+    vibe: "late_week",
+    turns: [
+      { speakerId: "archie_wall", text: "Antoine, sneaking genuine French butter past customs again?" },
+      { speakerId: "antoine_maruani", text: "Every Eurostar trip Archie, proper croissants require courage." },
+      { speakerId: "faiza_javaid", text: "Save one for Baker bay too or I hide the shared stapler!" }
+    ]
+  },
+  {
+    id: "hbak_006",
+    roomId: "klb_2f",
+    vibe: "evening",
+    turns: [
+      { speakerId: "archie_wall", text: "Past six already, time for epic film scores across the room." },
+      { speakerId: "peter_szijj", text: "Shire theme queueing now Archie, best sound in Bloomsbury!" },
+      { speakerId: "marcos_fernandez", text: "Just shout before lockup so nobody sleeps past seven thirty." }
+    ]
+  },
+  {
+    id: "hbak_007",
+    roomId: "klb_3f",
+    vibe: "monday",
+    turns: [
+      { speakerId: "archie_wall", text: "André, sharp waistcoat again, straight out after five tonight?" },
+      { speakerId: "andre_shamsabadi", text: "Just keeping standards high upstairs Archie, dinner in Soho." },
+      { speakerId: "archie_wall", text: "Save energy for the weekend derby, big match coming Sunday." }
+    ]
+  },
+  {
+    id: "hbak_008",
+    roomId: "klb_3f",
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "maximillian_lee", text: "Who demoted ginger nuts behind the custard creams on 3F?" },
+      { speakerId: "archie_wall", text: "Innocent bystander here Max, Baker bay brought chocolate ones." },
+      { speakerId: "daniel_richards", text: "Leave both tins untouched till half three tea, lads." }
+    ]
+  },
+  {
+    id: "hbak_009",
+    roomId: "klb_3f",
+    vibe: "late_week",
+    turns: [
+      { speakerId: "archie_wall", text: "Richard, kettle still hot for a quick afternoon Yorkshire brew?" },
+      { speakerId: "richard_spears", text: "Always boiled for polite visitors Archie, milk on the left." },
+      { speakerId: "archie_wall", text: "Champion, need steady legs before tonight's park run in rain." }
+    ]
+  },
+  {
+    id: "hbak_010",
+    roomId: "klb_3f",
+    vibe: "monday",
+    turns: [
+      { speakerId: "calise_bahou", text: "Central Line crawled past Holborn again, pure Monday pain." },
+      { speakerId: "archie_wall", text: "Took two trains just to escape Shepherd's Bush alive, Calise." },
+      { speakerId: "calise_bahou", text: "Wait till steak pie fixes everything at twelve thirty sharp." }
+    ]
+  },
+  {
+    id: "hbak_011",
+    roomId: "gordons_cafe",
+    vibe: "monday",
+    turns: [
+      { speakerId: "archie_wall", text: "Jamie Baker, Spurs nearly gave us both heart failure Sunday." },
+      { speakerId: "jamie_baker", text: "Ninety minutes of pure torture Archie, good thing coffee helps." },
+      { speakerId: "archie_wall", text: "Still backing them Saturday, though my nerves disagree!" }
+    ]
+  },
+  {
+    id: "hbak_012",
+    roomId: "gordons_cafe",
+    vibe: "mid_week",
+    turns: [
+      { speakerId: "archie_wall", text: "Nafsika, still dreaming of sunny tavernas and grilled octopus?" },
+      { speakerId: "nafsika_forte", text: "Desperately Archie! Better than Bloomsbury fog and rain." },
+      { speakerId: "archie_wall", text: "Next trip bring back olive oil, toasted focaccia deserves it." }
+    ]
+  },
+  {
+    id: "hbak_013",
+    roomId: "gordons_cafe",
+    vibe: "late_week",
+    turns: [
+      { speakerId: "archie_wall", text: "Faiza, tell me the morning train actually behaved today!" },
+      { speakerId: "faiza_javaid", text: "Cancelled at Watford again Archie, ordered cake as therapy." },
+      { speakerId: "daniel_richards", text: "Smart recovery, save half a brownie before lunch queue builds." }
+    ]
+  },
+  {
+    id: "hbak_014",
+    roomId: "gordons_cafe",
+    vibe: "morning",
+    turns: [
+      { speakerId: "joao_nogueira", text: "Proper double espresso beats cold instant dust every morning." },
+      { speakerId: "archie_wall", text: "Agreed João, plus toasted focaccia makes early starts easier." },
+      { speakerId: "joao_nogueira", text: "Grab a window seat Archie, rain is hammering Gordon Street." }
+    ]
+  },
+  {
+    id: "hbak_015",
+    roomId: "meeting_room",
+    vibe: "late_week",
+    turns: [
+      { speakerId: "vijay_chudasama", text: "Jamie Baker, great seeing Baker bay joining slides today." },
+      { speakerId: "jamie_baker", text: "Always helpful comparing notes Vijay, Archie kept traces tidy." },
+      { speakerId: "archie_wall", text: "Clean albumin SEC curves ready on Slide 2 whenever needed." },
+      { speakerId: "nafsika_forte", text: "And full unreduced controls listed cleanly right underneath!" }
+    ]
+  },
+  {
+    id: "hbak_016",
+    roomId: "meeting_room",
+    vibe: "morning",
+    turns: [
+      { speakerId: "archie_wall", text: "Loaded our joint conjugation deck onto the projector early." },
+      { speakerId: "nafsika_forte", text: "Checked font sizes too so nobody squints from the back row." },
+      { speakerId: "jamie_baker", text: "Spotless preparation both, crisp figures win easy questions." },
+      { speakerId: "vijay_chudasama", text: "Sharp energy across both groups, kick us off cleanly team." }
     ]
   }
 ];

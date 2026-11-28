@@ -523,6 +523,83 @@ select.ui-select::picker-icon {
   font-family: 'Consolas', monospace;
 }
 
+.char-card.bonus-card {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 10px 14px;
+  border-color: rgba(16, 185, 129, 0.45);
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.92));
+}
+.char-card.bonus-card:hover {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), rgba(25, 36, 59, 0.96));
+  border-color: rgba(52, 211, 153, 0.72);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.16), var(--shadow-card);
+}
+.char-card.bonus-card.selected {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.26), rgba(19, 42, 46, 0.96));
+  border-color: #34d399;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.28), var(--shadow-card);
+}
+.char-card.bonus-card img.portrait {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+}
+.char-card.bonus-card .bonus-card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.char-card.bonus-card:has(.cleared-pip):not(:has(> .bonus-badge)) .bonus-card-meta {
+  padding-right: 56px;
+}
+.char-card.bonus-card .c-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ecfdf5;
+}
+.char-card.bonus-card .c-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.char-card .bonus-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: 'Consolas', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.char-card.bonus-card > .bonus-badge {
+  margin-left: auto;
+}
+.char-card.bonus-card:has(.cleared-pip) > .bonus-badge {
+  margin-right: 58px;
+}
+.char-card.bonus-card .cleared-pip {
+  top: 8px;
+  right: 10px;
+}
+
 .quickstart-card {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -887,7 +964,7 @@ select.ui-select::picker-icon {
 }
 
 #select-zoom {
-  width: 102px;
+  width: 122px;
   flex-shrink: 0;
 }
 
@@ -971,6 +1048,12 @@ select.ui-select::picker-icon {
   display: block;
   width: 100%;
   height: 100%;
+}
+#world-canvas.spec-pannable {
+  cursor: grab;
+}
+#world-canvas.spec-dragging {
+  cursor: grabbing;
 }
 
 #live-alert-banner {
@@ -1653,6 +1736,15 @@ select.ui-select::picker-icon {
   color: var(--text-main);
   border-bottom-color: var(--accent-primary);
   background: rgba(59, 130, 246, 0.08);
+}
+#tab-lbl-whatsapp.klbchat-active,
+.deck-tab.klbchat-active {
+  color: #6ee7b7;
+}
+.deck-tab.klbchat-active.active {
+  color: #a7f3d0;
+  border-bottom-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
 }
 .unread-num {
   font-family: 'Consolas', monospace;

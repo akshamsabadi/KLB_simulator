@@ -7133,6 +7133,741 @@ window.KLB.CAMPAIGNS = {
         }
       }
     ]
+  },
+
+  // =========================================================================
+  // 11. ARCHIE WALL - Baker Group N-Aryl Dibromomaleimide HSA Cys34 Conjugates
+  // =========================================================================
+  archie_wall: {
+    charId: 'archie_wall',
+    title: 'Site-Selective Dibromomaleimide HSA-Drug Conjugate Platform',
+    manuscriptTopic: 'Thiol-Selective Dibromomaleimide Conjugation on Human Serum Albumin Cys34',
+    paperRef: 'Wall, Nicholls, Caspersen, Skrivergaard, Howard, Karu, Chudasama & Baker, Org. Biomol. Chem. 2019, 17, 7870 (DOI: 10.1039/c9ob00721k); Smith, Schumacher, Ryan, Tedaldi, Papaioannou, Waksman, Caddick & Baker, J. Am. Chem. Soc. 2010, 132, 1960 (DOI: 10.1021/ja908610s)',
+    overview: 'Build an N-aryl dibromomaleimide linker, conjugate HSA Cys34 with balanced-rotor desalting, and verify plasma thiol stability.',
+    steps: [
+      {
+        index: 0,
+        id: 'archie_step_1',
+        dayHint: 'Mon',
+        title: 'N-Aryl Dibromomaleimide Linker Synthesis',
+        desc: 'Condense dibromomaleic anhydride with arylamine in AcOH, strip solvent on Büchi, and run 1H NMR.',
+        locationRoom: 'klb_2f',
+        stationTypes: ['chem_cupboard'],
+        prepRequired: [],
+        durationMins: 24,
+        sweetSpotMins: 69,
+        minigame: 'buchi_bump',
+        subTasks: [
+          {
+            id: 'arc_1_1',
+            label: 'Get Baker maleimide kit',
+            roomId: 'klb_2f',
+            stationTypes: ['chem_cupboard'],
+            cupboardHint: 'Cupboard 17',
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_1_2',
+            label: 'Weigh arylamine & anhydride',
+            roomId: 'klb_2f',
+            stationTypes: ['balance_table'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_1_3',
+            label: 'Run AcOH ring condensation',
+            roomId: 'klb_2f',
+            stationTypes: ['fumehood'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 24,
+            sweetSpotMins: 69,
+            canOvercook: true,
+            triggersChoice: true,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_1_4',
+            label: 'Strip AcOH toluene azeotrope',
+            roomId: 'klb_2f',
+            stationTypes: ['buchi'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 11,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: 'buchi_bump',
+            minigameConfig: { solvent: 'AcOH / Toluene' },
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_1_5',
+            label: 'Submit sample to NMR',
+            roomId: 'cib_lg1b_nmr',
+            stationTypes: ['nmr_magnet'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 15,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_1_6',
+            label: 'View NMR on PC',
+            roomId: 'cib_lg1b_nmr',
+            stationTypes: ['pc_terminal'],
+            cupboardHint: null,
+            mode: 'collect',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: 'nmr',
+            requiresJobFromPrev: true
+          }
+        ],
+        choice: {
+          prompt: 'How do you form N-aryl dibromomaleimide cleanly?',
+          options: [
+            {
+              label: 'Reflux AcOH 3 h, then toluene azeotrope dry',
+              isOptimal: true,
+              yieldMod: 10,
+              purityMod: 12,
+              safetyMod: 2,
+              outcomeText: 'Quantitative ring closure with both Br intact.'
+            },
+            {
+              label: 'Reflux AcOH 1 h, then quick rotary strip',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Residual maleamic acid lowers crude recovery.'
+            },
+            {
+              label: 'Stir with Et3N in DMF at 60 °C overnight',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Basic amine triggers nucleophilic debromination.'
+            },
+            {
+              label: 'Heat aniline + DBM neat at 150 °C in open vial',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Thermal charring and HBr loss ruin maleimide.'
+            }
+          ],
+          askChudsHint: 'Nafsika: Glacial acetic acid drives imide ring closure smoothly, and co-evaporating with toluene removes trace acid without base.',
+          antoineHint: 'Antoine: Keep tertiary amines out during condensation so nucleophilic addition never strips the vinyl bromides.'
+        },
+        dataOutput: {
+          type: 'nmr',
+          label: '1H NMR (400 MHz, CDCl3): N-Aryl Dibromomaleimide',
+          productPeak: '7.36 ppm (d, 2H, Ar-H), 7.04 ppm (d, 2H, Ar-H), 3.68 ppm (t, 2H)',
+          metricLabel: '84% yield, 100% dibromo ring intact'
+        }
+      },
+      {
+        index: 1,
+        id: 'archie_step_2',
+        dayHint: 'Tue',
+        title: 'Biotage Flash Isolation & Maleimide Stability Check',
+        desc: 'Purify the N-aryl dibromomaleimide linker on Biotage and audit pH 7.4 integrity by LC-MS.',
+        locationRoom: 'klb_2f',
+        stationTypes: ['chem_cupboard'],
+        prepRequired: [],
+        durationMins: 21,
+        sweetSpotMins: 69,
+        minigame: 'biotage',
+        subTasks: [
+          {
+            id: 'arc_2_1',
+            label: 'Get column solvents',
+            roomId: 'klb_2f',
+            stationTypes: ['chem_cupboard'],
+            cupboardHint: 'Cupboard 9',
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_2_2',
+            label: 'Spot TLC for Rf check',
+            roomId: 'klb_2f',
+            stationTypes: ['tlc_station'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_2_3',
+            label: 'Purify linker on Biotage',
+            roomId: 'klb_2f',
+            stationTypes: ['biotage'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 16,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: 'biotage',
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_2_4',
+            label: 'Run pH 7.4 buffer check',
+            roomId: 'klb_2f',
+            stationTypes: ['heatblock'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 21,
+            sweetSpotMins: 69,
+            canOvercook: true,
+            triggersChoice: true,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_2_5',
+            label: 'Submit linker to Mass Spec',
+            roomId: 'cib_lg11_ms',
+            stationTypes: ['lcms_unit'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 15,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_2_6',
+            label: 'View MS on PC',
+            roomId: 'cib_lg11_ms',
+            stationTypes: ['pc_terminal'],
+            cupboardHint: null,
+            mode: 'collect',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: 'lcms',
+            requiresJobFromPrev: true
+          }
+        ],
+        choice: {
+          prompt: 'How do you isolate and stock the N-aryl dibromomaleimide?',
+          options: [
+            {
+              label: 'Hexane/EtOAc Biotage; dry DMSO stock at -20 °C',
+              isOptimal: true,
+              yieldMod: 9,
+              purityMod: 12,
+              safetyMod: 2,
+              outcomeText: 'Pure 1:2:1 Br2 linker with zero pre-hydrolysis.'
+            },
+            {
+              label: 'Hexane/EtOAc Biotage; 1:1 MeCN/PBS bench stock',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Aqueous pH 7.4 stock slowly ring-opens overnight.'
+            },
+            {
+              label: 'DCM/MeOH Biotage + 1% Et3N modifier; DMSO stock',
+              isOptimal: false,
+              yieldMod: -7,
+              purityMod: -10,
+              safetyMod: -2,
+              outcomeText: 'Triethylamine and methanol displace maleimide Br.'
+            },
+            {
+              label: 'Silica plug in wet MeOH/H2O; store at 37 °C',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Warm aqueous methanol hydrolyses imide to acid.'
+            }
+          ],
+          askChudsHint: 'Richard: Keep flash elution aprotic without amine modifiers, and store reactive maleimide stocks strictly dry in DMSO.',
+          antoineHint: 'Antoine: Neutral hexane/EtOAc silica chromatography isolates the intact dibromomaleimide cleanly before protein work.'
+        },
+        dataOutput: {
+          type: 'lcms',
+          label: 'Waters UPLC-MS: N-Aryl Dibromomaleimide Linker',
+          productPeak: '515.0 Da [M+H]+ (1:2:1 Br2 cluster, >98% UV purity)',
+          metricLabel: '98% UV purity, zero hydrolysed ring'
+        }
+      },
+      {
+        index: 2,
+        id: 'archie_step_3',
+        dayHint: 'Wed',
+        title: 'Cys34 Activation & Balanced-Rotor Spin Desalt of HSA',
+        desc: 'Unmask HSA Cys34 with mild TCEP, balance VivaSpin tubes to 0.01 g, and run 12% non-reducing SDS-PAGE.',
+        locationRoom: 'klb_2f',
+        stationTypes: ['fridge_4c'],
+        prepRequired: [],
+        durationMins: 18,
+        sweetSpotMins: 69,
+        minigame: 'gel_load',
+        subTasks: [
+          {
+            id: 'arc_3_1',
+            label: 'Collect HSA stock from fridge',
+            roomId: 'klb_2f',
+            stationTypes: ['fridge_4c'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_3_2',
+            label: 'Activate Cys34 with mild TCEP',
+            roomId: 'klb_2f',
+            stationTypes: ['tcep_bench'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 18,
+            sweetSpotMins: 69,
+            canOvercook: true,
+            triggersChoice: true,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_3_3',
+            label: 'Balance tubes to 0.01 g',
+            roomId: 'klb_2f',
+            stationTypes: ['balance_table'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_3_4',
+            label: 'Spin desalt on VivaSpin 30 kDa',
+            roomId: 'klb_2f',
+            stationTypes: ['centrifuge'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 13,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_3_5',
+            label: 'Load HSA & conjugate gel',
+            roomId: 'klb_2f',
+            stationTypes: ['gel_tank'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 15,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: 'gel_load',
+            minigameConfig: { laneLabels: ['Ladder', 'HSA Ctrl', 'Cys34 Act', 'HSA-Conj'], gelMode: 'hhll' },
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_3_6',
+            label: 'View SDS-PAGE gel',
+            roomId: 'klb_2f',
+            stationTypes: ['gel_tank'],
+            cupboardHint: null,
+            mode: 'collect',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: 'gel',
+            requiresJobFromPrev: true
+          }
+        ],
+        choice: {
+          prompt: 'How do you unmask HSA Cys34 without unfolding albumin?',
+          options: [
+            {
+              label: '1 eq TCEP pH 7, 25 °C; 0.01 g paired VivaSpin',
+              isOptimal: true,
+              yieldMod: 10,
+              purityMod: 12,
+              safetyMod: 2,
+              outcomeText: '0.95 free SH/HSA with all 17 disulfides intact.'
+            },
+            {
+              label: '1 eq TCEP pH 7, 25 °C; rough eye-matched tubes',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: -2,
+              outcomeText: 'Cys34 activates, though rotor wobble risks spin.'
+            },
+            {
+              label: '10 eq DTT pH 8.5, 37 °C for 2 h; VivaSpin wash',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -10,
+              safetyMod: -2,
+              outcomeText: 'Excess reductant scrambles core HSA disulfides.'
+            },
+            {
+              label: '50 eq TCEP in 6 M guanidine, 55 °C, 1 h',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -5,
+              outcomeText: 'Denatures albumin and aggregates protein in well.'
+            }
+          ],
+          askChudsHint: 'Dan: Commercial HSA carries a Cys34 mixed disulfide; stoichiometric mild TCEP and careful rotor balancing keep all 17 structural bridges intact.',
+          antoineHint: 'Antoine: Match paired VivaSpin tubes to 0.01 g on the balance and use 1 eq TCEP at neutral pH so only Cys34 is reduced.'
+        },
+        dataOutput: {
+          type: 'gel',
+          label: '12% Non-Reducing SDS-PAGE: Pretreated HSA Cys34 (66.5 kDa)',
+          productPeak: 'Single crisp 66.5 kDa monomer band (zero disulfide oligomer)',
+          metricLabel: '94% HSA recovery, 0.95 SH/protein'
+        }
+      },
+      {
+        index: 3,
+        id: 'archie_step_4',
+        dayHint: 'Thu',
+        title: 'Site-Selective HSA-Maleimide Coupling & Ring-Open Hydrolysis',
+        desc: 'Conjugate HSA Cys34 with linker, promote ring-opening hydrolysis, desalt, and verify +18 Da lock by MS.',
+        locationRoom: 'klb_2f',
+        stationTypes: ['tcep_bench'],
+        prepRequired: [],
+        durationMins: 24,
+        sweetSpotMins: 69,
+        minigame: null,
+        subTasks: [
+          {
+            id: 'arc_4_1',
+            label: 'Set up Cys34 maleimide coupling',
+            roomId: 'klb_2f',
+            stationTypes: ['tcep_bench'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 5,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_4_2',
+            label: 'Incubate coupling & hydrolysis',
+            roomId: 'klb_2f',
+            stationTypes: ['heatblock'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 24,
+            sweetSpotMins: 69,
+            canOvercook: true,
+            triggersChoice: true,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_4_3',
+            label: 'Spin desalt HSA conjugate',
+            roomId: 'klb_2f',
+            stationTypes: ['centrifuge'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 12,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_4_4',
+            label: 'Submit conjugate to Mass Spec',
+            roomId: 'cib_lg11_ms',
+            stationTypes: ['lcms_unit'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 16,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_4_5',
+            label: 'View MS on PC',
+            roomId: 'cib_lg11_ms',
+            stationTypes: ['pc_terminal'],
+            cupboardHint: null,
+            mode: 'collect',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: 'lcms',
+            requiresJobFromPrev: true
+          }
+        ],
+        choice: {
+          prompt: 'How do you lock HSA-maleimide inside the Cys34 crevice?',
+          options: [
+            {
+              label: '3 eq linker pH 7.4; hydrolyse pH 8.5 at 37 °C',
+              isOptimal: true,
+              yieldMod: 10,
+              purityMod: 12,
+              safetyMod: 2,
+              outcomeText: 'Quantitative +18 Da hydrolysed 1:1 HSA conjugate.'
+            },
+            {
+              label: '3 eq linker pH 7.4, keep pH 7.0 at 21 °C only',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Steric Cys34 crevice slows ring opening below 35%.'
+            },
+            {
+              label: '15 eq linker pH 8.5 directly for 6 h at 37 °C',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Excess maleimide cross-reacts with surface Lys.'
+            },
+            {
+              label: '3 eq linker pH 10.5 carbonate buffer, 50 °C',
+              isOptimal: false,
+              yieldMod: -12,
+              purityMod: -15,
+              safetyMod: -4,
+              outcomeText: 'Harsh base hydrolyses linker pre-coupling.'
+            }
+          ],
+          askChudsHint: 'Calise: The Cys34 pocket sterically shields the succinimide ring from neutral hydrolysis, so step gently to pH 8.5 after coupling.',
+          antoineHint: 'Antoine: Couple selectively at pH 7.4 with 3 equivalents first, then promote +18 Da maleamic acid ring-opening at pH 8.5.'
+        },
+        dataOutput: {
+          type: 'lcms',
+          label: 'Q-TOF MaxEnt1 MS: Hydrolysed HSA Cys34 Conjugate',
+          productPeak: '66,890 Da Hydrolysed HSA-Maleimide (+18 Da ring-open, DAR 1.0)',
+          metricLabel: '96% 1:1 Cys34 conjugate, +18 Da locked'
+        }
+      },
+      {
+        index: 4,
+        id: 'archie_step_5',
+        dayHint: 'Thu/Fri',
+        title: 'Human Plasma Thiol-Exchange Audit & Orthogonal NMR/MS',
+        desc: 'Challenge hydrolysed HSA conjugate in human plasma vs GSH and confirm zero thiol exchange by MS.',
+        locationRoom: 'klb_2f',
+        stationTypes: ['freezer_20c'],
+        prepRequired: [],
+        durationMins: 24,
+        sweetSpotMins: 69,
+        minigame: null,
+        subTasks: [
+          {
+            id: 'arc_5_1',
+            label: 'Thaw human plasma aliquot',
+            roomId: 'klb_2f',
+            stationTypes: ['freezer_20c'],
+            cupboardHint: null,
+            mode: 'action',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_5_2',
+            label: 'Incubate plasma thiol exchange',
+            roomId: 'klb_2f',
+            stationTypes: ['heatblock'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 24,
+            sweetSpotMins: 69,
+            canOvercook: true,
+            triggersChoice: true,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_5_3',
+            label: 'Spin and quench plasma assay',
+            roomId: 'klb_2f',
+            stationTypes: ['centrifuge'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 10,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_5_4',
+            label: 'Submit plasma audit to MS',
+            roomId: 'cib_lg11_ms',
+            stationTypes: ['lcms_unit'],
+            cupboardHint: null,
+            mode: 'wait',
+            durationMins: 11,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: null,
+            requiresJobFromPrev: false
+          },
+          {
+            id: 'arc_5_5',
+            label: 'View plasma MS on PC',
+            roomId: 'cib_lg11_ms',
+            stationTypes: ['pc_terminal'],
+            cupboardHint: null,
+            mode: 'collect',
+            durationMins: 4,
+            sweetSpotMins: 225,
+            canOvercook: false,
+            triggersChoice: false,
+            minigame: null,
+            viewOutput: 'lcms',
+            requiresJobFromPrev: true
+          }
+        ],
+        choice: {
+          prompt: 'How do you prove irreversible plasma Cys34 linkage?',
+          options: [
+            {
+              label: '37 °C plasma + GSH vs closed-ring ctrl, 7 d MS',
+              isOptimal: true,
+              yieldMod: 10,
+              purityMod: 12,
+              safetyMod: 2,
+              outcomeText: '97% hydrolysed conjugate intact vs 41% closed loss.'
+            },
+            {
+              label: '37 °C plasma 7 d by MS; omit closed-ring ctrl',
+              isOptimal: false,
+              yieldMod: 3,
+              purityMod: -5,
+              safetyMod: 0,
+              outcomeText: 'Shows 97% survival without retro-Michael baseline.'
+            },
+            {
+              label: '21 °C PBS + 50 µM GSH for 24 h only, LC-MS',
+              isOptimal: false,
+              yieldMod: -6,
+              purityMod: -9,
+              safetyMod: -2,
+              outcomeText: 'Cold low-thiol PBS masks slow albumin transfer.'
+            },
+            {
+              label: '4 °C plasma 7 d; inject whole plasma unspun',
+              isOptimal: false,
+              yieldMod: -13,
+              purityMod: -15,
+              safetyMod: -6,
+              outcomeText: 'Raw plasma fouls C18 guard and stalls LG11 MS.'
+            }
+          ],
+          askChudsHint: 'Faiza: Run the unhydrolysed closed-ring maleimide alongside your hydrolysed conjugate in 37 °C plasma and crash proteins before MS.',
+          antoineHint: 'Antoine: Benchmarking 7-day 37 °C plasma and GSH challenge against closed-ring maleimide proves the ring-open lock prevents thiol exchange.'
+        },
+        dataOutput: {
+          type: 'lcms',
+          label: 'Waters Q-TOF MS: 7-Day Plasma & GSH Thiol-Exchange Audit',
+          productPeak: '66,890 Da Hydrolysed HSA (97% intact vs 41% closed-ring loss)',
+          metricLabel: '97% plasma stability, zero thiol transfer'
+        }
+      }
+    ]
   }
 };
 

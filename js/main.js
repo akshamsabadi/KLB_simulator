@@ -27,6 +27,7 @@ window.KLB = window.KLB || {};
   let specSpeed = 1;
   let specFollowNpcId = null;
   let specCameraPos = null;
+  let specDrag = null;
   let lastAutoSaveSimMins = -Infinity;
   let alexPursuitActive = false;
 
@@ -89,7 +90,16 @@ window.KLB = window.KLB || {};
       const shortN = stripDiacritics(c.shortName || '').toLowerCase();
       const fullN = stripDiacritics(c.name || '').toLowerCase();
       const firstN = fullN.split(/\s+/)[0] || '';
-      return shortN === normPrefix || fullN === normPrefix || firstN === normPrefix || (normPrefix === 'dan' && c.id === 'daniel_richards');
+      const shortFirstN = shortN.split(/\s+/)[0] || '';
+      return shortN === normPrefix
+        || fullN === normPrefix
+        || firstN === normPrefix
+        || shortFirstN === normPrefix
+        || (normPrefix === 'dan' && c.id === 'daniel_richards')
+        || (normPrefix === 'jamie' && c.id === 'jamie_baker')
+        || (normPrefix === 'vijay' && c.id === 'vijay_chudasama')
+        || (normPrefix === 'kersti' && c.id === 'kersti_karu')
+        || (normPrefix === 'abil' && c.id === 'abil_aliev');
     });
     return {
       prefix,
@@ -99,11 +109,84 @@ window.KLB = window.KLB || {};
     };
   }
 
+  function getSupervisorMeta(st = state) {
+    const pid = st?.player?.id || st?.charId || selectedCharId;
+    const isArchie = pid === 'archie_wall';
+    return isArchie
+      ? { id: 'jamie_baker', shortName: 'Jamie', fullName: 'Prof. Jamie Baker', patienceLabel: 'Jamie Patience', chatName: 'KLBchat', askCmd: '/AskKLBchat', portrait: 'assets/portraits/jamie_baker.png' }
+      : { id: 'vijay_chudasama', shortName: 'Vijay', fullName: 'Prof. Vijay Chudasama', patienceLabel: 'Vijay Patience', chatName: 'Big-Chuds', askCmd: '/AskBigChuds', portrait: 'assets/portraits/vijay_chudasama.png' };
+  }
+
+  function getPlayableIds() {
+    if (Array.isArray(window.KLB.PLAYABLE_IDS) && window.KLB.PLAYABLE_IDS.length) {
+      return window.KLB.PLAYABLE_IDS.slice();
+    }
+    const fromCast = (window.KLB.CAST || []).filter(c => c.playable).map(c => c.id);
+    if (fromCast.length) return fromCast;
+    return (window.KLB.BIG_CHUDS_IDS || []).slice();
+  }
+
+  function getPlayableCast() {
+    const byId = window.KLB.CAST_BY_ID || {};
+    return getPlayableIds().map(id => byId[id]).filter(Boolean);
+  }
+
+  function syncZoomSelectUI() {
+    const sel = el('select-zoom');
+    if (!sel) return;
+    const targetVal = cameraZoom === 'fit' ? 'fit' : String(cameraZoom);
+    if (Array.from(sel.options).some(o => o.value === targetVal)) {
+      sel.value = targetVal;
+    }
+  }
+
+  function syncSupervisorChrome() {
+    const sup = getSupervisorMeta();
+    const isKlbChat = Boolean(!state?.spectatorMode && sup.chatName === 'KLBchat');
+    const patEl = el('lbl-patience-name');
+    if (patEl) patEl.textContent = sup.patienceLabel;
+
+    const waLbl = el('tab-lbl-whatsapp');
+    if (waLbl) {
+      waLbl.textContent = sup.chatName;
+      waLbl.classList.toggle('klbchat-active', isKlbChat);
+    }
+    const waTabBtn = document.querySelector('.deck-tab[data-tab="whatsapp"]');
+    if (waTabBtn) {
+      waTabBtn.classList.toggle('klbchat-active', isKlbChat);
+    }
+
+    const waSel = el('select-wa-action');
+    const askOpt = waSel?.querySelector('option[value="ask"]');
+    if (askOpt) {
+      askOpt.textContent = `${sup.askCmd} protocol hint (-10m)`;
+    }
+  }
+
+  function findDeskChair(rm, deskObj) {
+    if (!rm || !deskObj || deskObj.type !== 'writeup_desk') return null;
+    const byDeskId = (rm.objects || []).find(o => o && o.type === 'chair' && o.deskId === deskObj.id);
+    if (byDeskId) return byDeskId;
+    const dw = deskObj.w || 1;
+    const dh = deskObj.h || 1;
+    return (rm.objects || []).find(o => {
+      if (!o || o.type !== 'chair') return false;
+      const adjX = o.x >= deskObj.x && o.x < deskObj.x + dw && (o.y === deskObj.y + dh || o.y === deskObj.y - 1);
+      const adjY = o.y >= deskObj.y && o.y < deskObj.y + dh && (o.x === deskObj.x + dw || o.x === deskObj.x - 1);
+      return adjX || adjY;
+    }) || null;
+  }
+
   function resolveHintWhatsAppSender(rawHint, playerId) {
     const parsed = parseHintSpeakerAndBody(rawHint);
     const bigChuds = window.KLB.BIG_CHUDS_IDS || (window.KLB.CAST || []).filter(c => c.playable).map(c => c.id);
     let senderId = parsed.speakerId;
-    if (!senderId || !bigChuds.includes(senderId) || senderId === playerId) {
+    if (playerId === 'archie_wall') {
+      if (!senderId || !window.KLB.CAST_BY_ID?.[senderId] || senderId === playerId) {
+        const klbPool = ['nafsika_forte', 'jamie_baker', 'marco_sabatini', 'charlotte_coomber'].concat(bigChuds);
+        senderId = klbPool.find(id => id !== playerId && window.KLB.CAST_BY_ID?.[id]) || 'nafsika_forte';
+      }
+    } else if (!senderId || !bigChuds.includes(senderId) || senderId === playerId) {
       senderId = bigChuds.find(id => id !== playerId) || 'daniel_richards';
     }
     const meta = window.KLB.CAST_BY_ID?.[senderId];
@@ -322,11 +405,14 @@ window.KLB = window.KLB || {};
       cats.forEach(([label, val, max]) => {
         lines.push(`${label} ${makeBar(val, max)} ${Number(val).toFixed(1)}/${max.toFixed(1)}`);
       });
-      const verdictPool = Array.isArray(res.vijayVerdictLines) ? res.vijayVerdictLines : [];
+      const sup = getSupervisorMeta(st);
+      const verdictPool = Array.isArray(res.verdictLines)
+        ? res.verdictLines
+        : (Array.isArray(res.vijayVerdictLines) ? res.vijayVerdictLines : []);
       const standout = verdictPool.find(l => /suboptimal|exemplary|clicker|watertight|smashed|spotless|publication-ready|brave/i.test(l))
         || verdictPool[0]
         || `Overall score: ${res.total.toFixed(1)} out of 10.`;
-      lines.push(`Vijay: "${String(standout).replace(/\s+/g, ' ').trim()}"`);
+      lines.push(`${sup.shortName}: "${String(standout).replace(/\s+/g, ' ').trim()}"`);
     } else {
       const heading = extraOpts.heading || 'KLB Run Ended';
       const wrPct = Math.round(st.weeklyReportProgress || 0);
@@ -523,6 +609,7 @@ window.KLB = window.KLB || {};
     populateMutatorSelect();
     renderTitleScreen();
     bindGlobalEvents();
+    syncZoomSelectUI();
     syncMuteButtonUI();
     requestAnimationFrame(masterLoop);
   }
@@ -556,14 +643,17 @@ window.KLB = window.KLB || {};
     alexPursuitActive = false;
     specFollowNpcId = null;
     specCameraPos = null;
+    specDrag = null;
+    el('world-canvas')?.classList.remove('spec-pannable', 'spec-dragging');
     el('title-screen').classList.remove('hidden');
     el('game-shell').classList.add('hidden');
     closeModal();
     closeDialogue();
     syncCelebrationBanner();
 
+    const playables = getPlayableCast();
     const clearedCount = Object.keys(archive.clearedChars || {}).length;
-    el('archive-progress-lbl').textContent = `${clearedCount} / 10 Audited`;
+    el('archive-progress-lbl').textContent = `${clearedCount} / ${playables.length} Audited`;
 
     const totalEvents = (window.KLB.RANDOM_EVENTS || []).length || 32;
     const evCount = Object.keys(archive.discoveredEvents || {}).length;
@@ -614,22 +704,34 @@ window.KLB = window.KLB || {};
 
     const grid = el('char-grid');
     grid.innerHTML = '';
-    const playables = window.KLB.CAST.filter(c => c.playable);
     playables.forEach(c => {
       const card = document.createElement('button');
       card.type = 'button';
       const isSelected = c.id === selectedCharId;
-      card.className = 'char-card' + (isSelected ? ' selected' : '');
+      const isBonus = Boolean(c.isBonus || c.id === 'archie_wall');
+      card.className = (isBonus ? 'char-card bonus-card' : 'char-card') + (isSelected ? ' selected' : '');
       card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
       const best = archive.clearedChars?.[c.id];
       const badge = best !== undefined ? `<span class="cleared-pip">${best.toFixed(1)}/10</span>` : '';
       const roleShort = (c.role.split('•')[1] || c.role).trim();
-      card.innerHTML = `
-        ${badge}
-        <img class="portrait pixel-art" src="assets/portraits/${c.id}.png" alt="${escHtml(c.name)}" />
-        <div class="c-name">${escHtml(c.name)}</div>
-        <div class="c-sub">${escHtml(roleShort)}</div>
-      `;
+      if (isBonus) {
+        card.innerHTML = `
+          ${badge}
+          <img class="portrait pixel-art" src="assets/portraits/${c.id}.png" alt="${escHtml(c.name)}" />
+          <div class="bonus-card-meta">
+            <div class="c-name">${escHtml(c.name)}</div>
+            <div class="c-sub">${escHtml(roleShort)}</div>
+          </div>
+          <span class="bonus-badge">BONUS • BAKER GROUP</span>
+        `;
+      } else {
+        card.innerHTML = `
+          ${badge}
+          <img class="portrait pixel-art" src="assets/portraits/${c.id}.png" alt="${escHtml(c.name)}" />
+          <div class="c-name">${escHtml(c.name)}</div>
+          <div class="c-sub">${escHtml(roleShort)}</div>
+        `;
+      }
       card.onclick = () => {
         selectedCharId = c.id;
         if (window.KLB.Audio) { window.KLB.Audio.init(); window.KLB.Audio.playSfx('ui_click'); }
@@ -756,6 +858,8 @@ window.KLB = window.KLB || {};
     state._stepBiotageBonusApplied = false;
     state._stepFaizaA280Done = false;
     state._stepDanFumbleApplied = false;
+    state._stepArchieBonusApplied = false;
+    state._stepArchieFlawApplied = false;
     state.activeStationJobs = Array.isArray(state.activeStationJobs) ? state.activeStationJobs : [];
     state.activeReactions = state.activeStationJobs;
     state.paused = !spectator;
@@ -772,6 +876,8 @@ window.KLB = window.KLB || {};
     specSpeed = 1;
     specFollowNpcId = null;
     specCameraPos = null;
+    specDrag = null;
+    cameraZoom = 1.0;
     alexPursuitActive = false;
     lastAutoSaveSimMins = -Infinity;
 
@@ -780,6 +886,7 @@ window.KLB = window.KLB || {};
     closeDialogue();
     closeModal();
     syncCelebrationBanner();
+    syncZoomSelectUI();
     configureModeShell();
     syncAudioAmbience();
     syncPauseButtonUI();
@@ -801,7 +908,7 @@ window.KLB = window.KLB || {};
       );
     } else {
       setPaused(false);
-      showAlertBanner('Autonomous Lab Observer active — watch all 10 Big-Chuds and neighbours run KLB.', 4200, false);
+      showAlertBanner('Autonomous Lab Observer active — watch all 10 Big-Chuds, Archie & neighbours run KLB.', 4200, false);
     }
   }
 
@@ -851,6 +958,8 @@ window.KLB = window.KLB || {};
     specSpeed = 1;
     specFollowNpcId = null;
     specCameraPos = null;
+    specDrag = null;
+    if (cameraZoom === 'fit') cameraZoom = 1.0;
     alexPursuitActive = false;
     lastAutoSaveSimMins = (Number(state.weekNum) || 1) * 10000 + (Number(state.dayIdx) || 0) * 1440 + (Number(state.timeMins) || 0);
 
@@ -859,6 +968,7 @@ window.KLB = window.KLB || {};
     closeDialogue();
     closeModal();
     syncCelebrationBanner();
+    syncZoomSelectUI();
     configureModeShell();
     setPaused(false);
     syncAudioAmbience();
@@ -873,6 +983,11 @@ window.KLB = window.KLB || {};
 
   function configureModeShell() {
     const isSpec = Boolean(state?.spectatorMode);
+    const worldCanvas = el('world-canvas');
+    if (worldCanvas) {
+      worldCanvas.classList.toggle('spec-pannable', isSpec);
+      if (!isSpec) worldCanvas.classList.remove('spec-dragging');
+    }
     el('btn-toggle-specs').classList.toggle('hidden', isSpec);
     el('btn-toggle-headphones').classList.toggle('hidden', isSpec);
     if (el('spectator-room-wrap')) {
@@ -891,10 +1006,11 @@ window.KLB = window.KLB || {};
     }
 
     if (isSpec) {
-      el('controls-hint-text').textContent = 'WASD / Arrows: Pan Camera  |  Click Roster: Follow  |  1x/2x/4x: Speed  |  Space: Pause  |  M: Mute  |  Esc: Close';
+      el('controls-hint-text').textContent = 'WASD / Arrows / Drag: Pan Camera  |  Click Character: Follow  |  Zoom: Fit Whole Floor  |  Space: Pause';
     } else {
       el('controls-hint-text').textContent = 'WASD / Arrows / Click: Move  |  Space: Pause  |  E / Click: Interact  |  G: Specs  |  H: Headphones  |  M: Mute  |  Esc: Close';
     }
+    syncSupervisorChrome();
     syncSpecSpeedUI();
     syncSpecFollowBadge();
     syncMuteButtonUI();
@@ -1479,6 +1595,12 @@ window.KLB = window.KLB || {};
           }
           syncAudioAmbience();
           populateTravelCombobox();
+          const travelSel = el('select-travel');
+          if (travelSel) {
+            const roomOpt = 'room:' + npc.roomId;
+            travelSel.value = Array.from(travelSel.options).some(o => o.value === roomOpt) ? roomOpt : npc.roomId;
+          }
+          syncAllHUD(true);
         }
         specCameraPos = { x: npc.x, y: npc.y };
       }
@@ -1489,10 +1611,12 @@ window.KLB = window.KLB || {};
     if (!pend || !state) return;
     if (pend.sitChair) {
       const ch = pend.sitChair;
-      state.player.x = ch.x;
-      state.player.y = ch.y;
-      state.player.dir = ch.dir || 'N';
-      if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
+      if (!window.KLB.Sim.isOccupiedByCharacter?.(state, state.player.roomId, ch.x, ch.y, state.player.id, 0.48)) {
+        state.player.x = ch.x;
+        state.player.y = ch.y;
+        state.player.dir = ch.dir || 'N';
+        if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
+      }
       return;
     }
     if (pend.npcId) {
@@ -1714,17 +1838,21 @@ window.KLB = window.KLB || {};
       curStep && (
         meta.playable ||
         npc.id === 'antoine_maruani' ||
-        (state.player.id === 'antoine_maruani' && npc.id === 'vijay_chudasama')
+        (state.player.id === 'antoine_maruani' && npc.id === 'vijay_chudasama') ||
+        (state.player.id === 'archie_wall' && npc.id === 'jamie_baker')
       )
     );
     if (canGiveProtocolHint) {
       const isAntoine = npc.id === 'antoine_maruani';
       const isVijayForAntoine = state.player.id === 'antoine_maruani' && npc.id === 'vijay_chudasama';
+      const isJamieForArchie = state.player.id === 'archie_wall' && npc.id === 'jamie_baker';
       const hintBtnLabel = isAntoine
         ? '#AskAntoine Advice (In Person — 0m)'
         : isVijayForAntoine
           ? '#AskVijay Advice (In Person — 0m)'
-          : `Ask ${meta.shortName} for protocol hint (In Person — 0m)`;
+          : isJamieForArchie
+            ? '#AskJamie Advice (In Person — 0m)'
+            : `Ask ${meta.shortName} for protocol hint (In Person — 0m)`;
       actions.push({
         label: `[${actions.length + 1}] ${hintBtnLabel}`,
         primary: actions.length === 0,
@@ -1732,7 +1860,7 @@ window.KLB = window.KLB || {};
           const parsedChuds = parseHintSpeakerAndBody(curStep.choice?.askChudsHint);
           const parsedAntoine = parseHintSpeakerAndBody(curStep.choice?.antoineHint);
           let hintText = '';
-          if (isAntoine || isVijayForAntoine) {
+          if (isAntoine || isVijayForAntoine || isJamieForArchie) {
             hintText = parsedAntoine.body || meta.hintLine || 'Check your controls and stoichiometric equivalents cleanly.';
           } else if (parsedChuds.speakerId === npc.id && parsedChuds.body) {
             hintText = parsedChuds.body;
@@ -1796,7 +1924,8 @@ window.KLB = window.KLB || {};
             ],
             'nafsika_salve'
           );
-          showDialogue(npc.id, meta.name, 'Patched up. Shout via Big-Chuds WhatsApp rescue if you get stuck offsite late.', [{ label: '[1] Thanks Nafsika', primary: true, onClick: closeDialogue }], true);
+          const sup = getSupervisorMeta();
+          showDialogue(npc.id, meta.name, `Patched up. Shout via ${sup.chatName} WhatsApp rescue if you get stuck offsite late.`, [{ label: '[1] Thanks Nafsika', primary: true, onClick: closeDialogue }], true);
           syncAllHUD(true);
         }
       });
@@ -2015,6 +2144,21 @@ window.KLB = window.KLB || {};
       showAlertBanner('Low-energy bench scissors fumble below 25 Energy (-5 Quality)!', 4000, true);
     }
 
+    if (
+      state.player.id === 'archie_wall' &&
+      !state._stepArchieBonusApplied &&
+      (opts.stationType === 'centrifuge' || opts.stationType === 'tcep_bench' || /albumin|maleimide|hsa|cys34/i.test(step?.title || ''))
+    ) {
+      baseQuality += 5;
+      state._stepArchieBonusApplied = true;
+    }
+
+    if (state.player.id === 'archie_wall' && (Number(state.energy) || 0) < 30 && !state._stepArchieFlawApplied) {
+      state._stepArchieFlawApplied = true;
+      state.morale = clamp(state.morale - 6, 0, 100);
+      showAlertBanner('0.01 g Rotor Purist: rushing below 30% Energy triggered a perfectionist flare (-6 Morale).', 3800, true);
+    }
+
     const mgScore = typeof opts.minigameScore === 'number'
       ? opts.minigameScore
       : (!fromJob && state.activeMinigameScore !== null && state.activeMinigameScore !== undefined
@@ -2131,6 +2275,8 @@ window.KLB = window.KLB || {};
     state._stepBiotageBonusApplied = false;
     state._stepFaizaA280Done = false;
     state._stepDanFumbleApplied = false;
+    state._stepArchieBonusApplied = false;
+    state._stepArchieFlawApplied = false;
 
     if (window.KLB.Audio) window.KLB.Audio.playSfx('success');
     if (!openedNewFig && step) {
@@ -2671,6 +2817,11 @@ window.KLB = window.KLB || {};
 
       playStationSfx(obj.type);
 
+      let targetMins = Math.max(2, Math.round((sub.durationMins || 14) * durMult));
+      if (state.player.id === 'archie_wall' && (obj?.type === 'centrifuge' || (sub?.stationTypes || []).includes('centrifuge'))) {
+        targetMins = Math.max(3, Math.round(targetMins * 0.5));
+      }
+
       const job = {
         id: 'job_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
         kind: sub.canOvercook ? 'reaction' : 'instrument',
@@ -2686,7 +2837,7 @@ window.KLB = window.KLB || {};
         x: obj.x,
         y: obj.y,
         elapsedMins: 0,
-        targetMins: Math.max(2, Math.round((sub.durationMins || 14) * durMult)),
+        targetMins,
         sweetSpotMins: sub.canOvercook
           ? Math.max(15, Math.round((sub.sweetSpotMins || 55) * sweetMult))
           : (sub.sweetSpotMins || 180),
@@ -2938,8 +3089,9 @@ window.KLB = window.KLB || {};
       return;
     }
 
-    if (t === 'chair' && state.player.roomId === 'meeting_room') {
-      if (window.KLB.Sim.isCellWalkable(state.player.roomId, obj.x, obj.y, state.fireAlarm.active)) {
+    if (t === 'chair' && ['klb_2f', 'klb_3f', 'meeting_room'].includes(state.player.roomId)) {
+      if (!window.KLB.Sim.isOccupiedByCharacter?.(state, state.player.roomId, obj.x, obj.y, state.player.id, 0.48) &&
+          window.KLB.Sim.isCellWalkable(state.player.roomId, obj.x, obj.y, state.fireAlarm.active)) {
         state.player.x = obj.x;
         state.player.y = obj.y;
         state.player.dir = obj.dir || 'N';
@@ -3544,8 +3696,12 @@ window.KLB = window.KLB || {};
     const seed = (Number(state.runSeed) || Number(state.weekNum) || 1) + (Number(state.campaignStepIdx) || 0) * 131 + 17;
     const shuffledOptions = deterministicShuffle(choice.options || [], seed);
 
+    const sup = getSupervisorMeta();
+    const isArchiePlayer = state.player.id === 'archie_wall';
     const isAntoinePlayer = state.player.id === 'antoine_maruani';
-    const seniorHintBtnText = isAntoinePlayer ? '#AskVijay (-10m)' : '#AskAntoine (-10m)';
+    const advisorId = isArchiePlayer ? 'jamie_baker' : (isAntoinePlayer ? 'vijay_chudasama' : 'antoine_maruani');
+    const advisorLabel = isArchiePlayer ? '#AskJamie' : (isAntoinePlayer ? '#AskVijay' : '#AskAntoine');
+    const seniorHintBtnText = `${advisorLabel} (-10m)`;
 
     const box = prepareModalBox('klb-modal', 'modal_open');
     box.innerHTML = `
@@ -3569,7 +3725,7 @@ window.KLB = window.KLB || {};
 
       <footer class="klb-modal-footer">
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button id="btn-step-askchuds" class="rpg-btn">${icon('message-square', 13)}<span>Ask Big-Chuds (-10m)</span></button>
+          <button id="btn-step-askchuds" class="rpg-btn">${icon('message-square', 13)}<span>Ask ${escHtml(sup.chatName)} (-10m)</span></button>
           <button id="btn-step-askantoine" class="rpg-btn">${icon('help-circle', 13)}<span>${escHtml(seniorHintBtnText)}</span></button>
         </div>
         <span class="mono-muted">Press 1–${shuffledOptions.length} or click an option</span>
@@ -3601,7 +3757,7 @@ window.KLB = window.KLB || {};
       }
       const rawHint = choice.askChudsHint || 'Check glassware, dry solvent, and buffer pH before starting.';
       const resolved = resolveHintWhatsAppSender(rawHint, state.player.id);
-      window.KLB.Sim.pushWhatsApp(state, state.player.id, `/AskBigChuds sanity check on ${step.title}?`);
+      window.KLB.Sim.pushWhatsApp(state, state.player.id, `${sup.askCmd} sanity check on ${step.title}?`);
       window.KLB.Sim.pushWhatsApp(state, resolved.senderId, resolved.body || rawHint);
       appendHintLine(resolved.speakerName, resolved.body || rawHint);
       syncAllHUD(true);
@@ -3620,11 +3776,9 @@ window.KLB = window.KLB || {};
       const rawHint = choice.antoineHint || choice.askChudsHint || 'Keep reactions anhydrous and check TLC or LC-MS.';
       const parsed = parseHintSpeakerAndBody(rawHint);
       const cleanBody = parsed.body || rawHint;
-      const advisorId = isAntoinePlayer ? 'vijay_chudasama' : 'antoine_maruani';
-      const advisorLabel = isAntoinePlayer ? '#AskVijay' : '#AskAntoine';
-      if (advisorId === 'antoine_maruani') {
-        window.KLB.Sim.pushWhatsApp(state, state.player.id, `/AskAntoine check on ${step.title}?`);
-        window.KLB.Sim.pushWhatsApp(state, 'antoine_maruani', cleanBody);
+      if (advisorId === 'antoine_maruani' || advisorId === 'jamie_baker') {
+        window.KLB.Sim.pushWhatsApp(state, state.player.id, `${advisorLabel} check on ${step.title}?`);
+        window.KLB.Sim.pushWhatsApp(state, advisorId, cleanBody);
       }
       appendHintLine(advisorLabel, cleanBody);
       syncAllHUD(true);
@@ -3929,7 +4083,7 @@ window.KLB = window.KLB || {};
         id: 'desk-peer-proofread',
         icon: 'sparkles',
         label: `Peer Proofread: ${proofreadTarget.name} (+18%, 0m)`,
-        subline: 'Have a Big-Chud red-pen your schemes, tables, and experimental wording instantly.',
+        subline: 'Have a labmate red-pen your schemes, tables, and experimental wording instantly.',
         tagText: hasFavour ? '1 Favour' : 'Needs 1 Favour',
         tagCls: hasFavour ? 'warn' : 'danger',
         disabled: !hasFavour
@@ -4068,7 +4222,10 @@ window.KLB = window.KLB || {};
           state.manuscriptProgress = clamp((state.manuscriptProgress || 0) + 18, 0, 100);
           updatedPct = Math.round(state.manuscriptProgress);
         }
-        const reviewers = ['antoine_maruani', 'richard_spears', 'daniel_richards', 'faiza_javaid'].filter(id => id !== state.player.id);
+        const reviewers = (state.player.id === 'archie_wall'
+          ? ['nafsika_forte', 'antoine_maruani', 'richard_spears', 'daniel_richards']
+          : ['antoine_maruani', 'richard_spears', 'daniel_richards', 'faiza_javaid']
+        ).filter(id => id !== state.player.id);
         const reviewerId = reviewers[0] || 'richard_spears';
         const reviewerName = window.KLB.CAST_BY_ID?.[reviewerId]?.shortName || 'Labmate';
         window.KLB.Sim.pushWhatsApp(state, reviewerId, `Proofread your ${proofreadTarget.name} schemes and SI tables (+18% -> ${updatedPct}%).`);
@@ -4469,7 +4626,10 @@ window.KLB = window.KLB || {};
     if (hasCourierTask && el('btn-bloom-courier') && !courierDisabled) {
       el('btn-bloom-courier').onclick = () => {
         if ((Number(state.favours) || 0) < 1) return;
-        const couriers = ['marcos_fernandez', 'daniel_richards', 'antoine_maruani', 'faiza_javaid'].filter(id => id !== state.player.id);
+        const couriers = (state.player.id === 'archie_wall'
+          ? ['nafsika_forte', 'marcos_fernandez', 'daniel_richards', 'antoine_maruani']
+          : ['marcos_fernandez', 'daniel_richards', 'antoine_maruani', 'faiza_javaid']
+        ).filter(id => id !== state.player.id);
         const courierId = couriers[0] || 'marcos_fernandez';
         const courierName = window.KLB.CAST_BY_ID?.[courierId]?.shortName || 'Labmate';
         const curStepNow = getCurrentCampaignStep();
@@ -4620,6 +4780,7 @@ window.KLB = window.KLB || {};
     setPaused(true);
     modalDismissable = true;
     modalEscapeHandler = () => { closeModal(); setPaused(false); };
+    const sup = getSupervisorMeta();
     const roomTitle = window.KLB.ROOM_META[targetRoom].shortName;
     const box = prepareModalBox('klb-modal-sm', 'modal_open');
     box.innerHTML = `
@@ -4629,7 +4790,7 @@ window.KLB = window.KLB || {};
             ${icon('lock', 16)}
             <span>CIB Keypad — ${escHtml(roomTitle)}</span>
           </h3>
-          <p class="mono-muted" style="margin-top:3px;">Enter the 4-digit CIB door code or ask Big-Chuds on WhatsApp</p>
+          <p class="mono-muted" style="margin-top:3px;">Enter the 4-digit CIB door code or ask ${escHtml(sup.chatName)} on WhatsApp</p>
         </div>
         <button id="btn-keypad-cancel" class="hud-btn" aria-label="Close">${icon('x', 14)}</button>
       </header>
@@ -4678,7 +4839,7 @@ window.KLB = window.KLB || {};
         if (msg) {
           msg.classList.remove('hidden');
           msg.classList.add('warn');
-          msg.textContent = 'Invalid code — ask Big-Chuds for the 4-digit code.';
+          msg.textContent = `Invalid code — ask ${sup.chatName} for the 4-digit code.`;
         }
         if (window.KLB.Audio) window.KLB.Audio.playSfx('error');
       }
@@ -4875,10 +5036,11 @@ window.KLB = window.KLB || {};
   function triggerFridayMorningWelcome() {
     if (!state || state.spectatorMode || state.dayIdx !== 4 || state.fridayAuditDone) return;
     setPaused(true);
+    const sup = getSupervisorMeta();
     showAlertBanner('FRI 09:00 — Group Meeting starting in the Seminar Room!', 4500, false);
     showDialogue(
-      'vijay_chudasama',
-      'Prof. Vijay Chudasama — Friday 09:00 Group Meeting',
+      sup.id,
+      `${sup.fullName} — Friday 09:00 Group Meeting`,
       `Morning ${window.KLB.CAST_BY_ID[state.player.id]?.shortName || 'team'} — 09:00 Group Meeting is starting. Review your 4-slide deck or present at the projector now (then finish your Friday bench work & Manuscript Draft by 18:00).`,
       [
         {
@@ -4889,7 +5051,7 @@ window.KLB = window.KLB || {};
           }
         },
         {
-          label: '[2] Start Group Meeting with Vijay',
+          label: `[2] Start Group Meeting with ${sup.shortName}`,
           primary: true,
           onClick: () => {
             closeDialogue({ skipUnpause: true });
@@ -4904,9 +5066,10 @@ window.KLB = window.KLB || {};
   }
 
   function openFridayAuditTrigger() {
+    const sup = getSupervisorMeta();
     if (state.dayIdx < 4) {
       showDialogue(
-        'vijay_chudasama',
+        sup.id,
         'Group Meeting Seminar Room',
         'Friday Group Meeting starts Friday morning at 09:00. Build your 4-slide deck at any desk.',
         [
@@ -4919,7 +5082,7 @@ window.KLB = window.KLB || {};
 
     if (state.fridayAuditDone && state.lastAuditResult) {
       showDialogue(
-        'vijay_chudasama',
+        sup.id,
         'Group Meeting Seminar Room',
         `Morning Group Meeting wrapped! Finish remaining Friday tasks & Manuscript Draft (due 18:00).`,
         [{ label: '[1] Back to Work', primary: true, onClick: closeDialogue }],
@@ -5012,16 +5175,20 @@ window.KLB = window.KLB || {};
           ? `<button id="btn-audit-gordons" class="rpg-btn primary" data-hotkey="1" style="background:#15803d;border-color:#4ade80;">[1] Celebrate at Gordon's Café (Week Complete)</button>`
           : `<button id="btn-audit-week-wrap" class="rpg-btn primary" data-hotkey="1">[1] Continue to Week Wrap</button>`);
 
+    const sup = getSupervisorMeta();
+    const verdictLines = Array.isArray(res.verdictLines)
+      ? res.verdictLines
+      : (Array.isArray(res.vijayVerdictLines) ? res.vijayVerdictLines : []);
     const box = prepareModalBox('klb-modal', null);
     box.innerHTML = `
       <header class="klb-modal-header" style="align-items:center;">
-        <img class="pixel-art" src="assets/portraits/vijay_chudasama.png" style="width:76px;height:76px;border-radius:8px;border:1px solid var(--border-medium);" />
+        <img class="pixel-art" src="${escHtml(sup.portrait)}" style="width:76px;height:76px;border-radius:8px;border:1px solid var(--border-medium);" />
         <div style="flex:1;">
           <p class="mono-muted" style="color:#93c5fd;">${isWeekWrap ? 'Friday 18:00 Final Week Audit' : 'Friday 09:00 Group Meeting Audit'}</p>
-          <h3 style="margin:2px 0;font-size:19px;">Prof. Vijay Chudasama Score-Card</h3>
+          <h3 style="margin:2px 0;font-size:19px;">${escHtml(sup.fullName)} Score-Card</h3>
           <p style="font-size:12.5px;color:#cbd5e1;">${escHtml(window.KLB.getCampaign(state.player.id)?.title || '')}</p>
           <p class="mono-muted" style="margin-top:4px;">
-            Avg Quality: <span style="color:#f8fafc;">${avgQ}%</span> | Avg Yield: <span style="color:#f8fafc;">${avgY}%</span> | Vijay Patience: <span style="color:${deltaCol};">${deltaStr}</span>
+            Avg Quality: <span style="color:#f8fafc;">${avgQ}%</span> | Avg Yield: <span style="color:#f8fafc;">${avgY}%</span> | ${escHtml(sup.patienceLabel)}: <span style="color:${deltaCol};">${deltaStr}</span>
           </p>
         </div>
         <div class="audit-score-card ${res.passed ? 'good' : 'poor'}">
@@ -5034,7 +5201,7 @@ window.KLB = window.KLB || {};
         <div class="audit-grid">${metricsHtml}</div>
 
         <section class="audit-verdict-box">
-          ${(res.vijayVerdictLines || []).map(l => `<p style="margin-bottom:5px;">"${escHtml(l)}"</p>`).join('')}
+          ${verdictLines.map(l => `<p style="margin-bottom:5px;">"${escHtml(l)}"</p>`).join('')}
         </section>
       </div>
 
@@ -5115,13 +5282,17 @@ window.KLB = window.KLB || {};
       `;
     }).join('');
 
+    const sup = getSupervisorMeta();
+    const verdictLines = Array.isArray(res.verdictLines)
+      ? res.verdictLines
+      : (Array.isArray(res.vijayVerdictLines) ? res.vijayVerdictLines : []);
     const box = prepareModalBox('klb-modal', 'ui_click');
     box.innerHTML = `
       <header class="klb-modal-header" style="align-items:center;">
-        <img class="pixel-art" src="assets/portraits/vijay_chudasama.png" style="width:72px;height:72px;border-radius:8px;border:1px solid var(--border-medium);" />
+        <img class="pixel-art" src="${escHtml(sup.portrait)}" style="width:72px;height:72px;border-radius:8px;border:1px solid var(--border-medium);" />
         <div style="flex:1;">
           <p class="mono-muted" style="color:#93c5fd;">Week ${state.weekNum || 1} Friday Audit Review</p>
-          <h3 style="margin:2px 0;font-size:19px;">Prof. Vijay Chudasama Score-Card</h3>
+          <h3 style="margin:2px 0;font-size:19px;">${escHtml(sup.fullName)} Score-Card</h3>
           <p class="mono-muted" style="margin-top:4px;">Avg Quality: <span style="color:#f8fafc;">${avgQ}%</span> | Avg Yield: <span style="color:#f8fafc;">${avgY}%</span></p>
         </div>
         <div class="audit-score-card ${res.passed ? 'good' : 'poor'}">
@@ -5132,7 +5303,7 @@ window.KLB = window.KLB || {};
       <div class="klb-modal-body">
         <div class="audit-grid">${metricsHtml}</div>
         <section class="audit-verdict-box">
-          ${(res.vijayVerdictLines || []).map(l => `<p style="margin-bottom:5px;">"${escHtml(l)}"</p>`).join('')}
+          ${verdictLines.map(l => `<p style="margin-bottom:5px;">"${escHtml(l)}"</p>`).join('')}
         </section>
       </div>
       <footer class="klb-modal-footer">
@@ -5188,6 +5359,8 @@ window.KLB = window.KLB || {};
     state._stepBiotageBonusApplied = false;
     state._stepFaizaA280Done = false;
     state._stepDanFumbleApplied = false;
+    state._stepArchieBonusApplied = false;
+    state._stepArchieFlawApplied = false;
     state.npcChatCooldowns = {};
     state.morale = Math.min(100, state.morale + 15);
     state.energy = 95;
@@ -5214,26 +5387,33 @@ window.KLB = window.KLB || {};
     state.player.y = 10;
     state.player.dir = 'N';
     state.player.specsOn = false;
-    const cafeSpots = [[5, 11], [8, 11], [9, 11], [12, 11], [12, 9], [12, 5], [9, 3], [11, 3], [7, 9]];
-    const chuds = window.KLB.CAST.filter(c => c.playable && c.id !== state.player.id);
-    chuds.forEach((c, idx) => {
+    const sup = getSupervisorMeta();
+    const cafeSpots = [[5, 11], [8, 11], [9, 11], [12, 11], [12, 9], [12, 5], [9, 3], [11, 3], [7, 9], [10, 9], [12, 7], [6, 9]];
+    const allies = getPlayableCast().filter(c => c.id !== state.player.id);
+    if (state.player.id === 'archie_wall' && window.KLB.CAST_BY_ID?.nafsika_forte && !allies.some(c => c.id === 'nafsika_forte')) {
+      allies.unshift(window.KLB.CAST_BY_ID.nafsika_forte);
+    }
+    allies.forEach((c, idx) => {
+      const npc = state.npcs?.[c.id];
+      if (!npc) return;
       const spot = cafeSpots[idx % cafeSpots.length];
-      state.npcs[c.id].roomId = 'gordons_cafe';
-      state.npcs[c.id].x = spot[0];
-      state.npcs[c.id].y = spot[1];
-      state.npcs[c.id].dir = spot[1] >= 11 ? 'E' : 'S';
-      state.npcs[c.id].path = [];
+      npc.roomId = 'gordons_cafe';
+      npc.x = spot[0];
+      npc.y = spot[1];
+      npc.dir = spot[1] >= 11 ? 'E' : 'S';
+      npc.path = [];
     });
     syncAudioAmbience();
     syncCelebrationBanner();
     if (window.KLB.Audio) window.KLB.Audio.playSfx('success');
 
+    const speakerId = state.player.id === 'archie_wall' ? 'nafsika_forte' : 'joao_nogueira';
     showDialogue(
-      'joao_nogueira',
+      speakerId,
       `Week ${state.weekNum} Complete — Gordon's Café (${score.toFixed(1)}/10)`,
       passed
-        ? `Week Complete! Friday Audit cleared (${score.toFixed(1)}/10) and Friday shift finished. Chat with everyone at Gordon's, copy your score-card, start Week ${state.weekNum + 1}, or choose another Big-Chud.`
-        : `Week ${state.weekNum} wrapped (${score.toFixed(1)}/10). Catch a breather with the crew at Gordon's, copy your score-card, start Week ${state.weekNum + 1}, or pick another Big-Chud.`,
+        ? `Week Complete! Friday Audit cleared (${score.toFixed(1)}/10) and Friday shift finished. Chat with everyone in ${sup.chatName} at Gordon's, copy your score-card, start Week ${state.weekNum + 1}, or choose another researcher.`
+        : `Week ${state.weekNum} wrapped (${score.toFixed(1)}/10). Catch a breather with the ${sup.chatName} crew at Gordon's, copy your score-card, start Week ${state.weekNum + 1}, or pick another researcher.`,
       [
         { label: "[1] Walk Around Gordon's", primary: true, onClick: closeDialogue },
         {
@@ -5264,6 +5444,7 @@ window.KLB = window.KLB || {};
       window.KLB.Audio.stopAllAmbience();
     }
 
+    const sup = getSupervisorMeta();
     const playerMeta = window.KLB.CAST_BY_ID[state.player.id] || { id: state.player.id, name: state.player.id, shortName: state.player.id };
     let heading = '0 Lab Condition — Lab 230 Suspended Until Monday';
     let body = window.KLB.Sim.PERMADEATH_MESSAGES?.[reason] || 'Lab Condition hit 0% — KLB Lab 230 closed for emergency cleanup and formal review.';
@@ -5271,8 +5452,10 @@ window.KLB = window.KLB || {};
       heading = '0 Morale — Stepped Out Onto Gordon Street';
       body = `${playerMeta.name} hung up their lab coat after morale hit zero.`;
     } else if (reason === 'PATIENCE_ZERO') {
-      heading = '0 Vijay Patience — Friday Audit Failed';
-      body = window.KLB.Sim.PERMADEATH_MESSAGES?.PATIENCE_ZERO || "Vijay's patience hit zero after missed deadlines and poor group-meeting data.";
+      heading = `0 ${sup.patienceLabel} — Friday Audit Failed`;
+      body = sup.id === 'jamie_baker'
+        ? "Jamie's patience hit zero after missed deadlines, sloppy safety discipline, and poor group-meeting data."
+        : (window.KLB.Sim.PERMADEATH_MESSAGES?.PATIENCE_ZERO || "Vijay's patience hit zero after missed deadlines and poor group-meeting data.");
     } else if (reason === 'CONDITION_ZERO' || reason === 'SAFETY_ZERO') {
       heading = '0 Lab Condition — Lab 230 Closed for Review';
       body = window.KLB.Sim.PERMADEATH_MESSAGES?.CONDITION_ZERO || 'Lab Condition hit 0% — KLB Lab 230 closed for emergency cleanup and formal review.';
@@ -5603,6 +5786,29 @@ window.KLB = window.KLB || {};
     return clamp(Math.round(((Number(item.elapsedMins) || 0) / target) * 100), 0, 100);
   }
 
+  function pickPreferredStation(rm, roomId, predicate) {
+    if (!rm || !state?.player) return null;
+    const p = state.player;
+    const homeGroup = p.id === 'archie_wall' ? 'baker' : 'chudasama';
+    const busySet = new Set();
+    for (const n of Object.values(state.npcs || {})) {
+      if (n && n.roomId === roomId && n.busyObjId) busySet.add(n.busyObjId);
+    }
+    const candidates = (rm.objects || []).filter(predicate);
+    candidates.sort((a, b) => {
+      const aHome = a.group === homeGroup ? 0 : 1;
+      const bHome = b.group === homeGroup ? 0 : 1;
+      if (aHome !== bHome) return aHome - bHome;
+      const aBusy = busySet.has(a.id) ? 1 : 0;
+      const bBusy = busySet.has(b.id) ? 1 : 0;
+      if (aBusy !== bBusy) return aBusy - bBusy;
+      const da = Math.hypot((a.x + a.w * 0.5) - p.x, (a.y + a.h * 0.5) - p.y);
+      const db = Math.hypot((b.x + b.w * 0.5) - p.x, (b.y + b.h * 0.5) - p.y);
+      return da - db;
+    });
+    return candidates[0] || null;
+  }
+
   function autoWalkToStationTarget(targetRoomId, objId = null, stationTypes = null, cupboardHint = null) {
     if (!state || state.spectatorMode || state.gameOver) return;
     if (!el('modal-backdrop').classList.contains('hidden')) return;
@@ -5625,30 +5831,13 @@ window.KLB = window.KLB || {};
         targetObj = rm.objects.find(o => o.id === objId) || null;
       }
       if (!targetObj && Array.isArray(stationTypes) && stationTypes.length) {
-        const p = state.player;
-        const busySet = new Set();
-        for (const n of Object.values(state.npcs || {})) {
-          if (n && n.roomId === curRoom && n.busyObjId) busySet.add(n.busyObjId);
-        }
-        const candidates = rm.objects.filter(o => {
+        targetObj = pickPreferredStation(rm, curRoom, o => {
           if (!stationTypes.includes(o.type)) return false;
           if (cupboardHint && o.type === 'chem_cupboard') {
             return matchesCupboardHint(o.label || '', cupboardHint);
           }
           return true;
         });
-        candidates.sort((a, b) => {
-          const aChud = a.group === 'chudasama' ? 0 : 1;
-          const bChud = b.group === 'chudasama' ? 0 : 1;
-          if (aChud !== bChud) return aChud - bChud;
-          const aBusy = busySet.has(a.id) ? 1 : 0;
-          const bBusy = busySet.has(b.id) ? 1 : 0;
-          if (aBusy !== bBusy) return aBusy - bBusy;
-          const da = Math.hypot((a.x + a.w * 0.5) - p.x, (a.y + a.h * 0.5) - p.y);
-          const db = Math.hypot((b.x + b.w * 0.5) - p.x, (b.y + b.h * 0.5) - p.y);
-          return da - db;
-        });
-        targetObj = candidates[0] || null;
       }
     }
 
@@ -5695,7 +5884,7 @@ window.KLB = window.KLB || {};
           ${icon('users', 14)}
           <span class="pinned-title-text">Observer View: ${escHtml(rMeta.shortName || viewRoom)}</span>
         </div>
-        <div class="pinned-meta-line">All 10 Big-Chuds &amp; neighbours acting autonomously.</div>
+        <div class="pinned-meta-line">All 10 Big-Chuds, Archie &amp; neighbours acting autonomously.</div>
         <ol id="subtask-list" class="subtask-list"></ol>
       `;
       return;
@@ -6075,12 +6264,13 @@ window.KLB = window.KLB || {};
 
     syncPauseButtonUI();
     syncMuteButtonUI();
+    syncSupervisorChrome();
     populateTravelCombobox();
 
     const charBadgeEl = el('hud-char-badge');
     if (charBadgeEl) {
       if (state.spectatorMode) {
-        charBadgeEl.textContent = 'Observer | All 10 Big-Chuds';
+        charBadgeEl.textContent = 'Observer | Big-Chuds, Archie & neighbours';
       } else {
         const cMeta = window.KLB.CAST_BY_ID?.[state.player.id];
         const roleShort = (cMeta?.role?.split('•')[1] || cMeta?.role || 'Researcher').trim();
@@ -6178,12 +6368,12 @@ window.KLB = window.KLB || {};
       }
     } else {
       el('favours-readout').textContent = `Week ${state.weekNum}`;
-      const chuds = (window.KLB.BIG_CHUDS_IDS || []).map(id => state.npcs[id]).filter(Boolean);
+      const chuds = getPlayableIds().map(id => state.npcs[id]).filter(Boolean);
       const totalSteps = chuds.reduce((s, n) => s + (n.sim?.completedSteps?.length || 0), 0);
       const avgMs = Math.round(chuds.reduce((s, n) => s + (n.sim?.manuscriptProgress || 0), 0) / Math.max(1, chuds.length));
       const inLab = chuds.filter(n => n.roomId !== 'offsite').length;
       const cqText = window.KLB.Sim.isCoffeeQuartetWindow(state) ? " | Coffee Quartet at Gordon's" : '';
-      el('spectator-stats-line').textContent = `${inLab}/10 on campus | ${totalSteps}/50 steps done | Avg Manuscript ${avgMs}%${cqText}`;
+      el('spectator-stats-line').textContent = `${inLab}/${chuds.length} on campus | ${totalSteps}/${chuds.length * 5} steps done | Avg Manuscript ${avgMs}%${cqText}`;
     }
 
     renderTaskPanel(force);
@@ -6248,29 +6438,41 @@ window.KLB = window.KLB || {};
     if (!pane || el('pane-labbook').classList.contains('hidden')) return;
 
     if (state.spectatorMode) {
-      const chuds = (window.KLB.BIG_CHUDS_IDS || []).map(id => ({ meta: window.KLB.CAST_BY_ID[id], npc: state.npcs[id] })).filter(x => x.meta && x.npc);
-      const sig = `spec:${specFollowNpcId || ''}:` + chuds.map(x => `${x.npc.roomId}:${x.npc.sim?.completedSteps?.length}:${Math.round(x.npc.sim?.manuscriptProgress || 0)}:${Math.round(x.npc.sim?.weeklyReportProgress || 0)}:${Math.round(x.npc.sim?.energy || 0)}:${x.npc.sim?.auditResult?.total || ''}`).join('|');
+      const neighbourIds = ['nafsika_forte', 'marco_sabatini', 'charlotte_coomber', 'vijay_chudasama', 'jamie_baker'];
+      const seenIds = new Set();
+      const rosterIds = getPlayableIds().concat(neighbourIds).filter(id => {
+        if (!id || seenIds.has(id)) return false;
+        seenIds.add(id);
+        return true;
+      });
+      const roster = rosterIds.map(id => ({ meta: window.KLB.CAST_BY_ID?.[id], npc: state.npcs?.[id] })).filter(x => x.meta && x.npc);
+      const sig = `spec:${specFollowNpcId || ''}:` + roster.map(x => `${x.npc.roomId}:${x.npc.currentTaskText || ''}:${x.npc.sim?.completedSteps?.length || ''}:${Math.round(x.npc.sim?.manuscriptProgress || 0)}:${Math.round(x.npc.sim?.weeklyReportProgress || 0)}:${Math.round(x.npc.sim?.energy || 0)}:${x.npc.sim?.auditResult?.total || ''}`).join('|');
       if (!force && sig === lastLabBookSig) return;
       lastLabBookSig = sig;
       const prevScrollTop = pane.scrollTop;
 
       pane.innerHTML = `
-        <div class="sec-hdr"><h4>Autonomous Big-Chuds Roster</h4><span class="mono-muted">Click to Follow | Week ${state.weekNum}</span></div>
+        <div class="sec-hdr"><h4>Autonomous Campus Roster</h4><span class="mono-muted">Click to Follow | Week ${state.weekNum}</span></div>
         <ol class="step-list">
-          ${chuds.map(({ meta, npc }) => {
-            const s = npc.sim || {};
-            const auditTxt = s.auditResult ? ` | Audit: ${s.auditResult.total.toFixed(1)}/10 (${s.auditResult.passed ? 'Pass' : 'Fail'})` : '';
+          ${roster.map(({ meta, npc }) => {
+            const s = npc.sim || null;
+            const hasCampaignSim = Boolean(meta.playable && s && Array.isArray(s.completedSteps));
+            const auditTxt = hasCampaignSim && s.auditResult ? ` | Audit: ${s.auditResult.total.toFixed(1)}/10 (${s.auditResult.passed ? 'Pass' : 'Fail'})` : '';
             const isFollowing = specFollowNpcId === npc.id;
             const roomLbl = window.KLB.ROOM_META[npc.roomId]?.shortName || npc.roomId;
+            const roleShort = (meta.role?.split('•')[1] || meta.role || 'Campus Staff').trim();
+            const statsLine = hasCampaignSim
+              ? `Steps: ${s.completedSteps.length}/5 | WR: ${Math.round(s.weeklyReportProgress || 0)}% | Ms: ${Math.round(s.manuscriptProgress || 0)}% | E: ${Math.round(s.energy ?? 80)} S: ${Math.round(s.social ?? 84)}${auditTxt}`
+              : roleShort;
             return `
-              <li class="step-item spec-roster-card clickable ${s.auditResult?.passed ? 'done' : ''} ${isFollowing ? 'following' : ''}" data-spec-npc="${escHtml(npc.id)}" title="Click to follow ${escHtml(meta.shortName)}">
+              <li class="step-item spec-roster-card clickable ${hasCampaignSim && s.auditResult?.passed ? 'done' : ''} ${isFollowing ? 'following' : ''}" data-spec-npc="${escHtml(npc.id)}" title="Click to follow ${escHtml(meta.shortName)}">
                 <div style="flex:1;min-width:0;">
                   <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
                     <span>${escHtml(meta.name)} (${escHtml(roomLbl)})</span>
                     ${isFollowing ? `<span class="klb-tag info">${icon('eye', 11)}<span>Following</span></span>` : ''}
                   </div>
-                  <div class="mono-muted" style="font-size:10.5px;">${escHtml(npc.currentTaskText || 'Working')}</div>
-                  <div class="mono-muted" style="font-size:10.5px;">Steps: ${s.completedSteps?.length || 0}/5 | WR: ${Math.round(s.weeklyReportProgress || 0)}% | Ms: ${Math.round(s.manuscriptProgress || 0)}% | E: ${Math.round(s.energy ?? 80)} S: ${Math.round(s.social ?? 84)}${escHtml(auditTxt)}</div>
+                  <div class="mono-muted" style="font-size:10.5px;">${escHtml(npc.currentTaskText || 'On campus')}</div>
+                  <div class="mono-muted" style="font-size:10.5px;">${escHtml(statsLine)}</div>
                 </div>
               </li>
             `;
@@ -6412,14 +6614,15 @@ window.KLB = window.KLB || {};
         }).join('')
       : `<li class="archive-event-row undiscovered"><span class="archive-event-title">No random lab events logged yet</span><span class="archive-event-meta">0/${totalEvents}</span></li>`;
 
+    const playables = getPlayableCast();
     pane.innerHTML = `
       <section class="dossier-card">
         <h4>${icon('award', 13)}<span>KLB Archive Summary</span></h4>
         <p class="mono-muted">Runs: ${archive.totalRuns || 0} | Best Audit: ${(archive.bestScore || 0).toFixed(1)}/10 | Events: ${discoveredIds.length}/${totalEvents}</p>
       </section>
-      <div class="sec-hdr"><h4>Big-Chuds Clearance (${cleared.length}/10)</h4></div>
+      <div class="sec-hdr"><h4>Researcher Clearance (${cleared.length}/${playables.length})</h4></div>
       <ol class="step-list">
-        ${window.KLB.CAST.filter(c => c.playable).map(c => {
+        ${playables.map(c => {
           const sc = archive.clearedChars?.[c.id];
           return `<li class="step-item ${sc !== undefined ? 'done' : ''}" style="justify-content:space-between;">
             <span>${escHtml(c.name)}</span>
@@ -6488,30 +6691,14 @@ window.KLB = window.KLB || {};
     // 2) Highlight current sub-task station (or room portal)
     if (curSub && !targets.length) {
       if (curSub.roomId === roomId) {
-        const p = state.player;
-        const busySet = new Set();
-        for (const n of Object.values(state.npcs || {})) {
-          if (n && n.roomId === roomId && n.busyObjId) busySet.add(n.busyObjId);
-        }
-        const candidates = rm.objects.filter(o => {
+        const bestStation = pickPreferredStation(rm, roomId, o => {
           if (!matchesSubTaskStation(o, curSub)) return false;
           if (curSub.cupboardHint && o.type === 'chem_cupboard') {
             return matchesCupboardHint(o.label || '', curSub.cupboardHint);
           }
           return true;
         });
-        candidates.sort((a, b) => {
-          const aChud = a.group === 'chudasama' ? 0 : 1;
-          const bChud = b.group === 'chudasama' ? 0 : 1;
-          if (aChud !== bChud) return aChud - bChud;
-          const aBusy = busySet.has(a.id) ? 1 : 0;
-          const bBusy = busySet.has(b.id) ? 1 : 0;
-          if (aBusy !== bBusy) return aBusy - bBusy;
-          const da = Math.hypot((a.x + a.w * 0.5) - p.x, (a.y + a.h * 0.5) - p.y);
-          const db = Math.hypot((b.x + b.w * 0.5) - p.x, (b.y + b.h * 0.5) - p.y);
-          return da - db;
-        });
-        if (candidates[0]) pushTarget(candidates[0], 'quest');
+        if (bestStation) pushTarget(bestStation, 'quest');
       } else if (roomId === 'klb_2f' && curSub.roomId === 'klb_3f') {
         const st = rm.objects.find(o => o.type === 'spiral_stairs');
         if (st) pushTarget(st, 'quest', 'Spiral Stairs');
@@ -6614,7 +6801,11 @@ window.KLB = window.KLB || {};
     });
 
     window.addEventListener('keyup', e => keysDown.delete(e.code));
-    window.addEventListener('blur', () => keysDown.clear());
+    window.addEventListener('blur', () => {
+      keysDown.clear();
+      specDrag = null;
+      el('world-canvas')?.classList.remove('spec-dragging');
+    });
     window.addEventListener('beforeunload', e => {
       if (state && !state.spectatorMode && !state.gameOver && !state.postAuditCelebration) {
         saveActiveRunSnapshot(true);
@@ -6648,7 +6839,8 @@ window.KLB = window.KLB || {};
     el('btn-mute').onclick = toggleMute;
 
     el('select-zoom').onchange = () => {
-      cameraZoom = Number(el('select-zoom').value) || 1.0;
+      const raw = el('select-zoom').value;
+      cameraZoom = raw === 'fit' ? 'fit' : (Number(raw) || 1.0);
     };
 
     if (el('select-travel')) {
@@ -6660,6 +6852,8 @@ window.KLB = window.KLB || {};
           state.cameraRoomId = targetId;
           specFollowNpcId = null;
           specCameraPos = null;
+          specDrag = null;
+          el('world-canvas')?.classList.remove('spec-dragging');
           syncSpecFollowBadge();
           if (window.KLB.Sim?.syncVisibleReactionsCache) {
             window.KLB.Sim.syncVisibleReactionsCache(state);
@@ -6684,6 +6878,7 @@ window.KLB = window.KLB || {};
         showAlertBanner('Fire alarm active — evacuate KLB first!', 3000, true);
         return;
       }
+      const sup = getSupervisorMeta();
       const act = el('select-wa-action').value;
       const sender = state.spectatorMode ? 'daniel_richards' : state.player.id;
       if (act === 'ask') {
@@ -6692,7 +6887,7 @@ window.KLB = window.KLB || {};
           : ((state.dayIdx || 0) * 1440 + (state.timeMins || 0));
         if (!state.spectatorMode && state._lastWaAskTotalMins != null && (nowMono - state._lastWaAskTotalMins) < 30) {
           const rem = Math.max(1, Math.ceil(30 - (nowMono - state._lastWaAskTotalMins)));
-          showAlertBanner(`/AskBigChuds is on cooldown (${rem}m left).`, 2800, false);
+          showAlertBanner(`${sup.askCmd} is on cooldown (${rem}m left).`, 2800, false);
           return;
         }
         const startDayIdx = state.dayIdx;
@@ -6707,10 +6902,10 @@ window.KLB = window.KLB || {};
         const step = camp?.steps?.[state.spectatorMode ? 0 : Math.min(4, state.campaignStepIdx)];
         const rawHint = step?.choice?.askChudsHint || 'Keep glassware oven-dried, solvents anhydrous, and collect clean spectra.';
         const resolved = resolveHintWhatsAppSender(rawHint, sender);
-        window.KLB.Sim.pushWhatsApp(state, sender, `/AskBigChuds any quick tip for "${step?.title || 'Friday slides'}"?`);
+        window.KLB.Sim.pushWhatsApp(state, sender, `${sup.askCmd} any quick tip for "${step?.title || 'Friday slides'}"?`);
         window.KLB.Sim.pushWhatsApp(state, resolved.senderId, resolved.body || rawHint);
         if (!state.spectatorMode) {
-          showAlertBanner(`${resolved.speakerName} replied in WhatsApp (-10m elapsed).`, 3200, false);
+          showAlertBanner(`${resolved.speakerName} replied in ${sup.chatName} (-10m elapsed).`, 3200, false);
         }
       } else if (act === 'coffee') {
         if (state.spectatorMode) {
@@ -6780,7 +6975,21 @@ window.KLB = window.KLB || {};
 
     const canvas = el('world-canvas');
     canvas.addEventListener('mousedown', e => {
-      if (!state || state.spectatorMode || state.paused || state.isPaused || !el('modal-backdrop').classList.contains('hidden')) return;
+      if (!state) return;
+      const modalOpen = !el('modal-backdrop').classList.contains('hidden');
+      if (state.spectatorMode) {
+        if (modalOpen || e.button !== 0) return;
+        if (window.KLB.Audio) window.KLB.Audio.init();
+        specDrag = {
+          startX: e.clientX,
+          startY: e.clientY,
+          lastX: e.clientX,
+          lastY: e.clientY,
+          moved: false
+        };
+        return;
+      }
+      if (state.paused || state.isPaused || modalOpen) return;
       if (window.KLB.Audio) window.KLB.Audio.init();
       if (!window.KLB.Renderer25D?.screenToGrid) return;
 
@@ -6804,9 +7013,10 @@ window.KLB = window.KLB || {};
         return;
       }
 
-      // Clicking a meeting_room chair walks directly onto the chair tile and faces the projector
-      if (cell.obj && cell.obj.type === 'chair' && state.player.roomId === 'meeting_room') {
-        if (window.KLB.Sim.isCellWalkable(state.player.roomId, cell.obj.x, cell.obj.y, state.fireAlarm.active)) {
+      // Clicking a chair in 2F, 3F, or meeting_room walks onto the chair tile and sits facing its desk/table
+      if (cell.obj && cell.obj.type === 'chair' && ['klb_2f', 'klb_3f', 'meeting_room'].includes(state.player.roomId)) {
+        const chairOccupied = window.KLB.Sim.isOccupiedByCharacter?.(state, state.player.roomId, cell.obj.x, cell.obj.y, state.player.id, 0.48);
+        if (!chairOccupied && window.KLB.Sim.isCellWalkable(state.player.roomId, cell.obj.x, cell.obj.y, state.fireAlarm.active)) {
           if (Math.hypot(cell.obj.x - state.player.x, cell.obj.y - state.player.y) <= 0.35) {
             state.player.x = cell.obj.x;
             state.player.y = cell.obj.y;
@@ -6853,7 +7063,18 @@ window.KLB = window.KLB || {};
         goalY = gy;
         pending = { obj: { type: 'fire_exit_tile', x: gx, y: gy, w: 1, h: 1 } };
       } else if (cell.obj && cell.obj.type !== 'npc_marker') {
-        const free = window.KLB.Sim.findFreeAdjacentWalkable(state, state.player.roomId, cell.obj, state.player.id);
+        let free = null;
+        if (cell.obj.type === 'writeup_desk') {
+          const deskChair = findDeskChair(rm, cell.obj);
+          if (deskChair &&
+              !window.KLB.Sim.isOccupiedByCharacter?.(state, state.player.roomId, deskChair.x, deskChair.y, state.player.id, 0.48) &&
+              window.KLB.Sim.isCellWalkable(state.player.roomId, deskChair.x, deskChair.y, state.fireAlarm.active)) {
+            free = { x: deskChair.x, y: deskChair.y };
+          }
+        }
+        if (!free) {
+          free = window.KLB.Sim.findFreeAdjacentWalkable(state, state.player.roomId, cell.obj, state.player.id);
+        }
         if (free) { goalX = free.x; goalY = free.y; pending = { obj: cell.obj, allHits: resolvedHits }; }
       }
 
@@ -6870,6 +7091,61 @@ window.KLB = window.KLB || {};
           if (window.KLB.Renderer25D.triggerClickRipple) {
             window.KLB.Renderer25D.triggerClickRipple(goalX, goalY, pending ? 'interact' : 'walk');
           }
+        }
+      }
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!specDrag) return;
+      const modalOpen = !el('modal-backdrop').classList.contains('hidden');
+      if (!state?.spectatorMode || modalOpen) {
+        specDrag = null;
+        canvas.classList.remove('spec-dragging');
+        return;
+      }
+      const totalDist = Math.hypot(e.clientX - specDrag.startX, e.clientY - specDrag.startY);
+      if (!specDrag.moved && totalDist > 4) {
+        specDrag.moved = true;
+        if (specFollowNpcId) {
+          specFollowNpcId = null;
+          syncSpecFollowBadge();
+          renderLabBookPane(true);
+        }
+        canvas.classList.add('spec-dragging');
+      }
+      if (specDrag.moved) {
+        const viewRoom = getViewRoom();
+        const rm = window.KLB.WORLD_MAPS?.rooms?.[viewRoom];
+        if (rm) {
+          specCameraPos = specCameraPos || getRoomCenterTile(viewRoom);
+          const zoom = window.KLB.Renderer25D?.getCameraState?.()?.zoom || (Number(cameraZoom) || 1.0);
+          const tileW = window.KLB.Renderer25D?.TILE_W || 36;
+          const tileH = window.KLB.Renderer25D?.TILE_H || 36;
+          const dx = e.clientX - specDrag.lastX;
+          const dy = e.clientY - specDrag.lastY;
+          specCameraPos.x = clamp(specCameraPos.x - dx / (zoom * tileW), 0, Math.max(0, rm.w - 1));
+          specCameraPos.y = clamp(specCameraPos.y - dy / (zoom * tileH), 0, Math.max(0, rm.h - 1));
+        }
+      }
+      specDrag.lastX = e.clientX;
+      specDrag.lastY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', e => {
+      if (!specDrag) return;
+      canvas.classList.remove('spec-dragging');
+      const wasDrag = specDrag.moved;
+      specDrag = null;
+      const modalOpen = !el('modal-backdrop').classList.contains('hidden');
+      if (!wasDrag && state?.spectatorMode && !modalOpen && e.button === 0 && window.KLB.Renderer25D?.screenToGrid) {
+        const cell = window.KLB.Renderer25D.screenToGrid(canvas, e.clientX, e.clientY);
+        if (cell?.npc) {
+          specFollowNpcId = cell.npc.id;
+          specCameraPos = { x: cell.npc.x, y: cell.npc.y };
+          if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
+          syncSpecFollowBadge();
+          syncAllHUD(true);
+          showAlertBanner('Following ' + (window.KLB.CAST_BY_ID?.[cell.npc.id]?.shortName || cell.npc.id) + ' — pan or click pill to release.', 2400, false);
         }
       }
     });
@@ -6917,7 +7193,7 @@ window.KLB = window.KLB || {};
         : target.npc
           ? `Talk: ${window.KLB.CAST_BY_ID[target.npc.id]?.shortName || target.npc.id} [E]`
           : target.obj
-            ? `Use: ${target.obj.label || niceStationName(target.obj.type)} [E]`
+            ? `Use: ${target.obj.label || (target.obj.type === 'chair' ? (viewRoom === 'meeting_room' ? 'Seminar Chair' : 'Desk Chair') : niceStationName(target.obj.type))} [E]`
             : (window.KLB.ROOM_META[viewRoom]?.shortName || 'KLB');
 
       const canvas = el('world-canvas');
