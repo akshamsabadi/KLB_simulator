@@ -8451,6 +8451,96 @@ window.KLB.GROUP_HUDDLES = [
       { speakerId: "archie_wall", text: "Everyone went down to Gordon's Café, left me guarding the tubes." },
       { speakerId: "abil_aliev", text: "Smart habit collecting vials promptly avoids that £130 fridge fee." }
     ]
+  },
+  {
+    id: "c2_huddle_dan_antoine_01",
+    roomId: "klb_2f",
+    turns: [
+      { speakerId: "daniel_richards", text: "Antoine, warning you before the 365 nm cabinet lamp goes on." },
+      { speakerId: "antoine_maruani", text: "Appreciate that Dan, wrapping my porphyrin vials in extra tin foil." },
+      { speakerId: "daniel_richards", text: "Good shout, keep lab sunglasses clear of any crimson flasks." }
+    ]
+  },
+  {
+    id: "c2_huddle_max_rich_01",
+    roomId: "klb_2f",
+    turns: [
+      { speakerId: "maximillian_lee", text: "Richard, did my red-tape azide bottle move off the balance shelf?" },
+      { speakerId: "richard_spears", text: "Tucked it behind the ice bucket Max, safe from sunlight glare." },
+      { speakerId: "maximillian_lee", text: "Cheers mate, saved me hunting across all three bays again." }
+    ]
+  },
+  {
+    id: "c2_huddle_andre_marco_01",
+    roomId: "klb_2f",
+    turns: [
+      { speakerId: "andre_shamsabadi", text: "Marco, reckon that yellow oxygen balloon looks too plump today?" },
+      { speakerId: "marco_sabatini", text: "Just dial the needle valve down slightly André, safe and neat." },
+      { speakerId: "andre_shamsabadi", text: "Fair call, nobody wants surprise bangs at half four on Tuesday." }
+    ]
+  },
+  {
+    id: "c2_huddle_peter_joao_01",
+    roomId: "gordons_cafe",
+    turns: [
+      { speakerId: "peter_szijj", text: "João, tell me these almond croissants survived the morning rush." },
+      { speakerId: "joao_nogueira", text: "Snagged the final two trays for us Peetah, flat whites incoming!" },
+      { speakerId: "peter_szijj", text: "Absolute lifesaver, rough week two already feels much kinder." }
+    ]
+  },
+  {
+    id: "c2_huddle_faiza_calise_01",
+    roomId: "klb_2f",
+    turns: [
+      { speakerId: "faiza_javaid", text: "Calise, did you nick the good ice bucket beside the cold fridge?" },
+      { speakerId: "calise_bahou", text: "Guilty Daiza, thermal stress day means everyone guards cold trays." },
+      { speakerId: "faiza_javaid", text: "Sharing is caring mate, leave half a scoop for my Magacizumab." }
+    ]
+  },
+  {
+    id: "c2_huddle_marcos_archie_01",
+    roomId: "klb_2f",
+    turns: [
+      { speakerId: "marcos_fernandez", text: "Archie, bright yellow folate spots everywhere under 254 nm!" },
+      { speakerId: "archie_wall", text: "Looking smart Marcos, Baker bay rotor is hummed and happy too." },
+      { speakerId: "marcos_fernandez", text: "Top week two energy, pints at the Bentham once five strikes?" }
+    ]
+  },
+  {
+    id: "c2_huddle_rich_peter_01",
+    roomId: "klb_3f",
+    turns: [
+      { speakerId: "richard_spears", text: "Peter, fresh Yorkshire brew by the printer if your eyes hurt." },
+      { speakerId: "peter_szijj", text: "Bless you Rich, TopSpin peaks started looking like barcodes!" },
+      { speakerId: "richard_spears", text: "Grab a ginger biscuit too, cures ChemDraw fatigue instantly." }
+    ]
+  },
+  {
+    id: "c2_huddle_antoine_andre_01",
+    roomId: "klb_3f",
+    turns: [
+      { speakerId: "antoine_maruani", text: "André, spare tin foil left downstairs? My hood ran bone dry." },
+      { speakerId: "andre_shamsabadi", text: "Second drawer beside my waistcoat hanger on 3F, take a roll." },
+      { speakerId: "antoine_maruani", text: "Merci André, lifesaver for keeping those crimson tubes dark." }
+    ]
+  },
+  {
+    id: "c2_huddle_joao_nafsika_01",
+    roomId: "gordons_cafe",
+    turns: [
+      { speakerId: "nafsika_forte", text: "Cold drizzle outside again, João, flat white round number two?" },
+      { speakerId: "joao_nogueira", text: "Always yes Nafsika, Bloomsbury sky practically demands espresso." },
+      { speakerId: "nafsika_forte", text: "True, warm cups make late freezer quenches infinitely nicer." }
+    ]
+  },
+  {
+    id: "c2_huddle_calise_marcos_01",
+    roomId: "klb_3f",
+    turns: [
+      { speakerId: "calise_bahou", text: "Marcos, did my lemon tote bag slide under your chair upstairs?" },
+      { speakerId: "marcos_fernandez", text: "Right beside the heater Calise, smelling wonderfully zesty here!" },
+      { speakerId: "calise_bahou", text: "Cheers mate, rescuing those bargains before Jamie questions me." }
+    ]
   }
 ];
 

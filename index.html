@@ -18,7 +18,7 @@
   <meta name="twitter:title" content="KLB Simulator — UCL Chemistry Lab Simulation" />
   <meta name="twitter:description" content="Run bioconjugation reactions, dodge Safety Sweeps, survive Vijay &amp; Jamie's Friday 09:00 Audit, and banter with the Big-Chuds in 2.5D." />
   <meta name="twitter:image" content="https://akshamsabadi.github.io/KLB_simulator/assets/og_preview.jpg" />
-  <link rel="stylesheet" href="css/style.css?v=20261128e" />
+  <link rel="stylesheet" href="css/style.css?v=20261128f" />
 </head>
 <body>
 
@@ -38,6 +38,13 @@
           <label for="select-mutator">Run Modifier</label>
           <select id="select-mutator" class="ui-select">
             <option value="none">Standard KLB Week (No Modifier)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="select-spec-cascade">Observer Cascade</label>
+          <select id="select-spec-cascade" class="ui-select compact" aria-label="Observer Starting Cascade" title="Starting reaction cascade for Autonomous Lab Observer (flips automatically on Week 2+)">
+            <option value="0">Cascade 1 (Week 1)</option>
+            <option value="1">Cascade 2 (Week 1)</option>
           </select>
         </div>
         <button id="btn-spectator-mode" class="btn-secondary" title="Observe all 10 Big-Chuds, Archie, and neighbours run autonomously with no playable character">
@@ -369,15 +376,15 @@
   </div>
 
   <!-- Ordered Classic Scripts (Zero file:// CORS issues, zero build step) -->
-  <script defer src="js/ui/icons.js?v=20261128e"></script>
-  <script defer src="js/data/world_data.js?v=20261128e"></script>
-  <script defer src="js/data/cast_data.js?v=20261128e"></script>
-  <script defer src="js/data/campaigns_data.js?v=20261128e"></script>
-  <script defer src="js/data/events_data.js?v=20261128e"></script>
-  <script defer src="js/engine/audio.js?v=20261128e"></script>
-  <script defer src="js/engine/renderer_25d.js?v=20261128e"></script>
-  <script defer src="js/chemistry/spectra_and_minigames.js?v=20261128e"></script>
-  <script defer src="js/engine/sim_and_ai.js?v=20261128e"></script>
-  <script defer src="js/main.js?v=20261128e"></script>
+  <script defer src="js/ui/icons.js?v=20261128f"></script>
+  <script defer src="js/data/world_data.js?v=20261128f"></script>
+  <script defer src="js/data/cast_data.js?v=20261128f"></script>
+  <script defer src="js/data/campaigns_data.js?v=20261128f"></script>
+  <script defer src="js/data/events_data.js?v=20261128f"></script>
+  <script defer src="js/engine/audio.js?v=20261128f"></script>
+  <script defer src="js/engine/renderer_25d.js?v=20261128f"></script>
+  <script defer src="js/chemistry/spectra_and_minigames.js?v=20261128f"></script>
+  <script defer src="js/engine/sim_and_ai.js?v=20261128f"></script>
+  <script defer src="js/main.js?v=20261128f"></script>
 </body>
 </html>

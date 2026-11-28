@@ -532,13 +532,18 @@ select.ui-select::picker-icon {
   position: absolute;
   top: 6px;
   right: 6px;
-  font-size: 10.5px;
+  font-size: 10px;
   background: rgba(34, 197, 94, 0.18);
   border: 1px solid rgba(34, 197, 94, 0.55);
   color: #86efac;
   padding: 1px 5px;
   border-radius: 4px;
   font-family: 'Consolas', monospace;
+}
+.char-card .cleared-pip.all-clear {
+  background: rgba(250, 204, 21, 0.18);
+  border-color: rgba(250, 204, 21, 0.65);
+  color: #fde047;
 }
 
 .char-card.bonus-card {
@@ -749,6 +754,56 @@ select.ui-select::picker-icon {
 }
 .dossier-card.campaign h4 {
   color: #93c5fd;
+}
+.dossier-campaign-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.dossier-campaign-head h4 {
+  margin-bottom: 0;
+}
+.cascade-toggle-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.cascade-toggle-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.3;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.cascade-toggle-btn:hover {
+  color: var(--text-main);
+  background: rgba(59, 130, 246, 0.14);
+}
+.cascade-toggle-btn.active {
+  color: #dbeafe;
+  background: rgba(37, 99, 235, 0.32);
+  border-color: rgba(96, 165, 250, 0.65);
+}
+.cascade-pb-tag {
+  font-family: 'Consolas', monospace;
+  font-size: 9.5px;
+  color: #86efac;
 }
 
 .dossier-steps-list {

@@ -618,24 +618,48 @@ window.KLB = window.KLB || {};
   }
 
   function loadArchive() {
+    let arch = null;
     try {
       const storage = getStorage();
       const raw = storage?.getItem?.(ARCHIVE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) arch = JSON.parse(raw);
     } catch (_) {}
-    return {
-      clearedChars: {},
-      discoveredEvents: {},
-      unlockedMutators: {
-        vijays_not_in: false,
-        lcms_chaos: false,
-        eternal_heatwave: false,
-        infinite_espresso: false,
-        strict_coshh: false
-      },
-      totalRuns: 0,
-      bestScore: 0
+    if (!arch || typeof arch !== 'object') {
+      arch = {
+        clearedChars: {},
+        clearedCascades: {},
+        discoveredEvents: {},
+        unlockedMutators: {
+          vijays_not_in: false,
+          lcms_chaos: false,
+          eternal_heatwave: false,
+          infinite_espresso: false,
+          strict_coshh: false
+        },
+        totalRuns: 0,
+        bestScore: 0
+      };
+    }
+    arch.clearedChars = arch.clearedChars && typeof arch.clearedChars === 'object' ? arch.clearedChars : {};
+    arch.clearedCascades = arch.clearedCascades && typeof arch.clearedCascades === 'object' ? arch.clearedCascades : {};
+    for (const [cid, score] of Object.entries(arch.clearedChars)) {
+      if (typeof score === 'number' && Number.isFinite(score)) {
+        if (!arch.clearedCascades[cid] || typeof arch.clearedCascades[cid] !== 'object') {
+          arch.clearedCascades[cid] = { 0: score };
+        } else if (arch.clearedCascades[cid][0] === undefined && arch.clearedCascades[cid][1] === undefined) {
+          arch.clearedCascades[cid][0] = score;
+        }
+      }
+    }
+    arch.discoveredEvents = arch.discoveredEvents && typeof arch.discoveredEvents === 'object' ? arch.discoveredEvents : {};
+    arch.unlockedMutators = arch.unlockedMutators && typeof arch.unlockedMutators === 'object' ? arch.unlockedMutators : {
+      vijays_not_in: false,
+      lcms_chaos: false,
+      eternal_heatwave: false,
+      infinite_espresso: false,
+      strict_coshh: false
     };
+    return arch;
   }
 
   function saveArchive(arch) {
@@ -1894,9 +1918,27 @@ window.KLB = window.KLB || {};
       ? { pref: 'balanced', requiresCaffeine: false, label: 'Balanced' }
       : getPreferencesSpec(charMeta);
 
+    const startCascadeIdx = options?.startCascadeIdx === 1 ? 1 : 0;
+    const labStartCascadeIdx = options?.labStartCascadeIdx === 1 ? 1 : 0;
+    const initialCascadeIdx = typeof window.KLB.getActiveCascadeIndex === 'function'
+      ? window.KLB.getActiveCascadeIndex(
+          {
+            weekNum: 1,
+            spectatorMode,
+            player: { id: resolvedPlayerId },
+            startCascadeIdx,
+            labStartCascadeIdx
+          },
+          resolvedPlayerId
+        )
+      : startCascadeIdx;
+
     const state = {
       charId: resolvedPlayerId,
       weekNum: 1,
+      startCascadeIdx,
+      labStartCascadeIdx,
+      cascadeIdx: initialCascadeIdx,
       dayIdx: 0,
       timeMins: startMins,
       realSecAccum: 0,
@@ -2296,11 +2338,12 @@ window.KLB = window.KLB || {};
 
   function seedOpeningWhatsApp(state) {
     if (!state.spectatorMode && state.player?.id === 'archie_wall') {
-      const camp = window.KLB.CAMPAIGNS?.archie_wall;
+      const camp = window.KLB.getCampaign('archie_wall', state);
+      const casTag = (camp?.cascadeIndex ?? 0) === 1 ? ' (Cascade 2)' : '';
       pushWhatsApp(state, 'jamie_baker', 'Morning Baker bay! Safety specs on as soon as you step across the 2F threshold and keep the central balance spotless.');
       pushWhatsApp(state, 'nafsika_forte', 'Central Line running slow this morning @Archie — dry DMF and fresh albumin aliquots are ready in Baker bay, plus remember Thu 18:00 Report & Fri 09:00 Meeting!');
       if (camp) {
-        pushWhatsApp(state, 'daniel_richards', `Good luck on "${camp.title}" this week @Archie! Shout /AskKLBchat if a protocol gets spicy.`);
+        pushWhatsApp(state, 'daniel_richards', `Good luck on "${camp.title}"${casTag} this week @Archie! Shout /AskKLBchat if a protocol gets spicy.`);
       }
       return;
     }
@@ -2310,16 +2353,18 @@ window.KLB = window.KLB || {};
     pushWhatsApp(state, danSender, 'Morning Chuds! Lab 230 ovens are hot and Büchi 1 water bath is topped up.');
     pushWhatsApp(state, marcosSender, 'Reminder: Thu 18:00 Weekly Report, Fri 09:00 Group Meeting & Fri 18:00 Manuscript Draft.');
     if (!state.spectatorMode && state.player?.id) {
-      const camp = window.KLB.CAMPAIGNS?.[state.player.id];
+      const camp = window.KLB.getCampaign(state.player.id, state);
+      const casTag = (camp?.cascadeIndex ?? 0) === 1 ? ' (Cascade 2)' : '';
       const playerShort = window.KLB.CAST_BY_ID?.[state.player.id]?.shortName || 'team';
       if (camp) {
         const askHint = state.player.id === 'antoine_maruani'
           ? 'Shout /AskBigChuds if a protocol gets spicy.'
           : 'Shout #AskAntoine or /AskBigChuds if a protocol gets spicy.';
-        pushWhatsApp(state, antoineSender, `Good luck on "${camp.title}" this week @${playerShort}! ${askHint}`);
+        pushWhatsApp(state, antoineSender, `Good luck on "${camp.title}"${casTag} this week @${playerShort}! ${askHint}`);
       }
     } else {
-      pushWhatsApp(state, antoineSender, 'Full bench lineup in KLB today. Keep glassware dry and flasks under Argon.');
+      const obsCas = state?.labStartCascadeIdx === 1 ? 'Cascade 2' : 'Cascade 1';
+      pushWhatsApp(state, antoineSender, `Full bench lineup in KLB today (${obsCas}). Keep glassware dry and flasks under Argon.`);
     }
   }
 
@@ -4243,7 +4288,7 @@ window.KLB = window.KLB || {};
       sim.completedSteps.push(step.index);
       sim.weeklyStats.stepsCompleted += 1;
     }
-    const camp = window.KLB.CAMPAIGNS?.[npc.id];
+    const camp = window.KLB.getCampaign(npc.id, state);
     if (camp && sim.stepIdx < camp.steps.length - 1) {
       sim.stepIdx += 1;
     }
@@ -4308,6 +4353,10 @@ window.KLB = window.KLB || {};
 
     const mockState = {
       player: { id: npc.id },
+      weekNum: state.weekNum,
+      spectatorMode: state.spectatorMode,
+      startCascadeIdx: state.startCascadeIdx,
+      labStartCascadeIdx: state.labStartCascadeIdx,
       timeMins: state.timeMins,
       completedSteps: sim.completedSteps.slice(),
       labBook: sim.labBook.slice(),
@@ -5066,7 +5115,7 @@ window.KLB = window.KLB || {};
     sim.currentAction = null;
     npc.busyObjId = null;
 
-    const camp = window.KLB.CAMPAIGNS?.[npc.id];
+    const camp = window.KLB.getCampaign(npc.id, state);
     const step = camp?.steps?.[sim.stepIdx];
 
     if (act.kind === 'lunch' || act.kind === 'packed_lunch') {
@@ -5418,7 +5467,7 @@ window.KLB = window.KLB || {};
     if (!inWorkHours) {
       if (npc.roomId !== 'offsite') {
         if (sim.activeJob && sim.activeJob.canOvercook && sim.activeJob.status === 'sweet' && Math.random() < 0.72) {
-          const camp = window.KLB.CAMPAIGNS?.[npc.id];
+          const camp = window.KLB.getCampaign(npc.id, state);
           const step = camp?.steps?.[sim.activeJob.stepIdx];
           if (step) {
             const q = clamp((sim.activeJob.prepScore || 85) + 4, 0, 100);
@@ -5542,7 +5591,7 @@ window.KLB = window.KLB || {};
     }
 
     // 12. Decide next priority
-    const camp = window.KLB.CAMPAIGNS?.[npc.id];
+    const camp = window.KLB.getCampaign(npc.id, state);
     const step = camp?.steps?.[sim.stepIdx];
     const subTasks = step?.subTasks || [];
     const curSub = subTasks[sim.subTaskIdx] || null;
@@ -6251,7 +6300,7 @@ window.KLB = window.KLB || {};
       if (!npc) continue;
 
       if (meta.playable) {
-        if (window.KLB.CAMPAIGNS?.[meta.id] || !NEIGHBOUR_WORKFLOWS[meta.id]) {
+        if (window.KLB.getCampaign(meta.id, state) || !NEIGHBOUR_WORKFLOWS[meta.id]) {
           stepBigChudAI(state, npc, meta, deltaMins, viewRoom);
         } else {
           stepNeighbourAI(state, npc, meta, deltaMins);
@@ -7265,6 +7314,9 @@ window.KLB = window.KLB || {};
   function syncDayWeekRolloverFlags(state, callbacks = {}) {
     if (state._trackedWeekNum !== state.weekNum) {
       state._trackedWeekNum = state.weekNum;
+      if (typeof window.KLB.getActiveCascadeIndex === 'function') {
+        state.cascadeIdx = window.KLB.getActiveCascadeIndex(state, state.player?.id);
+      }
       state._seenEventsThisWeek = {};
       state._weeklySigDone = {};
       state._lastWeeklySigMins = -999;

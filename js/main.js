@@ -5,6 +5,7 @@ window.KLB = window.KLB || {};
   let state = null;
   let archive = null;
   let selectedCharId = 'daniel_richards';
+  const selectedCascadeByChar = {};
   let selectedMutator = 'none';
   let cameraZoom = 1.0;
   const keysDown = new Set();
@@ -452,8 +453,13 @@ window.KLB = window.KLB || {};
       return `[${'#'.repeat(filled)}${'-'.repeat(5 - filled)}]`;
     };
 
+    const activeCamp = !state?.spectatorMode && state?.player?.id
+      ? window.KLB.getCampaign(state.player.id, state)
+      : null;
+    const cascadeNum = activeCamp ? (activeCamp.cascadeIndex ?? 0) + 1 : ((state?.labStartCascadeIdx === 1 && ((state?.weekNum || 1) % 2 === 1)) || (state?.labStartCascadeIdx !== 1 && ((state?.weekNum || 1) % 2 === 0)) ? 2 : 1);
     const lines = [
-      `KLB SIMULATOR | ${meta.name} (Week ${st.weekNum || 1})`,
+      `KLB SIMULATOR | ${meta.name} (Week ${st.weekNum || 1} · Cascade ${cascadeNum})`,
+      ...(activeCamp?.title ? [`Project: ${activeCamp.title}`] : []),
       `Modifier: ${modLabel} | ${clockStr} | Steps: ${stepsDone}/5`
     ];
 
@@ -519,10 +525,11 @@ window.KLB = window.KLB || {};
     const res = state.lastAuditResult || { total: 6.0, passed: true };
     banner.classList.toggle('suboptimal', !res.passed);
     const scoreStr = Number(res.total ?? 6.0).toFixed(1);
+    const activeCasNum = (state.cascadeIdx ?? 0) + 1;
     banner.innerHTML = `
       <span class="celebration-banner-title">
         <span class="icon-inline">${icon('award', 14)}</span>
-        <span>Week ${state.weekNum || 1} Complete (${scoreStr}/10)</span>
+        <span>Week ${state.weekNum || 1} (C${activeCasNum}) Complete (${scoreStr}/10)</span>
       </span>
       <div class="celebration-banner-actions">
         <button id="btn-celeb-review" type="button" class="hud-btn">${icon('eye', 13)}<span>Review Score-Card</span></button>
@@ -769,8 +776,15 @@ window.KLB = window.KLB || {};
     populateMutatorSelect();
 
     const playables = getPlayableCast();
-    const clearedCount = Object.keys(archive.clearedChars || {}).length;
-    el('archive-progress-lbl').textContent = `${clearedCount} / ${playables.length} Audited`;
+    const totalCascades = playables.length * 2;
+    let clearedCascadesCount = 0;
+    for (const pc of playables) {
+      const cc = archive.clearedCascades?.[pc.id];
+      const has0 = cc && cc[0] !== undefined ? 1 : (archive.clearedChars?.[pc.id] !== undefined && !cc ? 1 : 0);
+      const has1 = cc && cc[1] !== undefined ? 1 : 0;
+      clearedCascadesCount += has0 + has1;
+    }
+    el('archive-progress-lbl').textContent = `${clearedCascadesCount} / ${totalCascades} Cascades Audited`;
 
     const totalEvents = (window.KLB.RANDOM_EVENTS || []).length || 32;
     const evCount = Object.keys(archive.discoveredEvents || {}).length;
@@ -795,12 +809,13 @@ window.KLB = window.KLB || {};
         const snapMutKeys = Object.keys(snap.mutators || {}).filter(k => snap.mutators[k] && !(snapCharId === 'archie_wall' && k === 'vijays_not_in'));
         const snapMutNames = snapMutKeys.map(k => (window.KLB.MUTATORS || []).find(m => m.id === k)?.name || k);
         const snapModLabel = snapMutNames.length ? ` | Modifier: ${snapMutNames.join(', ')}` : '';
+        const snapCascadeNum = (snap.cascadeIdx ?? ((snap.startCascadeIdx === 1 ? 1 : 0) + Math.max(0, (snap.weekNum || 1) - 1)) % 2) + 1;
         bannerEl.classList.remove('hidden');
         bannerEl.innerHTML = `
           <div class="continue-run-info">
             <img class="pixel-art" src="assets/portraits/${escHtml(snapMeta.id)}.png" alt="${escHtml(snapMeta.name)}" style="width:40px;height:40px;border-radius:7px;border:1px solid rgba(52,211,153,0.45);flex-shrink:0;" />
             <div class="continue-run-text">
-              <div><strong>Saved Shift Ready: ${escHtml(snapMeta.name)}</strong> (Week ${snap.weekNum || 1})</div>
+              <div><strong>Saved Shift Ready: ${escHtml(snapMeta.name)}</strong> (Week ${snap.weekNum || 1} · Cascade ${snapCascadeNum})</div>
               <div class="continue-run-meta">${escHtml(snapClock)} | Step ${snapSteps}/5 | ${escHtml(snapRoom)}${escHtml(snapModLabel)}</div>
             </div>
           </div>
@@ -854,8 +869,14 @@ window.KLB = window.KLB || {};
       const isBonus = Boolean(c.isBonus || c.id === 'archie_wall');
       card.className = (isBonus ? 'char-card bonus-card' : 'char-card') + (isSelected ? ' selected' : '');
       card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      const cc = archive.clearedCascades?.[c.id];
+      const c0 = cc?.[0] !== undefined ? cc[0] : (!cc ? archive.clearedChars?.[c.id] : undefined);
+      const c1 = cc?.[1];
+      const clearedN = (c0 !== undefined ? 1 : 0) + (c1 !== undefined ? 1 : 0);
       const best = archive.clearedChars?.[c.id];
-      const badge = best !== undefined ? `<span class="cleared-pip">${best.toFixed(1)}/10</span>` : '';
+      const badge = best !== undefined
+        ? `<span class="cleared-pip${clearedN >= 2 ? ' all-clear' : ''}">${best.toFixed(1)}/10 · ${clearedN}/2</span>`
+        : '';
       const roleShort = (c.role.split('•')[1] || c.role).trim();
       if (isBonus) {
         card.innerHTML = `
@@ -888,7 +909,8 @@ window.KLB = window.KLB || {};
 
   function renderSelectedDossier() {
     const c = window.KLB.CAST_BY_ID[selectedCharId];
-    const camp = window.KLB.CAMPAIGNS?.[selectedCharId];
+    const selCascade = selectedCascadeByChar[selectedCharId] === 1 ? 1 : 0;
+    const camp = window.KLB.getCampaign(selectedCharId, selCascade);
     const box = el('char-dossier');
     if (!c || !box) return;
 
@@ -900,10 +922,15 @@ window.KLB = window.KLB || {};
     const energyLabel = prefs.requiresCaffeine ? 'Caffeine-Reliant' : 'Standard';
     const lunchRoomLabel = c.lunchRoom === 'klb_3f' ? '3F Office' : "Gordon's Café";
     const lunchTimeLabel = c.lunchHour ? `${window.KLB.Sim.formatHHMM(c.lunchHour * 60)} (${lunchRoomLabel})` : lunchRoomLabel;
-    const personalBest = archive?.clearedChars?.[c.id];
-    const bestPillHtml = personalBest !== undefined
-      ? `<span class="dossier-pill" style="border-color:rgba(34,197,94,0.55);color:#86efac;">Best: ${personalBest.toFixed(1)}/10</span>`
-      : `<span class="dossier-pill">Best: Unaudited</span>`;
+    const cc = archive?.clearedCascades?.[c.id];
+    const pb0 = cc?.[0] !== undefined ? cc[0] : (!cc ? archive?.clearedChars?.[c.id] : undefined);
+    const pb1 = cc?.[1];
+    const c1PillHtml = pb0 !== undefined
+      ? `<span class="dossier-pill" style="border-color:rgba(34,197,94,0.55);color:#86efac;">C1: ${pb0.toFixed(1)}/10</span>`
+      : `<span class="dossier-pill">C1: Unaudited</span>`;
+    const c2PillHtml = pb1 !== undefined
+      ? `<span class="dossier-pill" style="border-color:rgba(34,197,94,0.55);color:#86efac;">C2: ${pb1.toFixed(1)}/10</span>`
+      : `<span class="dossier-pill">C2: Unaudited</span>`;
 
     box.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
@@ -918,14 +945,25 @@ window.KLB = window.KLB || {};
               <span class="dossier-pill">Energy: ${escHtml(energyLabel)}</span>
               <span class="dossier-pill">Break: ${escHtml(prefs.label || 'Balanced')}</span>
               <span class="dossier-pill">Lunch: ${escHtml(lunchTimeLabel)}</span>
-              ${bestPillHtml}
+              ${c1PillHtml}
+              ${c2PillHtml}
             </div>
           </div>
         </header>
 
         <section class="dossier-card campaign">
-          <h4>${icon('file-text', 13)}<span>Project: ${escHtml(camp?.title || 'Research Project')}</span></h4>
-          <p style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Topic: ${escHtml(camp?.manuscriptTopic || camp?.paperRef || '')}</p>
+          <div class="dossier-campaign-head">
+            <h4>${icon('file-text', 13)}<span>Project (Cascade ${selCascade + 1}): ${escHtml(camp?.title || 'Research Project')}</span></h4>
+            <div class="cascade-toggle-bar" role="group" aria-label="Select Reaction Cascade">
+              <button type="button" class="cascade-toggle-btn${selCascade === 0 ? ' active' : ''}" data-cascade-idx="0" aria-pressed="${selCascade === 0 ? 'true' : 'false'}">
+                <span>Cascade 1</span>${pb0 !== undefined ? `<span class="cascade-pb-tag">${pb0.toFixed(1)}</span>` : ''}
+              </button>
+              <button type="button" class="cascade-toggle-btn${selCascade === 1 ? ' active' : ''}" data-cascade-idx="1" aria-pressed="${selCascade === 1 ? 'true' : 'false'}">
+                <span>Cascade 2</span>${pb1 !== undefined ? `<span class="cascade-pb-tag">${pb1.toFixed(1)}</span>` : ''}
+              </button>
+            </div>
+          </div>
+          <p style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Ref: ${escHtml(camp?.paperRef || camp?.manuscriptTopic || '')}</p>
           <p style="font-size:11.5px;color:#cbd5e1;">${escHtml(camp?.overview || '')}</p>
           <ol class="dossier-steps-list">${stepsHtml}</ol>
         </section>
@@ -943,9 +981,19 @@ window.KLB = window.KLB || {};
 
       <button id="btn-launch-campaign" class="btn-start-run">
         ${icon('play', 16)}
-        <span>Enter KLB as ${escHtml(c.shortName)} (Monday ${window.KLB.Sim.formatHHMM(c.arriveHour * 60)})</span>
+        <span>Enter KLB as ${escHtml(c.shortName)} — Cascade ${selCascade + 1} (Monday ${window.KLB.Sim.formatHHMM(c.arriveHour * 60)})</span>
       </button>
     `;
+
+    box.querySelectorAll('[data-cascade-idx]').forEach(btn => {
+      btn.onclick = () => {
+        const nextIdx = Number(btn.dataset.cascadeIdx) === 1 ? 1 : 0;
+        if (selectedCascadeByChar[selectedCharId] === nextIdx) return;
+        selectedCascadeByChar[selectedCharId] = nextIdx;
+        if (window.KLB.Audio) { window.KLB.Audio.init(); window.KLB.Audio.playSfx('ui_click'); }
+        renderSelectedDossier();
+      };
+    });
 
     el('btn-launch-campaign').onclick = () => startNewRun(selectedCharId, false);
     lastDossierSpriteKey = '';
@@ -994,7 +1042,13 @@ window.KLB = window.KLB || {};
     }
 
     const muts = buildActiveMutators();
-    state = window.KLB.Sim.createRunState(charId, muts, { spectatorMode: spectator });
+    const startCascadeIdx = !spectator && selectedCascadeByChar[charId] === 1 ? 1 : 0;
+    const labStartCascadeIdx = Number(el('select-spec-cascade')?.value || 0) === 1 ? 1 : 0;
+    state = window.KLB.Sim.createRunState(charId, muts, {
+      spectatorMode: spectator,
+      startCascadeIdx,
+      labStartCascadeIdx
+    });
     if (muts.lcms_chaos && Math.random() < 0.5) state.lcmsBroken = true;
 
     // Initialize sub-task tracking and keep activeStationJobs & activeReactions strictly shared
@@ -1074,10 +1128,12 @@ window.KLB = window.KLB || {};
     if (!spectator) {
       setPaused(true);
       const meta = window.KLB.CAST_BY_ID[charId];
+      const activeCamp = window.KLB.getCampaign(charId, state);
+      const casNum = (activeCamp?.cascadeIndex ?? 0) + 1;
       showDialogue(
         charId,
-        meta.name,
-        `Monday in KLB Lab 230. Complete your 5 protocol steps, submit your Weekly Report by Thu 18:00, build your 4-slide deck for Friday 09:00 Group Meeting, and finish your Manuscript Draft by Fri 18:00.`,
+        `${meta.name} — Cascade ${casNum}`,
+        `Monday in KLB Lab 230 (${activeCamp?.title || 'Campaign'}). Complete your 5 protocol steps, submit your Weekly Report by Thu 18:00, build your 4-slide deck for Friday 09:00 Group Meeting, and finish your Manuscript Draft by Fri 18:00.`,
         [{ label: '[1] Start Shift & Unpause (E)', primary: true, onClick: closeDialogue }],
         true,
         '',
@@ -1085,7 +1141,8 @@ window.KLB = window.KLB || {};
       );
     } else {
       setPaused(false);
-      showAlertBanner('Autonomous Lab Observer active: watch all 10 Big-Chuds, Archie & neighbours run KLB.', 4200, false);
+      const obsCas = state.labStartCascadeIdx === 1 ? 'Cascade 2' : 'Cascade 1';
+      showAlertBanner(`Autonomous Lab Observer active (${obsCas}): watch all 10 Big-Chuds, Archie & neighbours run KLB.`, 4200, false);
     }
   }
 
@@ -1103,6 +1160,12 @@ window.KLB = window.KLB || {};
     state.victory = false;
     state.postAuditCelebration = false;
     state.weekNum = Number.isFinite(Number(state.weekNum)) ? Math.max(1, Math.round(Number(state.weekNum))) : 1;
+    state.startCascadeIdx = state.startCascadeIdx === 1 ? 1 : 0;
+    state.labStartCascadeIdx = state.labStartCascadeIdx === 1 ? 1 : 0;
+    state.cascadeIdx = typeof window.KLB.getActiveCascadeIndex === 'function'
+      ? window.KLB.getActiveCascadeIndex(state, state.player.id)
+      : state.startCascadeIdx;
+    selectedCascadeByChar[state.player.id] = state.startCascadeIdx;
     state.dayIdx = Number.isFinite(Number(state.dayIdx)) ? clamp(Math.round(Number(state.dayIdx)), 0, 4) : 0;
     state.timeMins = Number.isFinite(Number(state.timeMins)) ? clamp(Number(state.timeMins), 0, 24 * 60) : 540;
     state.energy = Number.isFinite(Number(state.energy)) ? clamp(Number(state.energy), 0, 100) : 92;
@@ -1301,7 +1364,7 @@ window.KLB = window.KLB || {};
 
   function getCurrentCampaignStep() {
     if (!state || state.spectatorMode) return null;
-    const camp = window.KLB.getCampaign(state.player.id);
+    const camp = window.KLB.getCampaign(state.player.id, state);
     const steps = camp?.steps || [];
     return state.campaignStepIdx < steps.length ? steps[state.campaignStepIdx] : null;
   }
@@ -2575,7 +2638,7 @@ window.KLB = window.KLB || {};
   }
 
   function advanceSubTaskOrFinishStep(stepIdxDone, completedSubIdx, figureAlreadyOpened = false) {
-    const camp = window.KLB.getCampaign(state.player.id);
+    const camp = window.KLB.getCampaign(state.player.id, state);
     const steps = camp?.steps || [];
     const step = steps[stepIdxDone];
     const sub = step?.subTasks?.[completedSubIdx];
@@ -2700,7 +2763,7 @@ window.KLB = window.KLB || {};
 
   function handlePlayerActionComplete(act) {
     if (act.kind === 'subtask_action') {
-      const camp = window.KLB.getCampaign(state.player.id);
+      const camp = window.KLB.getCampaign(state.player.id, state);
       const step = camp?.steps?.[act.stepIdx];
       applyStationPrepSideEffect(act.stationType, act.cupboardLabel || act.cupboardHint || '', act.label || '');
       if (act.viewOutput && step) {
@@ -2717,7 +2780,7 @@ window.KLB = window.KLB || {};
     } else if (act.kind === 'subtask_collect') {
       const job = removeStationJob(act.jobId);
       applyPlayerWetLabMess(job?.roomId || act.roomId, job?.stationType || 'gel_tank', job?.label || act.label, '', job?.status === 'overcooked');
-      const camp = window.KLB.getCampaign(state.player.id);
+      const camp = window.KLB.getCampaign(state.player.id, state);
       const step = camp?.steps?.[act.stepIdx];
       if (step) {
         const m = calcStepMetrics(step, { fromJob: job, stationType: job?.stationType });
@@ -2891,7 +2954,7 @@ window.KLB = window.KLB || {};
   }
 
   function handleActiveStationJob(job) {
-    const camp = window.KLB.getCampaign(state.player.id);
+    const camp = window.KLB.getCampaign(state.player.id, state);
     const step = camp?.steps?.[job.stepIdx];
     const sub = step?.subTasks?.[job.subTaskIdx];
 
@@ -4641,7 +4704,7 @@ window.KLB = window.KLB || {};
     const gamingMins = aoe2Active
       ? Math.min(60, Math.max(10, Math.round(18 * 60 - state.timeMins)))
       : 23;
-    const camp = window.KLB.getCampaign(state.player.id);
+    const camp = window.KLB.getCampaign(state.player.id, state);
     const hasFavour = (Number(state.favours) || 0) >= 1;
     const nowMono = getMonotonicSimMins(state);
     const gamingRem = (state._lastGamingBreakMins != null && nowMono >= state._lastGamingBreakMins && (nowMono - state._lastGamingBreakMins) < 60)
@@ -5407,7 +5470,7 @@ window.KLB = window.KLB || {};
         if (readyCibJob) {
           addFavours(-1);
           const job = removeStationJob(readyCibJob.id);
-          const camp = window.KLB.getCampaign(state.player.id);
+          const camp = window.KLB.getCampaign(state.player.id, state);
           const step = camp?.steps?.[job.stepIdx];
           if (step) {
             const nextSub = step.subTasks?.[job.subTaskIdx + 1];
@@ -5984,10 +6047,20 @@ window.KLB = window.KLB || {};
     state.lastAuditResult = res;
 
     if (res.passed && !continueMidFriday && (Number(state.patience) || 0) > 0) {
+      const activeCasIdx = res.cascadeIndex !== undefined
+        ? (res.cascadeIndex === 1 ? 1 : 0)
+        : (typeof window.KLB.getActiveCascadeIndex === 'function' ? window.KLB.getActiveCascadeIndex(state, state.player.id) : 0);
       archive = reconcileArchiveSafe(a => {
         a.clearedChars = a.clearedChars || {};
+        a.clearedCascades = a.clearedCascades || {};
         const prev = a.clearedChars[state.player.id] || 0;
         a.clearedChars[state.player.id] = Math.max(prev, res.total);
+        const charCas = (a.clearedCascades[state.player.id] && typeof a.clearedCascades[state.player.id] === 'object')
+          ? a.clearedCascades[state.player.id]
+          : (prev > 0 ? { 0: prev } : {});
+        const prevCas = charCas[activeCasIdx] || 0;
+        charCas[activeCasIdx] = Math.max(prevCas, res.total);
+        a.clearedCascades[state.player.id] = charCas;
         a.bestScore = Math.max(a.bestScore || 0, res.total);
       });
     }
@@ -6043,7 +6116,7 @@ window.KLB = window.KLB || {};
         <div style="flex:1;">
           <p class="mono-muted" style="color:#93c5fd;">${isWeekWrap ? 'Friday 18:00 Final Week Audit' : 'Friday 09:00 Group Meeting Audit'}</p>
           <h3 style="margin:2px 0;font-size:19px;">${escHtml(sup.fullName)} Score-Card</h3>
-          <p style="font-size:12.5px;color:#cbd5e1;">${escHtml(window.KLB.getCampaign(state.player.id)?.title || '')}</p>
+          <p style="font-size:12.5px;color:#cbd5e1;">Cascade ${(res.cascadeIndex ?? state.cascadeIdx ?? 0) + 1}: ${escHtml(res.campaignTitle || window.KLB.getCampaign(state.player.id, state)?.title || '')}</p>
           <p class="mono-muted" style="margin-top:4px;">
             Avg Quality: <span style="color:#f8fafc;">${avgQ}%</span> | Avg Yield: <span style="color:#f8fafc;">${avgY}%</span> | ${escHtml(sup.patienceLabel)}: <span style="color:${deltaCol};">${deltaStr}</span>
           </p>
@@ -6190,6 +6263,9 @@ window.KLB = window.KLB || {};
     state.dayIdx = 0;
     state._trackedWeekNum = state.weekNum;
     state._trackedDayIdx = state.dayIdx;
+    if (typeof window.KLB.getActiveCascadeIndex === 'function') {
+      state.cascadeIdx = window.KLB.getActiveCascadeIndex(state, state.player?.id);
+    }
     state.timeMins = Math.round((window.KLB.CAST_BY_ID[state.player.id].arriveHour || 9) * 60);
     state.runSeed = ((Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0) || 1;
     state.campaignStepIdx = 0;
@@ -6303,7 +6379,19 @@ window.KLB = window.KLB || {};
     syncCelebrationBanner();
     window.KLB.Sim.syncNPCSchedules(state, true, simCallbacks());
     transitionToRoom('klb_2f', window.KLB.ROOM_META.klb_2f.entrySpawn);
+    const nextCamp = window.KLB.getCampaign(state.player.id, state);
+    if (nextCamp) {
+      const casNum = (nextCamp.cascadeIndex ?? 0) + 1;
+      const announcer = state.player.id === 'archie_wall' ? 'nafsika_forte' : (state.player.id === 'daniel_richards' ? 'antoine_maruani' : 'daniel_richards');
+      window.KLB.Sim.pushWhatsApp(
+        state,
+        announcer,
+        `Week ${state.weekNum} kicks off — Cascade ${casNum}: "${nextCamp.title}"!`
+      );
+      showAlertBanner(`Week ${state.weekNum} — Starting Cascade ${casNum}: ${nextCamp.title}`, 4400, false);
+    }
     saveActiveRunSnapshot(true);
+    syncAllHUD(true);
   }
 
   function launchGordonsVictoryScene(res) {
@@ -7348,11 +7436,13 @@ window.KLB = window.KLB || {};
     const charBadgeEl = el('hud-char-badge');
     if (charBadgeEl) {
       if (state.spectatorMode) {
-        charBadgeEl.textContent = 'Observer | Big-Chuds, Archie & neighbours';
+        const specCasNum = (typeof window.KLB.getActiveCascadeIndex === 'function' ? window.KLB.getActiveCascadeIndex(state, null) : 0) + 1;
+        charBadgeEl.textContent = `Observer · Cascade ${specCasNum} | Big-Chuds, Archie & neighbours`;
       } else {
         const cMeta = window.KLB.CAST_BY_ID?.[state.player.id];
+        const activeCasNum = (window.KLB.getCampaign(state.player.id, state)?.cascadeIndex ?? 0) + 1;
         const roleShort = (cMeta?.role?.split('•')[1] || cMeta?.role || 'Researcher').trim();
-        charBadgeEl.textContent = `${cMeta?.shortName || state.player.id} | ${roleShort}`;
+        charBadgeEl.textContent = `${cMeta?.shortName || state.player.id} · C${activeCasNum} | ${roleShort}`;
       }
     }
     const roomBadgeEl = el('hud-room-badge');
@@ -7454,7 +7544,7 @@ window.KLB = window.KLB || {};
         el('lbl-morale-pref').textContent = prefMap[pref] || '';
       }
 
-      const camp = window.KLB.getCampaign(state.player.id);
+      const camp = window.KLB.getCampaign(state.player.id, state);
       const msTitleEl = el('lbl-manuscript-title');
       if (msTitleEl) {
         msTitleEl.textContent = 'Manuscript Draft';
@@ -7670,8 +7760,9 @@ window.KLB = window.KLB || {};
     }
 
     delete pane.dataset.specRosterWeek;
-    const camp = window.KLB.getCampaign(state.player.id);
-    const sig = `${state.player.id}:${state.campaignStepIdx}:${state.completedSteps.join(',')}:${state.favours}:${state.labBook.map(f => `${f.id}:${Math.round(f.quality || 0)}`).join(',')}`;
+    const camp = window.KLB.getCampaign(state.player.id, state);
+    const activeCasNum = (camp?.cascadeIndex ?? 0) + 1;
+    const sig = `${state.player.id}:${state.weekNum}:${activeCasNum}:${state.campaignStepIdx}:${state.completedSteps.join(',')}:${state.favours}:${state.labBook.map(f => `${f.id}:${Math.round(f.quality || 0)}`).join(',')}`;
     if (sig === lastLabBookSig) return;
     lastLabBookSig = sig;
     const prevScrollTop = pane.scrollTop;
@@ -7719,7 +7810,8 @@ window.KLB = window.KLB || {};
     ` : '';
 
     pane.innerHTML = `
-      <div class="sec-hdr"><h4>5-Day Campaign Steps</h4><span class="mono-muted">${state.completedSteps.length}/5</span></div>
+      <div class="sec-hdr"><h4>Cascade ${activeCasNum}: 5-Day Steps</h4><span class="mono-muted">${state.completedSteps.length}/5</span></div>
+      ${camp?.title ? `<div class="mono-muted" style="font-size:10.5px;margin:-4px 0 4px 0;color:#93c5fd;">${escHtml(camp.title)}</div>` : ''}
       <ol class="step-list">${stepsHtml}</ol>
       <div class="sec-hdr" style="margin-top:4px;"><h4>Saved Spectra &amp; Gels (${state.labBook.length})</h4></div>
       <div class="labbook-controls">
@@ -7753,7 +7845,18 @@ window.KLB = window.KLB || {};
     const discoveredMap = archive.discoveredEvents || {};
     const discoveredIds = Object.keys(discoveredMap).sort();
     const totalEvents = (window.KLB.RANDOM_EVENTS || []).length || 32;
-    const sig = `${archive.totalRuns}:${archive.bestScore}:${cleared.map(([k, v]) => `${k}:${v}`).join(',')}:${discoveredIds.map(k => `${k}:${discoveredMap[k]}`).join(',')}`;
+    const playables = getPlayableCast();
+    const totalCascades = playables.length * 2;
+    let clearedCasTotal = 0;
+    const casSig = playables.map(c => {
+      const cc = archive.clearedCascades?.[c.id];
+      const s0 = cc?.[0] !== undefined ? cc[0] : (!cc ? archive.clearedChars?.[c.id] : undefined);
+      const s1 = cc?.[1];
+      if (s0 !== undefined) clearedCasTotal++;
+      if (s1 !== undefined) clearedCasTotal++;
+      return `${c.id}:${s0 ?? ''}/${s1 ?? ''}`;
+    }).join(',');
+    const sig = `${archive.totalRuns}:${archive.bestScore}:${casSig}:${cleared.map(([k, v]) => `${k}:${v}`).join(',')}:${discoveredIds.map(k => `${k}:${discoveredMap[k]}`).join(',')}`;
     if (sig === lastArchiveSig) return;
     lastArchiveSig = sig;
     const prevScrollTop = pane.scrollTop;
@@ -7777,19 +7880,23 @@ window.KLB = window.KLB || {};
         }).join('')
       : `<li class="archive-event-row undiscovered"><span class="archive-event-title">No random lab events logged yet</span><span class="archive-event-meta">0/${totalEvents}</span></li>`;
 
-    const playables = getPlayableCast();
     pane.innerHTML = `
       <section class="dossier-card">
         <h4>${icon('award', 13)}<span>KLB Archive Summary</span></h4>
-        <p class="mono-muted">Runs: ${archive.totalRuns || 0} | Best Audit: ${(archive.bestScore || 0).toFixed(1)}/10 | Events: ${discoveredIds.length}/${totalEvents}</p>
+        <p class="mono-muted">Runs: ${archive.totalRuns || 0} | Best Audit: ${(archive.bestScore || 0).toFixed(1)}/10 | Cascades: ${clearedCasTotal}/${totalCascades} | Events: ${discoveredIds.length}/${totalEvents}</p>
       </section>
-      <div class="sec-hdr"><h4>Researcher Clearance (${cleared.length}/${playables.length})</h4></div>
+      <div class="sec-hdr"><h4>Researcher Clearance (${clearedCasTotal}/${totalCascades})</h4></div>
       <ol class="step-list">
         ${playables.map(c => {
-          const sc = archive.clearedChars?.[c.id];
-          return `<li class="step-item ${sc !== undefined ? 'done' : ''}" style="justify-content:space-between;">
+          const cc = archive.clearedCascades?.[c.id];
+          const s0 = cc?.[0] !== undefined ? cc[0] : (!cc ? archive.clearedChars?.[c.id] : undefined);
+          const s1 = cc?.[1];
+          const anyDone = s0 !== undefined || s1 !== undefined;
+          const c1Txt = s0 !== undefined ? `C1 ${s0.toFixed(1)}` : 'C1 —';
+          const c2Txt = s1 !== undefined ? `C2 ${s1.toFixed(1)}` : 'C2 —';
+          return `<li class="step-item ${anyDone ? 'done' : ''}" style="justify-content:space-between;gap:6px;">
             <span>${escHtml(c.name)}</span>
-            <span class="mono-muted" style="color:${sc !== undefined ? '#86efac' : '#94a3b8'};">${sc !== undefined ? `${sc.toFixed(1)}/10` : 'Pending'}</span>
+            <span class="mono-muted" style="font-size:10.5px;color:${s0 !== undefined && s1 !== undefined ? '#fde047' : anyDone ? '#86efac' : '#94a3b8'};">${c1Txt} &middot; ${c2Txt}</span>
           </li>`;
         }).join('')}
       </ol>
@@ -7844,7 +7951,7 @@ window.KLB = window.KLB || {};
       if (j.roomId !== roomId) return false;
       if (j.status === 'sweet' || j.status === 'overcooked') return true;
       if (j.status === 'ready') {
-        const step = window.KLB.getCampaign(state.player.id)?.steps?.[j.stepIdx];
+        const step = window.KLB.getCampaign(state.player.id, state)?.steps?.[j.stepIdx];
         const nextSub = step?.subTasks?.[j.subTaskIdx + 1];
         return !(nextSub && nextSub.requiresJobFromPrev);
       }
@@ -8146,7 +8253,7 @@ window.KLB = window.KLB || {};
         state._lastWaAskTotalMins = typeof state.totalElapsedMins === 'number'
           ? state.totalElapsedMins
           : (weekOffset + (state.dayIdx || 0) * 1440 + (state.timeMins || 0));
-        const camp = window.KLB.getCampaign(sender);
+        const camp = window.KLB.getCampaign(sender, state);
         const step = camp?.steps?.[state.spectatorMode ? 0 : Math.min(4, state.campaignStepIdx)];
         const rawHint = step?.choice?.askChudsHint || 'Keep glassware oven-dried, solvents anhydrous, and collect clean spectra.';
         const resolved = resolveHintWhatsAppSender(rawHint, sender);
@@ -8197,7 +8304,7 @@ window.KLB = window.KLB || {};
         removeStationJob(job.id);
         window.KLB.Sim.pushWhatsApp(state, state.player.id, '@Nafsika stuck offsite — can you pull my flask into the 4 °C fridge?');
         window.KLB.Sim.pushWhatsApp(state, 'nafsika_forte', 'Nafsika got it — pulled and tucked onto the 4 °C shelf for you.');
-        const camp = window.KLB.getCampaign(state.player.id);
+        const camp = window.KLB.getCampaign(state.player.id, state);
         const step = camp?.steps?.[job.stepIdx];
         const sub = step?.subTasks?.[job.subTaskIdx];
         if (step) {

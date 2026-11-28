@@ -3742,6 +3742,230 @@ window.KLB.WHATSAPP_BANTER = [
     context: 'facility_alert',
     vibe: 'late_week',
     klbchatOnly: true
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'UV 365 nm cabinet is booked for 20 minutes — testing thiomaleimide photo-rebridging and C-terminal cysteine photodecarboxylation.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Just shout before opening the UV shutter Dan, nobody wants photobleached porphyrins nearby.',
+    hourHint: 11,
+    minHour: 9,
+    maxHour: 17.5,
+    context: 'facility_alert'
+  },
+  {
+    senderId: 'daniel_richards',
+    text: 'Clean calcitonin photo-staple adduct on LG11 Q-TOF already — zero loss of C-terminal CO2 until the 365 nm trigger!',
+    replySenderId: 'faiza_javaid',
+    replyText: 'Textbook selectivity Dan, bring those MaxEnt overlays up to 3F for Vijay on Friday.',
+    hourHint: 15.5,
+    minHour: 12,
+    maxHour: 18,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Heading up to 3F? Left fresh neutral pH 8.0 TCEP by the bench for my p-azidobenzyl Staudinger lock on Fab Cys.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Saw your red-tape TCEP stock down in Bay 2 Max, good luck with the Staudinger lock.',
+    hourHint: 10.5,
+    minHour: 9,
+    maxHour: 17,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'maximillian_lee',
+    text: 'Down in LG11 checking MS: zero glycine off-target hits with benzyl isothiocyanate at pH 7.4 — cysteine lock held in 20 mM GSH.',
+    replySenderId: 'richard_spears',
+    replyText: 'Nice clean N-terminal vs cysteine selectivity Max, keeping an eye on those kinetics from 3F.',
+    hourHint: 16,
+    minHour: 13,
+    maxHour: 18.2,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Heads-up from Bay 2 to anyone coming down: every tin-foil-wrapped flask is light-sensitive porphyrin-azide PD — hands off the lamps!',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Copy #Hackerman, looks like a medieval alchemist cave in Chudasama hood two.',
+    hourHint: 11.5,
+    minHour: 9.5,
+    maxHour: 17.5,
+    context: 'facility_alert'
+  },
+  {
+    senderId: 'antoine_maruani',
+    text: 'Walked up to 3F with my multi-porphyrin PDT Herceptin trace — dark stability is 100%, saving singlet-oxygen data for Friday.',
+    replySenderId: 'peter_szijj',
+    replyText: 'Mega loading Antoine, leave some tin foil down in Lab 230 for the rest of us!',
+    hourHint: 16.5,
+    minHour: 14,
+    maxHour: 18.5,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Lab safety notice from Bay 2: dry O2 balloon bubbling cleanly through THF for C(sp3)-H amination — zero open flames near hood one pls.',
+    replySenderId: 'daniel_richards',
+    replyText: 'All clear André, keeping hot air guns unplugged till your azodicarboxylate quench wraps.',
+    hourHint: 11,
+    minHour: 9.5,
+    maxHour: 17,
+    context: 'facility_alert'
+  },
+  {
+    senderId: 'andre_shamsabadi',
+    text: 'Headed down to LG1b — ionic N-N rupture cleaved cleanly into the N-acyl carbamate, queuing 700 MHz VT-NMR now.',
+    replySenderId: 'marco_sabatini',
+    replyText: 'Super clean N-N cleavage André! Checking rotamers on 700 MHz will lock that paper in.',
+    hourHint: 16,
+    minHour: 13.5,
+    maxHour: 18.5,
+    context: 'cross_floor',
+    klbchatOnly: true
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'Walking back from CIB LG11 — dual anti-HER2 Fab-BCN and anti-CD3 Fab-N3 arms just clicked cleanly to the 100 kDa bispecific!',
+    replySenderId: 'joao_nogueira',
+    replyText: 'Wait, 100 kDa Fab-Fab bispecific already?! Bring that Q-TOF trace up to Gordon\'s!',
+    hourHint: 15,
+    minHour: 11.5,
+    maxHour: 18.8,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'peter_szijj',
+    text: 'Still upstairs on 3F checking slides — anyone free in 2F to grab the gel tank at 17:30 for my bispecific purity lanes?',
+    replySenderId: 'archie_wall',
+    replyText: 'All yours after my HSA Cys34 lane pulls at 17:15 Peetah.',
+    hourHint: 17,
+    minHour: 15,
+    maxHour: 19,
+    context: 'cross_floor',
+    klbchatOnly: true
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Quick Lab 230 notice: cryo-quenching TIPS porous PLGA-PEG microparticles at -20 °C right now — hands off freezer rack three for 15 mins.',
+    replySenderId: 'calise_bahou',
+    replyText: 'Hands firmly off freezer rack three João, nobody wants frozen emulsion splashes.',
+    hourHint: 11.5,
+    minHour: 9.5,
+    maxHour: 17,
+    context: 'facility_alert'
+  },
+  {
+    senderId: 'joao_nogueira',
+    text: 'Oriented pancreatic Fab-PLGA nanocarriers beat random NHS control by 4x on antigen capture — celebratory espresso run at Gordon\'s?',
+    replySenderId: 'faiza_javaid',
+    replyText: 'Yes coffee captain, heading over from Bay 2 as soon as this LRG1 spin finishes!',
+    hourHint: 15,
+    minHour: 10.5,
+    maxHour: 17.8,
+    context: 'coffee_call'
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'Sitting on 3F plotting LRG1 affinities — humanised IgG4 Magacizumab digested cleanly to Fab, Native-PAGE shift gel looks sharp!',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Class complex work Daiza! Keep a 1:1 LRG1 apo lane beside the bound shift band.',
+    hourHint: 13.5,
+    minHour: 10.5,
+    maxHour: 17.5,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'faiza_javaid',
+    text: 'Heading out of LG11 — Magacizumab Fab-LRG1 complex held together at 45 °C without aggregating, pH 7.4 calibration paid off!',
+    replySenderId: 'daniel_richards',
+    replyText: 'Textbook biophysical rigour Daiza, Vijay will love that Slide 3 Native-PAGE shift.',
+    hourHint: 16.5,
+    minHour: 14,
+    maxHour: 18,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Back from LG11 to 3F: disulfide-rebridged IgG1 still hits clean pH 6.0 FcRn and FcgRIIIa binding — biophysical trace done!',
+    replySenderId: 'richard_spears',
+    replyText: 'Mega control panel Calise, proves disulfide stapling preserves effector biology.',
+    hourHint: 15.5,
+    minHour: 12.5,
+    maxHour: 18,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'calise_bahou',
+    text: 'Lab safety reminder before lunch: measuring extracellular aryl-thio-PD cleavage vs 10 mM GSH in Bay 2 — bleach bath is primed.',
+    replySenderId: 'marcos_fernandez',
+    replyText: 'Appreciate the primed bleach bath mate, Cupboard 5 has stayed zero-stench all morning.',
+    hourHint: 11,
+    minHour: 9.5,
+    maxHour: 16.5,
+    context: 'facility_alert'
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Checking 128.40.76.1 on 3F: Fmoc-Cys(PD)-OH sailed through neat TFA cleavage without a scratch, then popped right open with selective thiol.',
+    replySenderId: 'antoine_maruani',
+    replyText: 'Clever orthogonal protecting group Rich, saves three painful resin steps.',
+    hourHint: 14,
+    minHour: 10,
+    maxHour: 17.5,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'richard_spears',
+    text: 'Down in LG1b checking 600 MHz NMR — C-terminal cysteine thiophosphonium adduct held 100% intact over 48 h in D2O!',
+    replySenderId: 'calise_bahou',
+    replyText: 'Running up to your 3F kettle for Yorkshire Tea to celebrate Rich!',
+    hourHint: 16,
+    minHour: 13.5,
+    maxHour: 17.8,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'Inspecting LG1b spectra from 3F: regioselective gamma-folate activation hit >92% vs alpha on 600 MHz NMR!',
+    replySenderId: 'andre_shamsabadi',
+    replyText: 'Clean gamma selectivity Marcos! Keep that excess-folate blocking control for Slide 4.',
+    hourHint: 12.5,
+    minHour: 10,
+    maxHour: 17.5,
+    context: 'cross_floor'
+  },
+  {
+    senderId: 'marcos_fernandez',
+    text: 'FR-alpha cell-lysate fluorescence totally wiped out by excess free folic acid control — Jeremy Bentham pints at 18:00?',
+    replySenderId: 'faiza_javaid',
+    replyText: 'Cracking specificity data Marcos, first round at the Bentham on you tonight!',
+    hourHint: 17.8,
+    minHour: 16.5,
+    maxHour: 19,
+    context: 'pub_call'
+  },
+  {
+    senderId: 'archie_wall',
+    text: 'Heading back from CIB LG11: one-pot monobromomaleimide thiol-amine coupling on HSA Cys34 self-hydrolysed cleanly in 20 mM GSH!',
+    replySenderId: 'nafsika_forte',
+    replyText: 'Textbook one-pot stabilisation @Archie, Jamie is going to beam on Friday.',
+    hourHint: 15.8,
+    minHour: 12.5,
+    maxHour: 18,
+    context: 'cross_floor',
+    klbchatOnly: true
+  },
+  {
+    senderId: 'archie_wall',
+    text: 'Door code check from LG1b? Wait, got my balanced-rotor HSA sample spun to 0.00 g, running MS before coffee!',
+    replySenderId: 'maximillian_lee',
+    replyText: '1965 for Mass Spec @Archie, 2145 for NMR. Precision weighing in Baker bay today!',
+    hourHint: 11.2,
+    minHour: 9.2,
+    maxHour: 17,
+    context: 'door_codes',
+    klbchatOnly: true
   }
 ];
 

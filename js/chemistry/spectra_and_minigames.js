@@ -4167,8 +4167,11 @@ window.KLB = window.KLB || {};
       shortName: modalPlayerId === 'archie_wall' ? 'Archie' : 'Chud'
     };
     const isArchieModal = modalPlayerId === 'archie_wall' || playerMeta?.supervisorId === 'jamie_baker';
-    const campTitle = window.KLB.CAMPAIGNS?.[modalPlayerId]?.title
-      || (isArchieModal ? 'Baker Group Weekly Update' : 'Chudasama Group Weekly Update');
+    const activeCamp = window.KLB.getCampaign(modalPlayerId, gameState);
+    const activeCascadeNum = (activeCamp?.cascadeIndex ?? 0) + 1;
+    const campTitle = activeCamp?.title
+      ? `Cascade ${activeCascadeNum}: ${activeCamp.title}`
+      : (isArchieModal ? 'Baker Group Weekly Update' : 'Chudasama Group Weekly Update');
     const isRichard = modalPlayerId === 'richard_spears';
     const missingClicker = modalPlayerId === 'andre_shamsabadi' && !gameState.prep?.has_clicker;
     const weeklyReportPct = clamp(Math.round(Number(gameState.weeklyReportProgress) || 0), 0, 100);
@@ -4518,7 +4521,9 @@ window.KLB = window.KLB || {};
     const supervisorName = isArchie ? 'Prof. Jamie Baker' : 'Prof. Vijay Chudasama';
     const supShort = isArchie ? 'Jamie' : 'Vijay';
     const patienceLabel = isArchie ? 'Jamie Patience' : 'Vijay Patience';
-    const totalSteps = window.KLB.CAMPAIGNS?.[playerId]?.steps?.length || 5;
+    const activeCamp = window.KLB.getCampaign(playerId, state);
+    const activeCascadeIdx = activeCamp?.cascadeIndex ?? 0;
+    const totalSteps = activeCamp?.steps?.length || 5;
     const doneSteps = Array.isArray(state.completedSteps) ? state.completedSteps.length : 0;
     const labBook = (Array.isArray(state.labBook) ? state.labBook : []).filter(Boolean);
     const deck = state.slideDeck || { ready: false, framing: 'mechanistic', fig1Id: null, fig2Id: null, honestDisclosure: true };
@@ -4815,7 +4820,11 @@ window.KLB = window.KLB || {};
 
     if (isArchie) {
       if (doneSteps >= totalSteps) {
-        vijayVerdictLines.push(`All ${totalSteps} campaign steps executed cleanly across the week, ${playerMeta.shortName} — textbook Baker-bay albumin-maleimide momentum and balanced-rotor discipline.`);
+        vijayVerdictLines.push(
+          activeCascadeIdx === 1
+            ? `All ${totalSteps} Cascade 2 steps executed cleanly across the week, ${playerMeta.shortName} — crisp one-pot thiol-amine maleimide selectivity and ring-open discipline.`
+            : `All ${totalSteps} campaign steps executed cleanly across the week, ${playerMeta.shortName} — textbook Baker-bay albumin-maleimide momentum and balanced-rotor discipline.`
+        );
       } else if (!isFinalPhase && doneSteps >= totalSteps - 1) {
         vijayVerdictLines.push(`Lovely progress with ${doneSteps} of ${totalSteps} planned steps complete by Friday morning, ${playerMeta.shortName} — Nafsika can keep an eye on the Baker hood if you finish Step ${totalSteps} before 18:00.`);
       } else if (doneSteps >= 3) {
@@ -4833,7 +4842,11 @@ window.KLB = window.KLB || {};
       }
     } else {
       if (doneSteps >= totalSteps) {
-        vijayVerdictLines.push(`All ${totalSteps} campaign steps executed across the week, ${playerMeta.shortName} — very solid synthetic momentum.`);
+        vijayVerdictLines.push(
+          activeCascadeIdx === 1
+            ? `All ${totalSteps} Cascade 2 steps (${activeCamp?.manuscriptTopic || 'project'}) executed across the week, ${playerMeta.shortName} — sharpest synthetic momentum yet.`
+            : `All ${totalSteps} campaign steps executed across the week, ${playerMeta.shortName} — very solid synthetic momentum.`
+        );
       } else if (!isFinalPhase && doneSteps >= totalSteps - 1) {
         vijayVerdictLines.push(`Strong momentum with ${doneSteps} of ${totalSteps} planned steps complete by Friday morning — wrap up Step ${totalSteps} before 18:00.`);
       } else if (doneSteps >= 3) {
@@ -5174,6 +5187,8 @@ window.KLB = window.KLB || {};
     return {
       total,
       passed,
+      cascadeIndex: activeCascadeIdx,
+      campaignTitle: activeCamp?.title || '',
       passThreshold,
       mutatorBonus,
       faizaRescueApplied,
