@@ -799,11 +799,11 @@
     osc2.stop(now + 0.26);
   }
 
-  // ==================== 6. 17:18 ALEX KING STEALTH BASS OSTINATO (PAUSES WHEN PAUSED) ====================
+  // ==================== 6. 17:18 ALEX KING STEALTH BASS OSTINATO (PLAYS DURING PAUSE) ====================
   const PURSUIT_BASS = [82.41, 82.41, 87.31, 82.41, 98.00, 87.31, 82.41, 77.78]; // E2 minor-second stealth pulse
 
   function playPursuitStep() {
-    if (!ambienceState.alexPursuitOn || paused || muted || stopped) return;
+    if (!ambienceState.alexPursuitOn || muted || stopped) return;
     if (!ctx || ctx.state !== 'running') return;
 
     const pursuitOut = ensurePursuitBusGain();
@@ -999,8 +999,8 @@
       }
     }
 
-    // 5. Alex King 17:18 Stealth Bass Ostinato (pauses cleanly when game is paused)
-    if (activeAudio && !paused && ambienceState.alexPursuitOn) {
+    // 5. Alex King 17:18 Stealth Bass Ostinato (plays even while simulation is paused during alex_stealth)
+    if (activeAudio && ambienceState.alexPursuitOn) {
       const pursuitOut = ensurePursuitBusGain();
       if (pursuitOut) {
         pursuitOut.gain.cancelScheduledValues(now);
@@ -1050,8 +1050,15 @@
   function setPaused(isPaused) {
     paused = Boolean(isPaused);
     if (paused) {
-      // Stop both non-urgent room ambience AND urgent alarm/pursuit timers immediately
-      clearAmbientTimers();
+      // Stop non-urgent room ambience and fire alarm timers immediately;
+      // keep active Alex King stealth ostinato running while alex_stealth pauses the sim
+      clearNonUrgentTimers();
+      clearInterval(alarmTimer);
+      alarmTimer = null;
+      if (!ambienceState.alexPursuitOn) {
+        clearInterval(pursuitTimer);
+        pursuitTimer = null;
+      }
     }
     if (!stopped && ctx && ctx.state === 'running') {
       syncAllAmbienceLayers();

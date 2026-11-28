@@ -832,10 +832,76 @@ window.KLB = window.KLB || {};
     return chosen.item;
   }
 
+  function getTimeHours(state) {
+    if (!state || !Number.isFinite(Number(state.timeMins))) return 12;
+    return Number(state.timeMins) / 60;
+  }
+
+  function extractDialogueText(itemOrText) {
+    if (typeof itemOrText === 'string') return itemOrText;
+    if (!itemOrText || typeof itemOrText !== 'object') return '';
+    const parts = [];
+    if (typeof itemOrText.text === 'string') parts.push(itemOrText.text);
+    if (typeof itemOrText.template === 'string') parts.push(itemOrText.template);
+    if (typeof itemOrText.replyText === 'string') parts.push(itemOrText.replyText);
+    const seq = itemOrText.turns || itemOrText.lines || itemOrText.exchanges;
+    if (Array.isArray(seq)) {
+      for (const entry of seq) {
+        if (typeof entry === 'string') parts.push(entry);
+        else if (entry && typeof entry.text === 'string') parts.push(entry.text);
+      }
+    }
+    return parts.join(' ');
+  }
+
+  const RX_GATE_MORNING = /\b(morning train|tube in|northern line|just got in|commute in|coming in late|before noon|this morning|start of the day|morning espresso|powering my morning|ten twenty-seven|before ten thirty|ten-fifteen|before the afternoon rush)\b/i;
+  const RX_GATE_LUNCH = /\b(lunchtime|grab lunch|off to lunch|pret|gordon's lunch|lunch break)\b/i;
+  const RX_GATE_THREE_PM = /\b(three pm|three o'clock|half three|3 pm|3 o'clock)\b/i;
+  const RX_GATE_AFTERWORK = /\b(after work|pint later|down the pub|institute of education bar|head home|heading home|going home|packing up|called it a day|see you tomorrow|tonight|this evening)\b|\b(?:past three|after 3)(?!(?:\s*(?:hours?|hrs?|mins?|minutes?|days?|weeks?|%|°|\.\d)))\b/i;
+  const RX_GATE_CURFEW = /\b(?:curfew|building closes|locking up|late shift)\b|\bpast (?:5|five)(?!(?:\s*(?:mins?|minutes?|secs?|seconds?|hours?|hrs?|days?|weeks?|%|°|\.\d)))\b/i;
+
+  function isDialogueAllowedAtTime(itemOrText, hourDecimal, dayIdx = null) {
+    const h = typeof hourDecimal === 'number' && Number.isFinite(hourDecimal)
+      ? hourDecimal
+      : (hourDecimal && typeof hourDecimal === 'object' ? getTimeHours(hourDecimal) : 12);
+
+    if (itemOrText && typeof itemOrText === 'object') {
+      if (itemOrText.minHour != null && h < Number(itemOrText.minHour)) return false;
+      if (itemOrText.maxHour != null && h >= Number(itemOrText.maxHour)) return false;
+      if (dayIdx != null && Number.isFinite(Number(dayIdx))) {
+        const d = Number(dayIdx);
+        if (itemOrText.dayOnly != null && d !== Number(itemOrText.dayOnly)) return false;
+        if (itemOrText.minDay != null && d < Number(itemOrText.minDay)) return false;
+        if (itemOrText.maxDay != null && d > Number(itemOrText.maxDay)) return false;
+      }
+    }
+
+    const txt = extractDialogueText(itemOrText);
+    if (!txt) return true;
+    if (h >= 12.0 && RX_GATE_MORNING.test(txt)) return false;
+    if ((h < 11.4 || h > 14.25) && RX_GATE_LUNCH.test(txt)) return false;
+    if (h < 14.5 && RX_GATE_THREE_PM.test(txt)) return false;
+    if (h < 15.0 && RX_GATE_AFTERWORK.test(txt)) return false;
+    if (h < 16.5 && RX_GATE_CURFEW.test(txt)) return false;
+    return true;
+  }
+
   function pickQuoteForNpc(state, npcId) {
     const meta = window.KLB.CAST_BY_ID?.[npcId];
     const quotes = Array.isArray(meta?.quotes) ? meta.quotes : [];
-    return pickFromShuffleBag(state, 'quotes_' + npcId, quotes, q => q);
+    if (!quotes.length) return null;
+    const curHour = getTimeHours(state);
+    const dayIdx = state?.dayIdx ?? null;
+    const timeFiltered = quotes.filter(q => isDialogueAllowedAtTime(q, curHour, dayIdx));
+    const pool = timeFiltered.length ? timeFiltered : quotes;
+    const picked = pickFromShuffleBag(
+      state,
+      'quotes_' + npcId,
+      pool,
+      q => (typeof q === 'string' ? q : (q?.text || JSON.stringify(q)))
+    );
+    if (!picked) return null;
+    return typeof picked === 'string' ? picked : (picked.text || null);
   }
 
   function formatClock(dayIdx, minsFromMidnight) {
@@ -1736,6 +1802,7 @@ window.KLB = window.KLB || {};
         dry_solvent: false,
         bleach_bath: false,
         tlc_check: false,
+        ph_calibrated: false,
         tcep_buffered: resolvedPlayerId !== 'maximillian_lee',
         has_clicker: resolvedPlayerId !== 'andre_shamsabadi',
         sabatini_spritz: false,
@@ -1966,24 +2033,32 @@ window.KLB = window.KLB || {};
     return chuds.find(id => id !== playerId) || preferredId || 'marcos_fernandez';
   }
 
-  function resolveBigChudsSender(state, senderId) {
+  function resolveBigChudsSender(state, senderId, excludeSenderId = null) {
     const chuds = getBigChudsIds();
-    if (chuds.includes(senderId)) return senderId;
-    if (isKlbChatMode(state) && senderId && window.KLB.CAST_BY_ID?.[senderId]) {
-      return senderId;
+    const klbChat = isKlbChatMode(state);
+    if (senderId && senderId !== excludeSenderId) {
+      if (chuds.includes(senderId)) return senderId;
+      if (klbChat && window.KLB.CAST_BY_ID?.[senderId]) return senderId;
     }
     const playerId = state?.spectatorMode ? null : state?.player?.id;
-    const fallbacks = ['marcos_fernandez', 'daniel_richards'].filter(id => id !== playerId && chuds.includes(id));
-    if (fallbacks.length === 2) {
-      return (Math.floor((state?.timeMins || 0) / 7) % 2 === 0) ? fallbacks[0] : fallbacks[1];
+    const poolBase = klbChat
+      ? Array.from(new Set(chuds.concat(['nafsika_forte', 'archie_wall', 'marco_sabatini', 'charlotte_coomber'])))
+      : chuds;
+    const preferredOrder = ['marcos_fernandez', 'daniel_richards', 'maximillian_lee', 'antoine_maruani'];
+    const preferred = preferredOrder.filter(id => id !== playerId && id !== excludeSenderId && poolBase.includes(id));
+    const candidates = preferred.length
+      ? preferred
+      : poolBase.filter(id => id !== playerId && id !== excludeSenderId);
+    if (candidates.length) {
+      const idx = Math.floor((state?.timeMins || 0) / 7) % candidates.length;
+      return candidates[idx];
     }
-    if (fallbacks.length === 1) return fallbacks[0];
-    return chuds.find(id => id !== playerId) || 'marcos_fernandez';
+    return chuds.find(id => id !== excludeSenderId) || 'marcos_fernandez';
   }
 
-  function pushWhatsApp(state, senderId, text, callbacks = null) {
+  function pushWhatsApp(state, senderId, text, callbacks = null, excludeSenderId = null) {
     if (!state) return;
-    const resolvedId = resolveBigChudsSender(state, senderId);
+    const resolvedId = resolveBigChudsSender(state, senderId, excludeSenderId);
     const c = window.KLB.CAST_BY_ID?.[resolvedId] || { shortName: resolvedId, waColor: '#93c5fd', id: resolvedId };
     state.whatsapp.push({
       id: 'wa_' + Math.random().toString(36).slice(2, 9),
@@ -2068,7 +2143,7 @@ window.KLB = window.KLB || {};
       pushWhatsApp(state, 'jamie_baker', 'Morning Baker bay! Safety specs on as soon as you step across the 2F threshold and keep the central balance spotless.');
       pushWhatsApp(state, 'nafsika_forte', 'Central Line running slow this morning @Archie — dry DMF and fresh albumin aliquots are ready in Baker bay, plus remember Thu 18:00 Report & Fri 09:00 Meeting!');
       if (camp) {
-        pushWhatsApp(state, 'daniel_richards', `Good luck on "${camp.title}" this week @Archie! Shout /AskKLBchat or /AskBigChuds if a protocol gets spicy.`);
+        pushWhatsApp(state, 'daniel_richards', `Good luck on "${camp.title}" this week @Archie! Shout /AskKLBchat if a protocol gets spicy.`);
       }
       return;
     }
@@ -2309,6 +2384,10 @@ window.KLB = window.KLB || {};
     return { unlockedIds: Array.from(unlockedIds) };
   }
 
+  function isNpcEvacuating(state, npc) {
+    return Boolean(state?.evacuating || state?.fireAlarm?.active || npc?.evacuating || npc?.pendingRoomTravel?.isFireEvac);
+  }
+
   function scheduleMultiTurnConversation(state, roomId, speakers, turns, convoId, opts = {}) {
     if (!state || !roomId) return null;
     const validSpeakers = (speakers || []).filter(Boolean);
@@ -2332,6 +2411,19 @@ window.KLB = window.KLB || {};
     const slots = Array.isArray(opts.slots) ? opts.slots : null;
     const inPlace = Boolean(opts.inPlace);
     const preserveDeskAction = Boolean(opts.preserveDeskAction);
+
+    const hasPlayerSpeaker = validSpeakers.some(s => Boolean(s.isPlayer || (!state.spectatorMode && state.player?.id === s.id)));
+    if (hasPlayerSpeaker || opts?.cancelPendingTravel) {
+      for (let i = 0; i < validSpeakers.length; i++) {
+        const s = validSpeakers[i];
+        const isPlayerSpk = Boolean(s.isPlayer || (!state.spectatorMode && state.player?.id === s.id));
+        if (isPlayerSpk) continue;
+        const npc = state.npcs?.[s.id] || s;
+        if (npc && npc.pendingRoomTravel && !isNpcEvacuating(state, npc)) {
+          npc.pendingRoomTravel = null;
+        }
+      }
+    }
 
     const assignedByIdx = new Array(validSpeakers.length).fill(null);
     if (!inPlace && !preserveDeskAction && slots && slots.length) {
@@ -2599,11 +2691,10 @@ window.KLB = window.KLB || {};
     const unplayed = allSigs.filter(sig => sig && sig.weeklyKey && !state._weeklySigDone[sig.weeklyKey]);
     if (!unplayed.length) return null;
 
-    if (!opts.ignoreSpacing) {
-      const sameDay = state.dayIdx === state._lastWeeklySigDay;
-      const gap = (state.timeMins || 0) - (state._lastWeeklySigMins ?? -999);
-      if (sameDay && gap < 55) return null;
-    }
+    const sameDay = state.dayIdx === state._lastWeeklySigDay;
+    const gap = (state.timeMins || 0) - (state._lastWeeklySigMins ?? -999);
+    const shortGapBlock = Boolean(!opts.ignoreSpacing && sameDay && gap < 55);
+    if (!opts.ignoreSpacing && sameDay && gap < 15) return null;
 
     const { activeConvoIds, busySpeakerIds } = getActiveRoomConversationInfo(state, roomId);
     const maxConvos = (roomId === 'klb_2f' || roomId === 'gordons_cafe') ? 2 : 1;
@@ -2628,8 +2719,12 @@ window.KLB = window.KLB || {};
       freeMap[state.player.id] = state.player;
     }
 
+    const curHour = getTimeHours(state);
+    const dayIdx = state.dayIdx ?? null;
     const eligible = unplayed.filter(sig => {
       if (!Array.isArray(sig.roomIds) || !sig.roomIds.includes(roomId)) return false;
+      if (shortGapBlock && sig.minHour == null && sig.maxHour == null) return false;
+      if (!isDialogueAllowedAtTime(sig, curHour, dayIdx)) return false;
       const reqIds = Array.isArray(sig.requiredIds) ? sig.requiredIds : [];
       for (const rid of reqIds) {
         if (!freeMap[rid]) return false;
@@ -2650,6 +2745,8 @@ window.KLB = window.KLB || {};
         const v = rawVariants[varIdx];
         const vTurns = Array.isArray(v) ? v : (v?.turns || v?.lines || []);
         if (!vTurns.length) continue;
+        const gateObj = Array.isArray(v) ? { turns: vTurns } : { ...v, turns: vTurns };
+        if (!isDialogueAllowedAtTime(gateObj, curHour, dayIdx)) continue;
         const spkIds = [];
         for (const t of vTurns) {
           const sid = t?.speakerId || t?.id || t?.charId;
@@ -2685,12 +2782,19 @@ window.KLB = window.KLB || {};
     if (!validEligible.length) return null;
 
     const curVibe = getCurrentDialogueVibe(state);
+    const hasTimeWindow = sig => Boolean(sig && (sig.minHour != null || sig.maxHour != null));
     const pickedEntry = pickFromShuffleBag(
       state,
       'weekly_themes',
       validEligible,
       entry => entry.sig.weeklyKey,
-      { preferFn: entry => Boolean(curVibe && entry.sig.vibe === curVibe) }
+      {
+        preferFns: [
+          entry => hasTimeWindow(entry.sig) && Boolean(curVibe && entry.sig.vibe === curVibe),
+          entry => hasTimeWindow(entry.sig),
+          entry => Boolean(curVibe && entry.sig.vibe === curVibe)
+        ]
+      }
     );
     const pickedSig = pickedEntry?.sig || null;
     const chosenVar = pickedSig
@@ -2777,9 +2881,18 @@ window.KLB = window.KLB || {};
         faceTowards(player, npc.x, npc.y);
       }
     }
+    if (npc.pendingRoomTravel && !isNpcEvacuating(state, npc)) {
+      npc.pendingRoomTravel = null;
+    }
+    if ((state.spectatorMode || player !== state.player) && player.pendingRoomTravel && !isNpcEvacuating(state, player)) {
+      player.pendingRoomTravel = null;
+    }
     if (!npc.pendingRoomTravel?.isFireEvac) {
       npc.path = [];
     }
+
+    const curHour = getTimeHours(state);
+    const dayIdx = state.dayIdx ?? null;
 
     if (Array.isArray(state._queuedBubbles) && state._queuedBubbles.length) {
       state._queuedBubbles = state._queuedBubbles.filter(qb => {
@@ -2815,6 +2928,7 @@ window.KLB = window.KLB || {};
     const sigMatches = [];
     for (const sig of allSigs) {
       if (!sig || !sig.weeklyKey || state._weeklySigDone[sig.weeklyKey]) continue;
+      if (!isDialogueAllowedAtTime(sig, curHour, dayIdx)) continue;
       if (Array.isArray(sig.roomIds) && sig.roomIds.length && !sig.roomIds.includes(convRoomId)) continue;
       const rawVariants = Array.isArray(sig.variants) && sig.variants.length
         ? sig.variants
@@ -2824,6 +2938,8 @@ window.KLB = window.KLB || {};
         const v = rawVariants[varIdx];
         const vTurns = Array.isArray(v) ? v : (v?.turns || v?.lines || []);
         if (vTurns.length < 2) continue;
+        const gateObj = Array.isArray(v) ? { turns: vTurns } : { ...v, turns: vTurns };
+        if (!isDialogueAllowedAtTime(gateObj, curHour, dayIdx)) continue;
         const spkIds = [];
         for (const t of vTurns) {
           const sid = t?.speakerId || t?.id || t?.charId;
@@ -2917,6 +3033,7 @@ window.KLB = window.KLB || {};
     const huddleMatches = [];
     for (const h of huddlePool) {
       if (!h) continue;
+      if (!isDialogueAllowedAtTime(h, curHour, dayIdx)) continue;
       const rawTurns = h.lines || h.turns || h.exchanges || [];
       if (rawTurns.length < 2) continue;
       const rawSpkIds = [];
@@ -3012,6 +3129,9 @@ window.KLB = window.KLB || {};
 
     const hasRealTask = Boolean(npc.currentTaskText && npc.currentTaskText !== 'Arriving at KLB');
     const taskTxt = npc.currentTaskText;
+    const greetingWord = curHour < 12 ? 'Morning' : (curHour < 17 ? 'Afternoon' : 'Evening');
+    const isArchiePlayer = !state.spectatorMode && state.player?.id === 'archie_wall';
+    const roundPiName = isArchiePlayer ? 'Jamie' : (state.mutators?.vijays_not_in ? 'Claire' : 'Vijay');
     const openerPool = hasRealTask
       ? [
           `${npcShort}, how is ${taskTxt} going?`,
@@ -3027,10 +3147,10 @@ window.KLB = window.KLB || {};
       : [
           `Hey ${npcShort}, how is your shift going today?`,
           `${npcShort}, fancy a coffee at Gordon's shortly?`,
-          `Afternoon ${npcShort}, everything behaving in KLB?`,
+          `${greetingWord} ${npcShort}, everything behaving in KLB?`,
           `${npcShort}, surviving the lab today or hiding upstairs?`,
           `Quick sanity check ${npcShort}, any dramas on your bench?`,
-          `${npcShort}, reckon Vijay is doing bench rounds soon?`,
+          `${npcShort}, reckon ${roundPiName} is doing bench rounds soon?`,
           `Got five minutes ${npcShort}, or chained to the hood?`,
           `${npcShort}, seen anyone claim the last biscuit upstairs?`,
           `Everything still running cleanly over there, ${npcShort}?`
@@ -3257,8 +3377,12 @@ window.KLB = window.KLB || {};
       return true;
     };
 
+    const curHour = getTimeHours(state);
+    const dayIdx = state.dayIdx ?? null;
+
     const candidates = pool.filter(h => {
       if (!h || h.roomId !== viewRoom) return false;
+      if (!isDialogueAllowedAtTime(h, curHour, dayIdx)) return false;
       const { lines, spkIds } = extractSpkIds(h);
       if (lines.length < 2) return false;
       if (spkIds.length < 2 || spkIds.length > 4) return false;
@@ -3367,9 +3491,15 @@ window.KLB = window.KLB || {};
     const id = npc.id;
     const ext = window.KLB.SPEECH_LINES?.[id];
     const def = DEFAULT_SPEECH_LINES[id];
-    const casualPool = (ext?.casual && ext.casual.length) ? ext.casual : (def?.casual || []);
-    const benchPool = (ext?.bench && ext.bench.length) ? ext.bench : (def?.bench || []);
+    const rawCasual = (ext?.casual && ext.casual.length) ? ext.casual : (def?.casual || []);
+    const rawBench = (ext?.bench && ext.bench.length) ? ext.bench : (def?.bench || []);
     const meta = window.KLB.CAST_BY_ID?.[id];
+    const curHour = getTimeHours(state);
+    const dayIdx = state?.dayIdx ?? null;
+
+    const filterTime = arr => arr.filter(item => isDialogueAllowedAtTime(item, curHour, dayIdx));
+    const casualPool = filterTime(rawCasual);
+    const benchPool = filterTime(rawBench);
 
     const preferCasual = preferCasualOverride !== null ? preferCasualOverride : (Math.random() < 0.82);
     let pool = preferCasual ? casualPool : benchPool;
@@ -3378,9 +3508,18 @@ window.KLB = window.KLB || {};
       pool = preferCasual ? benchPool : casualPool;
       kind = preferCasual ? 'bench' : 'casual';
     }
-    if (!pool.length) pool = meta?.quotes || [];
+    if (!pool.length) pool = filterTime(Array.isArray(meta?.quotes) ? meta.quotes : []);
+    if (!pool.length) pool = preferCasual ? rawCasual : rawBench;
+    if (!pool.length) pool = preferCasual ? rawBench : rawCasual;
+    if (!pool.length) pool = Array.isArray(meta?.quotes) ? meta.quotes : [];
     if (!pool.length) return { text: 'Busy shift in KLB.', kind: 'casual' };
-    const text = pickFromShuffleBag(state, 'speech_' + id + '_' + kind, pool, s => s) || pool[0];
+    const picked = pickFromShuffleBag(
+      state,
+      'speech_' + id + '_' + kind,
+      pool,
+      item => (typeof item === 'string' ? item : (item?.text || JSON.stringify(item)))
+    ) || pool[0];
+    const text = typeof picked === 'string' ? picked : (picked?.text || 'Busy shift in KLB.');
     return { text, kind };
   }
 
@@ -3531,6 +3670,57 @@ window.KLB = window.KLB || {};
     return list[Math.floor(Math.random() * list.length)];
   }
 
+  function getPortalCaptureRadius(roomId, travel) {
+    if (travel?.isSpiralStairs) return 0.85;
+    const meta = window.KLB.ROOM_META || {};
+    const stairs = meta[roomId]?.stairsSpawn;
+    if (stairs && travel?.portalCell && Math.hypot(travel.portalCell.x - stairs.x, travel.portalCell.y - stairs.y) <= 0.6) {
+      return 0.85;
+    }
+    return 0.65;
+  }
+
+  function getDoorwaySpawn(state, roomId, npcId, customSpawn = null) {
+    const base = customSpawn || window.KLB.ROOM_META?.[roomId]?.entrySpawn || { x: 15, y: 12, dir: 'W' };
+    if (state?._headlessVerify) {
+      const free = findFreeWalkableNear(state, roomId, base.x, base.y, npcId, true) || base;
+      return { x: free.x, y: free.y, dir: base.dir || 'S' };
+    }
+    const free = findFreeWalkableNear(state, roomId, base.x, base.y, npcId, true, { allowChokepoints: true });
+    if (free && Math.hypot(free.x - base.x, free.y - base.y) <= 1.5) {
+      return { x: free.x, y: free.y, dir: base.dir || 'S' };
+    }
+    return { x: base.x, y: base.y, dir: base.dir || 'S' };
+  }
+
+  function computePortalPath(state, roomId, sx, sy, portalCell, npcId, forceCollisionFree = false) {
+    if (!portalCell) return [];
+    if (state?._headlessVerify) {
+      const portalFree = findFreeWalkableNear(state, roomId, portalCell.x, portalCell.y, npcId, true, { allowChokepoints: true }) || portalCell;
+      return findPathBFS(roomId, sx, sy, portalFree.x, portalFree.y, 65, state, npcId);
+    }
+    let path = forceCollisionFree
+      ? findPathBFS(roomId, sx, sy, portalCell.x, portalCell.y, 65, null, null)
+      : findPathBFS(roomId, sx, sy, portalCell.x, portalCell.y, 65, state, npcId);
+    const reachesPortal = path.length > 0 &&
+      path[path.length - 1].x === portalCell.x &&
+      path[path.length - 1].y === portalCell.y;
+    if (!reachesPortal) {
+      const fallbackPath = findPathBFS(roomId, sx, sy, portalCell.x, portalCell.y, 65, null, null);
+      if (fallbackPath.length > 0) path = fallbackPath;
+    }
+    if (path.length === 0 && Math.round(sx) === portalCell.x && Math.round(sy) === portalCell.y) {
+      if (Math.hypot(sx - portalCell.x, sy - portalCell.y) > 0.45) {
+        path = [{
+          x: portalCell.x,
+          y: portalCell.y,
+          dir: dirBetween(sx, sy, portalCell.x, portalCell.y) || 'S'
+        }];
+      }
+    }
+    return path;
+  }
+
   function getPortalHop(currentRoom, finalRoom, fireAlarmActive = false) {
     const meta = window.KLB.ROOM_META || {};
     const stairs2f = meta.klb_2f?.stairsSpawn || { x: 18, y: 2, dir: 'S' };
@@ -3543,7 +3733,8 @@ window.KLB = window.KLB || {};
         nextRoom: 'klb_2f',
         portalCell: { x: stairs3f.x, y: stairs3f.y },
         arrivalSpawn: { x: stairs2f.x, y: stairs2f.y, dir: stairs2f.dir || 'S' },
-        isFireEvac: false
+        isFireEvac: false,
+        isSpiralStairs: true
       };
     }
 
@@ -3553,7 +3744,8 @@ window.KLB = window.KLB || {};
           nextRoom: 'klb_3f',
           portalCell: { x: stairs2f.x, y: stairs2f.y },
           arrivalSpawn: { x: stairs3f.x, y: stairs3f.y, dir: stairs3f.dir || 'S' },
-          isFireEvac: false
+          isFireEvac: false,
+          isSpiralStairs: true
         };
       }
       if (finalRoom === 'offsite' && fireAlarmActive) {
@@ -3561,7 +3753,8 @@ window.KLB = window.KLB || {};
           nextRoom: 'offsite',
           portalCell: { x: fireExit2f.x, y: fireExit2f.y },
           arrivalSpawn: null,
-          isFireEvac: true
+          isFireEvac: true,
+          isSpiralStairs: false
         };
       }
       const destEntry = finalRoom === 'offsite' ? null : (meta[finalRoom]?.entrySpawn || null);
@@ -3569,7 +3762,8 @@ window.KLB = window.KLB || {};
         nextRoom: finalRoom,
         portalCell: { x: entry2f.x, y: entry2f.y },
         arrivalSpawn: destEntry ? { ...destEntry } : null,
-        isFireEvac: false
+        isFireEvac: false,
+        isSpiralStairs: false
       };
     }
 
@@ -3579,7 +3773,8 @@ window.KLB = window.KLB || {};
         nextRoom: 'klb_2f',
         portalCell: { x: curEntry.x, y: curEntry.y },
         arrivalSpawn: { x: entry2f.x, y: entry2f.y, dir: entry2f.dir || 'W' },
-        isFireEvac: false
+        isFireEvac: false,
+        isSpiralStairs: false
       };
     }
     const destEntry = finalRoom === 'offsite' ? null : (meta[finalRoom]?.entrySpawn || null);
@@ -3587,7 +3782,8 @@ window.KLB = window.KLB || {};
       nextRoom: finalRoom,
       portalCell: { x: curEntry.x, y: curEntry.y },
       arrivalSpawn: destEntry ? { ...destEntry } : null,
-      isFireEvac: false
+      isFireEvac: false,
+      isSpiralStairs: false
     };
   }
 
@@ -3612,11 +3808,11 @@ window.KLB = window.KLB || {};
     }
 
     const spawn = travel.arrivalSpawn || window.KLB.ROOM_META?.[nextRoom]?.entrySpawn || { x: 15, y: 12 };
-    const freeSpawn = findFreeWalkableNear(state, nextRoom, spawn.x, spawn.y, npc.id, true) || spawn;
+    const freeSpawn = getDoorwaySpawn(state, nextRoom, npc.id, spawn);
     npc.roomId = nextRoom;
     npc.x = freeSpawn.x;
     npc.y = freeSpawn.y;
-    npc.dir = spawn.dir || npc.dir;
+    npc.dir = spawn.dir || freeSpawn.dir || npc.dir;
     npc.huddleLockTimer = 0;
     npc.huddleTarget = null;
     npc.specsOn = nextRoom === 'klb_2f';
@@ -3628,6 +3824,9 @@ window.KLB = window.KLB || {};
           || findFreeWalkableNear(state, nextRoom, travel.destObj.x, travel.destObj.y, npc.id, false);
         if (adj) {
           npc.path = findPathBFS(nextRoom, npc.x, npc.y, adj.x, adj.y, 65, state, npc.id);
+          if (npc.path.length === 0 && (Math.round(npc.x) !== adj.x || Math.round(npc.y) !== adj.y)) {
+            npc.path = findPathBFS(nextRoom, npc.x, npc.y, adj.x, adj.y, 65, null, null);
+          }
           if (npc.path.length === 0) faceObject(npc, travel.destObj);
         } else {
           npc.path = [];
@@ -3635,6 +3834,9 @@ window.KLB = window.KLB || {};
       } else if (travel.destPoint) {
         const ft = findFreeWalkableNear(state, nextRoom, travel.destPoint.x, travel.destPoint.y, npc.id, true) || travel.destPoint;
         npc.path = findPathBFS(nextRoom, npc.x, npc.y, ft.x, ft.y, 65, state, npc.id);
+        if (npc.path.length === 0 && (Math.round(npc.x) !== ft.x || Math.round(npc.y) !== ft.y)) {
+          npc.path = findPathBFS(nextRoom, npc.x, npc.y, ft.x, ft.y, 65, null, null);
+        }
       } else {
         npc.path = [];
       }
@@ -3650,10 +3852,10 @@ window.KLB = window.KLB || {};
       destObj: travel.destObj || null,
       destPoint: travel.destPoint || null,
       isFireEvac: Boolean(nextHop.isFireEvac),
+      isSpiralStairs: Boolean(nextHop.isSpiralStairs),
       waitSec: 0
     };
-    const portalFree = findFreeWalkableNear(state, nextRoom, nextHop.portalCell.x, nextHop.portalCell.y, npc.id, true, { allowChokepoints: true }) || nextHop.portalCell;
-    npc.path = findPathBFS(nextRoom, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+    npc.path = computePortalPath(state, nextRoom, npc.x, npc.y, nextHop.portalCell, npc.id, false);
     return true;
   }
 
@@ -3668,10 +3870,10 @@ window.KLB = window.KLB || {};
       destObj: destObj || null,
       destPoint: destPoint || null,
       isFireEvac: Boolean(hop.isFireEvac),
+      isSpiralStairs: Boolean(hop.isSpiralStairs),
       waitSec: 0
     };
-    const portalFree = findFreeWalkableNear(state, prevRoom, hop.portalCell.x, hop.portalCell.y, npc.id, true, { allowChokepoints: true }) || hop.portalCell;
-    npc.path = findPathBFS(prevRoom, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+    npc.path = computePortalPath(state, prevRoom, npc.x, npc.y, hop.portalCell, npc.id, false);
     if (!alreadyTarget && (prevRoom === 'klb_2f' || prevRoom === 'klb_3f') && (targetRoom === 'cib_lg1b_nmr' || targetRoom === 'cib_lg11_ms')) {
       triggerSampleRunCourtesy(state, npc.id, targetRoom, prevRoom);
     }
@@ -3703,14 +3905,17 @@ window.KLB = window.KLB || {};
         npc.path = [];
         return true;
       }
-      const spawn = window.KLB.ROOM_META?.[targetRoom]?.entrySpawn || { x: 15, y: 12 };
-      const freeSpawn = findFreeWalkableNear(state, targetRoom, spawn.x, spawn.y, npc.id, true) || spawn;
+      const freeSpawn = getDoorwaySpawn(state, targetRoom, npc.id);
       npc.roomId = targetRoom;
       npc.x = freeSpawn.x;
       npc.y = freeSpawn.y;
+      npc.dir = freeSpawn.dir || npc.dir;
       npc.specsOn = targetRoom === 'klb_2f';
       const freeTarget = findFreeWalkableNear(state, targetRoom, tx, ty, npc.id, true) || { x: tx, y: ty };
       npc.path = findPathBFS(targetRoom, npc.x, npc.y, freeTarget.x, freeTarget.y, 65, state, npc.id);
+      if (npc.path.length === 0 && (Math.round(npc.x) !== freeTarget.x || Math.round(npc.y) !== freeTarget.y)) {
+        npc.path = findPathBFS(targetRoom, npc.x, npc.y, freeTarget.x, freeTarget.y, 65, null, null);
+      }
       return true;
     }
 
@@ -3726,6 +3931,9 @@ window.KLB = window.KLB || {};
     }
     const freeTarget = findFreeWalkableNear(state, targetRoom, tx, ty, npc.id, true) || { x: tx, y: ty };
     npc.path = findPathBFS(targetRoom, npc.x, npc.y, freeTarget.x, freeTarget.y, 65, state, npc.id);
+    if (npc.path.length === 0 && (Math.round(npc.x) !== freeTarget.x || Math.round(npc.y) !== freeTarget.y)) {
+      npc.path = findPathBFS(targetRoom, npc.x, npc.y, freeTarget.x, freeTarget.y, 65, null, null);
+    }
     return true;
   }
 
@@ -3757,11 +3965,11 @@ window.KLB = window.KLB || {};
 
     if (prevRoom === 'offsite') {
       npc.pendingRoomTravel = null;
-      const spawn = window.KLB.ROOM_META?.[targetRoom]?.entrySpawn || { x: 15, y: 12 };
-      const freeSpawn = findFreeWalkableNear(state, targetRoom, spawn.x, spawn.y, npc.id, true) || spawn;
+      const freeSpawn = getDoorwaySpawn(state, targetRoom, npc.id);
       npc.roomId = targetRoom;
       npc.x = freeSpawn.x;
       npc.y = freeSpawn.y;
+      npc.dir = freeSpawn.dir || npc.dir;
       npc.specsOn = targetRoom === 'klb_2f';
       npc.path = findPathBFS(targetRoom, npc.x, npc.y, adj.x, adj.y, 65, state, npc.id);
       if (npc.path.length === 0 && (Math.round(npc.x) !== adj.x || Math.round(npc.y) !== adj.y)) {
@@ -5108,11 +5316,11 @@ window.KLB = window.KLB || {};
 
     // 11. Spawn into klb_2f if still offsite
     if (npc.roomId === 'offsite') {
-      const sp = window.KLB.ROOM_META?.klb_2f?.entrySpawn || { x: 28, y: 12 };
-      const free = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, npc.id, true) || sp;
+      const free = getDoorwaySpawn(state, 'klb_2f', npc.id);
       npc.roomId = 'klb_2f';
       npc.x = free.x;
       npc.y = free.y;
+      npc.dir = free.dir || 'W';
       npc.specsOn = true;
       npc.path = [];
     }
@@ -5675,13 +5883,12 @@ window.KLB = window.KLB || {};
         pi.specsOn = true;
         pi.departAtMins = Math.max(pi.departAtMins || 0, activeWin.endMins);
         if (pi.roomId === 'offsite') {
-          const sp = window.KLB.ROOM_META?.klb_2f?.entrySpawn || { x: 28, y: 12 };
-          const free = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, cfg.id, true) || sp;
+          const free = getDoorwaySpawn(state, 'klb_2f', cfg.id);
           pi.pendingRoomTravel = null;
           pi.roomId = 'klb_2f';
           pi.x = free.x;
           pi.y = free.y;
-          pi.dir = 'W';
+          pi.dir = free.dir || 'W';
           pi.path = [];
           const picked = pickStationForStep(state, pi, 'klb_2f', cfg.stationTypes, cfg.group, { allowShared: true });
           if (picked?.adj) {
@@ -5767,12 +5974,12 @@ window.KLB = window.KLB || {};
             vj.departAtMins = state.timeMins + 20;
             vj.currentTaskText = 'Walking through KLB 2F bays';
             if (vj.roomId === 'offsite') {
-              const sp = window.KLB.ROOM_META.klb_2f.entrySpawn;
-              const free = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, 'vijay_chudasama', true) || sp;
+              const free = getDoorwaySpawn(state, 'klb_2f', 'vijay_chudasama');
               vj.pendingRoomTravel = null;
               vj.roomId = 'klb_2f';
               vj.x = free.x;
               vj.y = free.y;
+              vj.dir = free.dir || 'W';
               const hood = findObjectByTypeOrLabel('klb_2f', 'fumehood');
               if (hood) {
                 const adj = findFreeAdjacentWalkable(state, 'klb_2f', hood, 'vijay_chudasama');
@@ -6102,27 +6309,26 @@ window.KLB = window.KLB || {};
 
   function triggerSafetySweep(state, callbacks) {
     state._sweepToday = true;
+    const entry2f = window.KLB.ROOM_META?.klb_2f?.entrySpawn || { x: 28, y: 12, dir: 'W' };
     const cc = state.npcs?.claire_carmalt;
     const si = state.npcs?.safety_inspector;
     if (cc) {
-      const s1 = findFreeWalkableNear(state, 'klb_2f', 27, 12, 'claire_carmalt', true) || { x: 27, y: 12 };
-      cc.roomId = 'klb_2f';
-      cc.x = s1.x;
-      cc.y = s1.y;
-      cc.dir = 'W';
+      cc.departAtMins = null;
+      cc.busyObjId = null;
+      cc.huddleLockTimer = 0;
+      cc.huddleTarget = null;
       cc.specsOn = true;
-      cc.path = [];
       cc.currentTaskText = 'Departmental Safety Sweep';
+      moveNpcToRoomAndPoint(state, cc, 'klb_2f', Math.max(0, entry2f.x - 4), entry2f.y, false);
     }
     if (si) {
-      const s2 = findFreeWalkableNear(state, 'klb_2f', 27, 13, 'safety_inspector', true) || { x: 27, y: 13 };
-      si.roomId = 'klb_2f';
-      si.x = s2.x;
-      si.y = s2.y;
-      si.dir = 'W';
+      si.departAtMins = null;
+      si.busyObjId = null;
+      si.huddleLockTimer = 0;
+      si.huddleTarget = null;
       si.specsOn = true;
-      si.path = [];
       si.currentTaskText = 'Safety Inspection';
+      moveNpcToRoomAndPoint(state, si, 'klb_2f', Math.max(0, entry2f.x - 4), entry2f.y + 1, false);
     }
 
     const countdownSec = (!state.spectatorMode && state.player?.id === 'marcos_fernandez') ? 90 : 45;
@@ -6297,17 +6503,16 @@ window.KLB = window.KLB || {};
 
   function triggerAlexKing1718(state, callbacks) {
     state._alexToday = true;
+    const entry2f = window.KLB.ROOM_META?.klb_2f?.entrySpawn || { x: 28, y: 12, dir: 'W' };
     const ak = state.npcs?.alex_king;
     if (ak) {
-      const spot = findFreeWalkableNear(state, 'klb_2f', 26, 12, 'alex_king', true) || { x: 26, y: 12 };
-      ak.roomId = 'klb_2f';
-      ak.x = spot.x;
-      ak.y = spot.y;
-      ak.dir = 'W';
+      ak.busyObjId = null;
+      ak.huddleLockTimer = 0;
+      ak.huddleTarget = null;
       ak.specsOn = false;
-      ak.path = [];
       ak.departAtMins = state.timeMins + 10;
       ak.currentTaskText = 'Hovering outside Lab 230';
+      moveNpcToRoomAndPoint(state, ak, 'klb_2f', Math.max(0, entry2f.x - 2), entry2f.y, false);
     }
 
     reconcileArchive(arch => {
@@ -6464,6 +6669,7 @@ window.KLB = window.KLB || {};
 
   function isRemoteBanterRealistic(state, b, curHour) {
     if (!b) return false;
+    if (!isDialogueAllowedAtTime(b, curHour, state?.dayIdx)) return false;
     const effectiveSenderId = resolveBigChudsSender(state, b.senderId);
     const sender = state.npcs?.[effectiveSenderId];
     const origSender = b.senderId !== effectiveSenderId ? state.npcs?.[b.senderId] : sender;
@@ -6500,18 +6706,25 @@ window.KLB = window.KLB || {};
   function triggerAmbientBanter(state, opts = {}) {
     const all = window.KLB.WHATSAPP_BANTER || [];
     if (!all.length) return false;
-    const curHour = state.timeMins / 60;
+    const curHour = getTimeHours(state);
+    const dayIdx = state.dayIdx ?? null;
     const curVibe = getCurrentDialogueVibe(state);
     state._usedBanter = state._usedBanter || {};
     const playerId = state.spectatorMode ? null : state.player?.id;
     const isKlbChat = isKlbChatMode(state);
     const vijayOut = Boolean(state.mutators?.vijays_not_in);
+    const chudSet = new Set(getBigChudsIds());
 
-    const banterAllowed = b =>
-      Boolean(b) &&
-      b.senderId !== playerId &&
-      (isKlbChat || !b.klbchatOnly) &&
-      (!vijayOut || (b.senderId !== 'vijay_chudasama' && b.replySenderId !== 'vijay_chudasama'));
+    const banterAllowed = b => {
+      if (!b || b.senderId === playerId) return false;
+      if (!isKlbChat) {
+        if (b.klbchatOnly) return false;
+        if (b.senderId && !chudSet.has(b.senderId)) return false;
+        if (b.replySenderId && !chudSet.has(b.replySenderId)) return false;
+      }
+      if (vijayOut && (b.senderId === 'vijay_chudasama' || b.replySenderId === 'vijay_chudasama')) return false;
+      return isDialogueAllowedAtTime(b, curHour, dayIdx);
+    };
 
     const hourEligible = all.filter(b =>
       banterAllowed(b) &&
@@ -6533,15 +6746,20 @@ window.KLB = window.KLB || {};
     const origIdx = all.indexOf(item);
     if (origIdx >= 0) state._usedBanter[origIdx] = true;
 
-    if (item.senderId && item.senderId !== playerId) {
-      pushWhatsApp(state, item.senderId, item.text);
-      if (item.replySenderId && item.replySenderId !== playerId && item.replyText) {
-        state._queuedWaReplies = state._queuedWaReplies || [];
-        state._queuedWaReplies.push({
-          delayMins: 1,
-          senderId: item.replySenderId,
-          text: item.replyText
-        });
+    const effectiveSenderId = item.senderId ? resolveBigChudsSender(state, item.senderId) : null;
+    if (effectiveSenderId && effectiveSenderId !== playerId) {
+      pushWhatsApp(state, effectiveSenderId, item.text);
+      if (item.replySenderId && item.replyText) {
+        const effectiveReplyId = resolveBigChudsSender(state, item.replySenderId, effectiveSenderId);
+        if (effectiveReplyId && effectiveReplyId !== playerId && effectiveReplyId !== effectiveSenderId) {
+          state._queuedWaReplies = state._queuedWaReplies || [];
+          state._queuedWaReplies.push({
+            delayMins: 1,
+            senderId: effectiveReplyId,
+            replyToId: effectiveSenderId,
+            text: item.replyText
+          });
+        }
       }
       return true;
     }
@@ -6609,13 +6827,12 @@ window.KLB = window.KLB || {};
         vj.departAtMins = Math.max(vj.departAtMins || 0, state.timeMins + 20);
         vj.currentTaskText = 'Doing KLB 2F bench rounds';
         if (vj.roomId === 'offsite') {
-          const sp = window.KLB.ROOM_META?.klb_2f?.entrySpawn || { x: 28, y: 12 };
-          const freeSp = findFreeWalkableNear(state, 'klb_2f', sp.x, sp.y, 'vijay_chudasama', true) || sp;
+          const freeSp = getDoorwaySpawn(state, 'klb_2f', 'vijay_chudasama');
           vj.pendingRoomTravel = null;
           vj.roomId = 'klb_2f';
           vj.x = freeSp.x;
           vj.y = freeSp.y;
-          vj.dir = 'W';
+          vj.dir = freeSp.dir || 'W';
         }
         moveNpcToRoomAndPoint(state, vj, 'klb_2f', Math.round(state.player.x), Math.round(state.player.y), false);
       }
@@ -6645,13 +6862,12 @@ window.KLB = window.KLB || {};
           actor.currentTaskText = 'Patrolling Baker bay & checking specs';
         }
         if (actor.roomId === 'offsite') {
-          const sp = window.KLB.ROOM_META?.[playerRoom]?.entrySpawn || { x: 28, y: 12 };
-          const freeSp = findFreeWalkableNear(state, playerRoom, sp.x, sp.y, actor.id, true) || sp;
+          const freeSp = getDoorwaySpawn(state, playerRoom, actor.id);
           actor.pendingRoomTravel = null;
           actor.roomId = playerRoom;
           actor.x = freeSp.x;
           actor.y = freeSp.y;
-          actor.dir = sp.dir || 'W';
+          actor.dir = freeSp.dir || 'W';
         }
         moveNpcToRoomAndPoint(state, actor, playerRoom, Math.round(state.player.x), Math.round(state.player.y), false);
       }
@@ -6774,8 +6990,11 @@ window.KLB = window.KLB || {};
       state._trackedDayIdx = state.dayIdx;
       state.aoe2UsedToday = false;
       state.coffeeUsedToday = false;
+      state._prevAoe2UsedToday = false;
       state._lcmsHazardToday = false;
       state.aoe2Event = { active: false, endMins: 0 };
+      state.vijayRound = { active: false, checkedPlayer: false };
+      state.doorPls = { active: false, requesterId: null, expireMins: 0 };
       state._pollToday = false;
       state._sweepToday = false;
       state._fireAlarmToday = false;
@@ -6783,7 +7002,13 @@ window.KLB = window.KLB || {};
       state._coffeePingToday = false;
       state._quartetWaToday = false;
       state._eveningToastToday = false;
+      state._salveToday = false;
+      state._speakersMoraleToday = false;
+      state._tcepFavourToday = false;
       state._sampleAskCooldowns = {};
+      if (state.prep) {
+        state.prep.ph_calibrated = false;
+      }
       rollDailyWeather(state);
       rollDailyBirthday(state, callbacks);
     }
@@ -6819,7 +7044,14 @@ window.KLB = window.KLB || {};
     if (!state.spectatorMode) {
       state.activePlayerAction = null;
       state.hadLunchToday = false;
+      state._salveToday = false;
+      state._speakersMoraleToday = false;
+      state._tcepFavourToday = false;
+      state._prevAoe2UsedToday = false;
       state.npcChatCooldowns = {};
+      if (state.prep) {
+        state.prep.ph_calibrated = false;
+      }
     }
 
     for (const npc of Object.values(state.npcs || {})) {
@@ -6854,6 +7086,8 @@ window.KLB = window.KLB || {};
     state.fireAlarm = { active: false, remainingMins: 0, elapsedMins: 0 };
     state.safetySweep = { active: false, countdownSec: 0, countdownMins: 0 };
     state.aoe2Event = { active: false, endMins: 0 };
+    state.vijayRound = { active: false, checkedPlayer: false };
+    state.doorPls = { active: false, requesterId: null, expireMins: 0 };
     state.lcmsBroken = false;
     state._lcmsHazardToday = false;
 
@@ -6894,6 +7128,7 @@ window.KLB = window.KLB || {};
         state.player.x = 27;
         state.player.y = 12;
         state.player.dir = 'W';
+        state.player.specsOn = true;
       }
     }
 
@@ -7060,6 +7295,7 @@ window.KLB = window.KLB || {};
       // 10. Advance NPC paths, portal hops & huddle locks proportionally during headless steps
       if (!state._tickingRealTime) {
         const stepsToAdvance = Math.max(1, Math.round(deltaMins * 1.65));
+        const headlessFast = Boolean(state._headlessVerify);
         for (const npc of Object.values(state.npcs || {})) {
           if ((npc.huddleLockTimer || 0) > 0) {
             npc.huddleLockTimer = Math.max(0, npc.huddleLockTimer - deltaMins * 0.5);
@@ -7070,13 +7306,25 @@ window.KLB = window.KLB || {};
           while (remSteps > 0) {
             if (npc.path && npc.path.length > 0) {
               const step = npc.path[0];
-              if (npc.path.length > 1 || !isOccupiedByCharacter(state, npc.roomId, step.x, step.y, npc.id, 0.48)) {
+              const canStepSqueeze = isChokepointOrDoorway(npc.roomId, step.x, step.y)
+                || Boolean(npc.pendingRoomTravel && (npc.pendingRoomTravel.waitSec || 0) >= 1.5);
+              if (canStepSqueeze || npc.path.length > 1 || !isOccupiedByCharacter(state, npc.roomId, step.x, step.y, npc.id, 0.48)) {
                 npc.x = step.x;
                 npc.y = step.y;
                 npc.dir = step.dir || npc.dir;
                 npc.path.shift();
                 if (npc.path.length === 0 && npc.busyObjId) {
                   faceNpcTowardCurrentAction(npc);
+                }
+                if (!headlessFast && npc.pendingRoomTravel) {
+                  const travel = npc.pendingRoomTravel;
+                  const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
+                  if (dist <= getPortalCaptureRadius(npc.roomId, travel)) {
+                    completeNpcPortalHop(state, npc);
+                    if (npc.roomId === 'offsite') break;
+                    remSteps--;
+                    continue;
+                  }
                 }
                 remSteps--;
                 continue;
@@ -7085,31 +7333,56 @@ window.KLB = window.KLB || {};
                   const travel = npc.pendingRoomTravel;
                   const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
                   travel.waitSec = (travel.waitSec || 0) + (deltaMins / CLOCK_MINS_PER_REAL_SEC);
-                  if (dist <= 1.85 || travel.waitSec >= 4.0) {
+                  const shouldHop = headlessFast
+                    ? (dist <= 1.85 || travel.waitSec >= 4.0)
+                    : (dist <= getPortalCaptureRadius(npc.roomId, travel));
+                  if (shouldHop) {
                     completeNpcPortalHop(state, npc);
                     if (npc.roomId === 'offsite') break;
                     continue;
                   }
                 }
-                const alt = findFreeWalkableNear(state, npc.roomId, step.x, step.y, npc.id, true);
-                if (alt) {
-                  npc.x = alt.x;
-                  npc.y = alt.y;
+                if (headlessFast) {
+                  const alt = findFreeWalkableNear(state, npc.roomId, step.x, step.y, npc.id, true);
+                  if (alt) {
+                    npc.x = alt.x;
+                    npc.y = alt.y;
+                  }
+                  npc.path = [];
+                } else {
+                  const goal = npc.path[npc.path.length - 1];
+                  const alt = findFreeWalkableNear(state, npc.roomId, npc.x, npc.y, npc.id, false);
+                  if (alt && Math.hypot(alt.x - npc.x, alt.y - npc.y) <= 1.5) {
+                    npc.x = alt.x;
+                    npc.y = alt.y;
+                    npc.path = goal ? findPathBFS(npc.roomId, npc.x, npc.y, goal.x, goal.y, 65, null, null) : [];
+                  } else {
+                    npc.path = goal ? findPathBFS(npc.roomId, npc.x, npc.y, goal.x, goal.y, 65, null, null) : [];
+                    if (!npc.path || npc.path.length === 0) break;
+                  }
+                  remSteps--;
                 }
-                npc.path = [];
               }
             }
             if (npc.pendingRoomTravel && (!npc.path || npc.path.length === 0)) {
               const travel = npc.pendingRoomTravel;
               const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
-              if (dist <= 1.85 || (travel.waitSec || 0) >= 4.0) {
+              const capR = headlessFast ? 1.85 : getPortalCaptureRadius(npc.roomId, travel);
+              const shouldHop = headlessFast
+                ? (dist <= 1.85 || (travel.waitSec || 0) >= 4.0)
+                : (dist <= capR);
+              if (shouldHop) {
                 completeNpcPortalHop(state, npc);
                 if (npc.roomId === 'offsite') break;
                 continue;
               } else {
                 travel.waitSec = (travel.waitSec || 0) + (deltaMins / CLOCK_MINS_PER_REAL_SEC);
-                const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true, { allowChokepoints: true }) || travel.portalCell;
-                npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+                if (headlessFast) {
+                  const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true, { allowChokepoints: true }) || travel.portalCell;
+                  npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+                } else {
+                  npc.path = computePortalPath(state, npc.roomId, npc.x, npc.y, travel.portalCell, npc.id, (travel.waitSec || 0) >= 1.5);
+                }
                 if (!npc.path || npc.path.length === 0) break;
                 continue;
               }
@@ -7192,7 +7465,7 @@ window.KLB = window.KLB || {};
         for (const q of state._queuedWaReplies) {
           q.delayMins -= deltaMins;
           if (q.delayMins <= 0) {
-            pushWhatsApp(state, q.senderId, q.text, callbacks);
+            pushWhatsApp(state, q.senderId, q.text, callbacks, q.replyToId || null);
           } else {
             remaining.push(q);
           }
@@ -7298,8 +7571,20 @@ window.KLB = window.KLB || {};
             const rot = avail.filter(n => n.id !== state._lastCoffeeSpeakerId);
             const pool = rot.length ? rot : avail;
             const spk = pool[Math.floor(Math.random() * pool.length)];
-            const lines = window.KLB.COFFEE_QUARTET?.chatLines?.[spk.id] || [];
-            const line = (lines.length && pickFromShuffleBag(state, 'coffee_' + spk.id, lines, s => s))
+            const curHour = getTimeHours(state);
+            const dayIdx = state.dayIdx ?? null;
+            const rawLines = window.KLB.COFFEE_QUARTET?.chatLines?.[spk.id] || [];
+            const gatedLines = rawLines.filter(item => isDialogueAllowedAtTime(item, curHour, dayIdx));
+            const linePool = gatedLines.length ? gatedLines : rawLines;
+            const pickedLine = linePool.length
+              ? pickFromShuffleBag(
+                  state,
+                  'coffee_' + spk.id,
+                  linePool,
+                  s => (typeof s === 'string' ? s : (s?.text || JSON.stringify(s)))
+                )
+              : null;
+            const line = (typeof pickedLine === 'string' ? pickedLine : pickedLine?.text)
               || getSpeechLineForNpc(spk, true, state).text;
             const partnerIds = cqNpcs.map(n => n.id).concat(playerHere ? [state.player.id] : []);
             pushBubble(state, spk.id, 'gordons_cafe', line, calcBubbleTtl(line), { convoId: 'coffee_quartet', partnerIds });
@@ -7531,19 +7816,34 @@ window.KLB = window.KLB || {};
             ny = npc.y + (dy / dist) * speed;
           }
 
+          const headlessFast = Boolean(state._headlessVerify);
           const cellFree = !isOccupiedByCharacter(state, npc.roomId, nx, ny, npc.id, 0.48);
-          const canSqueezePast = !cellFree &&
-            (isChokepointOrDoorway(npc.roomId, next.x, next.y) || (npc.blockedSec || 0) > 0.45) &&
-            (npc.path.length > 1 || dist > speed || Boolean(npc.pendingRoomTravel));
+          const travelUrgent = Boolean(npc.pendingRoomTravel && ((npc.pendingRoomTravel.waitSec || 0) >= 1.5 || isChokepointOrDoorway(npc.roomId, next.x, next.y)));
+          const crowdSqueeze = Boolean(!headlessFast && (npc.totalBlockedSec || 0) >= 1.5);
+          const canSqueezePast = !cellFree && (
+            travelUrgent ||
+            crowdSqueeze ||
+            ((isChokepointOrDoorway(npc.roomId, next.x, next.y) || (npc.blockedSec || 0) > 0.45) &&
+              (npc.path.length > 1 || dist > speed || Boolean(npc.pendingRoomTravel)))
+          );
           if (cellFree || canSqueezePast) {
             npc.x = nx;
             npc.y = ny;
             if (cellFree) {
               npc.blockedSec = 0;
               npc.blockedCount = 0;
+              npc.totalBlockedSec = 0;
             }
             npc.walkAnimTimer = (npc.walkAnimTimer || 0) + dt * 7;
             npc.walkFrame = Math.floor(npc.walkAnimTimer) % 4;
+            if (!headlessFast && npc.pendingRoomTravel) {
+              const travel = npc.pendingRoomTravel;
+              const pDist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
+              if (pDist <= getPortalCaptureRadius(npc.roomId, travel)) {
+                completeNpcPortalHop(state, npc);
+                continue;
+              }
+            }
             if (dist <= speed) {
               npc.path.shift();
               if (npc.path.length === 0) {
@@ -7555,12 +7855,22 @@ window.KLB = window.KLB || {};
           } else {
             npc.walkFrame = 0;
             npc.blockedSec = (npc.blockedSec || 0) + dt;
+            npc.totalBlockedSec = (npc.totalBlockedSec || 0) + dt;
             if (npc.pendingRoomTravel) {
-              npc.pendingRoomTravel.waitSec = (npc.pendingRoomTravel.waitSec || 0) + dt;
-              const pDist = Math.hypot(npc.x - npc.pendingRoomTravel.portalCell.x, npc.y - npc.pendingRoomTravel.portalCell.y);
-              if (pDist <= 1.85 || npc.pendingRoomTravel.waitSec >= 5.5) {
+              const travel = npc.pendingRoomTravel;
+              travel.waitSec = (travel.waitSec || 0) + dt;
+              const pDist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
+              const capR = headlessFast ? 1.85 : getPortalCaptureRadius(npc.roomId, travel);
+              if (headlessFast ? (pDist <= 1.85 || travel.waitSec >= 5.5) : (pDist <= capR)) {
                 completeNpcPortalHop(state, npc);
                 continue;
+              }
+              if (!headlessFast && travel.waitSec >= 1.5) {
+                const freePortalPath = computePortalPath(state, npc.roomId, npc.x, npc.y, travel.portalCell, npc.id, true);
+                if (freePortalPath.length > 0) {
+                  npc.path = freePortalPath;
+                  continue;
+                }
               }
             }
             if (npc.blockedSec > 0.55) {
@@ -7570,11 +7880,15 @@ window.KLB = window.KLB || {};
               if (goal) {
                 npc._retryTarget = { roomId: npc.roomId, x: goal.x, y: goal.y };
               }
-              const newPath = goal
+              let newPath = goal
                 ? findPathBFS(npc.roomId, npc.x, npc.y, goal.x, goal.y, 65, state, npc.id)
                 : [];
+              if (!headlessFast && goal && (newPath.length === 0 || (npc.blockedCount || 0) >= 2)) {
+                const freePath = findPathBFS(npc.roomId, npc.x, npc.y, goal.x, goal.y, 65, null, null);
+                if (freePath.length > 0) newPath = freePath;
+              }
 
-              if (newPath.length > 0 && !isOccupiedByCharacter(state, npc.roomId, newPath[0].x, newPath[0].y, npc.id, 0.48)) {
+              if (newPath.length > 0 && (npc.totalBlockedSec >= 1.5 || !isOccupiedByCharacter(state, npc.roomId, newPath[0].x, newPath[0].y, npc.id, 0.48))) {
                 npc.path = newPath;
               } else {
                 const aside = findFreeWalkableNear(state, npc.roomId, Math.round(npc.x), Math.round(npc.y), npc.id, false);
@@ -7603,14 +7917,20 @@ window.KLB = window.KLB || {};
           npc.walkFrame = 0;
 
           if (npc.pendingRoomTravel) {
+            const headlessFast = Boolean(state._headlessVerify);
             const travel = npc.pendingRoomTravel;
             const dist = Math.hypot(npc.x - travel.portalCell.x, npc.y - travel.portalCell.y);
-            if (dist <= 1.85 || (travel.waitSec || 0) >= 4.0) {
+            const capR = headlessFast ? 1.85 : getPortalCaptureRadius(npc.roomId, travel);
+            if (headlessFast ? (dist <= 1.85 || (travel.waitSec || 0) >= 4.0) : (dist <= capR)) {
               completeNpcPortalHop(state, npc);
             } else {
               travel.waitSec = (travel.waitSec || 0) + dt;
-              const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true, { allowChokepoints: true }) || travel.portalCell;
-              npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+              if (headlessFast) {
+                const portalFree = findFreeWalkableNear(state, npc.roomId, travel.portalCell.x, travel.portalCell.y, npc.id, true, { allowChokepoints: true }) || travel.portalCell;
+                npc.path = findPathBFS(npc.roomId, npc.x, npc.y, portalFree.x, portalFree.y, 65, state, npc.id);
+              } else {
+                npc.path = computePortalPath(state, npc.roomId, npc.x, npc.y, travel.portalCell, npc.id, (travel.waitSec || 0) >= 1.5);
+              }
             }
             continue;
           }
@@ -8095,9 +8415,12 @@ window.KLB = window.KLB || {};
     saveDialogueHistory,
     resetDialogueHistory,
     getCurrentDialogueVibe,
+    getTimeHours,
+    isDialogueAllowedAtTime,
     pickFromShuffleBag,
     pickQuoteForNpc,
     getSpeechLineForNpc,
+    resolveBigChudsSender,
     formatClock,
     formatHHMM,
     isCellWalkable,
@@ -8139,7 +8462,9 @@ window.KLB = window.KLB || {};
     setLabCondition,
     getPortalHop,
     completeNpcPortalHop,
+    moveNpcToRoomAndPoint,
     triggerSafetySweep,
+    triggerAlexKing1718,
     evaluateSafetySweep,
     evaluateWeeklyReportDeadline,
     evaluateManuscriptDeadline,

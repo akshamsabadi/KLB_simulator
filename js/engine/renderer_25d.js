@@ -5013,6 +5013,9 @@
     let nearSeatSurface = false;
     let nearType = null;
     let bestDist = 1.65;
+    const hasDeskChairs = room.objects.some(
+      o => o && o.type === 'chair' && o.group === 'desk_chair'
+    );
 
     for (let i = 0; i < room.objects.length; i++) {
       const o = room.objects[i];
@@ -5028,8 +5031,9 @@
         const cx = o.x + o.w * 0.5;
         const cy = o.y + o.h * 0.5;
         const wantDir = dirFromDelta(cx - (ex + 0.5), cy - (ey + 0.5), dirCode);
-        if (wantDir === dirCode || entity.busyObjId === o.id || o.type === 'cafe_table' ||
-            (o.type === 'writeup_desk' && (room.id === 'cib_lg11_ms' || room.id === 'cib_lg1b_nmr' || room.id === 'klb_3f'))) {
+        if (o.type === 'cafe_table' ||
+            (!hasDeskChairs && (wantDir === dirCode || entity.busyObjId === o.id ||
+              room.id === 'cib_lg11_ms' || room.id === 'cib_lg1b_nmr'))) {
           nearSeatSurface = true;
         }
       }

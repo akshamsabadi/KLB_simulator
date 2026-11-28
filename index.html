@@ -4,21 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KLB Simulator — UCL Chemistry Lab Simulation</title>
-  <meta name="description" content="Play KLB Simulator — a 2.5D UCL Chemistry lab simulation set in the Kathleen Lonsdale Building. Run reactions, dodge safety sweeps, survive Vijay's Friday Group Meeting, and banter with the Big-Chuds." />
+  <meta name="description" content="Play KLB Simulator — a 2.5D UCL Chemistry lab simulation set in the Kathleen Lonsdale Building. Run reactions, dodge safety sweeps, survive Vijay or Jamie's Friday Group Meeting, and banter with the Big-Chuds." />
   <meta name="theme-color" content="#0b101b" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://akshamsabadi.github.io/KLB_simulator/" />
   <meta property="og:title" content="KLB Simulator — UCL Chemistry Lab Simulation" />
-  <meta property="og:description" content="Run bioconjugation reactions, dodge Safety Sweeps, survive Prof. Vijay's Friday 09:00 Audit, and banter with the Big-Chuds in 2.5D." />
+  <meta property="og:description" content="Run bioconjugation reactions, dodge Safety Sweeps, survive Vijay &amp; Jamie's Friday 09:00 Audit, and banter with the Big-Chuds in 2.5D." />
   <meta property="og:image" content="https://akshamsabadi.github.io/KLB_simulator/assets/og_preview.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="KLB Simulator — UCL Chemistry Lab Simulation" />
-  <meta name="twitter:description" content="Run bioconjugation reactions, dodge Safety Sweeps, survive Prof. Vijay's Friday 09:00 Audit, and banter with the Big-Chuds in 2.5D." />
+  <meta name="twitter:description" content="Run bioconjugation reactions, dodge Safety Sweeps, survive Vijay &amp; Jamie's Friday 09:00 Audit, and banter with the Big-Chuds in 2.5D." />
   <meta name="twitter:image" content="https://akshamsabadi.github.io/KLB_simulator/assets/og_preview.jpg" />
-  <link rel="stylesheet" href="css/style.css?v=20261128b" />
+  <link rel="stylesheet" href="css/style.css?v=20261128c" />
 </head>
 <body>
 
@@ -72,7 +72,7 @@
               <span class="icon-inline" data-lucide="list-checks" data-size="13"></span>
               <span>Your KLB Week</span>
             </h4>
-            <p>Complete 5 bench steps &rarr; Submit Weekly Report (<code>Thu 18:00</code>) &rarr; Build 4-Slide Deck for Vijay (<code>Fri 09:00</code>) &rarr; Finish Manuscript (<code>Fri 18:00</code>)</p>
+            <p>Complete 5 bench steps &rarr; Submit Weekly Report (<code>Thu 18:00</code>) &rarr; Build 4-Slide Deck for Vijay / Jamie (<code>Fri 09:00</code>) &rarr; Finish Manuscript (<code>Fri 18:00</code>)</p>
           </div>
           <div class="quickstart-col">
             <h4>
@@ -109,16 +109,16 @@
           </button>
 
           <div id="spectator-room-wrap" class="spectator-room-wrap hidden">
-            <select id="select-travel" class="ui-select compact" aria-label="Observer Room"></select>
-            <div id="spec-speed-group" class="spec-speed-bar" role="group" aria-label="Spectator speed">
-              <button type="button" class="spec-speed-btn active" data-speed="1">1x</button>
-              <button type="button" class="spec-speed-btn" data-speed="2">2x</button>
-              <button type="button" class="spec-speed-btn" data-speed="4">4x</button>
+            <select id="select-travel" class="ui-select compact" aria-label="Observer Room" title="Jump observer camera to room"></select>
+            <div id="spec-speed-group" class="spec-speed-bar" role="group" aria-label="Observer simulation speed">
+              <button type="button" class="spec-speed-btn active" data-speed="1" title="Observer speed 1x">1x</button>
+              <button type="button" class="spec-speed-btn" data-speed="2" title="Observer speed 2x">2x</button>
+              <button type="button" class="spec-speed-btn" data-speed="4" title="Observer speed 4x">4x</button>
             </div>
             <span id="spec-follow-badge" class="spec-follow-badge hidden"></span>
           </div>
 
-          <select id="select-zoom" class="ui-select compact" aria-label="Camera Zoom">
+          <select id="select-zoom" class="ui-select compact" aria-label="Camera Zoom" title="Camera zoom">
             <option value="fit">Fit Whole Floor</option>
             <option value="0.55">Zoom 55%</option>
             <option value="0.75">Zoom 75%</option>
@@ -127,12 +127,12 @@
             <option value="1.5">Zoom 150%</option>
           </select>
 
-          <button id="btn-mute" class="hud-btn" title="Mute / Unmute WebAudio">
+          <button id="btn-mute" class="hud-btn" title="Mute / Unmute WebAudio (M)">
             <span class="icon-inline" data-lucide="volume-2" data-size="15"></span>
             <span id="lbl-mute">Audio</span>
           </button>
 
-          <button id="btn-new-run" class="hud-btn" title="Return to Character Select">
+          <button id="btn-new-run" class="hud-btn" title="Pause Menu &amp; Character Select">
             <span class="icon-inline" data-lucide="rotate-ccw" data-size="14"></span>
             <span>Menu</span>
           </button>
@@ -158,7 +158,7 @@
       </div>
 
       <footer id="controls-strip">
-        <span id="controls-hint-text">WASD / Arrows / Click: Move  |  Space: Pause  |  E / Click: Interact  |  G: Specs  |  H: Headphones  |  Esc: Close</span>
+        <span id="controls-hint-text">WASD / Arrows / Click: Move  |  Space: Pause  |  E / Click: Interact  |  G: Specs  |  H: Headphones  |  M: Mute  |  Esc: Close</span>
         <span id="hud-hover-hint">Facing: -</span>
       </footer>
     </section>
@@ -228,7 +228,7 @@
               <div class="meter-lbl">
                 <span class="meter-name">
                   <span class="icon-inline" data-lucide="gauge" data-size="13"></span>
-                  <span id="lbl-patience-name">Vijay Patience</span>
+                  <span id="lbl-patience-name">Supervisor Patience</span>
                 </span>
                 <span id="val-patience" class="meter-val">82</span>
               </div>
@@ -249,7 +249,7 @@
         </div>
 
         <div id="spectator-summary" class="spectator-summary hidden">
-          <p id="spectator-stats-line" class="spectator-stats-line">All 10 Big-Chuds running autonomously at real-time pace.</p>
+          <p id="spectator-stats-line" class="spectator-stats-line">All 10 Big-Chuds and campus neighbours running autonomously.</p>
         </div>
       </section>
 
@@ -369,15 +369,15 @@
   </div>
 
   <!-- Ordered Classic Scripts (Zero file:// CORS issues, zero build step) -->
-  <script defer src="js/ui/icons.js?v=20261128b"></script>
-  <script defer src="js/data/world_data.js?v=20261128b"></script>
-  <script defer src="js/data/cast_data.js?v=20261128b"></script>
-  <script defer src="js/data/campaigns_data.js?v=20261128b"></script>
-  <script defer src="js/data/events_data.js?v=20261128b"></script>
-  <script defer src="js/engine/audio.js?v=20261128b"></script>
-  <script defer src="js/engine/renderer_25d.js?v=20261128b"></script>
-  <script defer src="js/chemistry/spectra_and_minigames.js?v=20261128b"></script>
-  <script defer src="js/engine/sim_and_ai.js?v=20261128b"></script>
-  <script defer src="js/main.js?v=20261128b"></script>
+  <script defer src="js/ui/icons.js?v=20261128c"></script>
+  <script defer src="js/data/world_data.js?v=20261128c"></script>
+  <script defer src="js/data/cast_data.js?v=20261128c"></script>
+  <script defer src="js/data/campaigns_data.js?v=20261128c"></script>
+  <script defer src="js/data/events_data.js?v=20261128c"></script>
+  <script defer src="js/engine/audio.js?v=20261128c"></script>
+  <script defer src="js/engine/renderer_25d.js?v=20261128c"></script>
+  <script defer src="js/chemistry/spectra_and_minigames.js?v=20261128c"></script>
+  <script defer src="js/engine/sim_and_ai.js?v=20261128c"></script>
+  <script defer src="js/main.js?v=20261128c"></script>
 </body>
 </html>

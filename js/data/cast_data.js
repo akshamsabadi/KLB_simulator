@@ -21,12 +21,12 @@ window.KLB.CAST = [
     flawDesc: "2x Energy drain after 18:00 curfew; rare bench fumble with sharp scissors and loud lab laugh lore below 25 Energy.",
     waColor: "#60a5fa",
     quotes: [
-      "Morning team — been in since 07:45, Büchi 1 is already warmed up #BCN4Life",
+      { text: "Morning team — been in since 07:45, Büchi 1 is already warmed up #BCN4Life", maxHour: 12 },
       "Pepsin at pH 3.1 is behaving beautifully today, touch wood.",
       "Honestly if pH drifts 0.2 units on the 40 nm AuNPs they turn purple instantly.",
-      "Right, past 18:00, this grandad is heading home before I fall asleep in the hood.",
+      { text: "Right, past 18:00, this grandad is heading home before I fall asleep in the hood.", minHour: 16.5 },
       "Keep Trastuzumab Fab well away from Protein A unless you fancy losing half your yield.",
-      "Zero noise in Lab 230 at 07:45 — just me, the kettle, and a peaceful rotavap.",
+      { text: "Zero noise in Lab 230 at 07:45 — just me, the kettle, and a peaceful rotavap.", maxHour: 12 },
       "Everything is strictly suboptimal until my Burnley lads actually score before halftime.",
       "If anyone asks where those fourteen lemons came from, tell them I remained upstairs.",
       "Clean deconvoluted mass spec trace, no salt adducts, almost makes waking at six worthwhile.",
@@ -157,17 +157,17 @@ window.KLB.CAST = [
     flawDesc: "If Energy drops below 30, risks accidentally pipetting blue SDS loading dye into pure Fab stock instead of the gel PCR tube!",
     waColor: "#34d399",
     quotes: [
-      "6 PM in KLB 230 — lab's finally quiet, putting Howard Shore's Shire theme on the speakers.",
+      { text: "6 PM in KLB 230 — lab's finally quiet, putting Howard Shore's Shire theme on the speakers.", minHour: 16.5 },
       "Running parallel Trastuzumab, Rituximab and OKT3 digests like a one-man antibody factory.",
       "Please tell me I didn't just pipette 2 µL of blue LDS sample buffer into my pure Fab Eppendorf!",
       "SPIEDAC tetrazine click goes in minutes — cleanest 147 kDa band you'll ever see.",
       "Keep S. typhimurium sialidase strictly at pH 7.0 or your CiTE activity drops off a cliff.",
-      "Once 18:00 passes in Lab 230, Howard Shore carries Superdex fractions across the line.",
+      { text: "Once 18:00 passes in Lab 230, Howard Shore carries Superdex fractions across the line.", minHour: 16.5 },
       "Close the pure Fab master tube before touching blue LDS loading dye, learn from fear.",
       "Pink tetrazine SPIEDAC clicks fast enough to make protein chemists weep with joy.",
-      "Nothing beats a warm Hungarian sóskifli and a quiet 147 kDa SynAb gel after six.",
+      { text: "Nothing beats a warm Hungarian sóskifli and a quiet 147 kDa SynAb gel after six.", minHour: 16.5 },
       "Two hours of Hearts of Iron IV after lab somehow sharpens my Fc digest planning.",
-      "Walking out at lockup with Intro by The xx playing makes Bloomsbury rain cinematic."
+      { text: "Walking out at lockup with Intro by The xx playing makes Bloomsbury rain cinematic.", minHour: 16.5 }
     ],
     hintSpecialty: "bioconj",
     hintLine: "Peter nods over the gel tank: 'Keep sialidase CiTE clicks gentle at pH 7.0, and never pipette near pure Fab stocks when your Energy is below 30!'"
@@ -191,16 +191,16 @@ window.KLB.CAST = [
     flawDesc: "Refuses cold triangle Meal Deals & Dr Pepper; starting Biotage flash columns after 17:30 drains extra Energy.",
     waColor: "#fbbf24",
     quotes: [
-      "10:27 — Gordon's coffee run? Anyone coming?",
+      { text: "10:27 — Gordon's coffee run? Anyone coming?", maxHour: 12 },
       "How do British people call cold wet triangle bread + crisps + Dr Pepper 'lunch'?!",
       "11 kDa shark VNAR E4 clicked onto PLGA–PEG–N3 nanoparticles — polydispersity < 0.12!",
-      "17:30 and I'm just loading a silica column before lockup, pray for me.",
+      { text: "17:30 and I'm just loading a silica column before lockup, pray for me.", minHour: 16.5 },
       "One warm pastel de nata and a double espresso at Gordon's fixes any failed column.",
       "Add 0.05% Tween 80 or hydrophobic PLGA microparticles float on PBS out of sheer spite.",
       "Checking Malvern Zetasizer DLS after lunch — anything below PDI 0.10 earns celebrations.",
       "Abolish cold triangle sandwiches and baby carrots, bring warm bacalhau to the 3F table.",
       "Small 11 kDa shark VNARs slip into tumour crevices whole IgGs can only dream about.",
-      "Starting a silica column after 17:30 is reckless, yet here I stand with DCM ready.",
+      { text: "Starting a silica column after 17:30 is reckless, yet here I stand with DCM ready.", minHour: 16.5 },
       "Ten twenty-seven sharp at the coffee corner — never ask me to drink instant granules."
     ],
     hintSpecialty: "nano",
@@ -226,14 +226,14 @@ window.KLB.CAST = [
     waColor: "#f472b6",
     quotes: [
       "Guys what's the Mass Spec door code again?? Standing outside LG11!",
-      "I wasn't late, my morning train stalled outside Euston I swear!",
+      { text: "I wasn't late, my morning train stalled outside Euston I swear!", maxHour: 12 },
       "Pre-clicking diBrPD-BCN + N3-vc-PABC-MMAE first makes IgG4 DAR 4 rebridging so much cleaner.",
       "Need an A280 antibody check on the 2F bench? Just ask nicely!",
       "IgG4 S228P stays stubborn until you pre-click MMAE cleanly onto diBrPD-BCN first.",
       "Cathepsin B at pH 6.5 wakes right up while control buffer keeps the payload locked.",
       "Stop calling it Laboys — it is Laboys and girl, now pass the dark chocolate cake.",
       "Touch one windmill in my peaceful Age of Empires village and I hide the P20 pipettes.",
-      "West Coast mainline signals hate me personally, I swear I left home before eight.",
+      { text: "West Coast mainline signals hate me personally, I swear I left home before eight.", maxHour: 12 },
       "Two quick A280 and A335 reads on 2F save an entire wasted afternoon in LG11.",
       "Wait, is it 1965 for Mass Spec and 2145 for NMR, or did Estates swap them again?"
     ],
@@ -333,7 +333,7 @@ window.KLB.CAST = [
       "5 mM GSH cleaved the self-immolative coumarin linker cleanly while 40 mg/mL HSA stayed dark!",
       "Quench every thiol pipette straight in the bleach bath before Lab 230 clears the floor.",
       "Coumarin SMDC stays dark in serum albumin and flares bright blue inside tumour glutathione.",
-      "Buzzed three people through the 2F door before nine — consider it an unofficial duty.",
+      { text: "Buzzed three people through the 2F door before nine — consider it an unofficial duty.", maxHour: 12 },
       "Watch the stairs at quarter past ten, I spot Vijay and Prof. Carmalt ninety seconds early.",
       "Nobody opens Cupboard 19 without gloves and a fresh witness from Bay 2.",
       "Between slow Euston buses and RiskNET forms, Thursday fencing feels downright gentle.",
@@ -363,9 +363,9 @@ window.KLB.CAST = [
       "Every Friday slide needs a watertight mechanism, crisp data, and zero hand-waving.",
       "Never skip the unreduced antibody lane, it is the first box I check on every gel.",
       "Ten minutes over espresso at Gordon's often saves three days of chasing noise.",
-      "Signing a South American wonderkid on the morning train beats reading admin emails.",
+      { text: "Signing a South American wonderkid on the morning train beats reading admin emails.", maxHour: 12 },
       "Suboptimal is strictly one word, though your yield recovery this week looks strong.",
-      "Keep the Arsenal midfield talk brief before nine unless we actually kept a clean sheet.",
+      { text: "Keep the Arsenal midfield talk brief before nine unless we actually kept a clean sheet.", maxHour: 12 },
       "If the British weather holds for Sunday golf and a group BBQ, nobody mention Biotage."
     ]
   },
@@ -381,7 +381,7 @@ window.KLB.CAST = [
     role: "Baker Group PI • Safety-Specs Enforcer",
     waColor: "#10b981",
     quotes: [
-      "Morning — safety specs on as soon as you step past the door, please!",
+      { text: "Morning — safety specs on as soon as you step past the door, please!", maxHour: 12 },
       "Keep the central balance table spotless after weighing, everyone.",
       "Nice seeing the maleimide and PD bays humming along.",
       "Safety specs go on before your trainers cross the blue threshold, zero exceptions.",
@@ -409,12 +409,12 @@ window.KLB.CAST = [
       "Dry glassware makes all the difference on tricky condensations.",
       "Fancy bumping into half of KLB downstairs at Gordon's Café!",
       "Active four-Ångström molecular sieves cure half the headaches in borate amidation.",
-      "Nine o'clock organic lecture done, straight down to Gordon's before the queue doubles.",
+      { text: "Nine o'clock organic lecture done, straight down to Gordon's before the queue doubles.", maxHour: 12 },
       "KLB heating swings between Arctic wind tunnel and tropical greenhouse before lunch.",
       "Keep the glassware oven stocked and flame-dry twice when London drizzle hangs inside.",
       "Nothing beats escaping three hours of committee emails for twenty minutes by the hoods.",
       "Nothing beats watching a room-temperature borate coupling finish cleanly by lunch.",
-      "Tell Charlotte and Marco to leave half a Biotage slot free before four o'clock."
+      { text: "Tell Charlotte and Marco to leave half a Biotage slot free before four o'clock.", maxHour: 16 }
     ]
   },
   {
@@ -432,7 +432,7 @@ window.KLB.CAST = [
     role: "Baker Group Researcher • Official KLB First Aider & Late-Night Rescuer",
     waColor: "#10b981",
     quotes: [
-      "Still in Lab 230 until 19:15 — shout if you're stuck in CIB and need your flask pulled off heat!",
+      { text: "Still in Lab 230 until 19:15 — shout if you're stuck in CIB and need your flask pulled off heat!", minHour: 15 },
       "First-aid kit is stocked if anyone gets a dry-ice burn or glass nick.",
       "Need emergency anhydrous DMF or a tiny aliquot of Herceptin Fab? Cash in a Favour!",
       "If your Biotage is running past six and you need to dash, leave clear notes by my hood.",
@@ -441,7 +441,7 @@ window.KLB.CAST = [
       "First-aid plasters and ice packs live in the top drawer — shout before hiding a nick.",
       "Ten-thirty flat white at Gordon's is the single civilised pause in a rainy Tuesday.",
       "Check the 4 °C fridge latch before leaving, nobody enjoys finding melted buffer ice.",
-      "Lab 230 hits peak peace around seven in the evening when the rotavaps quiet down."
+      { text: "Lab 230 hits peak peace around seven in the evening when the rotavaps quiet down.", minHour: 16.5 }
     ]
   },
   {
@@ -472,9 +472,9 @@ window.KLB.CAST = [
       "Balance every centrifuge pair to 0.01 g or hear me cross Lab 230 in three strides.",
       "Spinning down albumin conjugates cleanly means balancing every pair to the hundredth.",
       "Got lanes nine and ten free on my 12% gel if someone brings a properly desalted sample.",
-      "Central Line at half eight tests human dignity, thank goodness for focaccia wraps.",
+      { text: "Central Line at half eight tests human dignity, thank goodness for focaccia wraps.", maxHour: 12 },
       "Büchi vacuum holding steady below 20 mbar means clean fractions before Champions League.",
-      "Two minutes till halftime in the Champions League — nobody start a flash column now.",
+      { text: "Two minutes till halftime in the Champions League — nobody start a flash column now.", minHour: 16.5 },
       "Maleimide-albumin conjugates run smoothly when nobody crashes the shared spin filters."
     ],
     hintSpecialty: "bioconj",
@@ -499,7 +499,7 @@ window.KLB.CAST = [
       "A tiny spritz of 'Sabatini by Sabatini' and even Kersti & Abil will smile at your vials!",
       "Treat the heirloom 'in memoriam Sabatini' TLC chamber with respect — fastest Rf separation in KLB.",
       "Bellissimo spot separation on 254 nm!",
-      "Two espressos before ten, clean boronate catalysis by noon — la dolce vita in KLB.",
+      { text: "Two espressos before ten, clean boronate catalysis by noon — la dolce vita in KLB.", maxHour: 12 },
       "Catalytic trimethyl borate works magic once molecular sieves drink every trace of water.",
       "A subtle wrist-spritz of Sabatini by Sabatini softens even Kersti before five o'clock.",
       "After three years in Paris and Lyon, proper Milanese espresso remains non-negotiable.",
@@ -528,7 +528,7 @@ window.KLB.CAST = [
       "Doing a card collection at the Sheppard desks if anyone has £2 coins!",
       "Wait till you hear the South London night-bus saga, just keep your headphones off a second.",
       "Guarding three fresh black dry-wipe markers for whoever gets grilled by Vijay first.",
-      "Booked the corner booth at the pub from five — everybody owes £2 for the leaving card.",
+      { text: "Booked the corner booth at the pub from five — everybody owes £2 for the leaving card.", minHour: 15 },
       "Thursday pub trivia still needs someone who actually remembers obscure 90s film plots.",
       "Just snapped my fourth TLC capillary in a row, someone pass an almond croissant fast.",
       "Who left their rotary evaporator timer screaming across Sheppard bay for twelve minutes?",
@@ -580,7 +580,7 @@ window.KLB.CAST = [
       "Check 128.40.76.1 from your desk upstairs before crowding my LG1b doorway.",
       "Every uncollected tube at five o'clock earns an automatic tour of the Sample Fridge.",
       "Do not blame a seventy-million-pound superconducting magnet for a muddy shim job.",
-      "Five minutes to five and six students sprint through the door with warm CDCl3 tubes.",
+      { text: "Five minutes to five and six students sprint through the door with warm CDCl3 tubes.", minHour: 16.5 },
       "A quiet mug of tea and clean NOESY cross-peaks beats the Northern Line every day.",
       "Polite manners and Sabatini cologne open doors faster than begging off a £130 fine."
     ]
@@ -596,12 +596,12 @@ window.KLB.CAST = [
     role: "Head of UCL Chemistry • Departmental Safety Sweep",
     waColor: "#ec4899",
     quotes: [
-      "Afternoon KLB — thirty seconds to inspect your sashes, specs, and bench discipline before my next committee.",
+      { text: "Afternoon KLB — thirty seconds to inspect your sashes, specs, and bench discipline before my next committee.", minHour: 12 },
       "Love seeing three groups sharing Lab 230 smoothly, as long as nobody blocks my fire doors.",
       "Winchesters capped, extinguishers home, smiles on — make Chemistry proud on Friday.",
       "Specs firmly on, headphones completely off, and keep those fire exits crystal clear.",
       "Sashes down to the calibration arrow — the departmental fume bill already rivals a grant.",
-      "Between Dean committees and seminar prep, spotting a spotless Bay 2 makes my afternoon.",
+      { text: "Between Dean committees and seminar prep, spotting a spotless Bay 2 makes my afternoon.", minHour: 12 },
       "Remind your benchmates that solvent Winchesters belong capped inside COSHH cupboards.",
       "Three research groups sharing Lab 230 cleanly is Bloomsbury chemistry at its finest.",
       "Friday four o'clock departmental seminar starts sharp, save your espresso for afterwards.",
@@ -644,13 +644,13 @@ window.KLB.CAST = [
     quotes: [
       "Excuse me, is this the corridor to Gordon's Café or the upstairs tea room?",
       "Wait, does everyone in white coats get priority at the Gordon Street espresso bar?",
-      "Sorry to hover by your hood — someone told me the coffee group meets here at 17:18!",
+      { text: "Sorry to hover by your hood — someone told me the coffee group meets here at 17:18!", minHour: 16.5 },
       "*Peers earnestly over your shoulder at a swirling flask* Oh, is that matcha or reaction mix?",
-      "Oh, sorry, I thought the coffee group met outside Lab 230 at quarter past five!",
+      { text: "Oh, sorry, I thought the coffee group met outside Lab 230 at quarter past five!", minHour: 16.5 },
       "Does this spiral staircase actually go straight up to the 3rd-floor tea room?",
       "That bubbling pink flask looks really fancy — is that for afternoon tea or work?",
       "Don't mind me standing behind your stool, I am just waiting for someone from 3F.",
-      "Wait, if everyone walks over to Gordon's Café at five, should I bring my coat?",
+      { text: "Wait, if everyone walks over to Gordon's Café at five, should I bring my coat?", minHour: 15 },
       "Oh, you're heading down to NMR right now? Let me just grab my bag and walk along!",
       "Funny bumping into you in the corridor again — everyone in white coats walks so fast!"
     ]
@@ -1770,6 +1770,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_dan_max_curfew",
+    minHour: 16.5,
     roomId: "klb_2f",
     turns: [
       { speakerId: "daniel_richards", text: "Max, quarter to six, packing up before my bedtime hits." },
@@ -1878,6 +1879,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_peter_lotr_6pm",
+    minHour: 16.5,
     roomId: "klb_2f",
     turns: [
       { speakerId: "peter_szijj", text: "Past six at last, putting Howard Shore's Shire theme on!" },
@@ -1905,6 +1907,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_coffee_1027_rally",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "joao_nogueira", text: "Ten twenty-seven coffeebois and girl, Gordon's right now!" },
@@ -1932,6 +1935,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_marcos_doorbuzz",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "andre_shamsabadi", text: "Marcos, forgot my UCL card downstairs, can you buzz me in?" },
@@ -2004,6 +2008,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_mill_hill_nuclear_blockade",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "maximillian_lee", text: "Calise, escaped Mill Hill East before the signal meltdown?" },
@@ -2076,6 +2081,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_faiza_peter_farms",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "peter_szijj", text: "Faiza, spare my peaceful farms in tonight's AoE lobby?" },
@@ -2094,6 +2100,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_calise_marcos_northern",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "calise_bahou", text: "Marcos, Northern Line cursed this morning or smooth run?" },
@@ -2103,6 +2110,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_joao_marcos_derby",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "joao_nogueira", text: "Marcos, watching the Iberia derby tonight or staying late?" },
@@ -2121,6 +2129,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_archie_calise_ucl",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "archie_wall", text: "Calise, catching the Champions League match tonight mate?" },
@@ -2130,6 +2139,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_max_nafsika_playlist",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "maximillian_lee", text: "Nafsika, leave Peter's Shire music on or swap to rock?" },
@@ -2146,6 +2156,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_faiza_calise_euston",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "faiza_javaid", text: "Calise, tell me Victoria Line actually moved faster today!" },
@@ -2171,6 +2182,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_max_marcos_gym",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "maximillian_lee", text: "Marcos, fencing footwork tonight or heavy deadlifts?" },
@@ -2189,6 +2201,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_richard_marcos_rain",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "richard_spears", text: "Marcos, bus gridlock on Gower Street again this morning?" },
@@ -2234,6 +2247,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_jamie_dan_music",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "jamie_baker", text: "Dan, who put Hobbit flute solos back on the lab speakers?" },
@@ -2252,6 +2266,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_2f_tom_charlotte_tlc",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "charlotte_coomber", text: "Tom, finally got clean spot-to-spot separation on the amide!" },
@@ -2261,6 +2276,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_bettys_yorkshire",
+    maxHour: 12,
     roomId: "klb_3f",
     turns: [
       { speakerId: "richard_spears", text: "André, put the kettle on, brought two grades of Bettys tea." },
@@ -2288,6 +2304,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_aoe2_lobby",
+    minHour: 16.5,
     roomId: "klb_3f",
     turns: [
       { speakerId: "maximillian_lee", text: "Five pm klaxon just hit, who is booting up Age of Empires?" },
@@ -2306,6 +2323,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_farmville_truce",
+    minHour: 15,
     roomId: "klb_3f",
     turns: [
       { speakerId: "antoine_maruani", text: "Is Faiza joining AoE tonight or are we warring properly?" },
@@ -2360,6 +2378,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_creaky_30s",
+    minHour: 15,
     roomId: "klb_3f",
     turns: [
       { speakerId: "richard_spears", text: "Calise, early tea and bed before ten tonight, joining?" },
@@ -2504,6 +2523,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_peter_marcos_broadsword",
+    minHour: 15,
     roomId: "klb_3f",
     turns: [
       { speakerId: "peter_szijj", text: "Marcos, still polishing that home broadsword or reading?" },
@@ -2513,6 +2533,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_richard_marcos_tea",
+    minHour: 15,
     roomId: "klb_3f",
     turns: [
       { speakerId: "richard_spears", text: "Marcos, fancy a quiet mug of tea before heading out?" },
@@ -2538,6 +2559,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_peter_joao_music",
+    minHour: 16.5,
     roomId: "klb_3f",
     turns: [
       { speakerId: "joao_nogueira", text: "Peter, still blasting Howard Shore upstairs after six tonight?" },
@@ -2565,6 +2587,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_3f_richard_marcos_quiet",
+    minHour: 15,
     roomId: "klb_3f",
     turns: [
       { speakerId: "marcos_fernandez", text: "Quiet evening on the third floor, rare peace before Friday." },
@@ -2628,6 +2651,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_cafe_faiza_cake_pic",
+    maxHour: 12,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "faiza_javaid", text: "No nonsense today, only thick dark chocolate cake!" },
@@ -2682,6 +2706,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_cafe_dan_egg_cress",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "daniel_richards", text: "Max, egg and cress sandwich and tea, four fifty, sorted." },
@@ -2876,6 +2902,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_cafe_antoine_marcos_coffee",
+    maxHour: 12,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "marcos_fernandez", text: "Antoine, walked from Euston again because the Tube died." },
@@ -2903,6 +2930,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_cafe_andre_joao_lunch",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "andre_shamsabadi", text: "João, warm panini downstairs or testing our luck on 3F?" },
@@ -2920,6 +2949,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_cafe_archie_joao_football",
+    minHour: 15,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "archie_wall", text: "João, Champions League knockout round tonight, fancy our odds?" },
@@ -2929,6 +2959,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "huddle_cafe_jamie_nafsika_coffee",
+    minHour: 14,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "jamie_baker", text: "Nafsika, flat white queue finally shorter than Gower Street?" },
@@ -3036,6 +3067,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_002",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3078,6 +3110,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_007",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3095,6 +3128,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_009",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3104,6 +3138,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_010",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3138,6 +3173,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_014",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3163,6 +3199,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_017",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3172,6 +3209,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_018",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "joao_nogueira", text: "Who eats cold pasta from a plastic tub at midday?" },
@@ -3180,6 +3219,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_019",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -3189,6 +3229,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_020",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3214,6 +3255,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_023",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3231,6 +3273,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_025",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3240,6 +3284,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_026",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -3257,6 +3302,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_028",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3298,6 +3344,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_033",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3307,6 +3354,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_034",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3340,6 +3388,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_038",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3357,6 +3406,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_040",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3366,6 +3416,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_041",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "andre_shamsabadi", text: "Calise, which stall on Torrington Place does the best wrap?" },
@@ -3374,6 +3426,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_042",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "andre_shamsabadi", text: "João, hot lunch today or risking the three-pound sandwich?" },
@@ -3410,6 +3464,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_046",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3420,6 +3475,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_047",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3430,6 +3486,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_048",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3440,6 +3497,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_049",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "andre_shamsabadi", text: "Max, keep an eye on the Biotage pressure gauge right now." },
@@ -3458,6 +3516,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_051",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "richard_spears", text: "Max, did you eat an entire tub of Greek yoghurt at noon?" },
@@ -3485,6 +3545,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_054",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -3495,6 +3556,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_055",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3523,6 +3585,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_058",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3551,6 +3614,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_061",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3580,6 +3644,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_064",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -3601,6 +3666,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_066",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3612,6 +3678,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_067",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3623,6 +3690,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_068",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3664,6 +3733,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_072",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -3675,6 +3745,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_073",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3686,6 +3757,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_074",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3718,6 +3790,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_077",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "marcos_fernandez", text: "Antoine, saw your NMR tubes sitting on Abil's rack earlier." },
@@ -3746,6 +3819,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_080",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -3783,6 +3857,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_084",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "antoine_maruani", text: "Malet Street sandwich shop hiked prices by fifty pence again." },
@@ -3792,6 +3868,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_085",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3829,6 +3906,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_089",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3848,6 +3926,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_091",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -3858,6 +3937,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_092",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "antoine_maruani", text: "Ten pounds for a small takeaway pasta near Euston — madness." },
@@ -3904,6 +3985,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_097",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -3935,6 +4017,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_100",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -3946,6 +4029,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_101",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "andre_shamsabadi", text: "Controversial take: cold leftover pizza beats fancy lunch." },
@@ -3956,6 +4041,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_102",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -3977,6 +4063,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2a_104",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4007,6 +4094,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_002",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "antoine_maruani", text: "João, who puts lukewarm milk into instant coffee here?" },
@@ -4043,6 +4131,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_006",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4063,6 +4152,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_008",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "antoine_maruani", text: "Calise, still spinning down samples or heading out soon?" },
@@ -4080,6 +4170,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_010",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "richard_spears", text: "João, catching Porto in Europe tonight or early sleep?" },
@@ -4108,6 +4199,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_013",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4126,6 +4218,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_015",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4163,6 +4256,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_019",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -4190,6 +4284,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_022",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4247,6 +4342,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_028",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -4275,6 +4371,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_031",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4295,6 +4392,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_033",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -4313,6 +4411,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_035",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4322,6 +4421,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_036",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "joao_nogueira", text: "Calise, spotted another sad cold tuna sandwich in your bag." },
@@ -4330,6 +4431,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_037",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "calise_bahou", text: "João, five-a-side tonight or nursing that dodgy hamstring?" },
@@ -4350,6 +4452,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_039",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4368,6 +4471,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_041",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4413,6 +4517,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_046",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -4448,6 +4553,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_050",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4467,6 +4573,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_052",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4485,6 +4592,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_054",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4494,6 +4602,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_055",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4520,6 +4629,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_058",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -4531,6 +4641,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_059",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "calise_bahou", text: "Faiza, joining the pub run tonight or hiding from cold rain?" },
@@ -4556,6 +4667,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_062",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "marcos_fernandez", text: "Faiza, how bad was the West Coast line chaos this morning?" },
@@ -4565,6 +4677,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_063",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "maximillian_lee", text: "João, joining the five pm lobby or watching football?" },
@@ -4581,6 +4694,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_065",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "maximillian_lee", text: "Faiza, please tell me you ordered proper lunch today." },
@@ -4607,6 +4722,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_068",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -4617,6 +4733,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_069",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "daniel_richards", text: "Richard, keeping the nine-thirty grandad curfew tonight?" },
@@ -4685,6 +4802,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_077",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "andre_shamsabadi", text: "Fancy grabbing thick tonkotsu broth after seven tonight?" },
@@ -4693,6 +4811,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_078",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "klb_2f",
     turns: [
       { speakerId: "joao_nogueira", text: "Nobody buys cold soggy triangle sandwiches near my coffee." },
@@ -4712,6 +4832,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_080",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4722,6 +4843,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_081",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "calise_bahou", text: "Who is actually staying awake past nine at the pub tonight?" },
@@ -4740,6 +4862,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_083",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "antoine_maruani", text: "Still cannot believe anyone drinks cherry fizz with breakfast." },
@@ -4749,6 +4872,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_084",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4759,6 +4883,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_085",
+    minHour: 16.5,
     roomId: "klb_2f",
     turns: [
       { speakerId: "peter_szijj", text: "Soundtrack speakers turn on the second six o'clock strikes." },
@@ -4777,6 +4902,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_087",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -4787,6 +4913,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_088",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "maximillian_lee", text: "Five pm gaming lobby opens soon, zero excuses accepted today." },
@@ -4796,6 +4923,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_089",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -4824,6 +4952,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_092",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4843,6 +4972,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_094",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -4885,6 +5015,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_098",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -4906,6 +5037,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_100",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4937,6 +5069,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_103",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "joao_nogueira", text: "Who is keen for proper hot pub pies before heading home tonight?" },
@@ -4947,6 +5080,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_104",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "faiza_javaid", text: "Muting the group chat whenever sticker spam tops fifty before noon." },
@@ -4957,6 +5091,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h2b_105",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -4968,6 +5103,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_001",
+    maxHour: 12,
     roomId: "klb_3f",
     vibe: "monday",
     turns: [
@@ -4979,6 +5115,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_002",
+    maxHour: 12,
     roomId: "klb_3f",
     vibe: "morning",
     turns: [
@@ -5008,6 +5145,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_005",
+    minHour: 15,
     roomId: "klb_3f",
     vibe: "evening",
     turns: [
@@ -5029,6 +5167,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_007",
+    maxHour: 12,
     roomId: "klb_3f",
     turns: [
       { speakerId: "joao_nogueira", text: "Mendeley desktop has been spinning on sync for twenty mins." },
@@ -5055,6 +5194,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_010",
+    minHour: 15,
     roomId: "klb_3f",
     vibe: "evening",
     turns: [
@@ -5122,6 +5262,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_017",
+    minHour: 16.5,
     roomId: "klb_3f",
     vibe: "evening",
     turns: [
@@ -5169,6 +5310,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_022",
+    minHour: 15,
     roomId: "klb_3f",
     vibe: "evening",
     turns: [
@@ -5197,6 +5339,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_025",
+    maxHour: 12,
     roomId: "klb_3f",
     vibe: "morning",
     turns: [
@@ -5234,6 +5377,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_029",
+    maxHour: 12,
     roomId: "klb_3f",
     vibe: "morning",
     turns: [
@@ -5300,6 +5444,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_036",
+    minHour: 12.5,
     roomId: "klb_3f",
     vibe: "late_week",
     turns: [
@@ -5309,6 +5454,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_037",
+    minHour: 15,
     roomId: "klb_3f",
     vibe: "evening",
     turns: [
@@ -5345,6 +5491,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_041",
+    maxHour: 12,
     roomId: "klb_3f",
     vibe: "monday",
     turns: [
@@ -5382,6 +5529,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_045",
+    minHour: 15,
     roomId: "klb_3f",
     turns: [
       { speakerId: "marcos_fernandez", text: "Fencing practice tonight, knees are already warning me." },
@@ -5504,6 +5652,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_059",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -5515,6 +5664,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_060",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "monday",
     turns: [
@@ -5525,6 +5675,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_061",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "marcos_fernandez", text: "Max, Pret baguette or walking over to Store Street today?" },
@@ -5535,6 +5687,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_062",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -5553,6 +5706,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_064",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "late_week",
     turns: [
@@ -5564,6 +5718,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_065",
+    maxHour: 12,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "daniel_richards", text: "Beat the Gower Street bus on foot from Euston again." },
@@ -5572,6 +5727,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_066",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "late_week",
     turns: [
@@ -5601,6 +5757,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_069",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "late_week",
     turns: [
@@ -5639,6 +5796,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_073",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "monday",
     turns: [
@@ -5648,6 +5806,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_074",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "faiza_javaid", text: "Marcos, Pret soup or Store Street hot wrap for lunch?" },
@@ -5665,6 +5825,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_076",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -5722,6 +5883,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_082",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "late_week",
     turns: [
@@ -5732,6 +5894,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_083",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "calise_bahou", text: "Pret prices jumped again, five pounds fifty for one wrap." },
@@ -5740,6 +5904,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_084",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -5751,6 +5916,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_085",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -5788,6 +5954,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_089",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -5806,6 +5973,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_091",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "monday",
     turns: [
@@ -5824,6 +5992,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_093",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "late_week",
     turns: [
@@ -5834,6 +6003,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_094",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "joao_nogueira", text: "Store Street wraps beat every plastic supermarket box easily." },
@@ -5852,6 +6023,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_096",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -5888,6 +6060,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_100",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -5906,6 +6079,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_102",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "late_week",
     turns: [
@@ -5934,6 +6108,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_105",
+    maxHour: 12,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "antoine_maruani", text: "Faiza, arriving ten fifteen again? West Coast excuse ready?" },
@@ -5951,6 +6126,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_107",
+    maxHour: 12,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "faiza_javaid", text: "João, paying four pounds for iced oat milk hurts every week." },
@@ -5970,6 +6146,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_109",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -5998,6 +6175,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_112",
+    minHour: 11.4,
+    maxHour: 14.25,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "joao_nogueira", text: "Store Street soup smelled amazing walking past ten mins ago." },
@@ -6006,6 +6185,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_113",
+    minHour: 15,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "antoine_maruani", text: "André, two espressos down and my late-night headache lingers." },
@@ -6022,6 +6202,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "h3c_115",
+    minHour: 14,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "peter_szijj", text: "André, survived a brutal afternoon stretch, cake time!" },
@@ -6031,6 +6212,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_001",
+    maxHour: 12,
     roomId: "meeting_room",
     vibe: "morning",
     turns: [
@@ -6060,6 +6242,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_004",
+    maxHour: 12,
     roomId: "meeting_room",
     vibe: "morning",
     turns: [
@@ -6144,6 +6327,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_013",
+    maxHour: 12,
     roomId: "meeting_room",
     turns: [
       { speakerId: "daniel_richards", text: "Survived another Friday morning grilling with pulse intact." },
@@ -6190,6 +6374,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_018",
+    maxHour: 12,
     roomId: "meeting_room",
     vibe: "morning",
     turns: [
@@ -6229,6 +6414,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_022",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -6239,6 +6425,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_023",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "nafsika_forte", text: "Watched three umbrellas snap outside Euston Road this morning." },
@@ -6247,6 +6434,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_024",
+    minHour: 15,
     roomId: "klb_2f",
     turns: [
       { speakerId: "calise_bahou", text: "Nafsika, any spare dry DMF left in Baker bay tonight?" },
@@ -6266,6 +6454,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_026",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -6284,6 +6473,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_028",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "monday",
     turns: [
@@ -6304,6 +6494,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_030",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -6332,6 +6523,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_033",
+    minHour: 12.5,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "tom_sheppard", text: "Marco, beaten the afternoon espresso rush downstairs at last?" },
@@ -6376,6 +6568,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_038",
+    minHour: 15,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -6386,6 +6579,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_039",
+    maxHour: 12,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "charlotte_coomber", text: "Richard, survived another morning inbox without flipping a desk?" },
@@ -6405,6 +6599,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_041",
+    maxHour: 12,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "faiza_javaid", text: "Charlotte, survive the Overground delays cleanly this morning?" },
@@ -6423,6 +6618,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_043",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -6433,6 +6629,8 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_044",
+    minHour: 11.4,
+    maxHour: 14.5,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "jamie_baker", text: "Quiet flat white before the afternoon lectures hit us?" },
@@ -6441,6 +6639,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_045",
+    minHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "tom_sheppard", text: "André, how is the shared Biotage queue looking this afternoon?" },
@@ -6450,6 +6649,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_046",
+    maxHour: 13.5,
     roomId: "gordons_cafe",
     vibe: "late_week",
     turns: [
@@ -6461,6 +6661,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_047",
+    maxHour: 12,
     roomId: "cib_lg11_ms",
     vibe: "monday",
     turns: [
@@ -6514,6 +6715,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_053",
+    minHour: 15,
     roomId: "cib_lg11_ms",
     vibe: "evening",
     turns: [
@@ -6532,6 +6734,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_055",
+    minHour: 15,
     roomId: "cib_lg11_ms",
     turns: [
       { speakerId: "peter_szijj", text: "Queued my 147 kDa SynAb after a full blank MeCN flush." },
@@ -6576,6 +6779,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_060",
+    minHour: 15,
     roomId: "cib_lg1b_nmr",
     vibe: "evening",
     turns: [
@@ -6594,6 +6798,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hmf_062",
+    maxHour: 12,
     roomId: "cib_lg1b_nmr",
     vibe: "morning",
     turns: [
@@ -6712,6 +6917,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_007",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -6732,6 +6938,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_009",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -6741,6 +6948,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_010",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "peter_szijj", text: "That lift just took three full minutes to climb one floor." },
@@ -6770,6 +6978,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_013",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -6893,6 +7102,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_026",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "late_week",
     turns: [
@@ -6913,6 +7123,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_028",
+    maxHour: 12,
     roomId: "klb_2f",
     vibe: "morning",
     turns: [
@@ -6922,6 +7133,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_029",
+    maxHour: 12,
     roomId: "klb_2f",
     turns: [
       { speakerId: "andre_shamsabadi", text: "Faiza, did that morning spin class wreck your legs?" },
@@ -7005,6 +7217,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_038",
+    minHour: 16.5,
     roomId: "klb_3f",
     vibe: "evening",
     turns: [
@@ -7061,6 +7274,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_044",
+    minHour: 15,
     roomId: "klb_3f",
     vibe: "late_week",
     turns: [
@@ -7089,6 +7303,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_047",
+    maxHour: 12,
     roomId: "klb_3f",
     vibe: "morning",
     turns: [
@@ -7117,6 +7332,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_050",
+    minHour: 15,
     roomId: "klb_3f",
     vibe: "evening",
     turns: [
@@ -7174,6 +7390,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_056",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -7240,6 +7457,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_063",
+    minHour: 16.5,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -7268,6 +7486,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_066",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -7296,6 +7515,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_069",
+    minHour: 12.5,
     roomId: "gordons_cafe",
     vibe: "monday",
     turns: [
@@ -7315,6 +7535,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_071",
+    minHour: 15,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "maximillian_lee", text: "Peter, fancy a curry on Drummond Street after six tonight?" },
@@ -7335,6 +7556,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_073",
+    minHour: 15,
     roomId: "gordons_cafe",
     turns: [
       { speakerId: "archie_wall", text: "Marcos, heading straight into town or catching the late bus?" },
@@ -7352,6 +7574,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hx_075",
+    minHour: 16.5,
     roomId: "gordons_cafe",
     vibe: "evening",
     turns: [
@@ -7494,6 +7717,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hdesk_013",
+    minHour: 15,
     roomId: "klb_3f",
     deskChat: true,
     vibe: "late_week",
@@ -7560,6 +7784,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hdesk_019",
+    minHour: 15,
     roomId: "klb_3f",
     deskChat: true,
     vibe: "late_week",
@@ -7603,6 +7828,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hbak_003",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -7613,6 +7839,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hbak_004",
+    minHour: 15,
     roomId: "klb_2f",
     vibe: "mid_week",
     turns: [
@@ -7633,6 +7860,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hbak_006",
+    minHour: 16.5,
     roomId: "klb_2f",
     vibe: "evening",
     turns: [
@@ -7644,7 +7872,8 @@ window.KLB.GROUP_HUDDLES = [
   {
     id: "hbak_007",
     roomId: "klb_3f",
-    vibe: "monday",
+    vibe: "evening",
+    minHour: 15.0,
     turns: [
       { speakerId: "archie_wall", text: "André, sharp waistcoat again, straight out after five tonight?" },
       { speakerId: "andre_shamsabadi", text: "Just keeping standards high upstairs Archie, dinner in Soho." },
@@ -7663,6 +7892,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hbak_009",
+    minHour: 15,
     roomId: "klb_3f",
     vibe: "late_week",
     turns: [
@@ -7673,6 +7903,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hbak_010",
+    maxHour: 12,
     roomId: "klb_3f",
     vibe: "monday",
     turns: [
@@ -7704,7 +7935,8 @@ window.KLB.GROUP_HUDDLES = [
   {
     id: "hbak_013",
     roomId: "gordons_cafe",
-    vibe: "late_week",
+    vibe: "morning",
+    maxHour: 12.0,
     turns: [
       { speakerId: "archie_wall", text: "Faiza, tell me the morning train actually behaved today!" },
       { speakerId: "faiza_javaid", text: "Cancelled at Watford again Archie, ordered cake as therapy." },
@@ -7713,6 +7945,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hbak_014",
+    maxHour: 12,
     roomId: "gordons_cafe",
     vibe: "morning",
     turns: [
@@ -7734,6 +7967,7 @@ window.KLB.GROUP_HUDDLES = [
   },
   {
     id: "hbak_016",
+    maxHour: 12,
     roomId: "meeting_room",
     vibe: "morning",
     turns: [
@@ -7749,6 +7983,7 @@ window.KLB.GROUP_HUDDLES = [
 window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
   {
     weeklyKey: "dan_andre_date",
+    minHour: 15,
     roomIds: ["klb_2f","klb_3f","gordons_cafe"],
     requiredIds: ["daniel_richards","andre_shamsabadi"],
     participants: ["daniel_richards","andre_shamsabadi"],
@@ -7771,7 +8006,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
       ],
       [
         { speakerId: "andre_shamsabadi", text: "Before you start Dan, no, this waistcoat is not a #DreDate." },
-        { speakerId: "daniel_richards", text: "Suspiciously defensive before noon. Dinner near Soho tonight?" },
+        { speakerId: "daniel_richards", text: "Suspiciously defensive this evening. Dinner near Soho tonight?" },
         { speakerId: "andre_shamsabadi", text: "Optimizing arylations till six, then straight home alone." },
         { speakerId: "daniel_richards", text: "Right, save a seat at Gordon's for the #DreDate debrief." }
       ],
@@ -7949,6 +8184,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
   },
   {
     weeklyKey: "andre_antoine_ramen",
+    minHour: 15,
     roomIds: ["klb_2f","klb_3f","gordons_cafe"],
     requiredIds: ["andre_shamsabadi","antoine_maruani"],
     participants: ["andre_shamsabadi","antoine_maruani"],
@@ -8170,6 +8406,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
   },
   {
     weeklyKey: "northern_line_euston_meltdown",
+    maxHour: 12,
     label: "Northern Line & Euston Meltdown",
     roomIds: ["klb_2f","gordons_cafe"],
     requiredIds: ["faiza_javaid","calise_bahou"],
@@ -8254,6 +8491,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
   },
   {
     weeklyKey: "friday_pub_rollcall",
+    minHour: 15,
     label: "Friday Pub Rollcall",
     roomIds: ["klb_2f","gordons_cafe"],
     requiredIds: ["andre_shamsabadi","joao_nogueira"],
@@ -8296,6 +8534,8 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
   },
   {
     weeklyKey: "store_street_lunch_war",
+    minHour: 11.4,
+    maxHour: 14.25,
     label: "Store Street Lunch War",
     roomIds: ["klb_2f","klb_3f","gordons_cafe"],
     requiredIds: ["calise_bahou","faiza_javaid"],
@@ -8543,6 +8783,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
   },
   {
     weeklyKey: "gordons_espresso_down",
+    maxHour: 12,
     label: "Gordon's Espresso Machine Down",
     roomIds: ["gordons_cafe","klb_2f"],
     requiredIds: ["joao_nogueira","faiza_javaid"],

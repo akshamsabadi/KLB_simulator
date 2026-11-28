@@ -353,8 +353,8 @@ window.KLB.RANDOM_EVENTS = [
     validRooms: ['cib_lg1b_nmr'],
     actorId: 'abil_aliev',
     whatsappSender: 'calise_bahou',
-    whatsappMsg: 'Lads, Abil just emailed — seven uncollected Chudasama NMR tubes left on the 600/700 MHz rack have been moved to the LG1b Sample Fridge. Collect today or £130 grant fine!',
-    bannerText: 'Dr Abil Aliev locked uncollected Chud NMR tubes in LG1b Sample Fridge under a £130 fine.',
+    whatsappMsg: 'Heads up — Abil just emailed that seven uncollected KLB NMR tubes left on the 600/700 MHz rack have been moved to the LG1b Sample Fridge. Collect today or £130 grant fine!',
+    bannerText: 'Dr Abil Aliev locked uncollected KLB NMR tubes in LG1b Sample Fridge under a £130 fine.',
     durationMins: 45,
     effectType: 'nmr_hostage',
     choices: [
@@ -379,7 +379,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 6,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Abil waives the £130 fine outright and sets your Chudasama NMR tubes aside safely.'
+        resultText: 'Abil waives the £130 fine outright and sets your NMR tubes aside safely.'
       },
       {
         label: 'Spritz Sabatini cologne and chat NOE shimming',
@@ -402,7 +402,7 @@ window.KLB.RANDOM_EVENTS = [
         favourDelta: 0,
         timeCostMins: 0,
         setsAbilFine: true,
-        resultText: 'You save time and energy by skipping the CIB basement run today, though Vijay gets copied on the £130 invoice tomorrow.'
+        resultText: 'You save time and energy by skipping the CIB basement run today, though your PI gets copied on the £130 invoice tomorrow.'
       }
     ]
   },
@@ -489,7 +489,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'You keep quiet bench space and impress Vijay with your focus while everyone walks over to Gordon\'s.'
+        resultText: 'You keep quiet bench space and show crisp focus at the bench while everyone walks over to Gordon\'s.'
       }
     ]
   },
@@ -843,7 +843,7 @@ window.KLB.RANDOM_EVENTS = [
         patienceDelta: 5,
         favourDelta: 0,
         timeCostMins: 5,
-        resultText: 'Specs on and ears free, you stay compliant while catching half the train saga and impressing Vijay with tidy calculations.'
+        resultText: 'Specs on and ears free, you stay compliant while catching half the train saga and impressing your PI with tidy calculations.'
       }
     ]
   },
@@ -1047,7 +1047,7 @@ window.KLB.RANDOM_EVENTS = [
     validRooms: ['klb_2f', 'klb_3f'],
     actorId: 'andre_shamsabadi',
     whatsappSender: 'andre_shamsabadi',
-    whatsappMsg: '17:00 AoE2 & Worms Lobby! Max, Antoine, Peter, and I are heading to our 3F desks for an hour of Black Forest ("Faiza FarmVille rules") and ninja ropes!',
+    whatsappMsg: '17:00 AoE2 & Worms Lobby! Heading to our 3F desks for an hour of Black Forest ("Faiza FarmVille rules") and ninja ropes!',
     bannerText: 'Gaming crew members are heading to their 3F desks for an hour of AoE2 & Worms.',
     durationMins: 60,
     effectType: 'aoe2_break',
@@ -1289,7 +1289,7 @@ window.KLB.RANDOM_EVENTS = [
   },
   {
     id: 'andre_spicy_poll',
-    title: 'André Drops a Classic Deadpan Big-Chuds Poll',
+    title: 'André Drops a Classic Deadpan Group Poll',
     category: 'social',
     weight: 7,
     minDay: 0,
@@ -1299,7 +1299,7 @@ window.KLB.RANDOM_EVENTS = [
     actorId: 'andre_shamsabadi',
     whatsappSender: 'andre_shamsabadi',
     whatsappMsg: 'Serious lunchtime poll: would you fight 1 Max-sized duck or 100 duck-sized Antoines wielding baguettes?',
-    bannerText: 'André dropped a deadpan Big-Chuds WhatsApp poll lighting up every phone in Lab 230.',
+    bannerText: 'André dropped a deadpan lab-chat poll lighting up every phone in Lab 230.',
     durationMins: 15,
     effectType: 'whatsapp_poll',
     choices: [
@@ -1467,6 +1467,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Buzzing you in now, keep your safety specs handy by the blue threshold.',
     hourHint: 10,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     vibe: 'morning'
   },
@@ -1476,6 +1478,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Thought a 160 kg silverback could walk straight through brickwork, unlatching the door now.',
     hourHint: 14,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     vibe: 'midday'
   },
@@ -1485,6 +1489,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: '1965 for the door and uplc2011 for the PC. Desalt 10x or Kersti will end us all.',
     hourHint: 11,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1493,6 +1499,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Still 2145 Daiza! And 1965 for Kersti\'s door if you are doing a basement double run.',
     hourHint: 10,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1501,6 +1509,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Hit C to clear first then punch 1965 slowly, that keypad sticks if your gloves are damp.',
     hourHint: 15,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1509,6 +1519,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Walking over to unlatch it now, André — stop leaving your lanyard inside your waistcoat.',
     hourHint: 9,
+    minHour: 8,
+    maxHour: 12,
     context: 'door_codes',
     vibe: 'morning'
   },
@@ -1518,6 +1530,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'On my way to the right exit João, hold the fort for ten seconds.',
     hourHint: 16,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1526,6 +1540,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Heading down the stairs now Peetah, stand by the glass doors.',
     hourHint: 18,
+    minHour: 18,
+    maxHour: 20,
     context: 'door_codes',
     vibe: 'evening'
   },
@@ -1534,7 +1550,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Back from CIB stores with two heavy Winchesters outside Lab 230 — door please when someone passes.',
     replySenderId: 'marcos_fernandez',
     replyText: 'Got it Dan, unlatching the 2F door for you right now.',
-    hourHint: 8,
+    hourHint: 8.5,
+    minHour: 8,
+    maxHour: 12,
     context: 'door_codes',
     vibe: 'morning'
   },
@@ -1544,6 +1562,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Opening the 3F door now Rich, better have Yorkshire tea bags in that bag.',
     hourHint: 13,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     vibe: 'midday'
   },
@@ -1553,6 +1573,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Got you Big C, walking straight over from Bay 1 right now.',
     hourHint: 11,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1561,6 +1583,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: '2145 for Abil\'s NMR room and 1965 for Kersti\'s Mass Spec, nearly mixed them up yesterday too!',
     hourHint: 15,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1569,6 +1593,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Use the standard 3F office code and give the handle a firm tug, Antoine.',
     hourHint: 17,
+    minHour: 13.5,
+    maxHour: 19,
     context: 'door_codes',
     vibe: 'late_week'
   },
@@ -1578,6 +1604,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'PC login is uplc2011, Marcos — and write your sample codes neatly in the blue logbook.',
     hourHint: 12,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1585,7 +1613,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Door please!! Balancing four hot takeaway coffees outside Lab 230!',
     replySenderId: 'andre_shamsabadi',
     replyText: 'Buzzing you in now Peetah, do not drop mine on the blue doorway line.',
-    hourHint: 17,
+    hourHint: 16,
+    minHour: 14,
+    maxHour: 18,
     context: 'door_codes'
   },
   {
@@ -1594,6 +1624,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: '2145 is LG1b NMR, 1965 is LG11 Mass Spec — save yourself knocking on the wrong door.',
     hourHint: 10,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1602,6 +1634,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Opening the 2F door now João, watch the doorstep.',
     hourHint: 14,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes'
   },
   {
@@ -1610,6 +1644,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Still on 2F Rich! Coming down the stairs to open the front entrance for you now.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20,
     context: 'door_codes',
     vibe: 'evening'
   },
@@ -1619,6 +1655,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Peak Richard: sneaking Bettys tea bags out of the business class lounge before enduring Thameslink delays.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1628,6 +1666,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Victoria Line is crawling too Daiza, walking up from Warren Street in sideways drizzle.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1637,6 +1677,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Standard #HalfDayDaiza schedule — I will put a beaker on your ice tray so it looks busy.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1644,8 +1686,10 @@ window.KLB.WHATSAPP_BANTER = [
     senderId: 'antoine_maruani',
     text: 'Eurostar delayed twenty minutes outside Ebbsfleet and the Northern Line died at King\'s Cross. Running late, send real coffee.',
     replySenderId: 'peter_szijj',
-    replyText: 'Rough Monday start mon ami, I am just stepping onto the escalator at Euston myself!',
+    replyText: 'Rough Monday start my friend, I am just stepping onto the escalator at Euston myself!',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1655,6 +1699,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Duck straight into Gordon\'s Café before 2F irmão, emergency pastel de nata waiting.',
     hourHint: 8,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1664,6 +1710,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Hang your coat near the 2F oven when you get in Big C, kettle is already on upstairs.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1672,7 +1720,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Northern Line holding at Archway for a signal fault — first time in months I might miss my 07:45 bench start. Expect me at 08:15.',
     replySenderId: 'marcos_fernandez',
     replyText: 'Do not stress Dr Dan, you will still beat half the building in by forty minutes.',
-    hourHint: 8,
+    hourHint: 8.5,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1682,6 +1732,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Already boiled André, Yorkshire gold waiting in the caddy when you walk in.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1690,7 +1742,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Just stepped onto the escalator at Euston after a train cancellation — also spotted a pigeon riding down like a paying commuter.',
     replySenderId: 'andre_shamsabadi',
     replyText: 'Still more punctual than the Northern Line Charing Cross branch, ngl.',
-    hourHint: 10,
+    hourHint: 9.5,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1700,6 +1754,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Grab an un-sliced plain almond croissant if they have any, zero flat ham-cheese crimes.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1709,6 +1765,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'zero judgement jcfn, my west coast train has not even cleared watford junction yet!',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1718,8 +1776,11 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Morning Vijay — specs on, balances wiped, and Marcos has not opened Cupboard 5 yet, so morale is high.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
-    vibe: 'monday'
+    vibe: 'monday',
+    klbchatOnly: true
   },
   {
     senderId: 'calise_bahou',
@@ -1727,6 +1788,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'True Samwise grit Big C, glad your pocket lemons survived the commute intact.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1735,7 +1798,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'just cleared euston barriers finally, did anyone already claim the 2f centrifuge or am i good for 10:20?',
     replySenderId: 'andre_shamsabadi',
     replyText: 'All yours Daiza, nobody has touched Bay 2 yet — walk fast before Max claims the P1000.',
-    hourHint: 10,
+    hourHint: 9.5,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1745,6 +1810,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Hang your waistcoat near the 2F drying oven once you arrive André, instant sauna.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1754,6 +1821,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Miracles happen Rich, save the good Bettys tea bags before Dan clears the tin.',
     hourHint: 8,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1763,6 +1832,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Sorted Antoine, transferred your tube into the Bay 2 ice bucket so you are covered.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1772,6 +1843,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Safe walk Marcos, the 3F kettle is already on for anyone braving the Bloomsbury drizzle.',
     hourHint: 8,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1781,6 +1854,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Leave room for silverback shoulders mate, catch you by the gel tank shortly.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1789,7 +1864,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Stayed up till 02:30 in HoI4 and just missed the 09:40 train — boarding the next one now, reaching KLB around 10:25.',
     replySenderId: 'joao_nogueira',
     replyText: 'Just in time for the 10:27 Gordon\'s run Peetah, do not dare skip espresso!',
-    hourHint: 10,
+    hourHint: 9.5,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late'
   },
   {
@@ -1798,6 +1875,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Wise choice João, Lab 230 HVAC feels like an Arctic bus shelter this morning anyway.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning'
   },
@@ -1807,8 +1886,11 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Cheers Vijay, will have the deconvoluted Q-TOF traces printed upstairs before you arrive.',
     hourHint: 8,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
-    vibe: 'morning'
+    vibe: 'morning',
+    klbchatOnly: true
   },
   {
     senderId: 'daniel_richards',
@@ -1816,6 +1898,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Have a good evening grandad Dan! Evening shift has the watch on 2F.',
     hourHint: 18,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1825,6 +1909,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Enjoy your slippers and Bettys tea, grandad Rich — evening shift holds the fort.',
     hourHint: 18,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1834,6 +1920,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Bonne nuit Peetah! Smash Friday Group Meeting tomorrow.',
     hourHint: 19,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1843,6 +1931,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Glad you escaped before the 19:30 porter swept the corridor, Peetah.',
     hourHint: 19,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1852,6 +1942,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Just checked from Bay 2 Daiza, rubber seal is clicked firmly shut and holding 4 °C!',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1861,6 +1953,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Put the kettle on and rest up Big C, impressive cycling stamina after a cold-room day.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1870,6 +1964,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Packing up my SynAb tubes now, my galactic empire will be online by 20:45!',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1879,6 +1975,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'On my way home shortly Max, prepare to eat a precision banana bomb.',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1888,6 +1986,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Will grab it straight onto your 3F desk first thing tomorrow morning, Antoine.',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1897,6 +1997,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Still on 3F packing up Marcos, will pop down and empty it before heading out.',
     hourHint: 18,
+    minHour: 17.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1906,6 +2008,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Already checked João, your column hit 100% baseline cleanly and pump is off!',
     hourHint: 19,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1915,6 +2019,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Slides 1 to 4 are ready Dan, even fixed my 125% yield formula!',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'late_week'
   },
@@ -1924,6 +2030,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'will tuck it behind the biscuit tin for you tomorrow morning rich!',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1933,6 +2041,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Passing through 2F on my way out Big C, made sure your tray is tucked safely at the back.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1942,6 +2052,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'I will set it on your chair at 07:45 tomorrow Max, assuming no giant spider sits there.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1951,6 +2063,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Rest well Antoine, tomorrow we shall keep the 3F bread strictly un-sliced.',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1960,6 +2074,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Peter locked the whole floor down cleanly at 19:20 André, screens all off.',
     hourHint: 19,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1969,6 +2085,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Barely survived till 18:45 Marcos, just got off the Tube myself and crashing straight into dinner.',
     hourHint: 19,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1978,6 +2096,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Enjoy the match JCFN, meanwhile Burnley are putting me through emotional surgery.',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1987,6 +2107,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Deal Daiza, pure FarmVille peace treaty until minute thirty.',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -1996,6 +2118,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Excuse me João, grab me a salt beef bagel if you pass Store Street, I am stuck spinning on 2F!',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2005,6 +2129,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Torrington Square hot food stalls every Thursday, Store Street the rest of the week — meet by the front stairs!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2014,6 +2140,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'brb sprinting up the spiral stairs once my VivaSpin stops at 12:25!!',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2023,6 +2151,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Packing up my morning digest notes now Big C, walking across Gordon Street in two minutes.',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2032,6 +2162,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Got you Daiza, picking up a salt beef bagel and your wrap right now.',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2041,6 +2173,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Hard pass on the nuggets Peetah, grab me a proper crusty baguette from the bakery if you pass one!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2050,6 +2184,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Leaving 2F right now André, wait for me at the corner for Korean rice bowls!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2057,8 +2193,10 @@ window.KLB.WHATSAPP_BANTER = [
     senderId: 'antoine_maruani',
     text: 'Lunch crew on 3F: nobody bring horizontally sliced ham croissants upstairs today please, let us walk to Store Street for proper Mediterranean wraps.',
     replySenderId: 'andre_shamsabadi',
-    replyText: 'Leaving Bay 2 now mon ami, see you on the Gordon Street steps.',
+    replyText: 'Leaving Bay 2 now, see you on the Gordon Street steps.',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2068,6 +2206,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Value per pound is not a Michelin criterion Max, warming homemade bacalhau up on 3F instead!',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2077,6 +2217,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Cold wet triangle bread is a cry for help Dan, coming up to 3F to judge you properly!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'late_week'
   },
@@ -2086,6 +2228,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Sounds sensible Marcos, save me a seat upstairs on 3F if the drizzle starts again.',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2095,6 +2239,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'on my way up from 2f now! save me a chair away from max\'s spider corner',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2104,6 +2250,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Finishing a pepsin quench in 2F and walking straight upstairs, smells way better than my meal deal.',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2113,6 +2261,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Bold of you to think a biohazard label slows down a hungry 160 kg silverback, meeting you upstairs.',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2122,6 +2272,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Count me in Max, just clicking the 4 °C fridge shut and coming down the stairs.',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2131,6 +2283,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Yes please Daiza, halloumi and falafel box with chilli sauce if the queue is moving!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2140,8 +2294,11 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Store Street Espresso moves much faster boss, walking down there now if you want to join.',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
-    vibe: 'midday'
+    vibe: 'midday',
+    klbchatOnly: true
   },
   {
     senderId: 'richard_spears',
@@ -2149,6 +2306,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Just stepping out of the NMR lift Rich, save me two slices before Max finishes the box!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2158,6 +2317,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'coming!! wait 2 mins im taking gloves off and washing hands in 2f',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2167,6 +2328,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Oui vieux, save me an almond croissant and a double espresso.',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2176,6 +2339,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Arriving at the spiral stairs now — if someone orders a flat sliced croissant I am turning round.',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2185,6 +2350,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Doctor\'s orders Daiza, grab me a double espresso shot if I don\'t make it down from 3F in time!',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday'
   },
@@ -2194,6 +2361,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Finishing this TLC plate in Bay 2 and sprinting straight up the spiral stairs, Rich!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2203,6 +2372,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'save me a slice away from max!! walking up from 2f in one minute!',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday'
   },
@@ -2212,6 +2383,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Coffee now André, never delay the 10:27 espresso ritual!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2221,6 +2394,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Awfully kind Calise — a strong pot of tea at the 3F desk will keep me going till six, thank you.',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday'
   },
@@ -2229,7 +2404,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Anyone still over at Gordon\'s Café right now? Could use a black coffee brought back to 2F if the queue isn\'t terrible.',
     replySenderId: 'joao_nogueira',
     replyText: 'Standing at the counter right now Dr Dan, bringing one up to Lab 230 in five!',
-    hourHint: 11,
+    hourHint: 10.5,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2239,6 +2416,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Kettle is clicking off now Max, come up and grab your mug before the chocolate bourbons vanish.',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2248,6 +2427,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'give me two mins to log my a280 read and i am right behind you peetah!',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday'
   },
@@ -2257,6 +2438,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Save us a corner table Marcos, Faiza and I are just locking the 2F hood sashes!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2266,8 +2449,11 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Coffee Quartet assembling right on cue boss, meeting you by the front door!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
-    vibe: 'morning'
+    vibe: 'morning',
+    klbchatOnly: true
   },
   {
     senderId: 'joao_nogueira',
@@ -2275,6 +2461,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Grab me an iced americano and a brownie please João, stuck watching a Biotage ramp on 2F!',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday'
   },
@@ -2284,6 +2472,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Yes please Antoine, double macchiato if you are feeling generous — owe you a Lab Favour!',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday'
   },
@@ -2293,6 +2483,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Heading upstairs from 2F right now André, need strong Yorkshire caffeine before touching RiskNET.',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday'
   },
@@ -2302,6 +2494,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Wait for no train except Daiza — holding by the entrance stairs for ninety seconds!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2310,7 +2504,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'At Gordon\'s counter right now — last call for anyone in KLB wanting an espresso or almond croissant brought over!',
     replySenderId: 'peter_szijj',
     replyText: 'Warm almond croissant please Big C! Stuck watching my Trastuzumab digest timer on 2F!',
-    hourHint: 11,
+    hourHint: 10.5,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning'
   },
@@ -2320,6 +2516,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Count me in for one civilised pint at Euston Tap, Marcos — then home in time for supper!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2329,6 +2527,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Jeremy Bentham first while we grab an upstairs table, then maybe Euston Tap for the late crew!',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2338,6 +2538,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'calise and dan just grabbed an outdoor bench by the taproom door, run!!',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'evening'
   },
@@ -2347,6 +2549,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Marlborough Arms first so folks walking straight out of KLB can join smoothly!',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2356,6 +2560,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Save me a barstool Big C — just finishing my last Biotage wash on 2F!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2365,6 +2571,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Just grabbing my waistcoat off 3F Dan, see you by the front porch in two minutes.',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2374,6 +2582,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Save me a seat by the fireplace Daiza, we will toast clean DAR 4.0!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2383,6 +2593,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Beats watching João cry over his Biotage cartridge at 18:15 Rich, leaving KLB now!',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2390,8 +2602,10 @@ window.KLB.WHATSAPP_BANTER = [
     senderId: 'antoine_maruani',
     text: 'Craving rich tonkotsu ramen at Ippudo after today\'s column drama, then one drink at Jeremy Bentham at 19:00 — anyone in?',
     replySenderId: 'andre_shamsabadi',
-    replyText: 'Locked in mon ami, washing the silica off my hands in 2F right now.',
+    replyText: 'Locked in, washing the silica off my hands in 2F right now.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'evening'
   },
@@ -2401,6 +2615,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Will drop you a ping when we move tables Peetah, lock up safely first.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'evening'
   },
@@ -2410,8 +2626,11 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Cheers Vijay — Marlborough Arms debrief pencilled in straight after everyone clears out!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
-    vibe: 'late_week'
+    vibe: 'late_week',
+    klbchatOnly: true
   },
   {
     senderId: 'calise_bahou',
@@ -2419,6 +2638,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Finish closing my MestReNova sheets on 3F and I will join for one quick half, Calise.',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'evening'
   },
@@ -2428,6 +2649,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'carpenter\'s arms booths pls, bloomsbury wind is already freezing my ears off!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2437,6 +2660,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Closing uplc2011 right now Marcos, walking down in five minutes.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'evening'
   },
@@ -2446,6 +2671,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Holding a booth at the Jeremy Bentham for twenty more mins JCFN, sprint down!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'evening'
   },
@@ -2455,6 +2682,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Just walking down Torrington Place right now Max, table inbound!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2464,6 +2693,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Tucked it safely behind the Bettys tea caddy on 3F so nobody walked off with it, André!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2472,6 +2703,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'staying safely on 3f for the next 15 mins thx!!',
     hourHint: 11,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2480,6 +2713,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'actual #Hackerman behaviour thank u!! staying at my 2f bench instead',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     vibe: 'midday'
   },
@@ -2488,7 +2723,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: '2f a280 bench is free right now if anyone upstairs on 3f needs antibody ratios checked before 5pm!',
     replySenderId: 'calise_bahou',
     replyText: 'Yes pls Daiza! Walking down the spiral stairs with my 4 °C Herceptin prep now.',
-    hourHint: 16,
+    hourHint: 15.5,
+    minHour: 12,
+    maxHour: 16.75,
     context: 'cross_floor'
   },
   {
@@ -2497,6 +2734,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Check behind the gel tank on 2F Max, I have stayed up on 3F all morning.',
     hourHint: 10,
+    minHour: 8.5,
+    maxHour: 12,
     context: 'cross_floor',
     vibe: 'morning'
   },
@@ -2505,7 +2744,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Back down on 2F and realised I left my lunch thermos upstairs on 3F — can someone move it onto Desk 1 so Max does not raid it?',
     replySenderId: 'peter_szijj',
     replyText: 'Grandad Dan memory kicking in early today, moved it safely to Desk 1!',
-    hourHint: 16,
+    hourHint: 15.5,
+    minHour: 12.5,
+    maxHour: 18,
     context: 'cross_floor'
   },
   {
@@ -2514,6 +2755,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Walked past and clicked the seal shut for you Big C, still holding steady at 4 °C!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2522,6 +2765,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Lifesaver Peetah, running down the spiral stairs with my VT-NMR tube right now!',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     vibe: 'midday'
   },
@@ -2531,6 +2776,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Walked past Bay 2 just now João, still spinning nicely and nobody pinched your socket!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2539,6 +2786,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Legend Rich, heading straight down to LG1b from 2F now!',
     hourHint: 15,
+    minHour: 12,
+    maxHour: 16.75,
     context: 'cross_floor'
   },
   {
@@ -2547,6 +2796,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Heading down the spiral stairs with my Dewar right now, cheers Marcos!',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2555,6 +2806,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Free in five mins Antoine, just balancing my last Trastuzumab pair!',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     vibe: 'midday'
   },
@@ -2564,6 +2817,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Only 40 mL left in the bottle here André, definitely grab a fresh Sure/Seal from stores!',
     hourHint: 11,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2572,6 +2827,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Wait two mins Daiza, running down from 2F with my VNAR sample right now!',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2580,6 +2837,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Zero Keck clips up on 3F Max — check behind Antoine\'s Biotage, he had five clipped to his solvent trap.',
     hourHint: 11,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2588,6 +2847,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Grab my purple-capped SPAAC vial sitting on the 2F Bay 2 ice rack if you have space Dan!',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2596,6 +2857,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Checking your 3F screen now Big C — yes you definitely multiplied by 2 twice in cell C4!',
     hourHint: 13,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     vibe: 'midday'
   },
@@ -2605,6 +2868,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'printer is totally free peetah, zero paper jam for once either!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2613,6 +2878,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Switched it off ten minutes ago João, Lab 230 is peaceful again.',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2621,6 +2888,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Both Büchis are backed up right now Rich, stay upstairs with your tea until half three.',
     hourHint: 14,
+    minHour: 11.5,
+    maxHour: 15.25,
     context: 'cross_floor'
   },
   {
@@ -2629,6 +2898,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Topped it up just now Marcos, column is still running clear.',
     hourHint: 12,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2636,7 +2907,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Anyone down in 2F see my black lab notebook? Thought I brought it up to my 3F desk after lunch.',
     replySenderId: 'maximillian_lee',
     replyText: 'Sitting right next to the 2F gel tank Antoine, bringing it up when I head to my desk.',
-    hourHint: 16,
+    hourHint: 15.5,
+    minHour: 13.5,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2645,6 +2918,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Checked from the door earlier André, bring the spare USB-C adapter from 3F just in case.',
     hourHint: 17,
+    minHour: 15.5,
+    maxHour: 19.5,
     context: 'cross_floor',
     vibe: 'late_week'
   },
@@ -2654,6 +2929,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Freshly printed and stacked neatly on your 3F desk tray, Faiza.',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2662,6 +2939,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Sitting right beside Richard\'s biscuit tin on 3F Big C, will drop it down when I grab ice.',
     hourHint: 10,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2670,6 +2949,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Lifesaver Peetah, thought I put it inside my pocket ice box!',
     hourHint: 17,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor'
   },
   {
@@ -2678,6 +2959,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Walking down to LG11 now to smooth it over with Kersti and check whose initials are on the rack.',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     vibe: 'midday'
   },
@@ -2687,6 +2970,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Sprinting down to CIB right now, pretty sure my diBrPD tube has been chilling there since Tuesday!',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert'
   },
   {
@@ -2695,6 +2980,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Cheers Marcos — caps on Winchesters and tidying Bay 2 right now.',
     hourHint: 10,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     vibe: 'morning'
   },
@@ -2703,7 +2990,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: '17:17 perimeter alert: Alex King just walked past the 2F lift asking where the Gordon\'s coffee group went. Keep 3F doors shut for ten mins!',
     replySenderId: 'andre_shamsabadi',
     replyText: 'Copy that chief scout, sliding quietly into CIB via the back stairwell.',
-    hourHint: 17,
+    hourHint: 17.25,
+    minHour: 16.5,
+    maxHour: 18,
     context: 'facility_alert',
     vibe: 'evening'
   },
@@ -2713,6 +3002,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'On my way down to Reception now Rich, will bring it straight to the -20 °C freezer.',
     hourHint: 11,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert'
   },
   {
@@ -2721,6 +3012,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Great, gently thawing my DMSO in 28 °C water first so zero bottles crack today.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 11.75,
     context: 'facility_alert',
     vibe: 'morning'
   },
@@ -2730,6 +3023,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Taped a quick ice-sleeve reminder on the Bay 2 fridge, merci Big C.',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     vibe: 'midday'
   },
@@ -2739,6 +3034,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Wasn\'t me Daiza! Always 10x water desalt unless you enjoy staring at Kersti\'s flashing red LED.',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert'
   },
   {
@@ -2747,6 +3044,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Heroic update Peetah, logging my coumarin conjugate onto uplc2011 straight after lunch.',
     hourHint: 13,
+    minHour: 11.5,
+    maxHour: 14.25,
     context: 'facility_alert',
     vibe: 'midday'
   },
@@ -2755,7 +3054,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: '09:15 #headsup: Vijay just walked out of CIB heading toward the KLB stairs looking ready for bench rounds.',
     replySenderId: 'daniel_richards',
     replyText: 'Noted Marcos, putting my Pepsin controls right at the front of the rack.',
-    hourHint: 9,
+    hourHint: 9.25,
+    minHour: 8.5,
+    maxHour: 10.5,
     context: 'facility_alert',
     vibe: 'morning'
   },
@@ -2765,6 +3066,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Cheers Rich, topping my DMSO-d6 tube up to 4.5 cm right now so Abil smiles.',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert'
   },
   {
@@ -2772,7 +3075,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'KLB Facilities notice: cold-water pressure on 2F is off for thirty minutes from 11:30 for pipe maintenance — do not start a rotary condenser right now!',
     replySenderId: 'calise_bahou',
     replyText: 'Nearly hooked up my toluene reflux Max, cheers for saving the flood!',
-    hourHint: 11,
+    hourHint: 11.25,
+    minHour: 10,
+    maxHour: 12,
     context: 'facility_alert'
   },
   {
@@ -2781,6 +3086,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: 'signing at reception now jcfn, moving them straight into the 4 °C fridge!',
     hourHint: 12,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     vibe: 'midday'
   },
@@ -2788,8 +3095,10 @@ window.KLB.WHATSAPP_BANTER = [
     senderId: 'antoine_maruani',
     text: 'Estates reminder: KLB fire alarm weekly bell test moved to 16:15 today — do not panic for the first ten seconds, pause after twenty.',
     replySenderId: 'peter_szijj',
-    replyText: 'Good to know mon ami, holding off my Superdex fraction switch until 16:20.',
-    hourHint: 16,
+    replyText: 'Good to know, holding off my Superdex fraction switch until 16:20.',
+    hourHint: 15.75,
+    minHour: 14.5,
+    maxHour: 16.2,
     context: 'facility_alert'
   },
   {
@@ -2797,7 +3106,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Departmental IT alert: ChemDraw and MestReNova licence server rebooting for ten mins at 10:30 — save your 3F spectra files now!',
     replySenderId: 'richard_spears',
     replyText: 'Saved all my kinetics tables just in time, thank you André.',
-    hourHint: 10,
+    hourHint: 10.25,
+    minHour: 9,
+    maxHour: 10.5,
     context: 'facility_alert',
     vibe: 'morning'
   },
@@ -2806,7 +3117,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Just walked past KLB stores — fresh 25 kg dry-ice shipment arrived in the basement, Dewar refills available all afternoon.',
     replySenderId: 'marcos_fernandez',
     replyText: 'Golden info Dan, heading down before four while pellets are still solid.',
-    hourHint: 15,
+    hourHint: 14.5,
+    minHour: 13,
+    maxHour: 15.9,
     context: 'facility_alert'
   },
   {
@@ -2815,8 +3128,11 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'All Chudasama hoods capped and logged Vijay, RiskNET forms nearly cleared.',
     hourHint: 11,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
-    vibe: 'late_week'
+    vibe: 'late_week',
+    klbchatOnly: true
   },
   {
     senderId: 'calise_bahou',
@@ -2824,6 +3140,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Already did three trips up from LG1b with dry ice, counting it as leg day.',
     hourHint: 13,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     vibe: 'midday'
   },
@@ -2833,6 +3151,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Booking Tuesday morning now Daiza, thanks for the quick heads up!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert'
   },
   {
@@ -2841,6 +3161,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Walking down with the carrier basket now Peetah, Cupboard 9 was running on fumes.',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert'
   },
   {
@@ -2849,6 +3171,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'nafsika_forte',
     replyText: 'Coming to unlatch the 2F door now Archie, keep those pipette tips upright.',
     hourHint: 10,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     klbchatOnly: true
   },
@@ -2858,6 +3182,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marco_sabatini',
     replyText: '2145 for Abil\'s room Charlotte, and leave a neat spinner for the rest of us.',
     hourHint: 14,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     klbchatOnly: true
   },
@@ -2867,6 +3193,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'archie_wall',
     replyText: 'Just stepping over from the balance bay Nafsika, buzzing you in.',
     hourHint: 16,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     klbchatOnly: true
   },
@@ -2876,6 +3204,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: '1965 for the door and uplc2011 on the PC marco, remember no PBS!',
     hourHint: 11,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     klbchatOnly: true
   },
@@ -2885,6 +3215,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'charlotte_coomber',
     replyText: 'Sprinting over from Sheppard bay now Tom, one second!',
     hourHint: 9,
+    minHour: 8.5,
+    maxHour: 18.5,
     context: 'door_codes',
     klbchatOnly: true
   },
@@ -2893,7 +3225,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Standing at the KLB bike shed door with a punctured tyre and left my UCL card inside Lab 230 — anyone downstairs near reception?',
     replySenderId: 'vijay_chudasama',
     replyText: 'Walking past the main foyer with coffee right now Jamie, opening the door for you.',
-    hourHint: 8,
+    hourHint: 8.5,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'door_codes',
     klbchatOnly: true
   },
@@ -2903,6 +3237,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'faiza_javaid',
     replyText: '3F kettle is next to richard\'s biscuit tin charlotte, run before max clears the bourbons!',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday',
     klbchatOnly: true
@@ -2913,6 +3249,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'maximillian_lee',
     replyText: 'Richard beat you to it at 08:50 Archie, Yorkshire brew waiting upstairs.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning',
     klbchatOnly: true
@@ -2923,6 +3261,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marco_sabatini',
     replyText: 'All flasks dry and ready Tom, grab a real espresso at Gordon\'s before climbing the stairs.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday',
     klbchatOnly: true
@@ -2933,6 +3273,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'nafsika_forte',
     replyText: 'Already here Jamie, centrifuge and gel tanks warmed up and specs firmly on!',
     hourHint: 8,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning',
     klbchatOnly: true
@@ -2943,6 +3285,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Courage Marco, meet us downstairs at 10:30 for round two away from the rain.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'morning',
     klbchatOnly: true
@@ -2953,6 +3297,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'archie_wall',
     replyText: 'Done Nafsika, sitting on your bench waiting for you.',
     hourHint: 9,
+    minHour: 7.5,
+    maxHour: 12,
     context: 'commute_late',
     vibe: 'monday',
     klbchatOnly: true
@@ -2963,6 +3309,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'Actual guardian angel of Lab 230 Nafsika, owe you two espressos tomorrow!',
     hourHint: 19,
+    minHour: 18,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening',
     klbchatOnly: true
@@ -2973,6 +3321,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Safe commute Archie, those tubes are guarded like crown jewels.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening',
     klbchatOnly: true
@@ -2983,6 +3333,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marco_sabatini',
     replyText: 'Buona serata Tom, just packing up Sheppard bay to go cook risotto myself.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening',
     klbchatOnly: true
@@ -2993,6 +3345,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'archie_wall',
     replyText: 'Left it spotless before heading for the Tube Jamie, enjoy the evening.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening',
     klbchatOnly: true
@@ -3003,16 +3357,20 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'nafsika_forte',
     replyText: 'Just checked upstairs on my way out Charlotte, hung it safely on your locker hook.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening',
     klbchatOnly: true
   },
   {
     senderId: 'marco_sabatini',
-    text: 'Home with a glass of red wine and pasta ragù after escaping London drizzle — leave my heirloom TLC lid clean for tomorrow morning, mon ami!',
+    text: 'Home with a glass of red wine and pasta ragù after escaping London drizzle — leave my heirloom TLC lid clean for tomorrow morning, my friend!',
     replySenderId: 'antoine_maruani',
     replyText: 'Treated with museum reverence Marco, bonne soirée!',
     hourHint: 19,
+    minHour: 16.5,
+    maxHour: 21,
     context: 'gone_home',
     vibe: 'evening',
     klbchatOnly: true
@@ -3023,6 +3381,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Hero Charlotte! Grab me a warm sausage roll and a flat white pls!',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday',
     klbchatOnly: true
@@ -3033,6 +3393,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Leaving 2F right now Archie, finally proper warm toasted bread instead of cold triangles!',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday',
     klbchatOnly: true
@@ -3043,6 +3405,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'jamie_baker',
     replyText: 'Just finished my tutorial group Tom, walking across Gordon Street right now.',
     hourHint: 12,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday',
     klbchatOnly: true
@@ -3053,6 +3417,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'charlotte_coomber',
     replyText: 'Heading straight to Gordon Square benches Nafsika, grab your box and come down!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday',
     klbchatOnly: true
@@ -3063,6 +3429,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Running up the stairs from 2F right now Marco, save me a slice!',
     hourHint: 13,
+    minHour: 11.4,
+    maxHour: 14.25,
     context: 'lunch_call',
     vibe: 'midday',
     klbchatOnly: true
@@ -3073,6 +3441,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'joao_nogueira',
     replyText: 'Right behind you Nafsika, saving the sunny table by the window for our squad!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning',
     klbchatOnly: true
@@ -3083,6 +3453,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'antoine_maruani',
     replyText: 'Un vrai scandale Marco, walking down the spiral stairs now!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning',
     klbchatOnly: true
@@ -3092,7 +3464,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Warning for anyone leaving KLB now: the Gordon\'s Café espresso queue is halfway down the Gordon Street pavement!',
     replySenderId: 'tom_sheppard',
     replyText: 'Good shout Jamie, heading down to Store Street Espresso between marking piles instead.',
-    hourHint: 11,
+    hourHint: 10.5,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning',
     klbchatOnly: true
@@ -3103,6 +3477,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'charlotte_coomber',
     replyText: 'Sprinting up the stairs right now Tom, nearly snapped my fifth TLC capillary in a row!',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday',
     klbchatOnly: true
@@ -3113,6 +3489,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'archie_wall',
     replyText: 'Grab me a double espresso please Charlotte, chained to the Baker centrifuge for another ten mins.',
     hourHint: 15,
+    minHour: 14.25,
+    maxHour: 16.25,
     context: 'coffee_call',
     vibe: 'midday',
     klbchatOnly: true
@@ -3123,6 +3501,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'nafsika_forte',
     replyText: 'Standing in the queue right now Archie, bringing one straight up to your bench!',
     hourHint: 10,
+    minHour: 9.5,
+    maxHour: 11.5,
     context: 'coffee_call',
     vibe: 'morning',
     klbchatOnly: true
@@ -3133,6 +3513,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Say less Charlotte! First round at Marlborough Arms is locked in.',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3143,6 +3525,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'I will cover geography and Silmarillion lore if Richard covers Yorkshire!',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3153,6 +3537,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'tom_sheppard',
     replyText: 'Wrapping up borate notes right now Jamie, see you downstairs shortly.',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3163,6 +3549,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Count me in Archie, just locking my 4 °C Herceptin shelf before walking over.',
     hourHint: 17,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'evening',
     klbchatOnly: true
@@ -3173,6 +3561,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'nafsika_forte',
     replyText: 'Holding the fort in 230 till 19:00 Tom, save me a spot if you stay past seven!',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3183,6 +3573,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Closing my ChemDraw file right now Marco, see you at the bar in five.',
     hourHint: 18,
+    minHour: 16.5,
+    maxHour: 20.5,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3193,6 +3585,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'peter_szijj',
     replyText: 'YES PLEASE Archie! Running down from 3F with 12 µL of my sialidase CiTE conjugate right now!',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     klbchatOnly: true
   },
@@ -3202,6 +3596,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'calise_bahou',
     replyText: 'Sprinting down the spiral stairs from 3F right now Nafsika — if that is mine I owe you pastries all week!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     klbchatOnly: true
   },
@@ -3211,6 +3607,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Treated it with museum reverence before coming upstairs Marco, lid is sitting flush on top.',
     hourHint: 15,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     klbchatOnly: true
   },
@@ -3220,6 +3618,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'richard_spears',
     replyText: 'Save me a marker please Charlotte, bringing two pound coins up from 2F shortly!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     klbchatOnly: true
   },
@@ -3229,6 +3629,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marco_sabatini',
     replyText: 'Still has four litres of headroom Tom, Charlotte is loading her cartridge now.',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     klbchatOnly: true
   },
@@ -3238,6 +3640,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'nafsika_forte',
     replyText: 'Already rebalanced it before Jamie walked past Archie, bearings survived!',
     hourHint: 11,
+    minHour: 9,
+    maxHour: 18.5,
     context: 'cross_floor',
     klbchatOnly: true
   },
@@ -3247,6 +3651,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'daniel_richards',
     replyText: 'Sorry Kersti — reminding everyone upstairs to 10x VivaSpin desalt in pure water before logging onto uplc2011.',
     hourHint: 14,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     klbchatOnly: true
   },
@@ -3256,6 +3662,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'andre_shamsabadi',
     replyText: 'Heading straight down to LG1b right now Abil, thank you for holding them safely!',
     hourHint: 16,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     klbchatOnly: true
   },
@@ -3264,7 +3672,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Good morning KLBchat — PLRP-S column conditioned cleanly and Q-TOF is open for properly desalted samples. Also thank you for Italian cologne smell, beats thiols.',
     replySenderId: 'marco_sabatini',
     replyText: 'Grazie Kersti! Bringing two clean, salt-free borate samples down within the hour.',
-    hourHint: 11,
+    hourHint: 9.5,
+    minHour: 8,
+    maxHour: 12,
     context: 'facility_alert',
     klbchatOnly: true
   },
@@ -3274,6 +3684,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'charlotte_coomber',
     replyText: 'Loud and clear Abil! Sharing the IP link with the Sheppard group on 3F right now.',
     hourHint: 15,
+    minHour: 11.5,
+    maxHour: 16.8,
     context: 'facility_alert',
     klbchatOnly: true
   },
@@ -3283,6 +3695,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'tom_sheppard',
     replyText: 'Cheers Archie, sending Charlotte down once her borate filtration wraps up.',
     hourHint: 13,
+    minHour: 10,
+    maxHour: 16.8,
     context: 'facility_alert',
     klbchatOnly: true
   },
@@ -3292,6 +3706,8 @@ window.KLB.WHATSAPP_BANTER = [
     replySenderId: 'marcos_fernandez',
     replyText: 'Already swept the central balance bay Jamie, Chudasama and Baker bays look sharp.',
     hourHint: 10,
+    minHour: 9,
+    maxHour: 17.5,
     context: 'facility_alert',
     klbchatOnly: true
   },
@@ -3300,7 +3716,9 @@ window.KLB.WHATSAPP_BANTER = [
     text: 'Departmental reminder across KLB: Friday four o\'clock seminar starts promptly in Nyholm, please cap solvent Winchesters before heading over.',
     replySenderId: 'tom_sheppard',
     replyText: 'Loud and clear Claire, reminding Sheppard and Baker bays to finish columns by quarter to four.',
-    hourHint: 15,
+    hourHint: 14.5,
+    minHour: 11.5,
+    maxHour: 15.75,
     context: 'facility_alert',
     vibe: 'late_week',
     klbchatOnly: true

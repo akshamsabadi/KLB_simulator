@@ -112,9 +112,13 @@ window.KLB = window.KLB || {};
   function getSupervisorMeta(st = state) {
     const pid = st?.player?.id || st?.charId || selectedCharId;
     const isArchie = pid === 'archie_wall';
-    return isArchie
+    const base = isArchie
       ? { id: 'jamie_baker', shortName: 'Jamie', fullName: 'Prof. Jamie Baker', patienceLabel: 'Jamie Patience', chatName: 'KLBchat', askCmd: '/AskKLBchat', portrait: 'assets/portraits/jamie_baker.png' }
       : { id: 'vijay_chudasama', shortName: 'Vijay', fullName: 'Prof. Vijay Chudasama', patienceLabel: 'Vijay Patience', chatName: 'Big-Chuds', askCmd: '/AskBigChuds', portrait: 'assets/portraits/vijay_chudasama.png' };
+    if (st?.spectatorMode) {
+      return Object.assign({}, base, { chatName: 'KLBchat', askCmd: '/AskKLBchat' });
+    }
+    return base;
   }
 
   function getPlayableIds() {
@@ -142,7 +146,7 @@ window.KLB = window.KLB || {};
 
   function syncSupervisorChrome() {
     const sup = getSupervisorMeta();
-    const isKlbChat = Boolean(!state?.spectatorMode && sup.chatName === 'KLBchat');
+    const isKlbChat = Boolean(sup.chatName === 'KLBchat');
     const patEl = el('lbl-patience-name');
     if (patEl) patEl.textContent = sup.patienceLabel;
 
@@ -157,6 +161,9 @@ window.KLB = window.KLB || {};
     }
 
     const waSel = el('select-wa-action');
+    if (waSel) {
+      waSel.setAttribute('aria-label', `${sup.chatName} WhatsApp Action`);
+    }
     const askOpt = waSel?.querySelector('option[value="ask"]');
     if (askOpt) {
       askOpt.textContent = `${sup.askCmd} protocol hint (-10m)`;
@@ -164,9 +171,20 @@ window.KLB = window.KLB || {};
   }
 
   function findDeskChair(rm, deskObj) {
-    if (!rm || !deskObj || deskObj.type !== 'writeup_desk') return null;
+    if (!rm || !deskObj || (deskObj.type !== 'writeup_desk' && deskObj.type !== 'pc_terminal')) return null;
     const byDeskId = (rm.objects || []).find(o => o && o.type === 'chair' && o.deskId === deskObj.id);
     if (byDeskId) return byDeskId;
+    if (deskObj.type === 'pc_terminal') {
+      const parentDesk = (rm.objects || []).find(o =>
+        o && o.type === 'writeup_desk' &&
+        deskObj.x >= o.x && deskObj.x < o.x + (o.w || 1) &&
+        deskObj.y >= o.y && deskObj.y < o.y + (o.h || 1)
+      );
+      if (parentDesk) {
+        const byParent = (rm.objects || []).find(o => o && o.type === 'chair' && o.deskId === parentDesk.id);
+        if (byParent) return byParent;
+      }
+    }
     const dw = deskObj.w || 1;
     const dh = deskObj.h || 1;
     return (rm.objects || []).find(o => {
@@ -175,6 +193,19 @@ window.KLB = window.KLB || {};
       const adjY = o.y >= deskObj.y && o.y < deskObj.y + dh && (o.x === deskObj.x + dw || o.x === deskObj.x - 1);
       return adjX || adjY;
     }) || null;
+  }
+
+  function snapPlayerTo3FDeskChair(obj) {
+    if (!state || !obj || state.player?.roomId !== 'klb_3f') return;
+    const rm = window.KLB.WORLD_MAPS?.rooms?.klb_3f;
+    const deskChair = findDeskChair(rm, obj);
+    if (deskChair &&
+        !window.KLB.Sim.isOccupiedByCharacter?.(state, 'klb_3f', deskChair.x, deskChair.y, state.player.id, 0.48) &&
+        window.KLB.Sim.isCellWalkable('klb_3f', deskChair.x, deskChair.y, state.fireAlarm?.active)) {
+      state.player.x = deskChair.x;
+      state.player.y = deskChair.y;
+      state.player.dir = deskChair.dir || state.player.dir;
+    }
   }
 
   function resolveHintWhatsAppSender(rawHint, playerId) {
@@ -376,7 +407,7 @@ window.KLB = window.KLB || {};
   function buildShareableScoreCard(st, res = null, extraOpts = {}) {
     if (!st || !st.player) return '';
     const meta = window.KLB.CAST_BY_ID?.[st.player.id] || { name: st.player.id, shortName: st.player.id, role: 'Researcher' };
-    const mutKeys = Object.keys(st.mutators || {}).filter(k => st.mutators[k]);
+    const mutKeys = Object.keys(st.mutators || {}).filter(k => st.mutators[k] && !(st.player.id === 'archie_wall' && k === 'vijays_not_in'));
     const mutMetaList = window.KLB.MUTATORS || [];
     const mutNames = mutKeys.map(k => mutMetaList.find(m => m.id === k)?.name || k);
     const modLabel = mutNames.length ? mutNames.join(', ') : 'Standard KLB Week';
@@ -502,9 +533,12 @@ window.KLB = window.KLB || {};
     }
     const meta = window.KLB.CAST_BY_ID?.[specFollowNpcId];
     const shortName = meta?.shortName || meta?.name || specFollowNpcId;
+    const npc = state.npcs?.[specFollowNpcId];
+    const isOffsite = Boolean(!npc || !npc.roomId || npc.roomId === 'offsite');
+    const offsiteTag = isOffsite ? ' (Offsite)' : '';
     badge.classList.remove('hidden');
     badge.title = 'Click to stop following';
-    badge.innerHTML = `${icon('eye', 12)}<span>Following: ${escHtml(shortName)}</span><span class="spec-follow-clear" aria-label="Clear follow">&times;</span>`;
+    badge.innerHTML = `${icon('eye', 12)}<span>Following: ${escHtml(shortName)}${offsiteTag}</span><span class="spec-follow-clear" aria-label="Clear follow">&times;</span>`;
     badge.onclick = () => {
       specFollowNpcId = null;
       if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
@@ -625,16 +659,21 @@ window.KLB = window.KLB || {};
   function populateMutatorSelect() {
     const sel = el('select-mutator');
     if (!sel) return;
-    const mutList = window.KLB.MUTATORS || [
+    const rawList = window.KLB.MUTATORS || [
       { id: 'vijays_not_in', name: '#VijaysNotIn', desc: 'No surprise bench rounds before Friday' },
       { id: 'lcms_chaos', name: '50% LC-MS Chaos', desc: 'Kersti instrument gremlins doubled' },
       { id: 'eternal_heatwave', name: '30 C May Heatwave', desc: 'Lab 230 stuck at 30 C all week' },
       { id: 'infinite_espresso', name: 'Double Espresso', desc: 'Slower Energy drain' },
       { id: 'strict_coshh', name: 'Strict COSHH Audit', desc: '2x safety inspection frequency & fines' }
     ];
+    const isArchie = selectedCharId === 'archie_wall';
+    const mutList = isArchie ? rawList.filter(m => m.id !== 'vijays_not_in') : rawList;
+    if (isArchie && selectedMutator === 'vijays_not_in') {
+      selectedMutator = 'none';
+    }
     sel.innerHTML = `<option value="none">Standard KLB Week (No Modifier)</option>` +
       mutList.map(m => `<option value="${escHtml(m.id)}" title="${escHtml(m.desc || '')}">${escHtml(m.name)} — ${escHtml(m.desc || '')}</option>`).join('');
-    sel.value = selectedMutator;
+    sel.value = mutList.some(m => m.id === selectedMutator) ? selectedMutator : 'none';
   }
 
   function buildActiveMutators() {
@@ -657,6 +696,7 @@ window.KLB = window.KLB || {};
     closeModal();
     closeDialogue();
     syncCelebrationBanner();
+    populateMutatorSelect();
 
     const playables = getPlayableCast();
     const clearedCount = Object.keys(archive.clearedChars || {}).length;
@@ -1056,7 +1096,7 @@ window.KLB = window.KLB || {};
     state.isPaused = next;
     if (next) keysDown.clear();
     if (window.KLB.Audio?.setPaused) {
-      window.KLB.Audio.setPaused(next);
+      window.KLB.Audio.setPaused(next && !alexPursuitActive);
     }
     syncPauseButtonUI();
   }
@@ -1350,7 +1390,7 @@ window.KLB = window.KLB || {};
       alexPursuitOn: Boolean(alexPursuitActive)
     });
     if (window.KLB.Audio.setPaused) {
-      window.KLB.Audio.setPaused(Boolean(state.paused || state.isPaused));
+      window.KLB.Audio.setPaused(Boolean((state.paused || state.isPaused) && !alexPursuitActive));
     }
   }
 
@@ -1374,6 +1414,24 @@ window.KLB = window.KLB || {};
       }
     }
     syncAllHUD(true);
+  }
+
+  const COMPACT_BENCHTOP_EQUIP = new Set(['ph_probe', 'base_bath', 'syringe_pump']);
+  const UNDERLYING_SURFACE_TYPES = new Set(['lab_bench', 'bench', 'bench_table', 'fumehood', 'writeup_desk', 'meeting_table']);
+
+  function pickPrioritizedStationHit(hits, curSub = null, roomId = state?.player?.roomId) {
+    if (!Array.isArray(hits) || !hits.length) return null;
+    const compactEquip = hits.find(o => COMPACT_BENCHTOP_EQUIP.has(o.type)) || null;
+    const jobMatch = hits.find(h =>
+      (state?.activeStationJobs || []).some(j => j.roomId === roomId && j.objId === h.id) &&
+      (!compactEquip || COMPACT_BENCHTOP_EQUIP.has(h.type) || !UNDERLYING_SURFACE_TYPES.has(h.type))
+    ) || null;
+    const subMatch = curSub
+      ? hits.find(h => matchesSubTaskStation(h, curSub) && (!compactEquip || COMPACT_BENCHTOP_EQUIP.has(h.type) || !UNDERLYING_SURFACE_TYPES.has(h.type)))
+      : null;
+    const surfaces = new Set(['lab_bench', 'bench', 'bench_table', 'writeup_desk', 'meeting_table']);
+    const nonSurf = hits.filter(o => !surfaces.has(o.type));
+    return jobMatch || subMatch || compactEquip || nonSurf[nonSurf.length - 1] || hits[hits.length - 1] || null;
   }
 
   function getFacingTarget() {
@@ -1407,12 +1465,7 @@ window.KLB = window.KLB || {};
     if (rm) {
       hits = rm.objects.filter(o => o.type !== 'npc_marker' && gx >= o.x && gx < o.x + o.w && gy >= o.y && gy < o.y + o.h);
       const curSub = getCurrentSubTask();
-      const jobMatch = hits.find(h => (state.activeStationJobs || []).some(j => j.roomId === p.roomId && j.objId === h.id));
-      const subMatch = curSub ? hits.find(h => matchesSubTaskStation(h, curSub)) : null;
-      const surfaces = new Set(['lab_bench', 'writeup_desk', 'meeting_table']);
-      const nonSurf = hits.filter(o => !surfaces.has(o.type));
-      const inHoodEquip = nonSurf.find(o => o.type === 'base_bath' || o.type === 'syringe_pump');
-      hitObj = jobMatch || subMatch || inHoodEquip || nonSurf[nonSurf.length - 1] || hits[hits.length - 1] || null;
+      hitObj = pickPrioritizedStationHit(hits, curSub, p.roomId);
 
       if (!hitObj) {
         const underfoot = rm.objects.filter(o => o.type !== 'npc_marker' && curX >= o.x && curX < o.x + o.w && curY >= o.y && curY < o.y + o.h);
@@ -1706,6 +1759,10 @@ window.KLB = window.KLB || {};
   function interactWithNPC(npc) {
     const meta = window.KLB.CAST_BY_ID[npc.id];
     if (!meta) return;
+
+    if (npc.pendingRoomTravel && !state.evacuating && !npc.evacuating && !state.fireAlarm?.active && !npc.pendingRoomTravel.isFireEvac) {
+      npc.pendingRoomTravel = null;
+    }
 
     if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('chat_pop');
 
@@ -2387,7 +2444,8 @@ window.KLB = window.KLB || {};
     } else if (act.kind === 'gaming') {
       const res = window.KLB.Sim.applyBreakEffects(state, 'gaming', hasColleaguesInRoom(state.player.roomId), state.timeMins);
       if (window.KLB.Audio) window.KLB.Audio.playSfx('lan_blip');
-      window.KLB.Sim.pushWhatsApp(state, 'maximillian_lee', 'GGs on Arabia / Ninja Rope!!');
+      const ggSender = state.player.id === 'maximillian_lee' ? 'peter_szijj' : 'maximillian_lee';
+      window.KLB.Sim.pushWhatsApp(state, ggSender, 'GGs on Arabia / Ninja Rope!!');
       showAlertBanner(`AoE2 / Worms break finished (+${res.moraleDelta} Morale, +${res.socialDelta} Social).`, 3600, false);
     } else if (act.kind === 'coffee') {
       const withCol = act.quartet ? true : hasColleaguesInRoom('gordons_cafe');
@@ -2403,13 +2461,17 @@ window.KLB = window.KLB || {};
         state.patience = Math.min(100, state.patience + 6);
         state.favours += favourGain;
         const totalMoraleShown = (res.moraleDelta || 0) + extraMorale;
-        const vLine = 'Good espresso break, sharp work this week.';
+        const vijayOut = Boolean(state.mutators?.vijays_not_in);
+        const quartetLead = vijayOut ? 'nafsika_forte' : 'vijay_chudasama';
+        const vLine = vijayOut
+          ? 'Good espresso break, keep the week moving cleanly.'
+          : 'Good espresso break, sharp work this week.';
         const secondId = isJoao ? 'antoine_maruani' : 'joao_nogueira';
         const secondLine = 'Top Gordon table with the crew today!';
         staggerNpcExchange(
           'gordons_cafe',
-          ['vijay_chudasama', secondId],
-          [{ speakerId: 'vijay_chudasama', line: vLine }, { speakerId: secondId, line: secondLine }],
+          [quartetLead, secondId],
+          [{ speakerId: quartetLead, line: vLine }, { speakerId: secondId, line: secondLine }],
           'coffee_quartet'
         );
         showAlertBanner(`Joined Coffee Quartet (+${res.energyDelta} Energy, +${totalMoraleShown} Morale, +${res.socialDelta} Social, +6 Patience, +${favourGain} Favour${favourGain > 1 ? 's' : ''}).`, 4200, false);
@@ -2777,7 +2839,16 @@ window.KLB = window.KLB || {};
       if (occupier) {
         const occMeta = window.KLB.CAST_BY_ID[occupier.id];
         const hasFavour = (Number(state.favours) || 0) >= 1;
-        showDialogue(occupier.id, `${occMeta.name} at Station`, `Using this station now (${occupier.currentTaskText || 'active task'}).`, [
+        const rmNow = window.KLB.WORLD_MAPS?.rooms?.[state.player.roomId];
+        const busyObjIds = new Set(
+          Object.values(state.npcs || {})
+            .filter(n => n && n.roomId === state.player.roomId && n.busyObjId)
+            .map(n => n.busyObjId)
+        );
+        const hasOtherFreeBay = Boolean(
+          rmNow && (rmNow.objects || []).some(o => o && o.type === obj.type && o.id !== obj.id && !busyObjIds.has(o.id))
+        );
+        const bayActions = [
           hasFavour
             ? {
                 label: `[1] Ask ${occMeta.shortName} to swap bays (-1 Favour)`,
@@ -2797,9 +2868,28 @@ window.KLB = window.KLB || {};
                 disabled: true,
                 primary: false,
                 onClick: () => {}
-              },
-          { label: '[2] Pick Free Bay', primary: !hasFavour, onClick: closeDialogue }
-        ]);
+              }
+        ];
+        if (hasOtherFreeBay) {
+          bayActions.push({ label: '[2] Pick Free Bay', primary: !hasFavour, onClick: closeDialogue });
+        } else {
+          bayActions.push({
+            label: '[2] Wait 5m for your turn (0 Favours)',
+            primary: !hasFavour,
+            onClick: () => {
+              const startDayIdx = state.dayIdx;
+              closeDialogue();
+              window.KLB.Sim.spendWhatsAppMinutes(state, 5, simCallbacks());
+              if (!state || state.dayIdx !== startDayIdx || state.fridayFinalAuditDone || state.gameOver || state.victory) return;
+              occupier.busyObjId = null;
+              showAlertBanner(`Waited 5m for your turn at ${obj.label || niceStationName(obj.type)} (0 Favours).`, 3200, false);
+              syncAllHUD(true);
+              launchWaitJob(step, sub, obj);
+            }
+          });
+          bayActions.push({ label: '[3] Cancel', primary: false, onClick: closeDialogue });
+        }
+        showDialogue(occupier.id, `${occMeta.name} at Station`, `Using this station now (${occupier.currentTaskText || 'active task'}).`, bayActions);
         return;
       }
 
@@ -2905,9 +2995,11 @@ window.KLB = window.KLB || {};
       return;
     }
 
+    const isCompactEquip = COMPACT_BENCHTOP_EQUIP.has(t);
+
     // 1) If current sub-task is 'collect' on this station (e.g. View SDS-PAGE gel / View NMR on PC / View MS on PC)
     const collectHit = curSub && curSub.mode === 'collect'
-      ? hitList.find(h => matchesSubTaskStation(h, curSub))
+      ? hitList.find(h => matchesSubTaskStation(h, curSub) && (!isCompactEquip || h.id === obj.id || !UNDERLYING_SURFACE_TYPES.has(h.type)))
       : null;
     if (collectHit) {
       startSubTaskAtStation(curStep, curSub, collectHit);
@@ -2916,7 +3008,7 @@ window.KLB = window.KLB || {};
 
     // 2) Check any active station job matching this tile/fixture
     const existingJob = (state.activeStationJobs || []).find(r =>
-      r.roomId === state.player.roomId && hitList.some(h => h.id === r.objId)
+      r.roomId === state.player.roomId && (isCompactEquip ? r.objId === obj.id : hitList.some(h => h.id === r.objId))
     );
     if (existingJob) {
       handleActiveStationJob(existingJob);
@@ -2994,7 +3086,9 @@ window.KLB = window.KLB || {};
     }
 
     // 5) Current Sub-Task Match (strictly verified via matchesSubTaskStation!)
-    const matchingHit = curSub ? hitList.find(h => matchesSubTaskStation(h, curSub)) : null;
+    const matchingHit = curSub
+      ? hitList.find(h => matchesSubTaskStation(h, curSub) && (!isCompactEquip || h.id === obj.id || !UNDERLYING_SURFACE_TYPES.has(h.type)))
+      : null;
     if (matchingHit) {
       if (matchingHit.type === 'chem_cupboard' && curSub.cupboardHint) {
         const lbl = matchingHit.label || '';
@@ -3003,6 +3097,9 @@ window.KLB = window.KLB || {};
           openCupboardInspectDialogue(matchingHit);
           return;
         }
+      }
+      if (state.player.roomId === 'klb_3f' && (matchingHit.type === 'pc_terminal' || matchingHit.type === 'writeup_desk')) {
+        snapPlayerTo3FDeskChair(matchingHit);
       }
       startSubTaskAtStation(curStep, curSub, matchingHit);
       return;
@@ -3281,11 +3378,14 @@ window.KLB = window.KLB || {};
     }
 
     if (t === 'ph_probe') {
+      const isMax = state.player.id === 'maximillian_lee';
       const isCal = Boolean(state.prep?.ph_calibrated);
       const tcepOk = Boolean(state.prep?.tcep_buffered);
       const statusText = isCal
-        ? `Electrode calibrated (pH 4.00 / 7.00 / 10.00, slope 98.6%, offset -4.2 mV). +3% Quality prep active${tcepOk ? ' and pH 8.00 BBS TCEP buffer verified' : ''}.`
-        : 'Live two-point readout: pH 4.00 / 7.00 / 10.00 standards ready (slope 98.6%, offset -4.2 mV). Calibrate for pH 7.40 PBS / pH 8.00 BBS bioconjugation buffers (+3% Quality prep bonus & verifies TCEP buffer).';
+        ? `Electrode calibrated (pH 4.00 / 7.00 / 10.00, slope 98.6%, offset -4.2 mV). +3% Quality prep active${tcepOk ? ' and pH 8.00 BBS TCEP buffer verified' : (isMax ? ' (your bench TCEP is still unbuffered — borrow buffered TCEP from a labmate)' : '')}.`
+        : (isMax
+            ? 'Live two-point readout: pH 4.00 / 7.00 / 10.00 standards ready (slope 98.6%, offset -4.2 mV). Calibrate for pH 7.40 PBS / pH 8.00 BBS bioconjugation buffers (+3% Quality prep bonus; borrow buffered TCEP separately from a labmate).'
+            : 'Live two-point readout: pH 4.00 / 7.00 / 10.00 standards ready (slope 98.6%, offset -4.2 mV). Calibrate for pH 7.40 PBS / pH 8.00 BBS bioconjugation buffers (+3% Quality prep bonus & verifies TCEP buffer).');
       const actions = isCal
         ? [
             {
@@ -3293,10 +3393,16 @@ window.KLB = window.KLB || {};
               primary: true,
               onClick: () => {
                 state.prep.ph_calibrated = true;
-                state.prep.tcep_buffered = true;
+                if (!isMax) state.prep.tcep_buffered = true;
                 if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('interact');
                 closeDialogue();
-                showAlertBanner('pH Probe verified (7.40 PBS / 8.00 BBS) — +3% Quality prep active and TCEP buffer verified!', 3600, false);
+                showAlertBanner(
+                  isMax && !state.prep.tcep_buffered
+                    ? 'pH Probe verified (7.40 PBS / 8.00 BBS) — +3% Quality prep active (bench TCEP remains unbuffered for Max!).'
+                    : 'pH Probe verified (7.40 PBS / 8.00 BBS) — +3% Quality prep active and TCEP buffer verified!',
+                  3600,
+                  false
+                );
                 syncAllHUD(true);
               }
             },
@@ -3308,10 +3414,16 @@ window.KLB = window.KLB || {};
               primary: true,
               onClick: () => {
                 state.prep.ph_calibrated = true;
-                state.prep.tcep_buffered = true;
+                if (!isMax) state.prep.tcep_buffered = true;
                 if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('success');
                 closeDialogue();
-                showAlertBanner('pH Probe calibrated (7.40 PBS / 8.00 BBS) — +3% Quality prep bonus active and TCEP buffer verified!', 3800, false);
+                showAlertBanner(
+                  isMax && !state.prep.tcep_buffered
+                    ? 'pH Probe calibrated (7.40 PBS / 8.00 BBS) — +3% Quality prep bonus active (borrow buffered TCEP from a labmate before TCEP steps!).'
+                    : 'pH Probe calibrated (7.40 PBS / 8.00 BBS) — +3% Quality prep bonus active and TCEP buffer verified!',
+                  3800,
+                  false
+                );
                 syncAllHUD(true);
               }
             },
@@ -4031,6 +4143,7 @@ window.KLB = window.KLB || {};
       window.KLB.Sim.checkPermadeath(state, simCallbacks());
       syncAllHUD(true);
     });
+    syncAudioAmbience();
   }
 
   function openFireAlarmModal() {
@@ -4121,6 +4234,7 @@ window.KLB = window.KLB || {};
       return;
     }
 
+    snapPlayerTo3FDeskChair(targetObj);
     setPaused(true);
     modalDismissable = true;
     modalEscapeHandler = () => { closeModal(); setPaused(false); };
@@ -4456,7 +4570,9 @@ window.KLB = window.KLB || {};
       menuItems.push({
         id: 'cafe-quartet',
         icon: 'coffee',
-        label: 'Join Coffee Quartet (João, Nafsika, Vijay & Faiza)',
+        label: state.mutators?.vijays_not_in
+          ? 'Join Coffee Quartet (João, Nafsika & Faiza)'
+          : 'Join Coffee Quartet (João, Nafsika, Vijay & Faiza)',
         duration: quartetJoined ? 'Joined' : '15m',
         durCls: quartetJoined ? 'good' : 'warn',
         disabled: quartetJoined,
@@ -5556,6 +5672,7 @@ window.KLB = window.KLB || {};
       const npc = state.npcs?.[c.id];
       if (!npc) return;
       const spot = cafeSpots[idx % cafeSpots.length];
+      npc.pendingRoomTravel = null;
       npc.roomId = 'gordons_cafe';
       npc.x = spot[0];
       npc.y = spot[1];
@@ -5750,6 +5867,15 @@ window.KLB = window.KLB || {};
     }
 
     (state.activeStationJobs || []).forEach(j => {
+      if (j.roomId === 'cib_lg1b_nmr' && !j._abilFineApplied && !state.spectatorMode) {
+        j._abilFineApplied = true;
+        state.abilFineOwed = true;
+        window.KLB.Sim.pushWhatsApp(
+          state,
+          'abil_aliev',
+          'Abil (LG1b NMR): "Uncollected NMR tube left past curfew — moved to the Sample Fridge (£130 fine). Collect your NMR tube or settle the fine!"'
+        );
+      }
       if (!j.isCold4C && j.canOvercook !== false) {
         j.elapsedMins = j.targetMins + j.sweetSpotMins + 60;
         j.status = 'overcooked';
@@ -5759,9 +5885,47 @@ window.KLB = window.KLB || {};
       }
     });
 
+    for (const npc of Object.values(state.npcs || {})) {
+      if (!npc) continue;
+      if (npc.sim?.activeJob) {
+        const job = npc.sim.activeJob;
+        if (!job.isCold4C && job.canOvercook && job.status !== 'overcooked') {
+          job.status = 'overcooked';
+          if (Array.isArray(npc.sim.failures)) npc.sim.failures.push('overcook');
+          if (npc.sim.weeklyStats) npc.sim.weeklyStats.overcooks += 1;
+        }
+      }
+      if (npc.sim) {
+        const roughNight = Math.random() < 0.28;
+        npc.sim.energy = roughNight ? (46 + Math.floor(Math.random() * 18)) : (70 + Math.floor(Math.random() * 20));
+        npc.sim.morale = clamp((npc.sim.morale ?? 50) + 4, 0, 100);
+        npc.sim.social = clamp((npc.sim.social ?? 84) + 6, 0, 100);
+        npc.sim.hadLunchToday = false;
+        npc.sim.currentAction = null;
+        npc.sim.pendingJobStart = null;
+        npc.sim._quartetDoneKey = null;
+      }
+      if (!window.KLB.CAST_BY_ID?.[npc.id]?.fixedRoom) {
+        npc.pendingRoomTravel = null;
+        npc.roomId = 'offsite';
+        npc.path = [];
+        npc.busyObjId = null;
+        npc.huddleLockTimer = 0;
+        npc.huddleTarget = null;
+      }
+    }
+
     if (state.dayIdx >= 4) {
       state.dayIdx = 0;
       state.weekNum = (state.weekNum || 1) + 1;
+      state._trackedWeekNum = state.weekNum;
+      if (state.spectatorMode) {
+        state.weeklyReportProgress = 0;
+        state.weeklyReportChecked = false;
+        state.manuscriptProgress = 0;
+        state.manuscriptChecked = false;
+        window.KLB.Sim.resetBigChudsWeeklySims?.(state);
+      }
     } else {
       state.dayIdx += 1;
     }
@@ -5777,12 +5941,16 @@ window.KLB = window.KLB || {};
       state._speakersMoraleToday = false;
       state._tcepFavourToday = false;
       state.npcChatCooldowns = {};
+      state.prep = state.prep || {};
+      state.prep.ph_calibrated = false;
+      state.prep.tcep_buffered = state.player.id !== 'maximillian_lee';
       state.energy = forcedCurfew ? 76 : 95;
       state.morale = Math.min(100, state.morale + (forcedCurfew ? -4 : 6));
       state.social = Math.min(100, (state.social ?? 84) + 6);
       state.lastPreferredBreakMins = state.timeMins;
     }
 
+    state._trackedDayIdx = state.dayIdx;
     state.aoe2UsedToday = false;
     state.coffeeUsedToday = false;
     state._prevAoe2UsedToday = false;
@@ -5793,10 +5961,21 @@ window.KLB = window.KLB || {};
     state._coffeePingToday = false;
     state._quartetWaToday = false;
     state._eveningToastToday = false;
+    state._lcmsHazardToday = false;
+    state.lcmsBroken = false;
+    state._sampleAskCooldowns = {};
+    state.vijayRound = { active: false, checkedPlayer: false };
+    state.doorPls = { active: false, requesterId: null, expireMins: 0 };
+    state.aoe2Event = { active: false, endMins: 0 };
     state.fireAlarm = { active: false, remainingMins: 0, elapsedMins: 0 };
     state.safetySweep = { active: false, countdownSec: 0, countdownMins: 0 };
-    state.weatherMode = state.mutators.eternal_heatwave ? 'heatwave' : 'normal';
-    state.tempC = state.mutators.eternal_heatwave ? 30.2 : 21.0;
+    if (window.KLB.Sim.rollDailyWeather) {
+      window.KLB.Sim.rollDailyWeather(state);
+    } else {
+      state.weatherMode = state.mutators.eternal_heatwave ? 'heatwave' : 'normal';
+      state.tempC = state.mutators.eternal_heatwave ? 30.2 : 21.0;
+    }
+    window.KLB.Sim.rollDailyBirthday?.(state, simCallbacks());
 
     if (!state.spectatorMode) {
       if (isFridayStart) {
@@ -6433,6 +6612,7 @@ window.KLB = window.KLB || {};
     syncMuteButtonUI();
     syncSupervisorChrome();
     populateTravelCombobox();
+    if (state.spectatorMode) syncSpecFollowBadge();
 
     const charBadgeEl = el('hud-char-badge');
     if (charBadgeEl) {
@@ -6626,7 +6806,8 @@ window.KLB = window.KLB || {};
             const hasCampaignSim = Boolean(meta.playable && s && Array.isArray(s.completedSteps));
             const auditTxt = hasCampaignSim && s.auditResult ? ` | Audit: ${s.auditResult.total.toFixed(1)}/10 (${s.auditResult.passed ? 'Pass' : 'Fail'})` : '';
             const isFollowing = specFollowNpcId === npc.id;
-            const roomLbl = window.KLB.ROOM_META[npc.roomId]?.shortName || npc.roomId;
+            const isOffsite = !npc.roomId || npc.roomId === 'offsite';
+            const roomLbl = isOffsite ? 'Offsite' : (window.KLB.ROOM_META[npc.roomId]?.shortName || npc.roomId);
             const roleShort = (meta.role?.split('•')[1] || meta.role || 'Campus Staff').trim();
             const statsLine = hasCampaignSim
               ? `Steps: ${s.completedSteps.length}/5 | WR: ${Math.round(s.weeklyReportProgress || 0)}% | Ms: ${Math.round(s.manuscriptProgress || 0)}% | E: ${Math.round(s.energy ?? 80)} S: ${Math.round(s.social ?? 84)}${auditTxt}`
@@ -6638,7 +6819,7 @@ window.KLB = window.KLB || {};
                     <span>${escHtml(meta.name)} (${escHtml(roomLbl)})</span>
                     ${isFollowing ? `<span class="klb-tag info">${icon('eye', 11)}<span>Following</span></span>` : ''}
                   </div>
-                  <div class="mono-muted" style="font-size:10.5px;">${escHtml(npc.currentTaskText || 'On campus')}</div>
+                  <div class="mono-muted" style="font-size:10.5px;">${escHtml(npc.currentTaskText || (isOffsite ? 'Offsite' : 'On campus'))}</div>
                   <div class="mono-muted" style="font-size:10.5px;">${escHtml(statsLine)}</div>
                 </div>
               </li>
@@ -6926,7 +7107,7 @@ window.KLB = window.KLB || {};
         return;
       }
 
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) || document.activeElement?.isContentEditable) return;
 
       if (e.code === 'KeyM') {
         e.preventDefault();
@@ -6936,9 +7117,19 @@ window.KLB = window.KLB || {};
 
       if (/^Digit[1-9]$/.test(e.code)) {
         const idx = e.code.replace('Digit', '');
-        const scope = modalOpen ? el('modal-box') : (!el('rpg-dialogue-box').classList.contains('hidden') ? el('rpg-actions') : null);
+        const dlgOpen = !el('rpg-dialogue-box').classList.contains('hidden');
+        const scope = modalOpen ? el('modal-box') : (dlgOpen ? el('rpg-actions') : null);
         const btn = scope?.querySelector(`[data-hotkey="${idx}"]`);
         if (btn && !btn.disabled) { e.preventDefault(); btn.click(); return; }
+        if (state?.spectatorMode && !modalOpen && !dlgOpen && el('title-screen').classList.contains('hidden') && /^Digit[1-3]$/.test(e.code)) {
+          const speedBtns = Array.from(document.querySelectorAll('#spec-speed-group .spec-speed-btn'));
+          const speedBtn = speedBtns[Number(idx) - 1];
+          if (speedBtn && !speedBtn.disabled) {
+            e.preventDefault();
+            speedBtn.click();
+            return;
+          }
+        }
       }
 
       if (modalOpen && e.code === 'KeyC') {
@@ -6997,7 +7188,7 @@ window.KLB = window.KLB || {};
     document.querySelectorAll('.spec-speed-btn').forEach(btn => {
       btn.onclick = () => {
         const sp = Number(btn.dataset.speed) || 1;
-        specSpeed = [1, 2, 4].includes(sp) ? sp : 1;
+        specSpeed = [1, 2, 3, 4].includes(sp) ? sp : 1;
         if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
         syncSpecSpeedUI();
       };
@@ -7169,7 +7360,10 @@ window.KLB = window.KLB || {};
       const dy = gy - state.player.y;
       const rm = window.KLB.WORLD_MAPS.rooms[state.player.roomId];
       const tileHits = rm ? rm.objects.filter(o => o.type !== 'npc_marker' && gx >= o.x && gx < o.x + o.w && gy >= o.y && gy < o.y + o.h) : [];
-      const resolvedHits = tileHits.length ? tileHits : (cell.obj ? [cell.obj] : []);
+      const clickedObj = (cell.obj && COMPACT_BENCHTOP_EQUIP.has(cell.obj.type))
+        ? cell.obj
+        : (tileHits.length ? (pickPrioritizedStationHit(tileHits, getCurrentSubTask(), state.player.roomId) || cell.obj) : cell.obj);
+      const resolvedHits = tileHits.length ? tileHits : (clickedObj ? [clickedObj] : []);
 
       // Direct adjacent click on NPC
       if (cell.npc && Math.hypot(cell.npc.x - state.player.x, cell.npc.y - state.player.y) <= 2.35) {
@@ -7181,25 +7375,25 @@ window.KLB = window.KLB || {};
       }
 
       // Clicking a chair in 2F, 3F, or meeting_room walks onto the chair tile and sits facing its desk/table
-      if (cell.obj && cell.obj.type === 'chair' && ['klb_2f', 'klb_3f', 'meeting_room'].includes(state.player.roomId)) {
-        const chairOccupied = window.KLB.Sim.isOccupiedByCharacter?.(state, state.player.roomId, cell.obj.x, cell.obj.y, state.player.id, 0.48);
-        if (!chairOccupied && window.KLB.Sim.isCellWalkable(state.player.roomId, cell.obj.x, cell.obj.y, state.fireAlarm.active)) {
-          if (Math.hypot(cell.obj.x - state.player.x, cell.obj.y - state.player.y) <= 0.35) {
-            state.player.x = cell.obj.x;
-            state.player.y = cell.obj.y;
-            state.player.dir = cell.obj.dir || 'N';
+      if (clickedObj && clickedObj.type === 'chair' && ['klb_2f', 'klb_3f', 'meeting_room'].includes(state.player.roomId)) {
+        const chairOccupied = window.KLB.Sim.isOccupiedByCharacter?.(state, state.player.roomId, clickedObj.x, clickedObj.y, state.player.id, 0.48);
+        if (!chairOccupied && window.KLB.Sim.isCellWalkable(state.player.roomId, clickedObj.x, clickedObj.y, state.fireAlarm.active)) {
+          if (Math.hypot(clickedObj.x - state.player.x, clickedObj.y - state.player.y) <= 0.35) {
+            state.player.x = clickedObj.x;
+            state.player.y = clickedObj.y;
+            state.player.dir = clickedObj.dir || 'N';
             if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
             return;
           }
-          const chairPath = window.KLB.Sim.findPathBFS(state.player.roomId, state.player.x, state.player.y, cell.obj.x, cell.obj.y, 65, state, state.player.id);
+          const chairPath = window.KLB.Sim.findPathBFS(state.player.roomId, state.player.x, state.player.y, clickedObj.x, clickedObj.y, 65, state, state.player.id);
           if (chairPath && chairPath.length > 0) {
             if (state.activePlayerAction) cancelActivePlayerAction();
             state.player.autoPath = chairPath;
-            state.player.walkTarget = { x: cell.obj.x, y: cell.obj.y };
-            state.player.pendingInteract = { sitChair: cell.obj };
+            state.player.walkTarget = { x: clickedObj.x, y: clickedObj.y };
+            state.player.pendingInteract = { sitChair: clickedObj };
             if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
             if (window.KLB.Renderer25D.triggerClickRipple) {
-              window.KLB.Renderer25D.triggerClickRipple(cell.obj.x, cell.obj.y, 'interact');
+              window.KLB.Renderer25D.triggerClickRipple(clickedObj.x, clickedObj.y, 'interact');
             }
             return;
           }
@@ -7209,9 +7403,9 @@ window.KLB = window.KLB || {};
       // Direct adjacent click on Object
       if (Math.hypot(dx, dy) <= 1.85) {
         state.player.dir = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'W' : 'E') : (dy < 0 ? 'N' : 'S');
-        if (cell.obj && cell.obj.type !== 'npc_marker') {
+        if (clickedObj && clickedObj.type !== 'npc_marker') {
           if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('interact');
-          interactWithObject(cell.obj, resolvedHits);
+          interactWithObject(clickedObj, resolvedHits);
           return;
         }
         triggerInteract();
@@ -7229,10 +7423,10 @@ window.KLB = window.KLB || {};
         goalX = gx;
         goalY = gy;
         pending = { obj: { type: 'fire_exit_tile', x: gx, y: gy, w: 1, h: 1 } };
-      } else if (cell.obj && cell.obj.type !== 'npc_marker') {
+      } else if (clickedObj && clickedObj.type !== 'npc_marker') {
         let free = null;
-        if (cell.obj.type === 'writeup_desk') {
-          const deskChair = findDeskChair(rm, cell.obj);
+        if (clickedObj.type === 'writeup_desk' || clickedObj.type === 'pc_terminal') {
+          const deskChair = findDeskChair(rm, clickedObj);
           if (deskChair &&
               !window.KLB.Sim.isOccupiedByCharacter?.(state, state.player.roomId, deskChair.x, deskChair.y, state.player.id, 0.48) &&
               window.KLB.Sim.isCellWalkable(state.player.roomId, deskChair.x, deskChair.y, state.fireAlarm.active)) {
@@ -7240,9 +7434,9 @@ window.KLB = window.KLB || {};
           }
         }
         if (!free) {
-          free = window.KLB.Sim.findFreeAdjacentWalkable(state, state.player.roomId, cell.obj, state.player.id);
+          free = window.KLB.Sim.findFreeAdjacentWalkable(state, state.player.roomId, clickedObj, state.player.id);
         }
-        if (free) { goalX = free.x; goalY = free.y; pending = { obj: cell.obj, allHits: resolvedHits }; }
+        if (free) { goalX = free.x; goalY = free.y; pending = { obj: clickedObj, allHits: resolvedHits }; }
       }
 
       if (window.KLB.Sim.isCellWalkable(state.player.roomId, goalX, goalY, state.fireAlarm.active)) {

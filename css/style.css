@@ -1925,6 +1925,29 @@ select.ui-select::picker-icon {
   background: rgba(14, 116, 144, 0.32);
   border-color: rgba(103, 232, 249, 0.85);
 }
+.spec-roster-card.offsite {
+  opacity: 0.82;
+  background: rgba(15, 23, 42, 0.68);
+}
+.spectator-offsite-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  color: var(--text-muted);
+  font-family: 'Consolas', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.spectator-offsite-badge.hidden {
+  display: none;
+}
 
 /* Archive Discovered Events Logbook */
 #archive-events-list {
@@ -3125,4 +3148,289 @@ input[type="range"].klb-volume-slider::-moz-range-thumb:hover {
 }
 .share-copied-badge.hidden {
   display: none;
+}
+
+/* ==================== RESPONSIVE VIEWPORTS (NARROW DESKTOP & TABLET) ==================== */
+@media (max-width: 1120px) {
+  #title-screen {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .title-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  #select-mutator {
+    width: 260px;
+  }
+
+  .char-select-layout {
+    grid-template-columns: 1.32fr 1fr;
+    gap: 12px;
+  }
+
+  .char-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .char-card {
+    padding: 8px 6px;
+  }
+
+  .char-card img.portrait {
+    width: 60px;
+    height: 60px;
+  }
+
+  .quickstart-card {
+    gap: 10px;
+    padding: 9px 12px;
+  }
+
+  .char-dossier {
+    padding: 12px 14px;
+  }
+
+  #game-shell {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  #top-hud-bar {
+    height: auto;
+    min-height: 44px;
+    padding: 6px 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .hud-toolbar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  #select-travel {
+    width: 142px;
+  }
+
+  #select-zoom {
+    width: 108px;
+  }
+
+  .hud-btn {
+    padding: 0 8px;
+  }
+
+  .deck-clock-card,
+  .meters-section,
+  .reactions-section,
+  .weekly-deliverables-section {
+    padding: 6px 10px;
+  }
+
+  .meter-grid {
+    gap: 4px 10px;
+  }
+
+  #rpg-dialogue-box {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 9px 12px;
+    gap: 10px;
+  }
+
+  #rpg-portrait {
+    width: 68px;
+    height: 68px;
+  }
+
+  #modal-box,
+  #modal-box.ev-modal,
+  #modal-box.klb-modal {
+    max-width: min(94vw, 720px);
+    padding: 16px 18px;
+  }
+
+  #modal-box.klb-modal-sm {
+    max-width: min(92vw, 480px);
+    padding: 16px 18px;
+  }
+}
+
+@media (max-width: 860px) {
+  #title-screen {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .title-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .title-brand {
+    flex: 0 0 auto;
+  }
+
+  .title-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .control-group {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  #select-mutator {
+    width: 100%;
+  }
+
+  .char-select-layout {
+    grid-template-columns: 1fr;
+    flex: 0 0 auto;
+  }
+
+  .char-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .char-card.bonus-card {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 9px 12px;
+  }
+
+  .char-card.bonus-card > .bonus-badge {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .quickstart-card {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .char-dossier {
+    overflow-y: visible;
+  }
+
+  #btn-launch-campaign {
+    position: static;
+    box-shadow: var(--shadow-card);
+  }
+
+  #game-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(300px, 54vh) minmax(260px, 1fr);
+    height: 100dvh;
+  }
+
+  #viewport-col {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    min-height: 0;
+  }
+
+  #top-hud-bar {
+    padding: 6px 8px;
+  }
+
+  .hud-room-cluster {
+    width: 100%;
+  }
+
+  .hud-toolbar {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .spectator-room-wrap {
+    flex-wrap: wrap;
+  }
+
+  #controls-strip {
+    height: auto;
+    min-height: 24px;
+    padding: 3px 10px;
+  }
+
+  #hud-hover-hint {
+    max-width: 150px;
+  }
+
+  #rpg-dialogue-box {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    min-height: 84px;
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  #rpg-portrait {
+    width: 56px;
+    height: 56px;
+  }
+
+  #command-deck {
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    overflow-y: auto;
+    box-shadow: 0 -4px 18px rgba(2, 6, 23, 0.45);
+  }
+
+  .deck-pane {
+    flex: 1 0 auto;
+    min-height: 180px;
+  }
+
+  .labbook-controls,
+  .wa-actions {
+    flex-wrap: wrap;
+  }
+
+  #modal-backdrop {
+    padding: 10px;
+  }
+
+  #modal-box,
+  #modal-box.ev-modal,
+  #modal-box.klb-modal,
+  #modal-box.klb-modal-sm {
+    max-width: 100%;
+    max-height: 94vh;
+    padding: 14px 15px;
+    border-radius: 10px;
+  }
+
+  .ev-modal-header {
+    gap: 10px;
+  }
+
+  .ev-modal-portrait {
+    width: 48px;
+    height: 48px;
+  }
+
+  .ev-choice-deltas {
+    padding-left: 0;
+  }
+
+  .audit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .klb-option-grid,
+  .slide-grid-2x2,
+  .pause-menu-grid,
+  .rules-grid {
+    grid-template-columns: 1fr;
+  }
 }
