@@ -14,7 +14,7 @@ window.KLB = window.KLB || {};
   const SHARED_STATION_TYPES = new Set([
     'cafe_table', 'cafe_counter', 'tea_drawer', 'pc_terminal', 'chem_cupboard',
     'fridge_4c', 'freezer_20c', 'balance_table', 'tlc_station', 'drying_oven',
-    'argon_cyl', 'base_bath', 'sink', 'waste_bin', 'chair'
+    'argon_cyl', 'base_bath', 'sink', 'waste_bin', 'chair', 'ph_probe'
   ]);
 
   const PERMADEATH_MESSAGES = {

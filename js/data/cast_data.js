@@ -8586,7 +8586,7 @@ window.KLB.WEEKLY_SIGNATURE_CONVERSATIONS = [
   {
     weeklyKey: "conference_poster_rush",
     label: "Conference Poster Rush",
-    roomIds: ["klb_3f","meeting_room"],
+    roomIds: ["klb_3f","klb_2f","meeting_room"],
     requiredIds: ["calise_bahou","richard_spears"],
     participants: ["calise_bahou","marcos_fernandez","richard_spears"],
     minPresent: 2,

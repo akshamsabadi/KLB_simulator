@@ -23,35 +23,35 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Evacuate immediately via Left Fire Exit',
-        moraleDelta: -4,
+        moraleDelta: -2,
         safetyDelta: 6,
-        energyDelta: 5,
-        socialDelta: 2,
+        energyDelta: 4,
+        socialDelta: 3,
         patienceDelta: 3,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'You clear the bay smoothly via the Left Fire Exit while timers tick.'
       },
       {
         label: 'Pull flask off heat, then bolt out',
-        moraleDelta: -2,
-        safetyDelta: -8,
-        energyDelta: -6,
-        patienceDelta: -2,
+        moraleDelta: 4,
+        safetyDelta: -4,
+        energyDelta: -4,
+        patienceDelta: 2,
         favourDelta: 0,
-        timeCostMins: 0,
+        timeCostMins: 5,
         resultText: 'You rescue your yield right before the marshal sweeps Bay 2.'
       },
       {
         label: 'Crouch behind Cupboard 19 and ignore siren',
-        moraleDelta: -12,
-        safetyDelta: -32,
-        energyDelta: -8,
-        socialDelta: -4,
-        patienceDelta: -8,
-        favourDelta: -2,
+        moraleDelta: 2,
+        safetyDelta: -10,
+        energyDelta: 6,
+        socialDelta: -3,
+        patienceDelta: -5,
+        favourDelta: -1,
         timeCostMins: 0,
-        resultText: 'The Safety Inspector catches you behind Cupboard 19 for a brutal Lab Condition hit.'
+        resultText: 'You skip the cold stairwell and keep bench momentum, though the marshal spots you and docks Lab Condition.'
       }
     ]
   },
@@ -73,34 +73,34 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Specs ON (G), Headphones OFF (H), tidy workspace',
         moraleDelta: 4,
-        safetyDelta: 12,
+        safetyDelta: 10,
         energyDelta: -8,
         socialDelta: 2,
-        patienceDelta: 5,
+        patienceDelta: 4,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Prof. Carmalt beams as the Safety Inspector ticks Exemplary Lab Condition on his clipboard.'
       },
       {
         label: 'Put Specs ON (G) only; leave headphones and clutter',
-        moraleDelta: -4,
-        safetyDelta: -12,
-        energyDelta: -2,
-        patienceDelta: -4,
-        favourDelta: -1,
+        moraleDelta: 2,
+        safetyDelta: -6,
+        energyDelta: 3,
+        patienceDelta: -3,
+        favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Your specs pass, though the Safety Inspector flags headphones in the lab and an untidy workspace.'
+        resultText: 'Your specs pass immediately, though the Safety Inspector flags headphones in the lab and an untidy workspace.'
       },
       {
         label: 'Bolt upstairs to 3F until they leave',
-        moraleDelta: 2,
-        safetyDelta: -18,
-        energyDelta: -4,
-        socialDelta: -2,
-        patienceDelta: -6,
-        favourDelta: -1,
-        timeCostMins: 0,
-        resultText: 'You hide upstairs on 3F while your unattended hood drags Lab Condition down.'
+        moraleDelta: 5,
+        safetyDelta: -8,
+        energyDelta: 4,
+        socialDelta: 2,
+        patienceDelta: -4,
+        favourDelta: 0,
+        timeCostMins: 5,
+        resultText: 'You catch a breather upstairs on 3F with the write-up crew while your unattended hood drags Lab Condition down.'
       }
     ]
   },
@@ -122,32 +122,33 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Walk Vijay through your TLC and controls',
-        moraleDelta: 10,
+        moraleDelta: 8,
         safetyDelta: 4,
-        energyDelta: -6,
-        patienceDelta: 8,
+        energyDelta: -8,
+        patienceDelta: 6,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Vijay nods and praises your watertight controls for Friday.'
       },
       {
         label: 'Swirl coloured water while mumbling about rotamers',
-        moraleDelta: -6,
+        moraleDelta: 2,
         safetyDelta: 0,
-        energyDelta: -4,
-        patienceDelta: -10,
+        energyDelta: 4,
+        patienceDelta: -6,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Vijay squints at the unlabelled flask and mutters suboptimal.'
+        resultText: 'You bluff cleanly and save your energy, though Vijay squints at the unlabelled flask and mutters suboptimal.'
       },
       {
         label: 'Ask Vijay about your Slide 4 controls',
         moraleDelta: 6,
         safetyDelta: 2,
-        energyDelta: -5,
-        patienceDelta: 5,
+        energyDelta: -3,
+        socialDelta: 3,
+        patienceDelta: 4,
         favourDelta: 0,
-        timeCostMins: 0,
+        timeCostMins: 5,
         resultText: 'Vijay sketches the exact negative control he wants for Friday.'
       }
     ]
@@ -171,23 +172,23 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Tap specs and brush Balance Table silica',
         moraleDelta: 5,
         safetyDelta: 8,
-        energyDelta: -3,
+        energyDelta: -8,
         socialDelta: 3,
         patienceDelta: 4,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Jamie Baker thanks you for keeping specs on and the balance bay tidy.'
       },
       {
         label: 'Scramble bare-eyed back to the door holder',
-        moraleDelta: -6,
-        safetyDelta: -14,
-        energyDelta: -4,
-        socialDelta: -2,
-        patienceDelta: -5,
+        moraleDelta: -2,
+        safetyDelta: -6,
+        energyDelta: 3,
+        socialDelta: -1,
+        patienceDelta: -3,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Jamie catches you mid-stride and reminds you specs go on at the door.'
+        resultText: 'You dash back for your specs without cleaning the bay, saving time while Jamie reminds you specs go on at the door.'
       }
     ]
   },
@@ -208,31 +209,31 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Thaw bottles gently in 28 °C water',
         moraleDelta: 2,
-        safetyDelta: 4,
-        energyDelta: -4,
+        safetyDelta: 5,
+        energyDelta: -8,
         socialDelta: 2,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'You gently thaw frozen DMSO stocks without cracking a single bottle.'
       },
       {
-        label: 'Blast frozen DMSO with the heat gun',
-        moraleDelta: -8,
-        safetyDelta: -20,
-        energyDelta: -5,
-        patienceDelta: -6,
-        favourDelta: -1,
+        label: 'Quick-warm bottles in 40 °C sonicator',
+        moraleDelta: 3,
+        safetyDelta: -5,
+        energyDelta: 2,
+        patienceDelta: -2,
+        favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Thermal shock cracks the bottle bottom as Nafsika hands you spill pads.'
+        resultText: 'Warming in the 40 °C sonicator melts the DMSO in seconds, though hot glassware draws a stern look from Nafsika.'
       },
       {
         label: 'Switch to DMF and MeCN stocks',
         moraleDelta: -3,
         safetyDelta: 2,
-        energyDelta: -6,
+        energyDelta: 4,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Your fingers are freezing, though DMF stays liquid down to -60 °C.'
+        resultText: 'Your fingers are chilly, though DMF stays liquid down to -60 °C and keeps your reaction moving.'
       }
     ]
   },
@@ -253,31 +254,32 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Tape fridge shut and pack ice sleeves',
         moraleDelta: 4,
-        safetyDelta: 5,
-        energyDelta: -7,
+        safetyDelta: 6,
+        energyDelta: -8,
         socialDelta: 3,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Ice sleeves keep 4 °C Herceptin cold while Calise and Antoine salute you.'
       },
       {
         label: "Dash to Gordon's for iced espressos",
         moraleDelta: 6,
         safetyDelta: 0,
-        energyDelta: 6,
-        socialDelta: 4,
+        energyDelta: 8,
+        socialDelta: 5,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 15,
         resultText: 'Iced caffeine revives Lab 230 and restores Energy despite the heat.'
       },
       {
         label: 'Power through in a buttoned lab coat',
-        moraleDelta: -10,
-        safetyDelta: -4,
-        energyDelta: -16,
+        moraleDelta: -4,
+        safetyDelta: 2,
+        energyDelta: 2,
+        patienceDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'You sweat behind the hood while the 4 °C lab fridge warms toward 13 °C.'
+        resultText: 'You sweat behind the hood in your buttoned lab coat, saving fifteen minutes on bench timers while the lab warms.'
       }
     ]
   },
@@ -297,24 +299,23 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Condition column and flush LG11 lines with Kersti',
-        moraleDelta: 6,
-        safetyDelta: 4,
-        energyDelta: -10,
+        safetyDelta: 5,
+        energyDelta: -12,
         socialDelta: 4,
         patienceDelta: 4,
-        favourDelta: 2,
-        timeCostMins: 0,
+        favourDelta: 1,
+        timeCostMins: 15,
         clearsLcmsBroken: true,
-        resultText: 'You flush and condition the LG11 column with Kersti, restoring clean baselines and earning two Favours.'
+        resultText: 'You flush and condition the LG11 column with Kersti, restoring clean baselines and earning one Favour.'
       },
       {
         label: 'Ask Kersti for a fast conditioned-line bypass (1 Favour)',
         favourCost: 1,
-        moraleDelta: 7,
+        moraleDelta: 4,
         safetyDelta: 4,
         energyDelta: 0,
-        socialDelta: 4,
-        patienceDelta: 5,
+        socialDelta: 2,
+        patienceDelta: 4,
         favourDelta: 0,
         timeCostMins: 0,
         clearsLcmsBroken: true,
@@ -324,21 +325,22 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Pivot to MALDI-TOF or KLB bench work',
         moraleDelta: 0,
         safetyDelta: 2,
-        energyDelta: -4,
+        energyDelta: 5,
+        patienceDelta: -2,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'You dodge the LG11 flush queue while Kersti conditions the column.'
       },
       {
-        label: 'Queue "BLANK_WATER" beside the flashing red LED',
-        moraleDelta: -12,
-        safetyDelta: -10,
-        energyDelta: -4,
+        label: 'Queue sample on secondary wash line',
+        moraleDelta: 4,
+        safetyDelta: 0,
+        energyDelta: 2,
         socialDelta: -4,
-        patienceDelta: -8,
-        favourDelta: -2,
-        timeCostMins: 0,
-        resultText: 'Kersti catches you at uplc2011 clicking Run during column conditioning.'
+        patienceDelta: -3,
+        favourDelta: 0,
+        timeCostMins: 5,
+        resultText: 'Your sample sneaks onto the secondary wash line ahead of the backlog, though Kersti sighs at the unconditioned injection.'
       }
     ]
   },
@@ -359,20 +361,20 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Head to LG1b, apologise, retrieve all tubes',
         moraleDelta: 5,
-        safetyDelta: 3,
-        energyDelta: -8,
+        safetyDelta: 4,
+        energyDelta: -10,
         socialDelta: 3,
         patienceDelta: 6,
-        favourDelta: 2,
-        timeCostMins: 0,
-        resultText: 'Abil waives the £130 fine and reminds everyone to check 128.40.76.1.'
+        favourDelta: 1,
+        timeCostMins: 15,
+        resultText: 'Abil waives the £130 fine, returns the tubes, and reminds everyone to check 128.40.76.1.'
       },
       {
         label: 'Ask Abil for a fine waiver and rack rescue (1 Favour)',
         favourCost: 1,
-        moraleDelta: 9,
+        moraleDelta: 8,
         safetyDelta: 2,
-        energyDelta: 0,
+        energyDelta: 2,
         socialDelta: 4,
         patienceDelta: 6,
         favourDelta: 0,
@@ -383,24 +385,24 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Spritz Sabatini cologne and chat NOE shimming',
         moraleDelta: 10,
         safetyDelta: 2,
-        energyDelta: -5,
-        socialDelta: 5,
+        energyDelta: -4,
+        socialDelta: 6,
         patienceDelta: 3,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Abil appreciates the cologne and shimming chat and returns your tubes.'
       },
       {
         label: 'Ignore the email until tomorrow morning',
-        moraleDelta: -14,
+        moraleDelta: -6,
         safetyDelta: 0,
-        energyDelta: 0,
-        socialDelta: -3,
-        patienceDelta: -12,
-        favourDelta: -1,
+        energyDelta: 8,
+        socialDelta: -2,
+        patienceDelta: -8,
+        favourDelta: 0,
         timeCostMins: 0,
         setsAbilFine: true,
-        resultText: 'Vijay gets copied on the £130 invoice and his Patience drops hard.'
+        resultText: 'You save time and energy by skipping the CIB basement run today, though Vijay gets copied on the £130 invoice tomorrow.'
       }
     ]
   },
@@ -423,21 +425,21 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Walk to Right Exit and unlatch door',
         moraleDelta: 6,
         safetyDelta: 0,
-        energyDelta: -3,
+        energyDelta: -4,
         socialDelta: 6,
         favourDelta: 1,
-        timeCostMins: 0,
-        resultText: 'You unlatch the exit door and bank one grateful Lab Favour.'
+        timeCostMins: 10,
+        resultText: 'You unlatch the exit door, help haul the ice box in, and bank one grateful Lab Favour.'
       },
       {
         label: 'Stay at your hood for someone else',
-        moraleDelta: -3,
-        safetyDelta: 0,
-        energyDelta: 0,
-        socialDelta: -4,
+        moraleDelta: -2,
+        safetyDelta: 2,
+        energyDelta: 3,
+        socialDelta: -3,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Three more door pings chime before Archie walks over to open it.'
+        resultText: 'You stay focused at your hood while Archie walks over to unlatch the door.'
       }
     ]
   },
@@ -464,7 +466,7 @@ window.KLB.RANDOM_EVENTS = [
         energyDelta: 8,
         socialDelta: 8,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 15,
         resultText: 'Flat whites and pastries at Gordon\'s recharge Energy, Morale, and Social.'
       },
       {
@@ -481,12 +483,13 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Stay at KLB and drink tap water',
         moraleDelta: -2,
-        safetyDelta: 0,
+        safetyDelta: 2,
         energyDelta: 0,
-        socialDelta: -3,
+        socialDelta: -2,
+        patienceDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'You keep quiet bench space while everyone walks over to Gordon\'s.'
+        resultText: 'You keep quiet bench space and impress Vijay with your focus while everyone walks over to Gordon\'s.'
       }
     ]
   },
@@ -511,32 +514,33 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Duck to CIB via NMR decoy',
         moraleDelta: 8,
         safetyDelta: 0,
-        energyDelta: -5,
+        energyDelta: -6,
         socialDelta: 4,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'You slip into CIB basement while keeping the 3F office sanctuary hidden.'
       },
       {
         label: 'Keep headphones on in stony silence',
-        moraleDelta: -14,
-        safetyDelta: 0,
-        energyDelta: -6,
+        moraleDelta: -4,
+        safetyDelta: -2,
+        energyDelta: 4,
         socialDelta: -2,
+        patienceDelta: 2,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'She stands behind your stool staring silently while you pipette.'
+        resultText: 'You stay planted at your bench with headphones on, finishing your pipetting in record time despite the awkward stare.'
       },
       {
         label: 'Panic and sprint up to 3F Office',
-        moraleDelta: -22,
-        safetyDelta: 0,
-        energyDelta: -8,
-        socialDelta: -8,
+        moraleDelta: -6,
+        safetyDelta: 2,
+        energyDelta: -4,
+        socialDelta: 6,
         patienceDelta: -4,
-        favourDelta: -2,
-        timeCostMins: 0,
-        resultText: 'She follows you straight onto 3F and nine Chuds roast you.'
+        favourDelta: -1,
+        timeCostMins: 5,
+        resultText: 'She trails you onto 3F, though the nine Chuds turn the roast into an instant group comedy session.'
       }
     ]
   },
@@ -556,23 +560,21 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Dunk rogue pipette into Hood Bleach Bath',
-        moraleDelta: 6,
-        safetyDelta: 10,
-        energyDelta: -6,
-        socialDelta: 6,
+        safetyDelta: 8,
+        energyDelta: -10,
+        socialDelta: 3,
         patienceDelta: 4,
-        favourDelta: 2,
-        timeCostMins: 0,
+        favourDelta: 1,
+        timeCostMins: 10,
         clearsPrep: ['thiol_dirty'],
         resultText: 'Hypochlorite kills the thiol stench instantly as all three bays cheer.'
       },
       {
         label: 'Ask a baymate to bleach-quench Cupboard 5 (1 Favour)',
         favourCost: 1,
-        moraleDelta: 5,
-        safetyDelta: 10,
-        energyDelta: 0,
-        socialDelta: 4,
+        moraleDelta: 3,
+        safetyDelta: 8,
+        energyDelta: 4,
         patienceDelta: 4,
         favourDelta: 0,
         timeCostMins: 0,
@@ -581,24 +583,23 @@ window.KLB.RANDOM_EVENTS = [
       },
       {
         label: 'Max hood sashes and retreat to 3F',
-        moraleDelta: -6,
-        safetyDelta: -6,
-        energyDelta: 4,
+        moraleDelta: 2,
+        safetyDelta: -5,
+        energyDelta: 6,
         socialDelta: -2,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Extractors clear the skunk cloud while 2F pauses briefly.'
+        resultText: 'Extractors clear the skunk cloud while you catch a quick breather on 3F.'
       },
       {
-        label: 'Spray air freshener over the thiol bin',
-        moraleDelta: -14,
-        safetyDelta: -12,
-        energyDelta: -3,
-        socialDelta: -5,
-        patienceDelta: -5,
-        favourDelta: -1,
+        label: 'Seal bin with parafilm for evening shift',
+        safetyDelta: -6,
+        energyDelta: 3,
+        socialDelta: 2,
+        patienceDelta: -3,
+        favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Lab 230 now smells strongly of Tropical Pine and Rotting Garlic.'
+        resultText: 'A double layer of parafilm traps most of the whiff for now, keeping the evening bay moving.'
       }
     ]
   },
@@ -618,23 +619,21 @@ window.KLB.RANDOM_EVENTS = [
     choices: [
       {
         label: 'Make fresh buffered TCEP in BBS',
-        moraleDelta: 6,
         safetyDelta: 4,
-        energyDelta: -7,
-        socialDelta: 5,
+        energyDelta: -10,
+        socialDelta: 2,
         patienceDelta: 3,
-        favourDelta: 2,
-        timeCostMins: 0,
+        favourDelta: 1,
+        timeCostMins: 10,
         setsPrep: { tcep_buffered: true },
         resultText: 'Antoine beams at your dated pH 8.0 stock and Max owes you a favour.'
       },
       {
         label: 'Borrow fresh pH 8.0 BBS TCEP from a baymate (1 Favour)',
         favourCost: 1,
-        moraleDelta: 7,
+        moraleDelta: 5,
         safetyDelta: 4,
-        energyDelta: 2,
-        socialDelta: 4,
+        energyDelta: 4,
         patienceDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
@@ -642,20 +641,20 @@ window.KLB.RANDOM_EVENTS = [
         resultText: 'A baymate slides over a fresh 20 mM pH 8.0 BBS TCEP aliquot so you skip buffer prep.'
       },
       {
-        label: 'Spot 1 µL onto pH strip first',
-        moraleDelta: 4,
+        label: 'Check 1 µL on the benchtop pH probe first',
+        moraleDelta: 3,
         safetyDelta: 3,
-        energyDelta: -2,
-        socialDelta: 2,
-        favourDelta: 1,
-        timeCostMins: 0,
-        resultText: 'The strip flashes red at pH 2.2 so you bin the unbuffered trap tube.'
+        energyDelta: -3,
+        favourDelta: 0,
+        timeCostMins: 5,
+        setsPrep: { ph_calibrated: true },
+        resultText: 'The benchtop pH probe reads pH 2.2 right away, so you bin the unbuffered trap tube and calibrate cleanly.'
       },
       {
         label: 'Use the mystery TCEP as-is',
         moraleDelta: 2,
         safetyDelta: -4,
-        energyDelta: 4,
+        energyDelta: 6,
         patienceDelta: -3,
         favourDelta: 0,
         timeCostMins: 0,
@@ -681,19 +680,19 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Vent gently and rinse bump trap back',
         moraleDelta: 5,
         safetyDelta: 6,
-        energyDelta: -5,
-        socialDelta: 6,
+        energyDelta: -8,
+        socialDelta: 5,
         patienceDelta: 3,
-        favourDelta: 2,
-        timeCostMins: 0,
-        resultText: 'You save the yellow PD product before it hits the coils and earn two Favours.'
+        favourDelta: 1,
+        timeCostMins: 10,
+        resultText: 'You save the yellow PD product before it hits the coils and earn one Favour.'
       },
       {
         label: 'Ask Nafsika or Marcos to rescue Büchi 1 (1 Favour)',
         favourCost: 1,
         moraleDelta: 6,
         safetyDelta: 6,
-        energyDelta: 0,
+        energyDelta: 2,
         socialDelta: 4,
         patienceDelta: 4,
         favourDelta: 0,
@@ -702,13 +701,13 @@ window.KLB.RANDOM_EVENTS = [
       },
       {
         label: 'Yank their flask off and claim Büchi',
-        moraleDelta: -4,
+        moraleDelta: 2,
         safetyDelta: -4,
-        energyDelta: 2,
+        energyDelta: 5,
         socialDelta: -6,
-        favourDelta: -2,
+        favourDelta: -1,
         timeCostMins: 0,
-        resultText: 'You clear the rotavap fast and trigger angry texts across the bay.'
+        resultText: 'You clear the rotavap in seconds to get your own concentration rolling, sparking grumpy texts across the bay.'
       }
     ]
   },
@@ -743,10 +742,10 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Bring Nafsika tea for holding down 230',
         moraleDelta: 6,
         safetyDelta: 2,
-        energyDelta: -5,
+        energyDelta: -6,
         socialDelta: 6,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Nafsika thanks you warmly and backs you up with a Lab Favour.'
       }
     ]
@@ -772,7 +771,7 @@ window.KLB.RANDOM_EVENTS = [
         energyDelta: 4,
         socialDelta: 5,
         favourDelta: 0,
-        timeCostMins: 0,
+        timeCostMins: 5,
         setsPrep: { sabatini_spritz: true, sabatini_tlc_jar: true },
         resultText: 'Dead-straight Rf spots appear while Kersti and Abil greet you warmly.'
       },
@@ -780,10 +779,10 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Swap workup tips at the Sheppard border',
         moraleDelta: 6,
         safetyDelta: 2,
-        energyDelta: -2,
+        energyDelta: -3,
         socialDelta: 6,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Sabatini shares fresh molecular sieves from Cupboard 14 in return.'
       }
     ]
@@ -810,7 +809,7 @@ window.KLB.RANDOM_EVENTS = [
         energyDelta: -4,
         socialDelta: 8,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Charlotte hands you a fresh whiteboard marker for Friday Group Meeting.'
       },
       {
@@ -827,21 +826,24 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Put noise-cancelling headphones on to concentrate',
         moraleDelta: 3,
-        safetyDelta: 0,
+        safetyDelta: -2,
         energyDelta: 6,
         socialDelta: -2,
+        patienceDelta: 2,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'Extractor roar and weekend gossip fade into blissful bench calm.'
       },
       {
         label: 'Calculate VivaSpin moles bare-eared next door',
-        moraleDelta: -6,
-        safetyDelta: 0,
-        energyDelta: -12,
+        moraleDelta: -3,
+        safetyDelta: 4,
+        energyDelta: -4,
+        socialDelta: 2,
+        patienceDelta: 5,
         favourDelta: 0,
-        timeCostMins: 0,
-        resultText: 'You accidentally write brunch notes into your lab book margin three times.'
+        timeCostMins: 5,
+        resultText: 'Specs on and ears free, you stay compliant while catching half the train saga and impressing Vijay with tidy calculations.'
       }
     ]
   },
@@ -866,18 +868,18 @@ window.KLB.RANDOM_EVENTS = [
         energyDelta: 4,
         socialDelta: 6,
         favourDelta: 0,
-        timeCostMins: 0,
+        timeCostMins: 5,
         resultText: 'Marcos keeps a straight face while the whole bay bursts out laughing.'
       },
       {
         label: 'Sweep plastic shrapnel before PIs spot it',
         moraleDelta: 4,
         safetyDelta: 5,
-        energyDelta: -2,
+        energyDelta: -4,
         socialDelta: 2,
         patienceDelta: 3,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'You bin the snapped cap five seconds before Prof. Baker glances over.'
       }
     ]
@@ -901,10 +903,10 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Corral all fourteen rolling lemons fast',
         moraleDelta: 11,
         safetyDelta: 6,
-        energyDelta: -5,
+        energyDelta: -8,
         socialDelta: 6,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 5,
         triggersMinigame: 'lemons',
         resultText: 'Zero slip hazards near the central balance bay and you pocket a lucky lemon intact.'
       },
@@ -912,7 +914,7 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Drop a Lemon Boy quip in the lab chat',
         moraleDelta: 8,
         safetyDelta: -2,
-        energyDelta: 2,
+        energyDelta: 3,
         socialDelta: 4,
         favourDelta: 0,
         timeCostMins: 0,
@@ -938,17 +940,17 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Trap under 250 mL beaker and release',
         moraleDelta: 9,
         safetyDelta: 2,
-        energyDelta: -3,
+        energyDelta: -4,
         socialDelta: 6,
-        favourDelta: 2,
-        timeCostMins: 0,
-        resultText: 'Max exhales in massive relief and hands you two Lab Favours.'
+        favourDelta: 1,
+        timeCostMins: 10,
+        resultText: 'Max exhales in massive relief and hands you one Lab Favour.'
       },
       {
         label: 'Name it Ungoliant and switch desks',
         moraleDelta: 5,
         safetyDelta: 0,
-        energyDelta: -2,
+        energyDelta: 2,
         socialDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
@@ -973,24 +975,24 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Move tube to Abil\'s 4 °C NMR fridge',
         moraleDelta: 8,
-        safetyDelta: 2,
-        energyDelta: -8,
+        safetyDelta: 3,
+        energyDelta: -10,
         socialDelta: 4,
         patienceDelta: 4,
-        favourDelta: 2,
-        timeCostMins: 0,
+        favourDelta: 1,
+        timeCostMins: 15,
         resultText: 'Fresh monomer antibody stock sits safely inside Abil\'s 4 °C NMR fridge.'
       },
       {
         label: 'Leave it until your next CIB trip',
-        moraleDelta: -8,
+        moraleDelta: -6,
         safetyDelta: 0,
-        energyDelta: 4,
+        energyDelta: 6,
         socialDelta: -3,
-        patienceDelta: -6,
-        favourDelta: -1,
+        patienceDelta: -5,
+        favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Warming on the LG11 bench causes 12% IgG dimerisation on SEC.'
+        resultText: 'You save fifteen minutes and stay on your current bench step, though warming causes slight IgG dimerisation.'
       }
     ]
   },
@@ -1013,22 +1015,22 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Ride the Fellowship evening bench groove',
         moraleDelta: 8,
-        safetyDelta: 0,
+        safetyDelta: 2,
         energyDelta: 4,
-        socialDelta: 4,
-        favourDelta: 1,
+        socialDelta: 3,
+        favourDelta: 0,
         timeCostMins: 0,
         setsLotrPlaying: true,
         resultText: 'Tin whistles carry your evening Biotage fractions cleanly home.'
       },
       {
         label: 'Queue Bridge of Khazad-dûm for centrifugation',
-        moraleDelta: 7,
+        moraleDelta: 6,
         safetyDelta: 0,
-        energyDelta: 3,
-        socialDelta: 6,
+        energyDelta: 2,
+        socialDelta: 7,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         setsLotrPlaying: true,
         resultText: 'Peter and Marcos debate First Age lore beside the spinning centrifuge.'
       }
@@ -1058,26 +1060,26 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 8,
         patienceDelta: -3,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 15,
         resultText: 'Faiza walls berry bushes while Antoine lands a crazy ninja-rope shot.'
       },
       {
         label: 'Spectate one round from 3F with a biscuit',
         moraleDelta: 6,
         safetyDelta: 0,
-        energyDelta: 3,
+        energyDelta: 6,
         socialDelta: 4,
         favourDelta: 0,
-        timeCostMins: 0,
+        timeCostMins: 5,
         resultText: 'A quick laugh and Yorkshire biscuit brighten the afternoon without leaving timers.'
       },
       {
         label: 'Stay downstairs and watch Biotage peaks',
         moraleDelta: 0,
-        safetyDelta: 2,
+        safetyDelta: 3,
         energyDelta: 0,
         socialDelta: -2,
-        patienceDelta: 3,
+        patienceDelta: 4,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'Fractions stay safe while gaming crew cheers echo down from the 3F desks.'
@@ -1102,23 +1104,23 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Swap fresh Winchesters in Cupboard 9',
         moraleDelta: 6,
         safetyDelta: 4,
-        energyDelta: -6,
+        energyDelta: -8,
         socialDelta: 6,
         patienceDelta: 2,
-        favourDelta: 2,
-        timeCostMins: 0,
+        favourDelta: 1,
+        timeCostMins: 10,
         resultText: 'Fresh EtOAc and dry THF are stocked in KLB 2F before the rush.'
       },
       {
         label: 'Ration remaining solvents in Cupboard 1',
-        moraleDelta: -3,
+        moraleDelta: -2,
         safetyDelta: -2,
-        energyDelta: 0,
-        socialDelta: -4,
+        energyDelta: 4,
+        socialDelta: -3,
         patienceDelta: -2,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Everyone scrambles around nearly empty Winchesters for the rest of the shift.'
+        resultText: 'You save ten minutes and skip hauling heavy Winchesters, though everyone works around thin solvent levels.'
       }
     ]
   },
@@ -1139,11 +1141,11 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Check the 2F balance bay clipboard',
         moraleDelta: 7,
-        safetyDelta: 0,
+        safetyDelta: 2,
         energyDelta: -4,
         socialDelta: 3,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         setsPrep: { knows_1965: true, knows_2145: true },
         resultText: 'You verify 1965 and 2145 on the 2F clipboard and save a wasted trip.'
       },
@@ -1151,7 +1153,7 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Ask #Hackerman Antoine for the codes',
         moraleDelta: 5,
         safetyDelta: 0,
-        energyDelta: -2,
+        energyDelta: 2,
         socialDelta: 5,
         favourDelta: 0,
         timeCostMins: 0,
@@ -1183,15 +1185,16 @@ window.KLB.RANDOM_EVENTS = [
         energyDelta: 6,
         socialDelta: 6,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'French-Portuguese pastry diplomacy restores peace at Gordon\'s Café.'
       },
       {
         label: 'Defend the toasted cheese croissant',
         moraleDelta: 5,
         safetyDelta: 0,
-        energyDelta: 4,
+        energyDelta: 8,
         socialDelta: 2,
+        patienceDelta: 2,
         favourDelta: 0,
         timeCostMins: 0,
         resultText: 'A lively Franco-Portuguese manifesto abolishing flat pressed pastries erupts across the café counter.'
@@ -1216,11 +1219,11 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Load clean LDS sample, thank Archie',
         moraleDelta: 6,
         safetyDelta: 2,
-        energyDelta: 2,
+        energyDelta: -4,
         socialDelta: 5,
         patienceDelta: 2,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Fast QC check strengthens Baker and Chudasama cross-bay harmony.'
       },
       {
@@ -1237,13 +1240,13 @@ window.KLB.RANDOM_EVENTS = [
       },
       {
         label: 'Overload 35 µL salty crude sample',
-        moraleDelta: -5,
+        moraleDelta: -4,
         safetyDelta: 0,
-        energyDelta: 6,
-        socialDelta: -6,
-        favourDelta: -2,
+        energyDelta: 8,
+        socialDelta: -5,
+        favourDelta: -1,
         timeCostMins: 0,
-        resultText: 'Your salty lane smears straight into Archie\'s albumin band.'
+        resultText: 'You skip desalting to save time and energy, though your salty lane smears into Archie\'s albumin band.'
       }
     ]
   },
@@ -1268,18 +1271,19 @@ window.KLB.RANDOM_EVENTS = [
         energyDelta: 10,
         socialDelta: 5,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Yorkshire tea restores Energy while Richard shares a stoichiometry tip.'
       },
       {
         label: 'Keep working and send a thumbs-up',
         moraleDelta: 2,
-        safetyDelta: 0,
+        safetyDelta: 2,
         energyDelta: 0,
         socialDelta: 1,
+        patienceDelta: 3,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Even knowing the posh biscuit tin exists lifts bench spirits slightly.'
+        resultText: 'Even knowing the posh biscuit tin exists lifts bench spirits slightly while keeping your desk momentum intact.'
       }
     ]
   },
@@ -1302,11 +1306,11 @@ window.KLB.RANDOM_EVENTS = [
       {
         label: 'Vote 100 duck-sized Antoines with baguettes',
         moraleDelta: 10,
-        safetyDelta: 0,
+        safetyDelta: -2,
         energyDelta: 3,
         socialDelta: 7,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 5,
         resultText: 'Antoine replies petit canard mais mortel and group Morale jumps.'
       },
       {
@@ -1339,11 +1343,11 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Transfer sealed bottle into Hood containment',
         moraleDelta: 4,
         safetyDelta: 10,
-        energyDelta: -6,
+        energyDelta: -8,
         socialDelta: 2,
         patienceDelta: 4,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         resultText: 'Zero lachrymator escapes and you rescue two pristine stir bars.'
       },
       {
@@ -1351,7 +1355,7 @@ window.KLB.RANDOM_EVENTS = [
         favourCost: 1,
         moraleDelta: 5,
         safetyDelta: 10,
-        energyDelta: 0,
+        energyDelta: 2,
         socialDelta: 3,
         patienceDelta: 4,
         favourDelta: 0,
@@ -1360,14 +1364,14 @@ window.KLB.RANDOM_EVENTS = [
       },
       {
         label: 'Crack cap on the open bench',
-        moraleDelta: -15,
-        safetyDelta: -26,
-        energyDelta: -10,
-        socialDelta: -4,
-        patienceDelta: -8,
+        moraleDelta: -6,
+        safetyDelta: -10,
+        energyDelta: 4,
+        socialDelta: -3,
+        patienceDelta: -5,
         favourDelta: -1,
         timeCostMins: 0,
-        resultText: 'Benzyl bromide tear-gas sting sends you straight to the eyewash.'
+        resultText: 'You skip the containment trek to stay on schedule, though a quick benzyl bromide sting forces a brief eyewash pause.'
       }
     ]
   },
@@ -1389,23 +1393,23 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Cap flask and move into Hood',
         moraleDelta: 6,
         safetyDelta: 8,
-        energyDelta: -5,
+        energyDelta: -6,
         socialDelta: 5,
         patienceDelta: 4,
-        favourDelta: 2,
-        timeCostMins: 0,
+        favourDelta: 1,
+        timeCostMins: 10,
         resultText: 'You seal the ether flask inside the hood before fumes spread across 2F.'
       },
       {
         label: 'Stay at your bay and fan the air',
-        moraleDelta: -4,
-        safetyDelta: -8,
-        energyDelta: -2,
-        socialDelta: -3,
-        patienceDelta: -4,
+        moraleDelta: -3,
+        safetyDelta: -6,
+        energyDelta: 4,
+        socialDelta: -2,
+        patienceDelta: -3,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'Solvent haze lingers across the south-east Baker bay near Cupboard 20 until Marcos caps it.'
+        resultText: 'You keep working at your own bay and save ten minutes until Marcos walks past and caps the flask.'
       }
     ]
   },
@@ -1430,24 +1434,24 @@ window.KLB.RANDOM_EVENTS = [
         label: 'Test projector, grab clicker, polish slides',
         moraleDelta: 9,
         safetyDelta: 2,
-        energyDelta: -5,
+        energyDelta: -6,
         socialDelta: 4,
         patienceDelta: 6,
         favourDelta: 1,
-        timeCostMins: 0,
+        timeCostMins: 10,
         setsPrep: { has_clicker: true },
         resultText: 'The Group Meeting Room projector syncs cleanly, the clicker is pocketed, and your slides look sharp for Friday 09:00.'
       },
       {
         label: 'Wing the projector setup at 09:00 tomorrow',
-        moraleDelta: -8,
+        moraleDelta: -4,
         safetyDelta: 0,
-        energyDelta: -4,
-        socialDelta: -3,
-        patienceDelta: -8,
+        energyDelta: 5,
+        socialDelta: -2,
+        patienceDelta: -6,
         favourDelta: 0,
         timeCostMins: 0,
-        resultText: 'You skip the Thursday dry run and leave tomorrow\'s Group Meeting Room cables to luck.'
+        resultText: 'You save ten minutes and energy today, leaving tomorrow\'s Group Meeting Room cables to luck.'
       }
     ]
   }

@@ -1565,6 +1565,17 @@
           "label": ""
         },
         {
+          "id": "obj_ph_probe_1",
+          "type": "ph_probe",
+          "x": 15,
+          "y": 4,
+          "w": 1,
+          "h": 1,
+          "dir": "S",
+          "group": "none",
+          "label": "pH Probe"
+        },
+        {
           "id": "obj_t50efdr",
           "type": "writeup_desk",
           "x": 13,

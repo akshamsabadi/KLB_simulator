@@ -46,6 +46,7 @@
     gel_tank:      'SDS-PAGE Gel Tank',
     centrifuge:    'Benchtop Microcentrifuge',
     heatblock:     '37 °C ThermoMixer Shaker',
+    ph_probe:      'Benchtop pH Meter & Probe',
     syringe_pump:  'Harvard Syringe Pump',
     lab_speakers:  'Lab Speakers (LotR Synth)',
     writeup_desk:  'Write-Up Desk',
@@ -101,6 +102,7 @@
     gel_tank: 13,
     centrifuge: 13,
     heatblock: 13,
+    ph_probe: 13,
     syringe_pump: 11,
     lab_speakers: 14,
     writeup_desk: 15,
@@ -3022,6 +3024,124 @@
     }
   }
 
+  // 17b. METTLER TOLEDO / SEVENCOMPACT BENCHTOP pH METER & ELECTRODE PROBE
+  function drawPhProbe(ctx, px, py, pw, ph, nowSec) {
+    ctx.save();
+
+    // Left: Compact angled cool-grey/white Mettler Toledo console chassis
+    draw3DBox(ctx, px + 5, py + 12, 16, 13, 8, '#f8fafc', '#cbd5e1', '#334155');
+
+    // Recessed dark LCD display on the angled top surface
+    fillRoundRect(ctx, px + 6.5, py + 5.5, 13, 7, 1.2, '#0f172a', '#475569', 0.8);
+    ctx.fillStyle = '#34d399';
+    ctx.font = 'bold 5.5px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('7.40', px + 13, py + 9.2);
+
+    // Tiny tactile keypad dots below the LCD
+    const keyCols = ['#0284c7', '#475569', '#10b981'];
+    for (let k = 0; k < 3; k++) {
+      ctx.fillStyle = keyCols[k];
+      ctx.fillRect(px + 8 + k * 4, py + 14.2, 2.2, 1.6);
+    }
+    // Subtle front status strip on chassis fascia
+    ctx.fillStyle = '#0284c7';
+    ctx.fillRect(px + 7.5, py + 19.5, 11, 1.6);
+
+    // Right: Stand base pad & small glass calibration buffer beaker
+    const standX = px + 39;
+    const standBaseY = py + 23;
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.ellipse(standX, standBaseY, 4.5, 2.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const beakerX = px + 30.5;
+    const beakerTopY = py + 14;
+    const beakerH = 11;
+    const beakerRx = 5;
+    const beakerRy = 2;
+
+    // Glass beaker body + cyan calibration buffer fill
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.35)';
+    ctx.fillRect(beakerX - beakerRx, beakerTopY, beakerRx * 2, beakerH);
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
+    ctx.fillRect(beakerX - beakerRx + 0.6, beakerTopY + 4, beakerRx * 2 - 1.2, beakerH - 4.2);
+
+    // Buffer meniscus ellipse
+    ctx.fillStyle = 'rgba(125, 211, 252, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(beakerX, beakerTopY + 4, beakerRx - 0.6, 1.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Slim glass-bulb pH probe dipped into the buffer liquid
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(beakerX - 1.1, py + 7, 2.2, 13.5);
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 0.7;
+    ctx.strokeRect(beakerX - 1.1, py + 7, 2.2, 13.5);
+    // Glass sensing bulb tip submerged in buffer
+    ctx.fillStyle = 'rgba(186, 230, 253, 0.9)';
+    ctx.beginPath();
+    ctx.arc(beakerX, py + 21, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0284c7';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+    // Electrode cap & collar
+    ctx.fillStyle = '#0284c7';
+    ctx.fillRect(beakerX - 1.6, py + 4.5, 3.2, 2.8);
+
+    // Beaker side walls & miniature cylinder rims (drawn over submerged probe for glass depth)
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.85)';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(beakerX - beakerRx, beakerTopY);
+    ctx.lineTo(beakerX - beakerRx, beakerTopY + beakerH);
+    ctx.moveTo(beakerX + beakerRx, beakerTopY);
+    ctx.lineTo(beakerX + beakerRx, beakerTopY + beakerH);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.ellipse(beakerX, beakerTopY + beakerH, beakerRx, beakerRy, 0, 0, Math.PI);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.beginPath();
+    ctx.ellipse(beakerX, beakerTopY, beakerRx, beakerRy, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Articulated black flexible electrode stand/arm curving over the beaker
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(standX, standBaseY - 1);
+    ctx.lineTo(standX, py + 8);
+    ctx.quadraticCurveTo(standX, py + 3.5, beakerX + 1.5, py + 5.5);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(standX - 0.3, standBaseY - 2);
+    ctx.lineTo(standX - 0.3, py + 8);
+    ctx.quadraticCurveTo(standX - 0.3, py + 4, beakerX + 1.5, py + 5.5);
+    ctx.stroke();
+
+    // Electrode lead wire connecting meter console to probe cap
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px + 20.5, py + 11);
+    ctx.quadraticCurveTo(px + 24, py + 2, beakerX, py + 4.5);
+    ctx.stroke();
+
+    ctx.restore();
+    drawStationMicroTag(ctx, px + pw * 0.5, py + ph - 7, 'pH');
+  }
+
   // 18. LAB SPEAKERS (LotR Bookshelf Monitors + Copper Cones!)
   function drawLabSpeakers(ctx, px, py, pw, ph, lotrPlaying, nowSec) {
     const pulse = lotrPlaying ? Math.sin(nowSec * 9) * 0.8 : 0;
@@ -4766,6 +4886,9 @@
       case 'heatblock':
         drawHeatblock(ctx, px, py, pw, ph, activeJob, nowSec);
         break;
+      case 'ph_probe':
+        drawPhProbe(ctx, px, py, pw, ph, nowSec);
+        break;
       case 'lab_speakers':
         drawLabSpeakers(ctx, px, py, pw, ph, Boolean(state.lotrPlaying), nowSec);
         break;
@@ -4959,7 +5082,7 @@
       const isCafe = room && room.id === 'gordons_cafe';
       const isTea = (charId === 'richard_spears' && room && room.id === 'klb_3f') || nearType === 'tea_drawer';
       const isClipboard = charId === 'safety_inspector' || charId === 'claire_carmalt';
-      const isPipette = nearType === 'tcep_bench' || nearType === 'gel_tank' || nearType === 'centrifuge' || nearType === 'heatblock';
+      const isPipette = nearType === 'tcep_bench' || nearType === 'gel_tank' || nearType === 'centrifuge' || nearType === 'heatblock' || nearType === 'ph_probe';
       const isFlask = nearType === 'fumehood' || nearType === 'buchi' || nearType === 'biotage' || nearType === 'sink' || nearType === 'base_bath';
       if (isCafe) propKind = 'coffee';
       else if (isTea) propKind = 'tea';

@@ -264,7 +264,8 @@ window.KLB = window.KLB || {};
     waste_bin: 'Solvent Waste Bin',
     sink: 'Lab Sink',
     balance_table: 'Analytical Balance',
-    syringe_pump: 'Syringe Pump'
+    syringe_pump: 'Syringe Pump',
+    ph_probe: 'Benchtop pH Meter & Probe'
   };
 
   function niceStationName(type) {
@@ -317,7 +318,7 @@ window.KLB = window.KLB || {};
       window.KLB.Audio.playSfx('nmr_lock');
     } else if (stationType === 'tlc_station') {
       window.KLB.Audio.playSfx('uv_click');
-    } else if (['fumehood', 'tcep_bench', 'lab_bench', 'heatblock', 'gel_tank', 'biotage', 'syringe_pump'].includes(stationType)) {
+    } else if (['fumehood', 'tcep_bench', 'lab_bench', 'heatblock', 'gel_tank', 'biotage', 'syringe_pump', 'ph_probe'].includes(stationType)) {
       window.KLB.Audio.playSfx('pipette');
     } else {
       window.KLB.Audio.playSfx('interact');
@@ -546,11 +547,17 @@ window.KLB = window.KLB || {};
     return null;
   }
 
-  function prepareModalBox(modalClass = 'klb-modal', sfxName = 'modal_open') {
+  function prepareModalBox(modalClass = 'klb-modal', sfxName = 'modal_open', themeClass = '') {
     const box = el('modal-box');
     if (!box) return null;
     box.classList.remove('ev-modal', 'klb-modal', 'klb-modal-sm');
+    Array.from(box.classList).forEach(cls => {
+      if (cls.startsWith('ev-theme-') || cls.startsWith('klb-theme-')) {
+        box.classList.remove(cls);
+      }
+    });
     if (modalClass) box.classList.add(modalClass);
+    if (themeClass) box.classList.add(themeClass);
     if (sfxName && window.KLB.Audio?.playSfx) {
       window.KLB.Audio.playSfx(sfxName);
     }
@@ -854,6 +861,8 @@ window.KLB = window.KLB || {};
     state.fridayMorningPresented = false;
     state.morningAuditResult = null;
     state.fridayFinalAuditDone = false;
+    state.prep = state.prep || {};
+    state.prep.ph_calibrated = false;
     state._stepPrepCredit = {};
     state._stepBiotageBonusApplied = false;
     state._stepFaizaA280Done = false;
@@ -932,6 +941,7 @@ window.KLB = window.KLB || {};
     state.whatsapp = Array.isArray(state.whatsapp) ? state.whatsapp : [];
     state.speechBubbles = Array.isArray(state.speechBubbles) ? state.speechBubbles : [];
     state.prep = state.prep || {};
+    if (typeof state.prep.ph_calibrated !== 'boolean') state.prep.ph_calibrated = false;
     state.mutators = state.mutators || {};
     state._stepPrepCredit = state._stepPrepCredit || {};
     state.slideDeck = state.slideDeck || { ready: false, framing: 'mechanistic', fig1Id: null, fig2Id: null, honestDisclosure: true };
@@ -2127,6 +2137,10 @@ window.KLB = window.KLB || {};
       baseQuality += 3;
       state._stepPrepCredit.tlc_check = true;
     }
+    if (state.prep?.ph_calibrated && !state._stepPrepCredit.ph_calibrated) {
+      baseQuality += 3;
+      state._stepPrepCredit.ph_calibrated = true;
+    }
     if (state._stepFaizaA280Done && !state._stepPrepCredit.faiza_a280) {
       baseQuality += 4;
       state._stepPrepCredit.faiza_a280 = true;
@@ -2254,6 +2268,7 @@ window.KLB = window.KLB || {};
     if (state._stepPrepCredit?.argon_balloon) state.prep.argon_balloon = false;
     if (state._stepPrepCredit?.dry_solvent) state.prep.dry_solvent = false;
     if (state._stepPrepCredit?.tlc_check) state.prep.tlc_check = false;
+    if (state._stepPrepCredit?.ph_calibrated) state.prep.ph_calibrated = false;
 
     const stepIsTcep = Boolean(
       step && (
@@ -2761,17 +2776,29 @@ window.KLB = window.KLB || {};
         : null;
       if (occupier) {
         const occMeta = window.KLB.CAST_BY_ID[occupier.id];
+        const hasFavour = (Number(state.favours) || 0) >= 1;
         showDialogue(occupier.id, `${occMeta.name} at Station`, `Using this station now (${occupier.currentTaskText || 'active task'}).`, [
-          {
-            label: `[1] Ask ${occMeta.shortName} to swap bays`,
-            primary: true,
-            onClick: () => {
-              occupier.busyObjId = null;
-              closeDialogue();
-              launchWaitJob(step, sub, obj);
-            }
-          },
-          { label: '[2] Pick Free Bay', onClick: closeDialogue }
+          hasFavour
+            ? {
+                label: `[1] Ask ${occMeta.shortName} to swap bays (-1 Favour)`,
+                primary: true,
+                onClick: () => {
+                  if ((Number(state.favours) || 0) < 1) return;
+                  state.favours = Math.max(0, (Number(state.favours) || 0) - 1);
+                  occupier.busyObjId = null;
+                  closeDialogue();
+                  showAlertBanner(`${occMeta.shortName} swapped bays with you (-1 Favour).`, 3200, false);
+                  syncAllHUD(true);
+                  launchWaitJob(step, sub, obj);
+                }
+              }
+            : {
+                label: `[1] Swap bays with ${occMeta.shortName} (Needs 1 Favour)`,
+                disabled: true,
+                primary: false,
+                onClick: () => {}
+              },
+          { label: '[2] Pick Free Bay', primary: !hasFavour, onClick: closeDialogue }
         ]);
         return;
       }
@@ -3253,6 +3280,54 @@ window.KLB = window.KLB || {};
       return;
     }
 
+    if (t === 'ph_probe') {
+      const isCal = Boolean(state.prep?.ph_calibrated);
+      const tcepOk = Boolean(state.prep?.tcep_buffered);
+      const statusText = isCal
+        ? `Electrode calibrated (pH 4.00 / 7.00 / 10.00, slope 98.6%, offset -4.2 mV). +3% Quality prep active${tcepOk ? ' and pH 8.00 BBS TCEP buffer verified' : ''}.`
+        : 'Live two-point readout: pH 4.00 / 7.00 / 10.00 standards ready (slope 98.6%, offset -4.2 mV). Calibrate for pH 7.40 PBS / pH 8.00 BBS bioconjugation buffers (+3% Quality prep bonus & verifies TCEP buffer).';
+      const actions = isCal
+        ? [
+            {
+              label: '[1] Re-Verify pH 7.40 PBS / pH 8.00 BBS Buffer (0m)',
+              primary: true,
+              onClick: () => {
+                state.prep.ph_calibrated = true;
+                state.prep.tcep_buffered = true;
+                if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('interact');
+                closeDialogue();
+                showAlertBanner('pH Probe verified (7.40 PBS / 8.00 BBS) — +3% Quality prep active and TCEP buffer verified!', 3600, false);
+                syncAllHUD(true);
+              }
+            },
+            { label: '[2] Close', onClick: closeDialogue }
+          ]
+        : [
+            {
+              label: '[1] Calibrate pH 7.40 PBS / pH 8.00 BBS Buffer (0m, +3% Quality)',
+              primary: true,
+              onClick: () => {
+                state.prep.ph_calibrated = true;
+                state.prep.tcep_buffered = true;
+                if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('success');
+                closeDialogue();
+                showAlertBanner('pH Probe calibrated (7.40 PBS / 8.00 BBS) — +3% Quality prep bonus active and TCEP buffer verified!', 3800, false);
+                syncAllHUD(true);
+              }
+            },
+            { label: '[2] Close', onClick: closeDialogue }
+          ];
+      showDialogue(
+        state.player.id,
+        obj.label || niceStationName('ph_probe'),
+        statusText,
+        actions,
+        false,
+        isCal ? '+3% Quality Prep Active (pH 7.40 PBS / 8.00 BBS)' : 'Two-Point Calibration: pH 4.00 / 7.00 / 10.00 (98.6%)'
+      );
+      return;
+    }
+
     if (t === 'base_bath') {
       const cond = Math.round(window.KLB.Sim.getLabCondition(state));
       showDialogue(
@@ -3703,7 +3778,7 @@ window.KLB = window.KLB || {};
     const advisorLabel = isArchiePlayer ? '#AskJamie' : (isAntoinePlayer ? '#AskVijay' : '#AskAntoine');
     const seniorHintBtnText = `${advisorLabel} (-10m)`;
 
-    const box = prepareModalBox('klb-modal', 'modal_open');
+    const box = prepareModalBox('klb-modal', 'modal_open', 'klb-theme-step');
     box.innerHTML = `
       <header class="klb-modal-header">
         <div>
@@ -3794,8 +3869,12 @@ window.KLB = window.KLB || {};
         <div class="ev-choice-top">
           <div class="ev-choice-left">
             <span class="ev-choice-key">${i + 1}</span>
+            <span class="dir-icon-badge wetlab">${icon('beaker', 15)}</span>
             <span class="ev-choice-label">${escHtml(opt.label)}</span>
           </div>
+          <span class="ev-choice-right">
+            <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+          </span>
         </div>
       `;
       b.onclick = () => {
@@ -3962,11 +4041,11 @@ window.KLB = window.KLB || {};
     modalDismissable = false;
     modalEscapeHandler = null;
     const rxnCount = (state.activeStationJobs || []).length;
-    const box = prepareModalBox('ev-modal', 'warning');
+    const box = prepareModalBox('ev-modal', 'warning', 'ev-theme-crisis');
     box.innerHTML = `
       <div class="ev-modal-header">
         <div class="ev-modal-head-body">
-          <span class="ev-modal-cat crisis">Mandatory Evacuation</span>
+          <span class="ev-modal-cat crisis">${icon('flame', 11)}<span>Mandatory Evacuation</span></span>
           <h3 class="ev-modal-title" style="display:flex;align-items:center;gap:8px;color:#fca5a5;">
             ${icon('flame', 19)}
             <span>KLB Fire Alarm — Evacuate Building</span>
@@ -3981,24 +4060,32 @@ window.KLB = window.KLB || {};
           <div class="ev-choice-top">
             <div class="ev-choice-left">
               <span class="ev-choice-key">1</span>
+              <span class="dir-icon-badge crisis">${icon('shield-check', 15)}</span>
               <span class="ev-choice-label">Evacuate via Left Fire Exit Now</span>
             </div>
-            <span class="klb-tag good">Safe</span>
+            <span class="ev-choice-right">
+              <span class="klb-tag good">Safe</span>
+              <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+            </span>
           </div>
         </button>
         <button id="btn-walk-evac" type="button" class="ev-choice-card" data-hotkey="2">
           <div class="ev-choice-top">
             <div class="ev-choice-left">
               <span class="ev-choice-key">2</span>
+              <span class="dir-icon-badge warn">${icon('alert-triangle', 15)}</span>
               <span class="ev-choice-label">Dismiss &amp; Walk to Left Fire Exit</span>
             </div>
-            <span class="klb-tag warn">Manual</span>
+            <span class="ev-choice-right">
+              <span class="klb-tag warn">Manual</span>
+              <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+            </span>
           </div>
         </button>
       </div>
       <div class="ev-modal-footer">
         <span>Press 1–2 or click an option</span>
-        <span>Current Room: ${escHtml(window.KLB.ROOM_META?.[state.player.roomId]?.shortName || state.player.roomId)}</span>
+        <span class="modal-footer-pill">${icon('map-pin', 11)}<span>Current Room: ${escHtml(window.KLB.ROOM_META?.[state.player.roomId]?.shortName || state.player.roomId)}</span></span>
       </div>
     `;
     el('modal-backdrop').classList.remove('hidden');
@@ -4137,18 +4224,21 @@ window.KLB = window.KLB || {};
         <div class="ev-choice-top">
           <div class="ev-choice-left">
             <span class="ev-choice-key">${idx + 1}</span>
-            ${icon(c.icon, 15)}
+            <span class="dir-icon-badge desk">${icon(c.icon, 16)}</span>
             <div>
               <div class="ev-choice-label">${escHtml(c.label)}</div>
               ${c.subline ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;">${escHtml(c.subline)}</div>` : ''}
             </div>
           </div>
-          <span class="klb-tag ${escHtml(c.tagCls)}">${escHtml(c.tagText)}</span>
+          <span class="ev-choice-right">
+            <span class="klb-tag ${escHtml(c.tagCls)}">${escHtml(c.tagText)}</span>
+            <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+          </span>
         </div>
       </button>
     `).join('');
 
-    const box = prepareModalBox('klb-modal', 'modal_open');
+    const box = prepareModalBox('klb-modal', 'modal_open', 'klb-theme-desk');
     box.innerHTML = `
       <header class="klb-modal-header">
         <div>
@@ -4162,7 +4252,7 @@ window.KLB = window.KLB || {};
       </div>
       <footer class="klb-modal-footer">
         <span>Press 1–${deskCards.length} or click an action</span>
-        <span>${isQuiet ? 'Focus Multiplier: Quiet / Headphones ON' : 'Tip: 3F or Headphones speeds writing'}</span>
+        <span class="modal-footer-pill">${icon('sparkles', 11)}<span>${isQuiet ? 'Focus Multiplier: Quiet / Headphones ON' : 'Tip: 3F or Headphones speeds writing'}</span></span>
       </footer>
     `;
     el('modal-backdrop').classList.remove('hidden');
@@ -4370,9 +4460,13 @@ window.KLB = window.KLB || {};
         duration: quartetJoined ? 'Joined' : '15m',
         durCls: quartetJoined ? 'good' : 'warn',
         disabled: quartetJoined,
-        pills: isJoao
-          ? ['+Energy', '+2x Morale', '+Social', '+6 Patience', '+2 Favours']
-          : ['+Energy', '+Morale', '+Social', '+6 Patience', '+1 Favour']
+        pills: [
+          { text: '+Energy', icon: 'zap' },
+          { text: '+2x Morale', icon: 'smile' },
+          { text: '+Social', icon: 'users' },
+          { text: '+6 Patience', icon: 'gauge' },
+          { text: isJoao ? '+2 Favours' : '+1 Favour', icon: 'award' }
+        ]
       });
     }
     menuItems.push({
@@ -4382,7 +4476,11 @@ window.KLB = window.KLB || {};
       duration: '10m',
       durCls: 'info',
       disabled: false,
-      pills: ['+Energy', '+Morale', '+Social']
+      pills: [
+        { text: '+Energy', icon: 'zap' },
+        { text: '+Morale', icon: 'smile' },
+        { text: '+Social', icon: 'users' }
+      ]
     });
     if (lunchHours) {
       menuItems.push({
@@ -4392,7 +4490,11 @@ window.KLB = window.KLB || {};
         duration: '23m',
         durCls: 'good',
         disabled: false,
-        pills: ['+Energy', '+Morale', '+Social']
+        pills: [
+          { text: '+Energy', icon: 'zap' },
+          { text: '+Morale', icon: 'smile' },
+          { text: '+Social', icon: 'users' }
+        ]
       });
     }
 
@@ -4401,18 +4503,21 @@ window.KLB = window.KLB || {};
         <div class="ev-choice-top">
           <div class="ev-choice-left">
             <span class="ev-choice-key">${idx + 1}</span>
-            ${icon(m.icon, 15)}
+            <span class="dir-icon-badge cafe">${icon(m.icon, 16)}</span>
             <span class="ev-choice-label">${escHtml(m.label)}</span>
           </div>
-          <span class="klb-tag ${escHtml(m.durCls)}">${escHtml(m.duration)}</span>
+          <span class="ev-choice-right">
+            <span class="klb-tag ${escHtml(m.durCls)}">${icon(m.duration === 'Joined' ? 'check-circle' : 'clock', 10)}<span>${escHtml(m.duration)}</span></span>
+            <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+          </span>
         </div>
         <div class="ev-choice-deltas">
-          ${m.pills.map(p => `<span class="ev-delta-pill pos">${escHtml(p)}</span>`).join('')}
+          ${m.pills.map(p => `<span class="ev-delta-pill pos">${icon(p.icon, 10)}<span>${escHtml(p.text)}</span></span>`).join('')}
         </div>
       </button>
     `).join('');
 
-    const box = prepareModalBox('klb-modal-sm', 'modal_open');
+    const box = prepareModalBox('klb-modal-sm', 'modal_open', 'klb-theme-cafe');
     box.innerHTML = `
       <header class="klb-modal-header">
         <div>
@@ -4426,7 +4531,7 @@ window.KLB = window.KLB || {};
       </div>
       <footer class="klb-modal-footer">
         <span>Press 1–${menuItems.length} or click an order</span>
-        <span>${quartetHere ? 'Coffee Quartet active now' : 'Standard counter service'}</span>
+        <span class="modal-footer-pill">${icon('coffee', 11)}<span>${quartetHere ? 'Coffee Quartet active now' : 'Standard counter service'}</span></span>
       </footer>
     `;
     el('modal-backdrop').classList.remove('hidden');
@@ -4468,22 +4573,42 @@ window.KLB = window.KLB || {};
     const canEndDay = state.timeMins >= 18 * 60;
     const errands = (window.KLB.BLOOMSBURY_ERRANDS || []).filter(er => er.targetRoom !== 'klb_3f');
 
+    const dirBadgeMap = {
+      klb_2f: 'wetlab',
+      gordons_cafe: 'cafe',
+      cib_lg11_ms: 'ms',
+      cib_lg1b_nmr: 'nmr',
+      meeting_room: 'meeting'
+    };
+
     let nextHotkey = 1;
     const itemsHtml = errands.map(er => {
       const hotkey = nextHotkey++;
       const isHere = curRoom === er.targetRoom;
       const isSubTarget = Boolean(curSub && curSub.roomId === er.targetRoom);
       const isCafeHighlight = er.id === 'gordons_cafe' && (quartetHere || lunchHighlight);
-      const hoursText = er.id === 'meeting_room' ? 'Fri 09:00 Group Meeting' : (er.hours || 'Open');
+      const badgeCls = dirBadgeMap[er.targetRoom] || dirBadgeMap[er.id] || 'wetlab';
+      const noteText = er.id === 'meeting_room'
+        ? (state.player.id === 'archie_wall' ? 'Friday group meeting with Jamie Baker & Vijay Chudasama.' : 'Friday group meeting with Prof. Vijay Chudasama.')
+        : (er.note || '');
+      let hoursText = er.id === 'meeting_room' ? 'Fri 09:00 Group Meeting' : (er.hours || 'Open');
       const tags = [];
       if (isHere) tags.push(`<span class="klb-tag info">Here</span>`);
       if (isSubTarget) tags.push(`<span class="klb-tag good">Sub-Task</span>`);
       if (er.id === 'gordons_cafe' && quartetHere) tags.push(`<span class="klb-tag warn">Coffee Quartet</span>`);
       else if (er.id === 'gordons_cafe' && lunchHighlight) tags.push(`<span class="klb-tag info">Lunch Hours</span>`);
-      if (er.targetRoom === 'cib_lg11_ms' && !state.prep.knows_1965) {
-        tags.push(`<span class="klb-tag warn">1965 Keypad</span>`);
-      } else if (er.targetRoom === 'cib_lg1b_nmr' && !state.prep.knows_2145) {
-        tags.push(`<span class="klb-tag warn">2145 Keypad</span>`);
+      if (er.targetRoom === 'cib_lg11_ms') {
+        const unlocked = Boolean(state.prep?.knows_1965);
+        tags.push(unlocked
+          ? `<span class="klb-tag good">${icon('key', 10)}<span>Code 1965</span></span>`
+          : `<span class="klb-tag warn">${icon('lock', 10)}<span>Keypad Locked</span></span>`);
+        hoursText = unlocked ? 'Unlocked • 1965' : '07:30–19:30';
+      } else if (er.targetRoom === 'cib_lg1b_nmr') {
+        const unlocked = Boolean(state.prep?.knows_2145);
+        tags.push(unlocked
+          ? `<span class="klb-tag good">${icon('key', 10)}<span>Code 2145</span></span>`
+          : `<span class="klb-tag warn">${icon('lock', 10)}<span>Keypad Locked</span></span>`);
+        hoursText = unlocked ? 'Unlocked • 2145' : '07:30–19:30';
       }
 
       return `
@@ -4491,16 +4616,19 @@ window.KLB = window.KLB || {};
           <div class="ev-choice-top">
             <div class="ev-choice-left">
               <span class="ev-choice-key">${hotkey}</span>
-              ${icon(er.icon || 'map-pin', 15)}
+              <span class="dir-icon-badge ${escHtml(badgeCls)}">${icon(er.icon || 'map-pin', 16)}</span>
               <div>
                 <div class="ev-choice-label" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                   <span>${escHtml(er.title)}</span>
                   ${tags.join('')}
                 </div>
-                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${escHtml(er.note || '')}</div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${escHtml(noteText)}</div>
               </div>
             </div>
-            <span class="mono-muted" style="flex-shrink:0;color:${isSubTarget || isCafeHighlight ? '#86efac' : '#93c5fd'};">${escHtml(isHere ? 'Current Room' : hoursText)}</span>
+            <span class="ev-choice-right">
+              <span class="mono-muted" style="flex-shrink:0;color:${isSubTarget || isCafeHighlight ? '#86efac' : '#93c5fd'};">${escHtml(isHere ? 'Current Room' : hoursText)}</span>
+              <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+            </span>
           </div>
         </button>
       `;
@@ -4556,7 +4684,7 @@ window.KLB = window.KLB || {};
       hasLabColleagues
     );
 
-    const box = prepareModalBox('klb-modal', 'modal_open');
+    const box = prepareModalBox('klb-modal', 'modal_open', 'klb-theme-directory');
     box.innerHTML = `
       <header class="klb-modal-header">
         <div>
@@ -4579,13 +4707,16 @@ window.KLB = window.KLB || {};
               <div class="ev-choice-top">
                 <div class="ev-choice-left">
                   <span class="ev-choice-key">C</span>
-                  ${icon('send', 15)}
+                  <span class="dir-icon-badge ms">${icon('send', 16)}</span>
                   <div>
                     <div class="ev-choice-label" style="color:#7dd3fc;">Labmate Sample Courier (1 Favour, 0m)</div>
                     <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${escHtml(courierDesc)}</div>
                   </div>
                 </div>
-                <span class="klb-tag ${courierDisabled ? 'danger' : 'warn'}">${!hasCourierFavour ? 'Needs 1 Favour' : (readyCibJob ? 'Collect 0m' : 'Run 0m')}</span>
+                <span class="ev-choice-right">
+                  <span class="klb-tag ${courierDisabled ? 'danger' : 'warn'}">${!hasCourierFavour ? 'Needs 1 Favour' : (readyCibJob ? 'Collect 0m' : 'Run 0m')}</span>
+                  <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+                </span>
               </div>
             </button>
           ` : ''}
@@ -4594,10 +4725,13 @@ window.KLB = window.KLB || {};
               <div class="ev-choice-top">
                 <div class="ev-choice-left">
                   <span class="ev-choice-key">${nightHotkey}</span>
-                  ${icon('moon', 15)}
+                  <span class="dir-icon-badge night">${icon('moon', 16)}</span>
                   <span class="ev-choice-label" style="color:#fde68a;">Head Home for the Night (End Day)</span>
                 </div>
-                <span class="klb-tag warn">Roll Day</span>
+                <span class="ev-choice-right">
+                  <span class="klb-tag warn">Roll Day</span>
+                  <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+                </span>
               </div>
             </button>
           ` : ''}
@@ -4606,10 +4740,13 @@ window.KLB = window.KLB || {};
               <div class="ev-choice-top">
                 <div class="ev-choice-left">
                   <span class="ev-choice-key">${nextWeekHotkey}</span>
-                  ${icon('play', 15)}
+                  <span class="dir-icon-badge meeting">${icon('play', 16)}</span>
                   <span class="ev-choice-label" style="color:#86efac;">Start Week ${state.weekNum + 1} (Monday)</span>
                 </div>
-                <span class="klb-tag good">Next Week</span>
+                <span class="ev-choice-right">
+                  <span class="klb-tag good">Next Week</span>
+                  <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+                </span>
               </div>
             </button>
           ` : ''}
@@ -4617,7 +4754,7 @@ window.KLB = window.KLB || {};
       </div>
       <footer class="klb-modal-footer">
         <span>Press 1–${nextHotkey - 1}${hasCourierTask ? ' or C' : ''} to choose</span>
-        <span>Current Room: ${escHtml(window.KLB.ROOM_META?.[curRoom]?.shortName || curRoom)}</span>
+        <span class="modal-footer-pill">${icon('map-pin', 11)}<span>Current Room: ${escHtml(window.KLB.ROOM_META?.[curRoom]?.shortName || curRoom)}</span></span>
       </footer>
     `;
     el('modal-backdrop').classList.remove('hidden');
@@ -4858,17 +4995,17 @@ window.KLB = window.KLB || {};
     setPaused(true);
     modalDismissable = false;
     modalEscapeHandler = null;
-    const box = prepareModalBox('ev-modal', 'modal_open');
 
     const actorId = ev.actorId || ev.whatsappSender || '';
     const catMap = {
-      crisis: { cls: 'crisis', label: 'Lab Crisis' },
-      inspection: { cls: 'inspection', label: 'Inspection' },
-      social: { cls: 'social', label: 'Social Event' },
-      weather: { cls: 'weather', label: 'Weather Alert' },
-      facility: { cls: 'facility', label: 'Facility Alert' }
+      crisis: { cls: 'crisis', label: 'Lab Crisis', icon: 'flame' },
+      inspection: { cls: 'inspection', label: 'Inspection', icon: 'shield-check' },
+      social: { cls: 'social', label: 'Social Event', icon: 'users' },
+      weather: { cls: 'weather', label: 'Weather Alert', icon: ev.id === 'may_heatwave' ? 'thermometer' : 'snowflake' },
+      facility: { cls: 'facility', label: 'Facility Alert', icon: 'wrench' }
     };
-    const cat = catMap[ev.category] || { cls: '', label: 'KLB Event' };
+    const cat = catMap[ev.category] || { cls: '', label: 'KLB Event', icon: 'alert-triangle' };
+    const box = prepareModalBox('ev-modal', 'modal_open', cat.cls ? `ev-theme-${cat.cls}` : '');
     const portraitHtml = actorId
       ? `<img class="ev-modal-portrait pixel-art" src="assets/portraits/${escHtml(actorId)}.png" alt="" onerror="this.style.display='none'" />`
       : '';
@@ -4883,7 +5020,7 @@ window.KLB = window.KLB || {};
       <div class="ev-modal-header">
         ${portraitHtml}
         <div class="ev-modal-head-body">
-          <span class="ev-modal-cat ${escHtml(cat.cls)}">${escHtml(cat.label)}</span>
+          <span class="ev-modal-cat ${escHtml(cat.cls)}">${icon(cat.icon, 11)}<span>${escHtml(cat.label)}</span></span>
           <h3 class="ev-modal-title">${escHtml(ev.title || 'KLB Event')}</h3>
           <p class="ev-modal-desc">${escHtml(ev.bannerText || ev.whatsappMsg || '')}</p>
           ${croissantWarnHtml}
@@ -4892,23 +5029,24 @@ window.KLB = window.KLB || {};
       <div id="ev-choices" class="ev-choices-list"></div>
       <div class="ev-modal-footer">
         <span>Press 1–${choices.length} or click an option</span>
-        <span>Available Favours: ${Number(state.favours) || 0}</span>
+        <span class="modal-footer-pill">${icon('sparkles', 11)}<span>Available Favours: ${Number(state.favours) || 0}</span></span>
       </div>
     `;
     el('modal-backdrop').classList.remove('hidden');
 
     const wrap = el('ev-choices');
     const deltaSpecs = [
-      ['moraleDelta', 'Morale'],
-      ['safetyDelta', 'Lab Condition'],
-      ['energyDelta', 'Energy'],
-      ['socialDelta', 'Social'],
-      ['patienceDelta', 'Patience'],
-      ['favourDelta', 'Favour']
+      ['moraleDelta', 'Morale', 'smile'],
+      ['safetyDelta', 'Lab Condition', 'sparkles'],
+      ['energyDelta', 'Energy', 'zap'],
+      ['socialDelta', 'Social', 'users'],
+      ['patienceDelta', 'Patience', 'gauge'],
+      ['favourDelta', 'Favour', 'award']
     ];
 
     choices.forEach((ch, idx) => {
       const cost = Number(ch.favourCost) || 0;
+      const timeCost = Math.max(0, Number(ch.timeCostMins) || 0);
       const cantAfford = cost > 0 && (Number(state.favours) || 0) < cost;
       const cleanLabel = cost > 0
         ? String(ch.label || '').replace(/\s*\(\d+\s*Favours?\)\s*$/i, '').trim()
@@ -4920,17 +5058,24 @@ window.KLB = window.KLB || {};
       b.dataset.hotkey = String(idx + 1);
       if (cantAfford) b.disabled = true;
 
+      const timeHtml = timeCost > 0
+        ? `<span class="ev-choice-time">${icon('clock', 10)}<span>${timeCost}m</span></span>`
+        : '';
       const costHtml = cost > 0
-        ? `<span class="ev-choice-cost${cantAfford ? ' short' : ''}">${cantAfford ? `Needs ${cost} Favour${cost === 1 ? '' : 's'}` : `-${cost} Favour${cost === 1 ? '' : 's'}`}</span>`
+        ? `<span class="ev-choice-cost${cantAfford ? ' short' : ''}">${icon('sparkles', 10)}<span>${cantAfford ? `Needs ${cost} Favour${cost === 1 ? '' : 's'}` : `-${cost} Favour${cost === 1 ? '' : 's'}`}</span></span>`
         : '';
 
-      const deltasHtml = deltaSpecs.reduce((acc, [key, label]) => {
+      const deltaEntries = [];
+      deltaSpecs.forEach(([key, label, iconName]) => {
         const val = Number(ch[key]) || 0;
-        if (!val) return acc;
+        if (val) deltaEntries.push({ val, label, iconName });
+      });
+      deltaEntries.sort((a, bItem) => (bItem.val > 0 ? 1 : 0) - (a.val > 0 ? 1 : 0));
+      const deltasHtml = deltaEntries.map(({ val, label, iconName }) => {
         const cls = val > 0 ? 'pos' : 'neg';
         const sign = val > 0 ? '+' : '';
-        return acc + `<span class="ev-delta-pill ${cls}">${sign}${val} ${escHtml(label)}</span>`;
-      }, '');
+        return `<span class="ev-delta-pill ${cls}">${icon(iconName, 10)}<span>${sign}${val} ${escHtml(label)}</span></span>`;
+      }).join('');
 
       b.innerHTML = `
         <div class="ev-choice-top">
@@ -4938,13 +5083,16 @@ window.KLB = window.KLB || {};
             <span class="ev-choice-key">${idx + 1}</span>
             <span class="ev-choice-label">${escHtml(cleanLabel)}</span>
           </div>
-          ${costHtml}
+          <span class="ev-choice-right">
+            ${timeHtml}${costHtml}<span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+          </span>
         </div>
         ${deltasHtml ? `<div class="ev-choice-deltas">${deltasHtml}</div>` : ''}
       `;
 
       b.onclick = () => {
         if (cost > 0 && (Number(state.favours) || 0) < cost) return;
+        const startDayIdx = state.dayIdx;
         closeModal();
         setPaused(false);
         if (cost > 0) {
@@ -4979,6 +5127,11 @@ window.KLB = window.KLB || {};
         if (ev.id === 'sliced_croissant_crime' && state.player.id === 'antoine_maruani') {
           state.morale = clamp(state.morale - 15, 0, 100);
           antoineCroissantShock = true;
+        }
+
+        if (timeCost > 0) {
+          window.KLB.Sim.spendWhatsAppMinutes(state, timeCost, simCallbacks());
+          if (!state || state.dayIdx !== startDayIdx || state.gameOver || state.victory) return;
         }
 
         if (ch.triggersMinigame === 'lemons' && window.KLB.Minigames) {
@@ -5355,6 +5508,12 @@ window.KLB = window.KLB || {};
     state._salveToday = false;
     state._speakersMoraleToday = false;
     state._tcepFavourToday = false;
+    state.prep = state.prep || {};
+    state.prep.oven_flask = false;
+    state.prep.argon_balloon = false;
+    state.prep.dry_solvent = false;
+    state.prep.tlc_check = false;
+    state.prep.ph_calibrated = false;
     state._stepPrepCredit = {};
     state._stepBiotageBonusApplied = false;
     state._stepFaizaA280Done = false;
@@ -5702,10 +5861,13 @@ window.KLB = window.KLB || {};
       b.className = 'rpg-btn' + (a.primary ? ' primary' : '');
       b.dataset.hotkey = String(i + 1);
       b.textContent = a.label;
-      if (a.disabled) {
-        b.disabled = true;
-      } else {
-        b.onclick = a.onClick;
+      const isDisabled = Boolean(a.disabled);
+      b.disabled = isDisabled;
+      if (!isDisabled && typeof a.onClick === 'function') {
+        b.onclick = () => {
+          if (b.disabled) return;
+          a.onClick();
+        };
       }
       actWrap.appendChild(b);
     });
@@ -5730,6 +5892,11 @@ window.KLB = window.KLB || {};
     const b = el('modal-box');
     if (b) {
       b.classList.remove('ev-modal', 'klb-modal', 'klb-modal-sm');
+      Array.from(b.classList).forEach(cls => {
+        if (cls.startsWith('ev-theme-') || cls.startsWith('klb-theme-')) {
+          b.classList.remove(cls);
+        }
+      });
       b.innerHTML = '';
     }
     modalDismissable = true;
