@@ -670,20 +670,27 @@ window.KLB = window.KLB || {};
     const overRed = Boolean(item.hasOverReduction) || q < 78;
     const blueMishap = Boolean(item.hasBlueDyeMishap);
     const gelMeta = `${item.label || ''} ${item.productPeak || ''} ${item.notes || ''} ${item.metricLabel || ''}`;
+    const isSynab = /147(?:\.\d+)?\s*kda|\bsynab\b/i.test(gelMeta);
+    const hasDualFluor = /dual-?fluor|fluorescence\s*sds|495\/?646|cy5|coumarin|hsa.*gsh|turn-on/i.test(gelMeta);
+    const isFabPanel = /sequential\s*fab|fabher2\s*digest|fab\/fc\s*panel/i.test(gelMeta);
 
-    // 7 distinct biochemical visual modes
+    // 8 distinct biochemical visual modes
     let gelMode = 'hhll';
-    if (/aunp|529\s*nm|colloidal\s*mobility|ruby-?red/i.test(gelMeta)) {
+    if (item.gelMode && ['hhll', 'fab_48', 'vnar_tricine', 'reducing', 'aunp_ruby', 'dual_fluor', 'native_shift', 'hsa_monomer'].includes(item.gelMode)) {
+      gelMode = item.gelMode;
+    } else if (/aunp|529\s*nm|colloidal\s*mobility|ruby-?red/i.test(gelMeta)) {
       gelMode = 'aunp_ruby';
     } else if (/tricine|vnar|depletion/i.test(gelMeta)) {
       gelMode = 'vnar_tricine';
-    } else if (/dual-?fluor|fluorescence\s*sds|495\/?646|cy5|coumarin|hsa.*gsh|turn-on/i.test(gelMeta)) {
+    } else if (hasDualFluor) {
       gelMode = 'dual_fluor';
     } else if (/native\s+her2|antigen-?shift|fcrn\s*complex/i.test(gelMeta)) {
       gelMode = 'native_shift';
     } else if (/reducing\s+sds-?page/i.test(gelMeta) && !/non-?reducing/i.test(gelMeta)) {
       gelMode = 'reducing';
-    } else if (/fab|48(?:\.\d+)?\s*kda|fc\s*panel|digest/i.test(gelMeta)) {
+    } else if (/hsa|albumin|66\.5\s*kda/i.test(gelMeta)) {
+      gelMode = 'hsa_monomer';
+    } else if (!isSynab && (isFabPanel || /fab|48(?:\.\d+)?\s*kda|fc\s*panel|digest/i.test(gelMeta))) {
       gelMode = 'fab_48';
     }
 
@@ -691,6 +698,7 @@ window.KLB = window.KLB || {};
     const isHsaFluor = gelMode === 'dual_fluor' && /hsa|coumarin|66\.5/i.test(gelMeta);
     const isFcrnShift = gelMode === 'native_shift' && /fcrn/i.test(gelMeta);
     const isMultiFab = gelMode === 'fab_48' && /3-antibody|fabcd3|fccd20/i.test(gelMeta);
+    const isSynabHhll = gelMode === 'hhll' && isSynab;
 
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, w, h);
@@ -718,13 +726,16 @@ window.KLB = window.KLB || {};
       vnar_tricine: compact ? '16% Tricine: VNAR' : '16% Tricine SDS-PAGE • Shark VNAR Depletion',
       reducing: compact ? 'Reducing SDS-PAGE' : 'Reducing SDS-PAGE (+DTT) • HC / LC Chains',
       aunp_ruby: compact ? 'AuNP Mobility Gel' : 'Colloidal Mobility Shift Gel • 40 nm AuNP (529 nm)',
+      hsa_monomer: compact ? 'SDS-PAGE: 66.5 kDa HSA' : '12% Non-Reducing SDS-PAGE • Monomeric HSA (66.5 kDa)',
       dual_fluor: isHsaFluor
         ? (compact ? 'Fluor PAGE: HSA/GSH' : 'Fluorescence SDS-PAGE • HSA Non-Transfer vs GSH')
         : (compact ? 'Dual-Fluor SDS-PAGE' : 'Dual-Fluorescence (495/646 nm) + Coomassie Gel'),
       native_shift: isFcrnShift
         ? (compact ? 'FcRn Shift Gel' : 'pH 6.0 vs 7.4 FcRn Complex Shift SDS-PAGE')
         : (compact ? 'Native HER2 Shift' : 'Native HER2 Antigen-Shift Gel • Binding Check'),
-      hhll: compact ? 'SDS-PAGE (Coomassie)' : '4–15% Mini-PROTEAN SDS-PAGE • Coomassie Stain'
+      hhll: isSynabHhll
+        ? (compact ? 'SDS-PAGE: 147 kDa SynAb' : '10% SDS-PAGE • Tri-Protein SynAb / CiTE (147.3 kDa)')
+        : (compact ? 'SDS-PAGE (Coomassie)' : '4–15% Mini-PROTEAN SDS-PAGE • Coomassie Stain')
     };
 
     ctx.fillStyle = isDarkFluor ? '#67e8f9' : '#93c5fd';
@@ -763,9 +774,10 @@ window.KLB = window.KLB || {};
       vnar_tricine: ['Ladder', 'Input', 'Ctrl NP', 'N3-NP Sup'],
       reducing: ['Ladder', 'Native', 'Red Ctrl', 'Dha mAb'],
       aunp_ruby: ['Ladder', 'Bare Au', 'PBS Fail', 'BSA-TCO'],
+      hsa_monomer: ['Ladder', 'Untreated', 'Cys34 Act', 'HSA Prod'],
       dual_fluor: isHsaFluor ? ['Ladder', 'HSA', 'HSA+SMDC', '5mM GSH'] : ['Ladder', 'mAb', 'Dox4', 'Dox4-Cy5'],
       native_shift: isFcrnShift ? ['Ladder', 'mAb', 'pH 6.0', 'pH 7.4'] : ['Ladder', 'Herceptin', 'mAb+HER2', 'ADC+HER2'],
-      hhll: ['Ladder', 'Ctrl mAb', 'Reduced', 'Product']
+      hhll: isSynabHhll ? ['Ladder', 'Fab Input', 'Crude Mix', 'Pure SynAb'] : ['Ladder', 'Ctrl mAb', 'Reduced', 'Product']
     };
     const laneNames = laneNamesByMode[gelMode];
     const laneW = gw / 4;
@@ -971,6 +983,29 @@ window.KLB = window.KLB || {};
         ctx.fillStyle = '#475569';
         ctx.fillText(fitCanvasText(ctx, compact ? 'Bare Well Agg' : 'Bare Au Stalled in Well', maxRW), rx, mwToY(235) + 3);
       }
+    } else if (gelMode === 'hsa_monomer') {
+      // 66.5 kDa Monomeric HSA (with ~133 kDa disulfide dimer if unreduced/flawed)
+      drawGelBand(1, 66.5, 0.80, 5.6);
+      drawGelBand(1, 133, 0.48, 4.4);
+      drawGelBand(2, 66.5, 0.90, 5.8);
+      drawGelBand(2, 133, 0.14, 3.0);
+      if (overRed) {
+        drawGelBand(3, 66.5, 0.56, 4.8);
+        drawGelBand(3, 133, 0.82, 5.6, '185, 28, 28');
+        drawVectorWarning(ctx, rx + 4, mwToY(133) - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(fitCanvasText(ctx, compact ? '133 kDa Dimer!' : '133 kDa HSA Dimer!', maxRW - 11), rx + 11, mwToY(133) + 3);
+        ctx.fillStyle = '#334155';
+        ctx.fillText(fitCanvasText(ctx, compact ? '66.5 kDa (Weak)' : '66.5 kDa HSA (Weak)', maxRW), rx, mwToY(66.5) + 3);
+      } else {
+        drawGelBand(3, 66.5, 0.96, 6.6);
+        drawGelBand(3, 133, 0.06, 2.4);
+        drawVectorCheck(ctx, rx + 4, mwToY(66.5) - 1, compact ? 3.5 : 4.4, '#15803d');
+        ctx.fillStyle = '#15803d';
+        ctx.fillText(fitCanvasText(ctx, compact ? '66.5 kDa HSA' : '66.5 kDa HSA Monomer', maxRW - 11), rx + 11, mwToY(66.5) + 3);
+        ctx.fillStyle = '#475569';
+        ctx.fillText(fitCanvasText(ctx, compact ? 'No 133 Dimer' : '133 kDa Dimer Absent', maxRW), rx, mwToY(133) + 3);
+      }
     } else if (gelMode === 'dual_fluor') {
       if (isHsaFluor) {
         // Marcos Step 5: 66.5 kDa HSA lanes completely dark (Coomassie ghost only), 5 mM GSH glows bright cyan-green!
@@ -1042,6 +1077,29 @@ window.KLB = window.KLB || {};
           ctx.fillStyle = '#475569';
           ctx.fillText(fitCanvasText(ctx, compact ? '150 kDa Free' : '150 kDa Unbound Ctrl', maxRW), rx, mwToY(150) + 3);
         }
+      }
+    } else if (isSynabHhll) {
+      // 147.3 kDa Tri-Protein SynAb / CiTE intact band
+      drawGelBand(1, 48, 0.90, 5.8);
+      drawGelBand(2, 147.3, 0.72, 5.4);
+      drawGelBand(2, 98, 0.42, 4.0);
+      drawGelBand(2, 48, 0.50, 4.4);
+      if (overRed) {
+        drawGelBand(3, 147.3, 0.52, 4.8);
+        drawGelBand(3, 48, 0.78, 5.2, '185, 28, 28');
+        drawVectorWarning(ctx, rx + 4, mwToY(48) - 1, compact ? 3.5 : 4.2, '#dc2626', '#ffffff');
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(fitCanvasText(ctx, compact ? '48 kDa Unclicked!' : 'Unclicked 48 kDa Fab Mix!', maxRW - 11), rx + 11, mwToY(48) + 3);
+        ctx.fillStyle = '#334155';
+        ctx.fillText(fitCanvasText(ctx, compact ? '147 kDa (Weak)' : '147.3 kDa SynAb (Weak)', maxRW), rx, mwToY(147.3) + 3);
+      } else {
+        drawGelBand(3, 147.3, 0.96, 6.8);
+        drawGelBand(3, 48, 0.08, 2.4);
+        drawVectorCheck(ctx, rx + 4, mwToY(147.3) - 1, compact ? 3.5 : 4.4, '#15803d');
+        ctx.fillStyle = '#15803d';
+        ctx.fillText(fitCanvasText(ctx, compact ? '147 kDa SynAb' : '147.3 kDa SynAb', maxRW - 11), rx + 11, mwToY(147.3) + 3);
+        ctx.fillStyle = '#475569';
+        ctx.fillText(fitCanvasText(ctx, compact ? '48 kDa Fab In' : '48 kDa Fab Consumed', maxRW), rx, mwToY(48) + 3);
       }
     } else {
       // Classic 150 kDa HHLL mAb conjugate
@@ -1492,8 +1550,10 @@ window.KLB = window.KLB || {};
       centerMass = 548.1;
     }
 
-    // Only treat as protein/antibody conjugate for mass > 5000 (or >= 2000 with protein keywords); < 2000 Da is always small-molecule!
-    const isProtein = centerMass >= 2000 && (centerMass > 5000 || /fab|igg|mab|bsa|hsa|vnar|her2|dar|par/i.test(lcmsMeta));
+    // Treat small-molecule adduct / Br2 triplet strings under 5000 Da as HRMS rather than protein envelope
+    const hasSmallMolIon = /\[m\+[hna]+\]\+|br2\s*triplet/i.test(rawPeakStr);
+    const isMaldi = String(item.type || '').toLowerCase() === 'maldi' || /maldi/i.test(lcmsMeta);
+    const isProtein = centerMass > 5000 || (centerMass >= 2000 && !hasSmallMolIon && /fab|igg|mab|bsa|hsa|vnar|her2|dar|par/i.test(lcmsMeta));
     const spanLeft = isProtein ? 220 : 28;
     const spanRight = isProtein ? 340 : 42;
     const mMin = centerMass - spanLeft;
@@ -1509,10 +1569,12 @@ window.KLB = window.KLB || {};
     ctx.textAlign = 'left';
     ctx.fillText(
       compact
-        ? (isProtein ? 'Q-TOF MaxEnt1 MS' : 'UPLC ESI-HRMS')
-        : (isProtein
-          ? 'CIB LG11 • Q-TOF / MaxEnt1 Deconvoluted MS'
-          : 'CIB LG11 • Waters UPLC–Xevo ESI-HRMS'),
+        ? (isMaldi ? 'Waters MALDI-TOF MS' : (isProtein ? 'Q-TOF MaxEnt1 MS' : 'UPLC ESI-HRMS'))
+        : (isMaldi
+          ? 'CIB LG11 • Waters MALDI-TOF MS'
+          : (isProtein
+            ? 'CIB LG11 • Q-TOF / MaxEnt1 Deconvoluted MS'
+            : 'CIB LG11 • Waters UPLC–Xevo ESI-HRMS')),
       10,
       compact ? 13 : 17
     );
@@ -1787,7 +1849,7 @@ window.KLB = window.KLB || {};
           badge: 'SDS-PAGE GEL LOADING',
           defaultTitle: 'Micropipette Well Loader',
           controls: 'Aim with [A/D], [Arrows], or [Mouse]; press [Space] or [Click] over each well.',
-          durationSec: 9.5
+          durationSec: 11.0
         },
         syringe_cryo: {
           icon: 'snowflake',
@@ -1914,6 +1976,10 @@ window.KLB = window.KLB || {};
 
       function abortAndExit() {
         if (closed) return;
+        if (finished && finalPayload) {
+          finalizeAndExit();
+          return;
+        }
         cleanupListeners();
         if (onFinish) onFinish({ score: 0, aborted: true });
       }
@@ -1923,18 +1989,24 @@ window.KLB = window.KLB || {};
         if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
           e.preventDefault();
         }
+        if (finished) {
+          if (e.code === 'Escape') {
+            e.preventDefault();
+            if (finalPayload) finalizeAndExit();
+            else abortAndExit();
+            return;
+          }
+          if (!e.repeat && (e.code === 'Space' || e.code === 'Enter') && (performance.now() - finishedAt >= 450)) {
+            finalizeAndExit();
+          }
+          return;
+        }
         if (e.code === 'Escape') {
           e.preventDefault();
           abortAndExit();
           return;
         }
         if (e.repeat) return;
-        if (finished) {
-          if ((e.code === 'Space' || e.code === 'Enter') && (performance.now() - finishedAt >= 450)) {
-            finalizeAndExit();
-          }
-          return;
-        }
         if (!input.keys.has(e.code) && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyE')) {
           input.justPressedAction = true;
         }
@@ -2049,6 +2121,8 @@ window.KLB = window.KLB || {};
         }, 2400);
       }
 
+      const isActionHeld = () => input.mouseDown || input.keys.has('Space') || input.keys.has('KeyE') || input.keys.has('Enter');
+
       // Instantiate specific wet-lab runner using CSS logical dimensions (680x310)
       const runner = createMinigameRunner(type, W, H, meta.durationSec, config);
       let lastTs = performance.now();
@@ -2064,14 +2138,17 @@ window.KLB = window.KLB || {};
 
         if (!finished) {
           elapsed += dt;
-          const holding = input.mouseDown || input.keys.has('Space');
+          const holding = isActionHeld();
           const stepState = runner.update(dt, elapsed, input, holding);
           input.justPressedAction = false;
           input.justClickedOnCanvas = false;
           input.justMouseMoved = false;
 
           runner.render(ctx);
-          scoreEl.textContent = `Score: ${clamp(Math.round(stepState.liveScore), 0, 100)}%`;
+          const livePct = clamp(Math.round(stepState.liveScore), 0, 100);
+          scoreEl.textContent = stepState.statusText
+            ? `Score: ${livePct}% | ${stepState.statusText}`
+            : `Score: ${livePct}%`;
           timerEl.textContent = `${Math.max(0, meta.durationSec - elapsed).toFixed(1)}s`;
 
           if (stepState.done || elapsed >= meta.durationSec) {
@@ -2301,7 +2378,10 @@ window.KLB = window.KLB || {};
 
     // -------------------- 2. SDS-PAGE MICROPIPETTE STEADY-HAND --------------------
     if (type === 'gel_load') {
-      const defaultLaneLabels = ['Ctrl', 'Red.', 'Crude', 'Prod'];
+      const gelModeCfg = String(config?.gelMode || '').toLowerCase();
+      const defaultLaneLabels = gelModeCfg === 'hsa_monomer'
+        ? ['Ladder', 'HSA Ctrl', 'Cys34 Act', 'HSA-Conj']
+        : ['Ctrl', 'Red.', 'Crude', 'Prod'];
       const rawLaneLabels = Array.isArray(config?.laneLabels) ? config.laneLabels : [];
       const wells = [0, 1, 2, 3].map(i => {
         const shortLbl = String(rawLaneLabels[i] ?? defaultLaneLabels[i]).trim() || defaultLaneLabels[i];
@@ -2369,9 +2449,13 @@ window.KLB = window.KLB || {};
             }
           }
 
-          const loaded = wells.filter(w => w.filled);
-          const avg = loaded.length ? loaded.reduce((s, w) => s + w.score, 0) / loaded.length : 85;
-          return { liveScore: avg, done: currentWell >= wells.length && dipAnim <= 0.1 };
+          const loadedWells = wells.filter(w => w.filled);
+          const avg = loadedWells.length ? loadedWells.reduce((s, w) => s + w.score, 0) / loadedWells.length : 85;
+          return {
+            liveScore: avg,
+            statusText: `Wells: ${loadedWells.length}/4`,
+            done: currentWell >= wells.length && dipAnim <= 0.1
+          };
         },
         render(ctx) {
           const tankGrad = ctx.createLinearGradient(0, 0, 0, H);
@@ -2380,6 +2464,18 @@ window.KLB = window.KLB || {};
           tankGrad.addColorStop(1, '#0e223d');
           ctx.fillStyle = tankGrad;
           ctx.fillRect(0, 0, W, H);
+
+          const loadedCount = wells.filter(w => w.filled).length;
+          ctx.fillStyle = loadedCount === 4 ? '#86efac' : '#93c5fd';
+          ctx.font = 'bold 11.5px Consolas, monospace';
+          ctx.textAlign = 'left';
+          ctx.fillText(`Wells: ${loadedCount}/4`, 16, 22);
+          if (gelModeCfg === 'hsa_monomer') {
+            ctx.fillStyle = '#cbd5e1';
+            ctx.textAlign = 'right';
+            ctx.fillText('12% Non-Reducing HSA Cys34 Gel (66.5 kDa)', W - 16, 22);
+            ctx.textAlign = 'left';
+          }
 
           ctx.strokeStyle = 'rgba(125, 211, 252, 0.45)';
           ctx.lineWidth = 2;
@@ -3594,7 +3690,7 @@ window.KLB = window.KLB || {};
     const playerSpriteImg = getMgSprite(playerSpriteId);
 
     const player = { x: 64, y: 165, r: 12, dirRow: 2, moving: false, walkTime: 0 };
-    const alex = { x: 355, y: 155, angle: Math.PI, sweepDir: 1, coneLen: 175, coneHalf: 0.44, dirRow: 1, walkTime: 0 };
+    const alex = { x: 355, y: 155, angle: Math.PI, sweepDir: 1, coneLen: 175, coneHalf: 0.44, dirRow: 1, walkTime: 0, quote: '"Heading to Gordon\'s Café?"' };
     const stairs3F = { x: 255, y: 10, w: 150, h: 42 };
     const cibExit = { x: W - 122, y: H - 86, w: 104, h: 68 };
     const pillars = [
@@ -3824,12 +3920,14 @@ window.KLB = window.KLB || {};
             }
           );
           const tagY = Math.max(18, alex.y - 38);
-          ctx.fillStyle = 'rgba(9, 14, 26, 0.78)';
-          ctx.fillRect(alex.x - 74, tagY - 11, 148, 15);
-          ctx.fillStyle = '#bbf7d0';
           ctx.font = 'bold 10px Segoe UI, sans-serif';
+          const pillW = Math.ceil(ctx.measureText(alex.quote).width) + 18;
+          const pillX = clamp(alex.x - pillW / 2, 4, W - pillW - 4);
+          ctx.fillStyle = 'rgba(9, 14, 26, 0.78)';
+          ctx.fillRect(pillX, tagY - 11, pillW, 15);
+          ctx.fillStyle = '#bbf7d0';
           ctx.textAlign = 'center';
-          ctx.fillText('"Heading to Gordon\'s Café?"', alex.x, tagY);
+          ctx.fillText(alex.quote, pillX + pillW / 2, tagY);
         };
 
         const drawPlayer = () => {
@@ -3922,6 +4020,38 @@ window.KLB = window.KLB || {};
     );
   }
 
+  function describeGelFlaw(fig) {
+    const meta = `${fig?.label || ''} ${fig?.productPeak || ''} ${fig?.notes || ''} ${fig?.metricLabel || ''}`;
+    if (/aunp|529\s*nm|colloidal\s*mobility|ruby-?red/i.test(meta)) {
+      return 'purple AuNP well-aggregation smear';
+    }
+    if (/tricine|vnar|depletion/i.test(meta)) {
+      return 'unconjugated 12 kDa VNAR supernatant band';
+    }
+    if (/hsa|albumin|66\.5\s*kda/i.test(meta) && /dual-?fluor|fluorescence\s*sds|gsh|turn-on/i.test(meta)) {
+      return '66.5 kDa HSA fluorophore transfer smear';
+    }
+    if (/hsa|albumin|66\.5\s*kda/i.test(meta)) {
+      return '133 kDa HSA disulfide dimer band';
+    }
+    if (!/147(?:\.\d+)?\s*kda|\bsynab\b/i.test(meta) && /sequential\s*fab|fabher2\s*digest|fab\/fc\s*panel|\bfab\b|48(?:\.\d+)?\s*kda/i.test(meta)) {
+      return '25 kDa over-reduced Fab fragment band';
+    }
+    if (/147(?:\.\d+)?\s*kda|\bsynab\b/i.test(meta)) {
+      return 'unclicked 48 kDa Fab / incomplete SynAb bands';
+    }
+    if (/native\s+her2|antigen-?shift/i.test(meta)) {
+      return 'unshifted 150 kDa unbound mAb band';
+    }
+    if (/fcrn\s*complex/i.test(meta)) {
+      return 'incomplete pH 6.0 FcRn complex band';
+    }
+    if (/reducing\s+sds-?page/i.test(meta) && !/non-?reducing/i.test(meta)) {
+      return 'over-cleaved heavy-chain fragment bands';
+    }
+    return '75 kDa HL half-antibody over-reduction bands';
+  }
+
   function describeFigureFlaw(fig) {
     if (!fig) return '';
     const q = Number(fig.quality);
@@ -3929,7 +4059,7 @@ window.KLB = window.KLB || {};
     const t = String(fig.type || '').toLowerCase();
     if (fig.hasSolventPeak || (t === 'nmr' && lowQ)) return '5.30 ppm residual DCM / EtOAc peaks';
     if (fig.hasBlueDyeMishap) return 'blue LDS loading-dye spillover smear';
-    if (fig.hasOverReduction || (t === 'gel' && lowQ)) return '75 kDa HL over-reduction bands';
+    if (fig.hasOverReduction || (t === 'gel' && lowQ)) return describeGelFlaw(fig);
     if (fig.hasAdduct || (t === 'lcms' && lowQ)) return '+69 Da adduct & +44 Da PEG comb';
     if (lowQ) return 'unreacted starting material / baseline streaking';
     return '';
@@ -4059,6 +4189,22 @@ window.KLB = window.KLB || {};
         `;
       };
 
+      const savedDeck = gameState.slideDeck;
+      const hasPendingEdits = Boolean(savedDeck?.ready) && (
+        draft.framing !== (savedDeck.framing || 'mechanistic') ||
+        draft.fig1Id !== (savedDeck.fig1Id || null) ||
+        draft.fig2Id !== (savedDeck.fig2Id || null) ||
+        draft.honestDisclosure !== (savedDeck.honestDisclosure !== undefined ? Boolean(savedDeck.honestDisclosure) : true)
+      );
+      const deckSavedReady = Boolean(savedDeck?.ready) && distinctPair && !hasPendingEdits;
+      const deckStatusCls = deckSavedReady ? 'good' : 'warn';
+      const deckStatusIcon = deckSavedReady ? 'check-circle' : 'alert-circle';
+      const deckStatusText = !distinctPair
+        ? `${labBook.length}/2 Distinct Figures`
+        : deckSavedReady
+          ? '4/4 Slides Ready'
+          : 'Unsaved Draft — Click Save';
+
       mountEl.innerHTML = `
         <header class="klb-modal-header">
           <div>
@@ -4161,9 +4307,9 @@ window.KLB = window.KLB || {};
 
         <footer class="klb-modal-footer">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="klb-tag ${distinctPair ? 'good' : 'warn'}">
-              ${iconSvg(distinctPair ? 'check-circle' : 'alert-circle', 13)}
-              <span>${distinctPair ? '4/4 Slides Ready' : `${labBook.length}/2 Distinct Figures`}</span>
+            <span class="klb-tag ${deckStatusCls}">
+              ${iconSvg(deckStatusIcon, 13)}
+              <span>${deckStatusText}</span>
             </span>
             <span class="klb-tag ${pairBadgeCls === 'good' ? 'good' : 'warn'}">${escHtml(pairBadgeText)}</span>
             <span class="klb-tag ${qualBadgeCls === 'good' ? 'good' : qualBadgeCls === 'poor' ? 'danger' : 'warn'}">Slide Quality: ${slideAvgQ}%</span>
@@ -4387,9 +4533,10 @@ window.KLB = window.KLB || {};
           if (figType === 'nmr' || slideFlawedFig.hasSolventPeak) {
             vijayCalloutLine = `Hold on, ${playerMeta.shortName} — look closely at Slide ${slideNum}. There is an unflagged 5.30 ppm DCM peak sitting beside your product signals that needed noting upfront.`;
           } else if (figType === 'gel' || slideFlawedFig.hasOverReduction || slideFlawedFig.hasBlueDyeMishap) {
+            const gelFlawDesc = describeFigureFlaw(slideFlawedFig);
             vijayCalloutLine = slideFlawedFig.hasBlueDyeMishap
               ? `Just pause on Slide ${slideNum}, ${playerMeta.shortName} — that blue LDS loading-dye smear down the lane should have been disclosed openly rather than brushed past.`
-              : `Just pause on Slide ${slideNum}, ${playerMeta.shortName} — what are those stray cleavage bands on the gel? Always declare non-specific fragments on Slide 4 rather than glossing over them.`;
+              : `Just pause on Slide ${slideNum}, ${playerMeta.shortName} — what is that ${gelFlawDesc} on the gel? Always declare lane flaws on Slide 4 rather than glossing over them.`;
           } else if (figType === 'lcms' || slideFlawedFig.hasAdduct) {
             vijayCalloutLine = `Let's stay on Slide ${slideNum} a moment, ${playerMeta.shortName} — there is an unflagged +69 Da adduct and +44 Da PEG comb on the LC-MS trace that needed honest disclosure.`;
           } else {
@@ -4400,9 +4547,10 @@ window.KLB = window.KLB || {};
           if (figType === 'nmr' || slideFlawedFig.hasSolventPeak) {
             vijayCalloutLine = `Wait — is that 5.30 ppm DCM on Slide ${slideNum}?! That's suboptimal — one word.`;
           } else if (figType === 'gel' || slideFlawedFig.hasOverReduction || slideFlawedFig.hasBlueDyeMishap) {
+            const gelFlawDesc = describeFigureFlaw(slideFlawedFig);
             vijayCalloutLine = slideFlawedFig.hasBlueDyeMishap
               ? `Hold on — go back to Slide ${slideNum}. Is that a blue LDS loading-dye smear down the gel lane you tried to gloss over?! That's suboptimal — one word.`
-              : `Hold on — go back to Slide ${slideNum}. Is that an over-reduced 75 kDa half-antibody gel band you tried to gloss over?! That's suboptimal — one word.`;
+              : `Hold on — go back to Slide ${slideNum}. Is that ${gelFlawDesc} you tried to gloss over?! That's suboptimal — one word.`;
           } else if (figType === 'lcms' || slideFlawedFig.hasAdduct) {
             vijayCalloutLine = `Hold on — go back to Slide ${slideNum}. Is that a +69 Da adduct and +44 Da PEG comb in the LC-MS you tried to gloss over?! That's suboptimal — one word.`;
           } else {
@@ -4783,7 +4931,63 @@ window.KLB = window.KLB || {};
       });
     }
 
-    if (isArchie) {
+    if (!isFinalPhase) {
+      if (isArchie) {
+        if (passed) {
+          chudReactions.push(
+            {
+              senderId: 'nafsika_forte',
+              text: `${total.toFixed(1)}/10 on the morning slides @${playerMeta.shortName} — clean Baker-bay start, smash the last bench step & SI push before 18:00!`
+            },
+            {
+              senderId: 'joao_nogueira',
+              text: `Strong 09:45 Baker-bay update @${playerMeta.shortName} (${total.toFixed(1)}/10) — finish the final bench check cleanly before 18:00!`
+            },
+            {
+              senderId: 'daniel_richards',
+              text: `Solid morning HSA Cys34 slides for Jamie @${playerMeta.shortName} — keep those balanced-rotor spins tight for the 18:00 wrap.`
+            }
+          );
+        } else {
+          chudReactions.push(
+            {
+              senderId: 'nafsika_forte',
+              text: `${total.toFixed(1)}/10 in the morning audit @${playerMeta.shortName} — plenty of time before 18:00, grab me in Lab 230 if you need spin-filter or HSA backup!`
+            },
+            {
+              senderId: 'antoine_maruani',
+              text: `Tough 09:00 grilling from Jamie @${playerMeta.shortName} (${total.toFixed(1)}/10) — use the afternoon to lock in 2 clean figures & finish the SI draft before 18:00.`
+            },
+            {
+              senderId: 'daniel_richards',
+              text: `Rough 09:00 start @${playerMeta.shortName}, but the day is young — knock out the remaining bench steps and 3F write-up before 18:00.`
+            }
+          );
+        }
+      } else if (passed) {
+        chudReactions.push(
+          {
+            senderId: 'joao_nogueira',
+            text: `${total.toFixed(1)}/10 at the 09:00 meeting @${playerMeta.shortName} — solid morning slides, smash the last bench step before 18:00!`
+          },
+          {
+            senderId: 'calise_bahou',
+            text: `Tidy morning update @${playerMeta.shortName} — finish the 18:00 manuscript push cleanly and we celebrate after!`
+          }
+        );
+      } else {
+        chudReactions.push(
+          {
+            senderId: 'antoine_maruani',
+            text: `Tough 09:00 grilling @${playerMeta.shortName} (${total.toFixed(1)}/10) — plenty of bench hours before 18:00 to lock in clean data and hit 3F!`
+          },
+          {
+            senderId: 'faiza_javaid',
+            text: `Shake off the morning slides @${playerMeta.shortName} — grab two clean spectra and finish your 3F manuscript draft before 18:00.`
+          }
+        );
+      }
+    } else if (isArchie) {
       if (passed) {
         chudReactions.push(
           {

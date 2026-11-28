@@ -71,6 +71,7 @@
   let extractorNodes = null; // { src: null, hpFilter: null, lpFilter: null, gain }
   let facilityNodes = null;  // { osc, lp, gain } — pure sine room tone (meeting_room / CIB)
   let cafeFilter = null;     // BiquadFilterNode (420 Hz headphones / 6000 Hz open)
+  let ambienceBusGain = null;// Shared bus for LotR / Café / room ambience (ramps to 0 on pause)
   let alarmBusGain = null;   // Dedicated fire-alarm bus for instant pause silence
   let pursuitBusGain = null; // Dedicated pursuit ostinato bus for instant pause silence
 
@@ -163,7 +164,7 @@
     }
     if (ctx.state === 'running') {
       markUnlocked();
-    } else if (ctx.state === 'suspended' && typeof ctx.resume === 'function') {
+    } else if (ctx.state === 'suspended' && (typeof document === 'undefined' || !document.hidden) && typeof ctx.resume === 'function') {
       ctx.resume().then(() => {
         if (ctx && ctx.state === 'running' && markUnlocked() && !stopped) {
           syncAllAmbienceLayers();
@@ -200,16 +201,19 @@
   function onVisibilityChange() {
     if (!ctx || typeof document === 'undefined') return;
     if (document.hidden) {
+      clearAmbientTimers();
       if (ctx.state === 'running' && typeof ctx.suspend === 'function') {
         ctx.suspend().catch(() => {});
       }
-    } else if (!muted && !stopped) {
+    } else if (unlocked && !muted && !stopped) {
       if (ctx.state === 'suspended' && typeof ctx.resume === 'function') {
         ctx.resume().then(() => {
-          if (!stopped && !muted) {
+          if (!stopped && !muted && !document.hidden) {
             syncAllAmbienceLayers();
           }
         }).catch(() => {});
+      } else if (ctx.state === 'running') {
+        syncAllAmbienceLayers();
       }
     }
   }
@@ -239,7 +243,7 @@
       if (audioCtx.state === 'running') {
         markUnlocked();
         if (!stopped) syncAllAmbienceLayers();
-      } else if (audioCtx.state === 'suspended' && typeof audioCtx.resume === 'function') {
+      } else if (audioCtx.state === 'suspended' && (typeof document === 'undefined' || !document.hidden) && typeof audioCtx.resume === 'function') {
         audioCtx.resume().then(() => {
           if (audioCtx.state === 'running' && markUnlocked() && !stopped) {
             syncAllAmbienceLayers();
@@ -286,6 +290,26 @@
     return extractorNodes;
   }
 
+  function ensureAmbienceBusGain() {
+    if (!ctx || !masterGain) return null;
+    if (!ambienceBusGain) {
+      ambienceBusGain = ctx.createGain();
+      ambienceBusGain.gain.value = (paused || stopped) ? 0.0 : 1.0;
+      ambienceBusGain.connect(masterGain);
+    }
+    return ambienceBusGain;
+  }
+
+  function disconnectNodes(nodes) {
+    if (!Array.isArray(nodes)) return;
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      if (n && typeof n.disconnect === 'function') {
+        try { n.disconnect(); } catch (_) {}
+      }
+    }
+  }
+
   function ensureFacilityHumGraph() {
     if (!ctx) return null;
     if (facilityNodes) return facilityNodes;
@@ -303,7 +327,7 @@
 
     osc.connect(lp);
     lp.connect(gain);
-    gain.connect(masterGain);
+    gain.connect(ensureAmbienceBusGain() || masterGain);
     osc.start();
 
     facilityNodes = { osc, lp, gain };
@@ -317,7 +341,7 @@
       cafeFilter.type = 'lowpass';
       cafeFilter.frequency.value = ambienceState.headphonesOn ? 420 : 6000;
       cafeFilter.Q.value = 0.75;
-      cafeFilter.connect(masterGain);
+      cafeFilter.connect(ensureAmbienceBusGain() || masterGain);
     }
     return cafeFilter;
   }
@@ -346,7 +370,9 @@
     const lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
     lp.frequency.value = ambienceState.headphonesOn ? headphoneCutoff : normalCutoff;
-    lp.connect(masterGain);
+    lp.connect(ensureAmbienceBusGain() || masterGain);
+    lp._isOneShotMuffle = true;
+    lp._activeTones = 0;
     return lp;
   }
 
@@ -367,6 +393,18 @@
 
     osc.connect(env);
     env.connect(dest);
+    if (dest._isOneShotMuffle) {
+      dest._activeTones = (dest._activeTones || 0) + 1;
+    }
+    osc.onended = () => {
+      disconnectNodes([osc, env]);
+      if (dest._isOneShotMuffle) {
+        dest._activeTones = Math.max(0, (dest._activeTones || 1) - 1);
+        if (dest._activeTones === 0) {
+          disconnectNodes([dest]);
+        }
+      }
+    };
     osc.start(startTime);
     osc.stop(startTime + duration + 0.02);
   }
@@ -567,8 +605,9 @@
     const muffleFilter = ctx.createBiquadFilter();
     muffleFilter.type = 'lowpass';
     muffleFilter.frequency.value = ambienceState.headphonesOn ? 340 : 2800;
-    muffleFilter.connect(masterGain);
+    muffleFilter.connect(ensureAmbienceBusGain() || masterGain);
 
+    let remainingSyllables = syllables;
     let t = now + 0.02;
     for (let i = 0; i < syllables; i++) {
       const dur = 0.055 + Math.random() * 0.055;
@@ -594,6 +633,12 @@
       osc.connect(formant);
       formant.connect(env);
       env.connect(muffleFilter);
+
+      osc.onended = () => {
+        disconnectNodes([osc, formant, env]);
+        remainingSyllables--;
+        if (remainingSyllables <= 0) disconnectNodes([muffleFilter]);
+      };
 
       osc.start(t);
       osc.stop(t + dur + 0.02);
@@ -643,14 +688,21 @@
     const idx = lotrStep % 16;
     lotrStep++;
 
-    // Gentle acoustic room / headphone muffle filter
+    // Gentle acoustic room / headphone muffle filter routed through shared ambience bus
     const outFilter = ctx.createBiquadFilter();
     outFilter.type = 'lowpass';
     outFilter.frequency.value = ambienceState.headphonesOn ? 580 : 3400;
-    outFilter.connect(masterGain);
+    outFilter.connect(ensureAmbienceBusGain() || masterGain);
+
+    const harpFreq = LOTR_HARP_NOTES[idx];
+    const fluteFreq = LOTR_FLUTE_MELODY[idx];
+    let remainingVoices = (harpFreq ? 1 : 0) + (fluteFreq ? 1 : 0);
+    if (remainingVoices === 0) {
+      disconnectNodes([outFilter]);
+      return;
+    }
 
     // 1) Warm plucked harp arpeggio note
-    const harpFreq = LOTR_HARP_NOTES[idx];
     if (harpFreq) {
       const hOsc = ctx.createOscillator();
       hOsc.type = 'triangle';
@@ -664,12 +716,16 @@
 
       hOsc.connect(hGain);
       hGain.connect(outFilter);
+      hOsc.onended = () => {
+        disconnectNodes([hOsc, hGain]);
+        remainingVoices--;
+        if (remainingVoices <= 0) disconnectNodes([outFilter]);
+      };
       hOsc.start(now);
       hOsc.stop(now + 0.75);
     }
 
     // 2) Pastoral wooden flute melody note with soft vibrato
-    const fluteFreq = LOTR_FLUTE_MELODY[idx];
     if (fluteFreq) {
       const fOsc = ctx.createOscillator();
       fOsc.type = 'sine';
@@ -686,11 +742,16 @@
       const fPeak = 0.045 * roomScale;
       fGain.gain.setValueAtTime(0.0001, now);
       fGain.gain.linearRampToValueAtTime(fPeak, now + 0.065);
-      fGain.gain.setTargetAtTime(fPeak * 0.72, now + 0.12, 0.14);
+      fGain.gain.linearRampToValueAtTime(fPeak * 0.72, now + 0.24);
       fGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
 
       fOsc.connect(fGain);
       fGain.connect(outFilter);
+      fOsc.onended = () => {
+        disconnectNodes([fOsc, fGain, vib, vibGain]);
+        remainingVoices--;
+        if (remainingVoices <= 0) disconnectNodes([outFilter]);
+      };
 
       vib.start(now);
       fOsc.start(now);
@@ -744,6 +805,9 @@
       env.connect(lp);
       tineEnv.connect(lp);
 
+      osc.onended = () => { disconnectNodes([osc, env]); };
+      tine.onended = () => { disconnectNodes([tine, tineEnv]); };
+
       osc.start(t);
       tine.start(t);
       osc.stop(t + 2.4);
@@ -793,6 +857,8 @@
     lp.connect(env);
     env.connect(alarmOut);
 
+    osc.onended = () => { disconnectNodes([osc, osc2, mix2, lp, env]); };
+
     osc.start(now);
     osc2.start(now);
     osc.stop(now + 0.26);
@@ -833,6 +899,8 @@
     lp.connect(env);
     env.connect(pursuitOut);
 
+    osc.onended = () => { disconnectNodes([osc, lp, env]); };
+
     osc.start(now);
     osc.stop(now + 0.21);
   }
@@ -860,6 +928,14 @@
     return 0.0;
   }
 
+  function rampAmbienceBus(targetGain, durationSec = 0.04) {
+    if (!ctx || !ambienceBusGain) return;
+    const now = ctx.currentTime;
+    ambienceBusGain.gain.cancelScheduledValues(now);
+    ambienceBusGain.gain.setValueAtTime(ambienceBusGain.gain.value, now);
+    ambienceBusGain.gain.linearRampToValueAtTime(targetGain, now + durationSec);
+  }
+
   function silenceContinuousBuses(timeConstant = 0.06) {
     if (!ctx) return;
     const now = ctx.currentTime;
@@ -870,6 +946,9 @@
     if (facilityNodes && facilityNodes.gain) {
       facilityNodes.gain.gain.cancelScheduledValues(now);
       facilityNodes.gain.gain.setTargetAtTime(0, now, timeConstant);
+    }
+    if (ambienceBusGain) {
+      rampAmbienceBus(0, 0.04);
     }
     if (alarmBusGain) {
       alarmBusGain.gain.cancelScheduledValues(now);
@@ -927,8 +1006,12 @@
 
     if (paused || !activeAudio) {
       // Stop all room ambience, chatter, music, and café timers while paused or inactive
+      // and smoothly ramp shared ambienceBusGain to 0 over 40ms
       clearNonUrgentTimers();
+      rampAmbienceBus(0, 0.04);
     } else {
+      ensureAmbienceBusGain();
+      rampAmbienceBus(1.0, 0.04);
       // Sparse non-hissy room-specific atmospheric soundscape (all 6 rooms)
       if (!ambienceState.fireAlarmOn) {
         if (!roomAmbientTimer || activeAmbientRoom !== ambienceState.roomId) {
@@ -1051,7 +1134,7 @@
     paused = Boolean(isPaused);
     if (paused) {
       // Stop non-urgent room ambience and fire alarm timers immediately;
-      // keep active Alex King stealth ostinato running while alex_stealth pauses the sim
+      // ramp shared ambienceBusGain smoothly to 0 over 40ms while leaving alarmBusGain & pursuitBusGain independent
       clearNonUrgentTimers();
       clearInterval(alarmTimer);
       alarmTimer = null;
@@ -1059,6 +1142,7 @@
         clearInterval(pursuitTimer);
         pursuitTimer = null;
       }
+      if (ctx) rampAmbienceBus(0, 0.04);
     }
     if (!stopped && ctx && ctx.state === 'running') {
       syncAllAmbienceLayers();
@@ -1084,6 +1168,7 @@
 
     osc.connect(env);
     env.connect(masterGain);
+    osc.onended = () => { disconnectNodes([osc, env]); };
     osc.start(startTime);
     osc.stop(startTime + duration + 0.015);
   }
@@ -1108,6 +1193,7 @@
     src.connect(filter);
     filter.connect(env);
     env.connect(masterGain);
+    src.onended = () => { disconnectNodes([src, filter, env]); };
     const maxOffset = Math.max(0, (buf.duration || 1.0) - duration - 0.05);
     src.start(startTime, Math.random() * maxOffset);
     src.stop(startTime + duration + 0.015);
@@ -1178,14 +1264,16 @@
         break;
       }
       case 'audit_pass': {
-        // Bright triumphant 4-note chord arpeggio (D5 -> F#5 -> A5 -> D6)
+        // Bright triumphant 4-note chord arpeggio (D5 -> F#5 -> A5 -> D6) with warm harmony thirds
         const notes = [587.33, 739.99, 880.00, 1174.66];
+        const thirds = [739.99, 880.00, 1174.66, 1479.98];
         notes.forEach((n, i) => {
           const t = now + i * 0.06;
-          const dur = i === 3 ? 0.30 : 0.16;
+          const dur = i === 3 ? 0.32 : 0.17;
           playTone('triangle', n, n, t, dur, 0.095);
+          playTone('sine', thirds[i], thirds[i], t, dur * 0.85, 0.045);
           if (i === 3) {
-            playTone('sine', n * 0.5, n * 0.5, t, 0.28, 0.05);
+            playTone('sine', n * 0.5, n * 0.5, t, 0.30, 0.055);
           }
         });
         break;
@@ -1254,11 +1342,12 @@
         const bodyEnv = audioCtx.createGain();
         bodyEnv.gain.setValueAtTime(0.0001, now);
         bodyEnv.gain.linearRampToValueAtTime(0.075, now + 0.07);
-        bodyEnv.gain.setTargetAtTime(0.052, now + 0.16, 0.08);
+        bodyEnv.gain.linearRampToValueAtTime(0.052, now + 0.24);
         bodyEnv.gain.exponentialRampToValueAtTime(0.0001, now + 0.43);
 
         body.connect(bodyEnv);
         bodyEnv.connect(lp);
+        body.onended = () => { disconnectNodes([body, bodyEnv, lp]); };
         body.start(now);
         body.stop(now + 0.45);
 
@@ -1275,6 +1364,7 @@
 
         swirl.connect(swirlEnv);
         swirlEnv.connect(lp);
+        swirl.onended = () => { disconnectNodes([swirl, swirlEnv]); };
         swirl.start(now);
         swirl.stop(now + 0.43);
         break;
@@ -1294,11 +1384,12 @@
         const rEnv = audioCtx.createGain();
         rEnv.gain.setValueAtTime(0.0001, now);
         rEnv.gain.linearRampToValueAtTime(0.082, now + 0.045);
-        rEnv.gain.setTargetAtTime(0.068, now + 0.18, 0.06);
+        rEnv.gain.linearRampToValueAtTime(0.068, now + 0.24);
         rEnv.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
 
         rotor.connect(rEnv);
         rEnv.connect(lp);
+        rotor.onended = () => { disconnectNodes([rotor, rEnv, lp]); };
         rotor.start(now);
         rotor.stop(now + 0.40);
 
@@ -1314,6 +1405,7 @@
 
         harm.connect(hEnv);
         hEnv.connect(lp);
+        harm.onended = () => { disconnectNodes([harm, hEnv]); };
         harm.start(now);
         harm.stop(now + 0.37);
         break;
@@ -1391,6 +1483,33 @@
         playTone('sawtooth', 392.00, 392.00, now + 0.025, 0.085, 0.025);
         playTone('triangle', 587.33, 587.33, now + 0.095, 0.17, 0.105);
         playTone('sawtooth', 587.33, 587.33, now + 0.095, 0.16, 0.028);
+        break;
+      }
+      case 'ph_beep': {
+        // Crisp twin-tone pH meter stabilization lock (1568 Hz -> 2093 Hz)
+        playTone('sine', 1568, 1568, now, 0.055, 0.075);
+        playTone('sine', 2093, 2093, now + 0.06, 0.11, 0.09);
+        break;
+      }
+      case 'bay_swap': {
+        // Brisk upbeat double-chime for swapping bays / waiting
+        playTone('triangle', 587.33, 587.33, now, 0.055, 0.085);
+        playTone('sine', 880.00, 880.00, now + 0.05, 0.095, 0.09);
+        playTone('triangle', 1174.66, 1174.66, now + 0.05, 0.07, 0.035);
+        break;
+      }
+      case 'fanfare_clear': {
+        // Warm multi-voice major-9th brass/harp flourish for researcher clears / >= 8.0 Friday passes
+        const arp = [523.25, 659.25, 783.99, 987.77, 1174.66]; // C5 - E5 - G5 - B5 - D6
+        arp.forEach((n, i) => {
+          const t = now + i * 0.055;
+          const dur = i === arp.length - 1 ? 0.38 : 0.18;
+          playTone('triangle', n, n, t, dur, 0.085);
+          playTone('sine', n * 0.5, n * 0.5, t, dur * 0.85, 0.035);
+        });
+        [261.63, 329.63, 392.00, 493.88, 587.33].forEach((f) => {
+          playTone('triangle', f, f, now + 0.22, 0.42, 0.032);
+        });
         break;
       }
       default: {

@@ -103,7 +103,7 @@ window.KLB = window.KLB || {};
 
     for (const el of placeholders) {
       if (!el.parentNode || (el.tagName && el.tagName.toLowerCase() === 'svg')) continue;
-      const name = el.getAttribute('data-lucide');
+      const name = String(el.getAttribute('data-lucide') || '').trim();
       if (!name) continue;
       const rawSize = el.getAttribute('data-size') || el.getAttribute('width');
       const size = rawSize ? (Number(rawSize) || 15) : 15;

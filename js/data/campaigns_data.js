@@ -3919,7 +3919,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: true,
             triggersChoice: true,
             minigame: 'syringe_cryo',
-            minigameConfig: { tempLabel: '-78 °C Cryo Bath', rateLabel: '0.15 mL/min Dropwise' },
+            minigameConfig: { tempLabel: '21 °C Stirred 1% PVA', rateLabel: '0.15 mL/min Dropwise' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -7531,7 +7531,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
-            minigameConfig: { laneLabels: ['Ladder', 'HSA Ctrl', 'Cys34 Act', 'HSA-Conj'], gelMode: 'hhll' },
+            minigameConfig: { laneLabels: ['Ladder', 'HSA Ctrl', 'Cys34 Act', 'HSA-Conj'], gelMode: 'hsa_monomer' },
             viewOutput: null,
             requiresJobFromPrev: false
           },

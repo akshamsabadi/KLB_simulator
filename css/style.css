@@ -1084,6 +1084,10 @@ select.ui-select::picker-icon {
 #live-alert-banner.hidden {
   display: none;
 }
+#canvas-stage:has(.celebration-banner:not(.hidden)) #live-alert-banner {
+  top: 58px;
+  z-index: 22;
+}
 
 /* Gordon's Victory Celebration Floating Top Bar */
 .celebration-banner {
@@ -1106,6 +1110,11 @@ select.ui-select::picker-icon {
   box-shadow: 0 10px 28px rgba(2, 6, 23, 0.72), 0 0 0 1px rgba(56, 189, 248, 0.16);
   backdrop-filter: blur(6px);
 }
+.celebration-banner.suboptimal {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.22) 0%, rgba(15, 23, 42, 0.96) 38%, rgba(51, 65, 85, 0.92) 100%);
+  border-color: rgba(251, 191, 36, 0.62);
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.72), 0 0 0 1px rgba(245, 158, 11, 0.18);
+}
 .celebration-banner.hidden {
   display: none;
 }
@@ -1119,9 +1128,17 @@ select.ui-select::picker-icon {
   color: #ecfdf5;
   white-space: nowrap;
 }
+.celebration-banner.suboptimal .celebration-banner-title,
+.celebration-banner.suboptimal .celebration-banner-text {
+  color: #fef3c7;
+}
 .celebration-banner-title .icon-inline,
 .celebration-banner-text .icon-inline {
   color: #34d399;
+}
+.celebration-banner.suboptimal .celebration-banner-title .icon-inline,
+.celebration-banner.suboptimal .celebration-banner-text .icon-inline {
+  color: #fbbf24;
 }
 .celebration-banner-actions {
   display: flex;
@@ -1444,6 +1461,8 @@ select.ui-select::picker-icon {
 .meter-fill.condition { background: #3b82f6; width: 95%; }
 .meter-fill.weekly-report { background: #0ea5e9; width: 0%; }
 .meter-fill.manuscript { background: #6366f1; width: 0%; }
+.meter-fill.slide-deck { background: linear-gradient(90deg, #14b8a6, #10b981); width: 0%; }
+.deliverable-row.ready .meter-fill.slide-deck { background: #22c55e; }
 
 .spectator-summary {
   background: var(--bg-elevated);
@@ -2178,7 +2197,7 @@ select.ui-select::picker-icon {
   border-radius: 14px;
   background: linear-gradient(180deg, #17223a 0%, #0d1424 100%);
   border: 1px solid rgba(148, 163, 184, 0.24);
-  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(56, 189, 248, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   animation: modalPopIn 0.16s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -2198,6 +2217,7 @@ select.ui-select::picker-icon {
 
 #modal-box.ev-theme-crisis {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(239, 68, 68, 0.16), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(239, 68, 68, 0.92);
 }
 #modal-box.ev-theme-crisis::before {
   background: linear-gradient(90deg, #ef4444, #fb7185, #f59e0b);
@@ -2209,6 +2229,7 @@ select.ui-select::picker-icon {
 
 #modal-box.ev-theme-weather {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(6, 182, 212, 0.16), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(6, 182, 212, 0.9);
 }
 #modal-box.ev-theme-weather::before {
   background: linear-gradient(90deg, #06b6d4, #38bdf8, #818cf8);
@@ -2220,6 +2241,7 @@ select.ui-select::picker-icon {
 
 #modal-box.ev-theme-inspection {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(59, 130, 246, 0.16), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(59, 130, 246, 0.9);
 }
 #modal-box.ev-theme-inspection::before {
   background: linear-gradient(90deg, #3b82f6, #60a5fa, #38bdf8);
@@ -2227,6 +2249,7 @@ select.ui-select::picker-icon {
 
 #modal-box.ev-theme-facility {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(139, 92, 246, 0.16), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(139, 92, 246, 0.9);
 }
 #modal-box.ev-theme-facility::before {
   background: linear-gradient(90deg, #8b5cf6, #c084fc, #60a5fa);
@@ -2234,6 +2257,7 @@ select.ui-select::picker-icon {
 
 #modal-box.ev-theme-social {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(16, 185, 129, 0.15), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(16, 185, 129, 0.9);
 }
 #modal-box.ev-theme-social::before {
   background: linear-gradient(90deg, #10b981, #34d399, #38bdf8);
@@ -2241,6 +2265,7 @@ select.ui-select::picker-icon {
 
 #modal-box.klb-theme-directory {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(37, 99, 235, 0.16), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(37, 99, 235, 0.92);
 }
 #modal-box.klb-theme-directory::before {
   background: linear-gradient(90deg, #2563eb, #38bdf8, #34d399);
@@ -2248,6 +2273,7 @@ select.ui-select::picker-icon {
 
 #modal-box.klb-theme-desk {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(99, 102, 241, 0.14), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(99, 102, 241, 0.9);
 }
 #modal-box.klb-theme-desk::before {
   background: linear-gradient(90deg, #6366f1, #38bdf8, #60a5fa);
@@ -2255,6 +2281,7 @@ select.ui-select::picker-icon {
 
 #modal-box.klb-theme-cafe {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(217, 119, 6, 0.14), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(245, 158, 11, 0.9);
 }
 #modal-box.klb-theme-cafe::before {
   background: linear-gradient(90deg, #d97706, #fbbf24, #34d399);
@@ -2262,6 +2289,7 @@ select.ui-select::picker-icon {
 
 #modal-box.klb-theme-step {
   background: radial-gradient(ellipse 85% 42% at 50% 0%, rgba(34, 211, 238, 0.14), transparent 72%), linear-gradient(180deg, #17223a 0%, #0d1424 100%);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.84), inset 0 3px 0 rgba(34, 211, 238, 0.9);
 }
 #modal-box.klb-theme-step::before {
   background: linear-gradient(90deg, #3b82f6, #22d3ee, #60a5fa);
@@ -2796,10 +2824,16 @@ select.ui-select::picker-icon {
   border-color: rgba(34, 211, 238, 0.38);
   color: #67e8f9;
 }
-.dir-icon-badge.evac {
+.dir-icon-badge.evac,
+.dir-icon-badge.crisis {
   background: linear-gradient(145deg, rgba(153, 27, 27, 0.34), rgba(15, 23, 42, 0.94));
   border-color: rgba(248, 113, 113, 0.42);
   color: #fca5a5;
+}
+.dir-icon-badge.warn {
+  background: linear-gradient(145deg, rgba(146, 64, 14, 0.32), rgba(15, 23, 42, 0.94));
+  border-color: rgba(251, 191, 36, 0.38);
+  color: #fbbf24;
 }
 
 .modal-footer-pill {
