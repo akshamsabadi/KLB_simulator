@@ -26,7 +26,8 @@ window.KLB = window.KLB || {};
   }
 
   function clamp(v, lo, hi) {
-    return Math.max(lo, Math.min(hi, v));
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : lo;
   }
 
   function playSfxSafe(name) {
@@ -367,8 +368,8 @@ window.KLB = window.KLB || {};
       const padB = compact ? 24 : 32;
       const plotTop = compact ? 30 : 42;
       const baseY = h - padB;
-      const plotW = w - padL - padR;
-      const plotH = baseY - plotTop;
+      const plotW = Math.max(1, w - padL - padR);
+      const plotH = Math.max(1, baseY - plotTop);
       const wlMin = 320, wlMax = 520;
       const wlToX = wl => padL + ((wl - wlMin) / (wlMax - wlMin)) * plotW;
 
@@ -773,7 +774,7 @@ window.KLB = window.KLB || {};
       fab_48: isMultiFab ? ['Ladder', 'FabHER2', 'FabCD3', 'FcCD20'] : ['Ladder', 'Ctrl IgG', 'Pepsin', 'Fab Prod'],
       vnar_tricine: ['Ladder', 'Input', 'Ctrl NP', 'N3-NP Sup'],
       reducing: ['Ladder', 'Native', 'Red Ctrl', 'Dha mAb'],
-      aunp_ruby: ['Ladder', 'Bare Au', 'PBS Fail', 'BSA-TCO'],
+      aunp_ruby: ['Ladder', 'Bare Au', 'PBS Fail', 'BSA-N3'],
       hsa_monomer: ['Ladder', 'Untreated', 'Cys34 Act', 'HSA Prod'],
       dual_fluor: isHsaFluor ? ['Ladder', 'HSA', 'HSA+SMDC', '5mM GSH'] : ['Ladder', 'mAb', 'Dox4', 'Dox4-Cy5'],
       native_shift: isFcrnShift ? ['Ladder', 'mAb', 'pH 6.0', 'pH 7.4'] : ['Ladder', 'Herceptin', 'mAb+HER2', 'ADC+HER2'],
@@ -962,7 +963,7 @@ window.KLB = window.KLB || {};
         ctx.fillText(fitCanvasText(ctx, compact ? '25 kDa L' : '25 kDa Intact Light (L)', maxRW), rx, mwToY(25) + 3);
       }
     } else if (gelMode === 'aunp_ruby') {
-      // Bare Au & PBS fail aggregate in well top (250 kDa); BSA-TCO runs as crisp ruby-red 529 nm band!
+      // Bare Au & PBS fail aggregate in well top (250 kDa); BSA-N3 runs as crisp ruby-red 529 nm band!
       drawGelBand(1, 240, 0.88, 7.5, '55, 48, 82');
       drawGelBand(2, 235, 0.85, 7.2, '68, 51, 102');
       if (overRed) {
@@ -1191,8 +1192,8 @@ window.KLB = window.KLB || {};
     const padB = compact ? 28 : 36;
     const baseY = h - padB;
     const plotTop = compact ? 30 : 40;
-    const plotH = baseY - plotTop;
-    const plotW = w - padL - padR;
+    const plotH = Math.max(1, baseY - plotTop);
+    const plotW = Math.max(1, Math.floor(w - padL - padR));
 
     // 31P{1H} NMR branch (max_step_2)
     if (is31P) {
@@ -1380,11 +1381,15 @@ window.KLB = window.KLB || {};
     }
 
     // Residual workup/column solvent spikes if hasSolventPeak or quality < 78
+    const dcmPpm = useDmso ? 5.76 : 5.30;
+    const etoacQ = useDmso ? 4.03 : 4.12;
+    const etoacS = useDmso ? 1.99 : 2.04;
+    const etoacT = useDmso ? 1.17 : 1.26;
     if (hasSolvent) {
-      peaks.push({ ppm: 5.30, amp: 0.96, w: 0.009, split: [1], j: 0, isFlaw: true, flawLbl: '5.30 ppm (DCM!)' });
-      peaks.push({ ppm: 4.12, amp: 0.42, w: 0.010, split: [1, 3, 3, 1], j: 0.018, isFlaw: true, flawLbl: '4.12 (EtOAc)' });
-      peaks.push({ ppm: 2.04, amp: 0.68, w: 0.009, split: [1], j: 0, isFlaw: true, flawLbl: '2.04 (EtOAc)' });
-      peaks.push({ ppm: 1.26, amp: 0.46, w: 0.010, split: [1, 2, 1], j: 0.018, isFlaw: true });
+      peaks.push({ ppm: dcmPpm, amp: 0.96, w: 0.009, split: [1], j: 0, isFlaw: true, flawLbl: `${dcmPpm.toFixed(2)} ppm (DCM!)` });
+      peaks.push({ ppm: etoacQ, amp: 0.42, w: 0.010, split: [1, 3, 3, 1], j: 0.018, isFlaw: true, flawLbl: `${etoacQ.toFixed(2)} (EtOAc)` });
+      peaks.push({ ppm: etoacS, amp: 0.68, w: 0.009, split: [1], j: 0, isFlaw: true, flawLbl: `${etoacS.toFixed(2)} (EtOAc)` });
+      peaks.push({ ppm: etoacT, amp: 0.46, w: 0.010, split: [1, 2, 1], j: 0.018, isFlaw: true });
     }
 
     const cleanVals = new Float32Array(plotW + 1);
@@ -1483,7 +1488,7 @@ window.KLB = window.KLB || {};
       }
       ctx.stroke();
 
-      const dcmX = ppmToX(5.30);
+      const dcmX = ppmToX(dcmPpm);
       const dcmTopY = Math.max(plotTop - 4, baseY - 0.92 * plotH * 0.90);
       const boxW = compact ? 132 : 178;
       const boxH = compact ? 18 : 22;
@@ -1496,7 +1501,7 @@ window.KLB = window.KLB || {};
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${compact ? 8.5 : 10.5}px Consolas, monospace`;
       ctx.textAlign = 'left';
-      ctx.fillText(compact ? '5.30 DCM + EtOAc!' : '5.30 ppm DCM + EtOAc!', boxX + 17, dcmTopY + (compact ? 12 : 15));
+      ctx.fillText(compact ? `${dcmPpm.toFixed(2)} DCM + EtOAc!` : `${dcmPpm.toFixed(2)} ppm DCM + EtOAc!`, boxX + 17, dcmTopY + (compact ? 12 : 15));
     }
 
     // Reference solvent tag (CDCl3 7.26 / DMSO-d6 2.50)
@@ -1585,8 +1590,8 @@ window.KLB = window.KLB || {};
     const padB = compact ? 28 : 36;
     const plotTop = compact ? 34 : 46;
     const baseY = h - padB;
-    const plotW = w - padL - padR;
-    const plotH = baseY - plotTop;
+    const plotW = Math.max(1, Math.floor(w - padL - padR));
+    const plotH = Math.max(1, baseY - plotTop);
 
     const mToX = m => padL + ((m - mMin) / (mMax - mMin)) * plotW;
     const xToM = px => mMin + ((px - padL) / plotW) * (mMax - mMin);
@@ -1614,36 +1619,51 @@ window.KLB = window.KLB || {};
       }
     });
 
+    const isHsaMaleimide = isProtein && /hydrolysed\s*hsa|hsa-?maleimide|ring-?open|\+18\s*da|closed-?ring/i.test(lcmsMeta);
     const widthDa = isProtein ? 6.5 : 0.35;
     const msPeaks = [
       { m: centerMass, amp: 1.0, w: widthDa, isFlaw: false }
     ];
 
     if (isProtein) {
-      msPeaks.push(
-        { m: centerMass + 18, amp: 0.08, w: widthDa * 0.85, isFlaw: false },
-        { m: centerMass - 148, amp: hasAdduct ? 0.22 : 0.05, w: widthDa, isFlaw: hasAdduct }
-      );
-      if (/47,964|4:1/.test(rawPeakStr) && massMatches.length > 1) {
-        msPeaks.push({ m: parseFloat(massMatches[1][1]), amp: 0.25, w: widthDa, isFlaw: false });
-      }
-      if (hasAdduct) {
-        msPeaks.push({ m: centerMass + 69, amp: 0.56, w: widthDa * 0.9, isFlaw: true });
-        for (let k = 1; k <= 5; k++) {
-          msPeaks.push({
-            m: centerMass + 44 * k,
-            amp: 0.44 * Math.pow(0.84, k - 1),
-            w: widthDa * 0.72,
-            isFlaw: true
-          });
+      if (isHsaMaleimide) {
+        // Archie's N-aryl maleimide HSA Cys34 (+18 Da succinamic acid ring-open product vs -18 Da closed-ring thiol-maleimide)
+        msPeaks.push(
+          { m: centerMass - 18, amp: hasAdduct ? 0.62 : 0.06, w: widthDa * 0.85, isFlaw: hasAdduct }
+        );
+        if (hasAdduct) {
+          msPeaks.push(
+            { m: centerMass - 155, amp: 0.38, w: widthDa, isFlaw: true },
+            { m: centerMass + 165, amp: 0.30, w: widthDa, isFlaw: true }
+          );
+        }
+      } else {
+        msPeaks.push(
+          { m: centerMass + 18, amp: 0.08, w: widthDa * 0.85, isFlaw: false },
+          { m: centerMass - 148, amp: hasAdduct ? 0.22 : 0.05, w: widthDa, isFlaw: hasAdduct }
+        );
+        if (/47,964|4:1/.test(rawPeakStr) && massMatches.length > 1) {
+          msPeaks.push({ m: parseFloat(massMatches[1][1]), amp: 0.25, w: widthDa, isFlaw: false });
+        }
+        if (hasAdduct) {
+          msPeaks.push({ m: centerMass + 69, amp: 0.56, w: widthDa * 0.9, isFlaw: true });
+          for (let k = 1; k <= 5; k++) {
+            msPeaks.push({
+              m: centerMass + 44 * k,
+              amp: 0.44 * Math.pow(0.84, k - 1),
+              w: widthDa * 0.72,
+              isFlaw: true
+            });
+          }
         }
       }
     } else {
       // Clean small-molecule isotopic cluster (Br2 1:2:1, BrCl, Cl 3:1, or standard 13C M+1/M+2)
       if (/1:2:1|br2/i.test(lcmsMeta)) {
+        msPeaks[0].amp = 0.51;
         msPeaks.push(
-          { m: centerMass + 2.0, amp: 0.98, w: widthDa, isFlaw: false },
-          { m: centerMass + 4.0, amp: 0.52, w: widthDa, isFlaw: false }
+          { m: centerMass + 2.0, amp: 1.00, w: widthDa, isFlaw: false },
+          { m: centerMass + 4.0, amp: 0.49, w: widthDa, isFlaw: false }
         );
       } else if (/79br35cl|81br35cl/i.test(lcmsMeta)) {
         msPeaks.push(
@@ -1718,7 +1738,15 @@ window.KLB = window.KLB || {};
 
       ctx.font = `bold ${compact ? 8 : 10.5}px Consolas, monospace`;
       ctx.textAlign = 'left';
-      if (isProtein) {
+      if (isHsaMaleimide) {
+        const closedX = mToX(centerMass - 18);
+        const closedY = baseY - 0.62 * plotH * 0.86;
+        const closedTxt = compact ? '-18 Da Closed!' : '-18 Da Closed-Ring (Thiol Loss Risk)!';
+        const closedDrawX = clamp(closedX - (compact ? 64 : 165), padL + 14, w - padR - (compact ? 70 : 185));
+        drawVectorWarning(ctx, closedDrawX - 8, closedY - 9, compact ? 3.2 : 4.1, '#f87171', '#090e1a');
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText(fitCanvasText(ctx, closedTxt, w - padR - closedDrawX), closedDrawX, closedY - 6);
+      } else if (isProtein) {
         const addX = mToX(centerMass + 69);
         const addY = baseY - 0.56 * plotH * 0.86;
         const addTxt = compact ? '+69 Da Adduct!' : '+69 Da Adduct!';
@@ -1790,6 +1818,7 @@ window.KLB = window.KLB || {};
   // =========================================================================
   (() => {
     let activeCleanup = null;
+    let activeAbort = null;
     const mgSpriteCache = new Map();
 
     function getMgSprite(charId) {
@@ -1905,7 +1934,7 @@ window.KLB = window.KLB || {};
         </header>
 
         <section style="background:#070b14;border:1px solid #334155;border-radius:10px;padding:8px;position:relative;display:flex;justify-content:center;box-shadow:0 8px 24px rgba(2,6,23,0.6), inset 0 1px 0 rgba(148,163,184,0.08);">
-          <canvas id="mg-canvas" width="680" height="310" style="width:100%;max-width:680px;height:auto;border-radius:6px;cursor:crosshair;"></canvas>
+          <canvas id="mg-canvas" width="680" height="310" style="width:100%;max-width:680px;height:auto;border-radius:6px;cursor:crosshair;touch-action:none;"></canvas>
           <div id="mg-finish-banner" style="display:none;position:absolute;inset:12px;background:rgba(9,14,26,0.90);border:1px solid #4b6394;border-radius:8px;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;cursor:pointer;box-shadow:0 16px 36px rgba(2,6,23,0.78), inset 0 1px 0 rgba(148,163,184,0.12);">
             <h3 id="mg-finish-title" style="margin:0;display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:600;color:#86efac;"></h3>
             <div id="mg-finish-sub" style="font-size:13px;color:#e2e8f0;max-width:480px;"></div>
@@ -1921,6 +1950,7 @@ window.KLB = window.KLB || {};
     `;
 
       const canvas = mountEl.querySelector('#mg-canvas');
+      if (canvas && canvas.style) canvas.style.touchAction = 'none';
       const W = 680;
       const H = 310;
       const { ctx } = setupHiDpiCanvas(canvas, W, H);
@@ -1955,6 +1985,7 @@ window.KLB = window.KLB || {};
       let rafId = null;
       let autoCloseTimer = null;
       let finalPayload = null;
+      let activePointerId = null;
 
       function isCanvasDetached() {
         if (startedConnected && canvas.isConnected === false) return true;
@@ -1975,18 +2006,23 @@ window.KLB = window.KLB || {};
       }
 
       function abortAndExit() {
-        if (closed) return;
+        if (closed) return { committed: false, aborted: false };
         if (finished && finalPayload) {
           finalizeAndExit();
-          return;
+          return { committed: true, aborted: false };
         }
         cleanupListeners();
         if (onFinish) onFinish({ score: 0, aborted: true });
+        return { committed: false, aborted: true };
       }
 
       function onKeyDown(e) {
         if (closed) return;
-        if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        if (isCanvasDetached()) {
+          cleanupListeners();
+          return;
+        }
+        if (['Space', 'Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
           e.preventDefault();
         }
         if (finished) {
@@ -2015,41 +2051,67 @@ window.KLB = window.KLB || {};
 
       function onKeyUp(e) {
         if (closed) return;
+        if (isCanvasDetached()) {
+          cleanupListeners();
+          return;
+        }
         input.keys.delete(e.code);
       }
 
-      function onMouseDown(e) {
-        if (closed || e.button !== 0) return;
+      function onPointerDown(e) {
+        if (closed) return;
+        if (isCanvasDetached()) {
+          cleanupListeners();
+          return;
+        }
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
         if (finished) {
           if (performance.now() - finishedAt >= 450) finalizeAndExit();
           return;
         }
-        updatePointerCoords(e, false);
+        activePointerId = e.pointerId !== undefined ? e.pointerId : null;
+        if (typeof canvas.setPointerCapture === 'function' && e.pointerId !== undefined) {
+          try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        updatePointerCoords(e, Boolean(e.pointerType && e.pointerType !== 'mouse'));
         input.mouseDown = true;
         input.justPressedAction = true;
         input.justClickedOnCanvas = true;
       }
 
-      function onMouseMove(e) {
+      function onPointerMove(e) {
         if (closed) return;
+        if (isCanvasDetached()) {
+          cleanupListeners();
+          return;
+        }
+        if (activePointerId !== null && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
         updatePointerCoords(e, true);
       }
 
-      function onMouseUp() {
+      function onPointerUp(e) {
         if (closed) return;
+        if (isCanvasDetached()) {
+          cleanupListeners();
+          return;
+        }
+        if (activePointerId !== null && e && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
+        activePointerId = null;
         input.mouseDown = false;
       }
 
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('keyup', onKeyUp);
-      canvas.addEventListener('mousedown', onMouseDown);
-      canvas.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      canvas.addEventListener('pointerdown', onPointerDown);
+      canvas.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
       if (closeBtn) closeBtn.onclick = abortAndExit;
 
       function cleanupListeners() {
         if (closed) return;
         closed = true;
+        activePointerId = null;
         if (rafId !== null) {
           if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(rafId);
           rafId = null;
@@ -2060,9 +2122,10 @@ window.KLB = window.KLB || {};
         }
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);
-        canvas.removeEventListener('mousedown', onMouseDown);
-        canvas.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
+        canvas.removeEventListener('pointerdown', onPointerDown);
+        canvas.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
         if (closeBtn) closeBtn.onclick = null;
         if (finishBtn) finishBtn.onclick = null;
         if (finishBanner) finishBanner.onclick = null;
@@ -2072,12 +2135,20 @@ window.KLB = window.KLB || {};
         if (activeCleanup === cleanupListeners) {
           activeCleanup = null;
         }
+        if (activeAbort === abortAndExit) {
+          activeAbort = null;
+        }
       }
 
       activeCleanup = cleanupListeners;
+      activeAbort = abortAndExit;
 
       function finalizeAndExit() {
         if (closed) return;
+        if (isCanvasDetached()) {
+          cleanupListeners();
+          return;
+        }
         cleanupListeners();
         if (onFinish) {
           onFinish(finalPayload || { score: 80, summary: 'Bench protocol complete.' });
@@ -2165,12 +2236,18 @@ window.KLB = window.KLB || {};
     }
 
     function abortActive() {
+      if (typeof activeAbort === 'function') {
+        const fn = activeAbort;
+        activeAbort = null;
+        const res = fn();
+        if (res && typeof res === 'object') return res;
+      }
       if (typeof activeCleanup === 'function') {
         const fn = activeCleanup;
         activeCleanup = null;
         fn();
       }
-      return { aborted: true };
+      return { committed: false, aborted: true };
     }
 
   function drawWrappedCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
@@ -4068,14 +4145,14 @@ window.KLB = window.KLB || {};
   function openDeckModal(mountEl, gameState, onSaveDeck) {
     if (!mountEl || !gameState) return;
 
-    const labBook = Array.isArray(gameState.labBook) ? gameState.labBook : [];
+    const labBook = (Array.isArray(gameState.labBook) ? gameState.labBook : []).filter(Boolean);
     const cur = gameState.slideDeck || {};
 
     // Pick smart distinct defaults from labBook if not yet chosen
-    let fig1Id = labBook.some(f => f.id === cur.fig1Id) ? cur.fig1Id : (labBook[0]?.id || null);
-    let fig2Id = labBook.some(f => f.id === cur.fig2Id && f.id !== fig1Id)
+    let fig1Id = labBook.some(f => f && f.id === cur.fig1Id) ? cur.fig1Id : (labBook[0]?.id || null);
+    let fig2Id = labBook.some(f => f && f.id === cur.fig2Id && f.id !== fig1Id)
       ? cur.fig2Id
-      : (labBook.find(f => f.id !== fig1Id)?.id || labBook[0]?.id || null);
+      : (labBook.find(f => f && f.id !== fig1Id)?.id || labBook[0]?.id || null);
 
     const draft = {
       framing: cur.framing || 'mechanistic',
@@ -4100,8 +4177,19 @@ window.KLB = window.KLB || {};
     const labCondPct = Number.isFinite(labCond) ? clamp(Math.round(labCond), 0, 100) : 85;
 
     function renderModalUI() {
-      const fig1 = labBook.find(f => f.id === draft.fig1Id) || null;
-      const fig2 = labBook.find(f => f.id === draft.fig2Id) || null;
+      const doc = mountEl.ownerDocument || (typeof document !== 'undefined' ? document : null);
+      const activeEl = doc ? doc.activeElement : null;
+      let focusTarget = null;
+      if (activeEl && typeof mountEl.contains === 'function' && mountEl.contains(activeEl)) {
+        if (activeEl.id) {
+          focusTarget = { type: 'id', id: activeEl.id };
+        } else if (activeEl.name && activeEl.value !== undefined) {
+          focusTarget = { type: 'nameVal', name: activeEl.name, value: activeEl.value };
+        }
+      }
+
+      const fig1 = labBook.find(f => f && f.id === draft.fig1Id) || null;
+      const fig2 = labBook.find(f => f && f.id === draft.fig2Id) || null;
       const distinctPair = Boolean(fig1 && fig2 && fig1.id !== fig2.id);
       const anyFlaw = hasSpectrumFlaw(fig1) || hasSpectrumFlaw(fig2);
 
@@ -4287,8 +4375,8 @@ window.KLB = window.KLB || {};
                 draft.honestDisclosure,
                 'Disclose Flaws Rigorously',
                 anyFlaw
-                  ? `Flag flaws honestly (+0.40 Rigor${isRichard ? ', +0.25 Richard perk' : ''} partial credit).`
-                  : 'Add cautious caveats/controls (+0.60 Rigor).',
+                  ? `Flag flaws honestly (+0.40 Rigour${isRichard ? ', +0.25 Richard perk' : ''} partial credit).`
+                  : 'Add cautious caveats/controls (+0.65 Rigour).',
                 'good'
               )}
               ${radioOpt(
@@ -4297,8 +4385,8 @@ window.KLB = window.KLB || {};
                 !draft.honestDisclosure,
                 'Present As Clean',
                 anyFlaw
-                  ? `<span class="klb-tag danger">${iconSvg('alert-triangle', 12)}<span>Risk: visible flaws (-1.40 Rigor, -6 Patience).</span></span>`
-                  : `<span class="klb-tag good">${iconSvg('check-circle', 12)}<span>Clean polish (+0.65 Rigor).</span></span>`,
+                  ? `<span class="klb-tag danger">${iconSvg('alert-triangle', 12)}<span>Risk: visible flaws (${isRichard ? '-1.75' : '-1.40'} Rigour, -6 Patience).</span></span>`
+                  : `<span class="klb-tag good">${iconSvg('check-circle', 12)}<span>Clean polish (+0.60 Rigour).</span></span>`,
                 anyFlaw ? 'warn' : 'good'
               )}
             </section>
@@ -4396,6 +4484,19 @@ window.KLB = window.KLB || {};
         gameState.slideDeck = saved;
         if (onSaveDeck) onSaveDeck(saved);
       };
+
+      if (focusTarget) {
+        let nextFocus = null;
+        if (focusTarget.type === 'id') {
+          nextFocus = mountEl.querySelector(`#${focusTarget.id}`);
+        } else if (focusTarget.type === 'nameVal') {
+          const candidates = mountEl.querySelectorAll(`input[name="${focusTarget.name}"]`);
+          nextFocus = Array.from(candidates).find(el => el.value === focusTarget.value) || null;
+        }
+        if (nextFocus && typeof nextFocus.focus === 'function') {
+          nextFocus.focus();
+        }
+      }
     }
 
     renderModalUI();
@@ -4419,13 +4520,13 @@ window.KLB = window.KLB || {};
     const patienceLabel = isArchie ? 'Jamie Patience' : 'Vijay Patience';
     const totalSteps = window.KLB.CAMPAIGNS?.[playerId]?.steps?.length || 5;
     const doneSteps = Array.isArray(state.completedSteps) ? state.completedSteps.length : 0;
-    const labBook = Array.isArray(state.labBook) ? state.labBook : [];
+    const labBook = (Array.isArray(state.labBook) ? state.labBook : []).filter(Boolean);
     const deck = state.slideDeck || { ready: false, framing: 'mechanistic', fig1Id: null, fig2Id: null, honestDisclosure: true };
 
     // Resolve Slide 2 & Slide 3 figures (if player forgot to open SlideBuilder, inspect what's in labBook at a hygiene penalty)
-    const fig1 = labBook.find(f => f.id === deck.fig1Id) || (deck.ready ? null : labBook[0]) || null;
-    const fig2 = labBook.find(f => f.id === deck.fig2Id && f.id !== fig1?.id)
-      || (deck.ready ? labBook.find(f => f.id === deck.fig2Id) : labBook.find(f => f.id !== fig1?.id))
+    const fig1 = labBook.find(f => f && f.id === deck.fig1Id) || (deck.ready ? null : labBook[0]) || null;
+    const fig2 = labBook.find(f => f && f.id === deck.fig2Id && f.id !== fig1?.id)
+      || (deck.ready ? labBook.find(f => f && f.id === deck.fig2Id) : labBook.find(f => f && f.id !== fig1?.id))
       || null;
     const distinctFigures = Boolean(fig1 && fig2 && fig1.id !== fig2.id);
 
@@ -4435,7 +4536,7 @@ window.KLB = window.KLB || {};
       if (f && !slideFigs.some(u => u.id === f.id)) slideFigs.push(f);
     }
     const slideIdSet = new Set(slideFigs.map(f => f.id));
-    const otherFigs = labBook.filter(f => !slideIdSet.has(f.id));
+    const otherFigs = labBook.filter(f => f && !slideIdSet.has(f.id));
 
     const meanQualityOf = arr => arr.length ? arr.reduce((s, f) => s + getQuality(f, 0), 0) / arr.length : 0;
     const meanYieldOf = arr => arr.length
@@ -4482,7 +4583,7 @@ window.KLB = window.KLB || {};
     const yieldReason = `${doneSteps}/${isFinalPhase ? totalSteps : stepDenom} ${isFinalPhase ? 'steps' : 'morning target steps'}, ${Math.round(avgYieldRaw)}% curated yield${framingNote}`;
 
     // 2) HOMOGENEITY & SWEET-SPOT PURITY SCORE (0.0 - 2.0)
-    const overcookedCount = (state.activeReactions || []).filter(r => r.status === 'overcooked').length;
+    const overcookedCount = (Array.isArray(state.activeReactions) ? state.activeReactions : []).filter(r => r && r.status === 'overcooked').length;
     const homogeneityRaw = (avgQualityRaw / 100) * 2.0 - overcookedCount * 0.2;
     const homogeneityScore = Math.round(clamp(homogeneityRaw, 0, 2.0) * 10) / 10;
     const homogeneityReason = `${Math.round(avgQualityRaw)}% curated quality (70% slides / 30% book)${overcookedCount > 0 ? `, -${(overcookedCount * 0.2).toFixed(1)} (${overcookedCount} overcooked)` : ''}`;
@@ -4525,10 +4626,12 @@ window.KLB = window.KLB || {};
         richardPerkTriggered = isRich;
         rigorReason = `${pairDesc}; flaw disclosed (+${isRich ? '0.65 Richard perk' : '0.40'} recovery)`;
       } else {
-        rigorRaw -= 1.40;
+        const isRich = playerId === 'richard_spears';
+        const hidePenalty = isRich ? 1.75 : 1.40;
+        rigorRaw -= hidePenalty;
         const slideNum = slideFlawedFig.id === fig1?.id ? 2 : 3;
         const figType = figTypeOf(slideFlawedFig);
-        rigorReason = `Slide ${slideNum} flaw hidden (-1.40 ${supShort} callout)`;
+        rigorReason = `Slide ${slideNum} flaw hidden (-${hidePenalty.toFixed(2)} ${supShort} callout${isRich ? ', Richard flaw' : ''})`;
         if (isArchie) {
           if (figType === 'nmr' || slideFlawedFig.hasSolventPeak) {
             vijayCalloutLine = `Hold on, ${playerMeta.shortName} — look closely at Slide ${slideNum}. There is an unflagged 5.30 ppm DCM peak sitting beside your product signals that needed noting upfront.`;
@@ -4560,11 +4663,11 @@ window.KLB = window.KLB || {};
         }
       }
     } else if (distinctFigures) {
-      const bonus = !deck.honestDisclosure ? 0.65 : 0.60;
+      const bonus = deck.honestDisclosure ? 0.65 : 0.60;
       rigorRaw += bonus;
       rigorReason = `${pairDesc}; spotless data (+${bonus.toFixed(2)})`;
     } else if (fig1 || fig2) {
-      const bonus = !deck.honestDisclosure ? 0.45 : 0.40;
+      const bonus = deck.honestDisclosure ? 0.45 : 0.40;
       rigorRaw += bonus;
       rigorReason = `${pairDesc}; clean (+${bonus.toFixed(2)})`;
     }
@@ -4646,10 +4749,7 @@ window.KLB = window.KLB || {};
     else if (vijayPatience < 55) citizenshipRaw -= (vijayPatience < 30 ? 0.20 : 0.12);
     if (state.prep?.thiol_dirty) citizenshipRaw -= 0.25;
     if (state.abilFineOwed) citizenshipRaw -= 0.25;
-    // Fold Faiza's +0.5 PI Charm perk cleanly into citizenshipScore (capped at 1.0)
-    if (playerId === 'faiza_javaid') citizenshipRaw += 0.50;
     const citizenshipScore = Math.round(clamp(citizenshipRaw, 0, 1.0) * 10) / 10;
-    const citizenshipReason = `Lab ${Math.round(safeLabCond)}%, ${Number(state.favours) || 0} favour(s), ${patienceLabel} ${Math.round(vijayPatience)}${playerId === 'faiza_javaid' ? ', +0.5 Faiza PI charm' : ''}${state.prep?.thiol_dirty ? ', thiol penalty' : ''}${state.abilFineOwed ? ', NMR fine' : ''}`;
 
     // Presented Group Meeting Quality & Yield -> Supervisor Patience Delta
     const presentedFigs = slideFigs.length > 0 ? slideFigs : labBook.slice();
@@ -4679,13 +4779,33 @@ window.KLB = window.KLB || {};
       patienceDelta -= 6;
     }
 
-    // Total ALWAYS equals exact sum of the 6 rounded breakdown cards
-    const total = Math.round(clamp(
-      yieldScore + homogeneityScore + rigorScore + manuscriptScore + hygieneScore + citizenshipScore,
+    // Hard-mutator prestige bonus (+0.40) and Faiza PI Charm rescue (+0.50 on tight 5.5-7.0 scores)
+    const muts = state.mutators || {};
+    const hardMutatorLabels = [];
+    if (muts.strict_coshh) hardMutatorLabels.push('Strict COSHH');
+    if (muts.lcms_chaos) hardMutatorLabels.push('50% LC-MS Chaos');
+    if (muts.eternal_heatwave) hardMutatorLabels.push('30 °C Heatwave');
+    const hasHardMutator = hardMutatorLabels.length > 0;
+    const mutatorBonus = hasHardMutator ? 0.40 : 0;
+
+    let total = Math.round(clamp(
+      yieldScore + homogeneityScore + rigorScore + manuscriptScore + hygieneScore + citizenshipScore + mutatorBonus,
       0,
       10
     ) * 10) / 10;
-    const passed = total >= 6.0;
+
+    let faizaRescueApplied = false;
+    const preRescueTotal = total;
+    if (playerId === 'faiza_javaid' && total >= 5.5 && total < 7.0) {
+      total = Math.round(clamp(total + 0.50, 0, 10) * 10) / 10;
+      faizaRescueApplied = true;
+    }
+
+    const weekNum = Math.max(1, Number(state.weekNum) || 1);
+    const passThreshold = Math.min(7.5, 6.0 + 0.3 * Math.max(0, weekNum - 1));
+    const passed = total >= passThreshold;
+
+    const citizenshipReason = `Lab ${Math.round(safeLabCond)}%, ${Number(state.favours) || 0} favour(s), ${patienceLabel} ${Math.round(vijayPatience)}${faizaRescueApplied ? ', +0.5 Faiza PI charm rescue' : ''}${hasHardMutator ? `, +0.4 hard-mutator (${hardMutatorLabels.join(', ')})` : ''}${state.prep?.thiol_dirty ? ', thiol penalty' : ''}${state.abilFineOwed ? ', NMR fine' : ''}`;
 
     // Assemble Supervisor's multi-line solo verdict (no outer quotation marks; main.js adds smart quotes)
     const vijayVerdictLines = [];
@@ -4726,7 +4846,7 @@ window.KLB = window.KLB || {};
         vijayVerdictLines.push(
           richardPerkTriggered
             ? `Exemplary scientific honesty flagging the ${describeFigureFlaw(slideFlawedFig)} upfront on Slide 4, Richard — that's how we keep Chudasama manuscripts watertight.`
-            : `Good scientific rigor disclosing the ${describeFigureFlaw(slideFlawedFig)} openly on Slide 4 with a clear re-purification plan.`
+            : `Good scientific rigour disclosing the ${describeFigureFlaw(slideFlawedFig)} openly on Slide 4 with a clear re-purification plan.`
         );
       } else if (!slideFlawedFig && distinctFigures) {
         vijayVerdictLines.push(`Crisp orthogonal proof across your ${figTypeOf(fig1).toUpperCase()} and ${figTypeOf(fig2).toUpperCase()} slides — baseline-resolved and publication-ready.`);
@@ -4874,17 +4994,25 @@ window.KLB = window.KLB || {};
       );
     }
 
+    if (hasHardMutator) {
+      vijayVerdictLines.push(`Hard-mutator prestige bonus (+0.40): operating under ${hardMutatorLabels.join(' + ')} earns +0.40 overall audit prestige.`);
+    }
+    if (faizaRescueApplied) {
+      vijayVerdictLines.push(`Faiza PI charm rescue (+0.50): ${supShort} softens your tight ${preRescueTotal.toFixed(1)} audit score up to ${total.toFixed(1)}/10.`);
+    }
+
+    const weekTargetNote = weekNum > 1 ? ` (Week ${weekNum} threshold ${passThreshold.toFixed(1)})` : '';
     if (isArchie) {
       vijayVerdictLines.push(
         passed
-          ? `Overall score: ${total.toFixed(1)} out of 10. Proper tidy week in Baker bay, ${playerMeta.shortName} — grab a flat white or a pint at Gordon's.`
-          : `Overall score: ${total.toFixed(1)} out of 10. Reset over the weekend, balance those rotors to 0.01 g, and we will nail the controls next week.`
+          ? `Overall score: ${total.toFixed(1)} out of 10${weekTargetNote}. Proper tidy week in Baker bay, ${playerMeta.shortName} — grab a flat white or a pint at Gordon's.`
+          : `Overall score: ${total.toFixed(1)} out of 10${weekTargetNote}. Reset over the weekend, balance those rotors to 0.01 g, and we will nail the controls next week.`
       );
     } else {
       vijayVerdictLines.push(
         passed
-          ? `Overall score: ${total.toFixed(1)} out of 10. Good week's graft — go enjoy a coffee or pint at Gordon's.`
-          : `Overall score: ${total.toFixed(1)} out of 10. Regroup, dry your glassware, and tighten the controls next week.`
+          ? `Overall score: ${total.toFixed(1)} out of 10${weekTargetNote}. Good week's graft — go enjoy a coffee or pint at Gordon's.`
+          : `Overall score: ${total.toFixed(1)} out of 10${weekTargetNote}. Regroup, dry your glassware, and tighten the controls next week.`
       );
     }
 
@@ -4911,7 +5039,7 @@ window.KLB = window.KLB || {};
     } else if (richardPerkTriggered) {
       chudReactions.push({
         senderId: 'daniel_richards',
-        text: `Classic Richard turning an impurity disclosure table into a Rigor masterclass.`
+        text: `Classic Richard turning an impurity disclosure table into a Rigour masterclass.`
       });
     }
 
@@ -5046,6 +5174,10 @@ window.KLB = window.KLB || {};
     return {
       total,
       passed,
+      passThreshold,
+      mutatorBonus,
+      faizaRescueApplied,
+      faizaRescueBonus: faizaRescueApplied ? 0.50 : 0,
       phase,
       onTime,
       patienceDelta,

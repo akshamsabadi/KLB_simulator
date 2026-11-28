@@ -140,7 +140,47 @@
   }
 
   function clamp(v, lo, hi) {
+    if (lo > hi) {
+      const tmp = lo;
+      lo = hi;
+      hi = tmp;
+    }
+    if (v !== v || typeof v !== 'number') {
+      const n = Number(v);
+      if (n !== n) return Number.isFinite(lo) ? lo : 0;
+      return n < lo ? lo : n > hi ? hi : n;
+    }
     return v < lo ? lo : v > hi ? hi : v;
+  }
+
+  const TEXT_WIDTH_CACHE_CAP = 512;
+  const textWidthCacheByCtx = typeof WeakMap === 'function' ? new WeakMap() : null;
+  const fallbackTextWidthCache = new Map();
+
+  function measureTextCached(ctx, text) {
+    const str = text == null ? '' : String(text);
+    if (!str) return 0;
+    let cache = fallbackTextWidthCache;
+    if (textWidthCacheByCtx && ctx && typeof ctx === 'object') {
+      cache = textWidthCacheByCtx.get(ctx);
+      if (!cache) {
+        cache = new Map();
+        textWidthCacheByCtx.set(ctx, cache);
+      }
+    }
+    const fontKey = (ctx && ctx.font) ? ctx.font : '';
+    const key = fontKey + '\x00' + str;
+    const cached = cache.get(key);
+    if (cached !== undefined) return cached;
+    const w = ctx.measureText(str).width;
+    if (Number.isFinite(w)) {
+      if (cache.size >= TEXT_WIDTH_CACHE_CAP) {
+        const oldestKey = cache.keys().next().value;
+        cache.delete(oldestKey);
+      }
+      cache.set(key, w);
+    }
+    return w;
   }
 
   function stripBubbleEmojis(str) {
@@ -153,15 +193,15 @@
   function fitLabelNoEllipsis(ctx, str, maxWidth) {
     const clean = stripBubbleEmojis(str);
     if (!clean) return '';
-    if (ctx.measureText(clean).width <= maxWidth) return clean;
+    if (measureTextCached(ctx, clean) <= maxWidth) return clean;
     const words = clean.split(' ');
-    while (words.length > 1 && ctx.measureText(words.join(' ')).width > maxWidth) {
+    while (words.length > 1 && measureTextCached(ctx, words.join(' ')) > maxWidth) {
       words.pop();
     }
     const wordFit = words.join(' ');
-    if (ctx.measureText(wordFit).width <= maxWidth) return wordFit;
+    if (measureTextCached(ctx, wordFit) <= maxWidth) return wordFit;
     const chars = Array.from(wordFit);
-    while (chars.length > 1 && ctx.measureText(chars.join('')).width > maxWidth) {
+    while (chars.length > 1 && measureTextCached(ctx, chars.join('')) > maxWidth) {
       chars.pop();
     }
     return chars.join('');
@@ -258,6 +298,40 @@
     ctx.restore();
   }
 
+  function drawVectorDocPenIcon(ctx, cx, cy, accentCol) {
+    ctx.save();
+    const docX = cx - 4;
+    const docY = cy - 4.5;
+    const docW = 6.5;
+    const docH = 8.5;
+    // Compact slate/blue document sheet
+    ctx.fillStyle = 'rgba(203, 213, 225, 0.92)';
+    ctx.strokeStyle = accentCol || '#60a5fa';
+    ctx.lineWidth = 0.95;
+    ctx.beginPath();
+    ctx.rect(docX, docY, docW, docH);
+    ctx.fill();
+    ctx.stroke();
+
+    // Crisp slate ink lines
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(docX + 1.3, docY + 2.1, 3.8, 0.95);
+    ctx.fillRect(docX + 1.3, docY + 4.0, 3.2, 0.95);
+    ctx.fillRect(docX + 1.3, docY + 5.9, 2.3, 0.95);
+
+    // Compact diagonal blue/slate pen nib
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx + 4.3, cy - 1.4);
+    ctx.lineTo(cx + 1.1, cy + 3.4);
+    ctx.stroke();
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(cx + 0.4, cy + 3.0, 1.2, 1.2);
+    ctx.restore();
+  }
+
   function roundRectPath(ctx, x, y, w, h, r) {
     const rr = Math.min(r, w * 0.5, h * 0.5);
     ctx.beginPath();
@@ -345,7 +419,7 @@
     const cfg = opts || {};
     ctx.save();
     ctx.font = cfg.font || 'bold 8px monospace';
-    const tw = ctx.measureText(label).width;
+    const tw = measureTextCached(ctx, label);
     const pw = Math.ceil(tw + 8);
     const ph = 11;
     const bx = Math.round(cx - pw * 0.5);
@@ -737,10 +811,14 @@
   }
 
   function getCachedFloorCanvas(room, dpr) {
-    const cacheScale = Math.min(2.5, Math.max(1, Math.ceil((dpr || 1) * 1.25)));
+    const cacheScale = Math.min(2, Math.max(1, Math.ceil((dpr || 1) * 1.25)));
     const sig = roomSignature(room) + '@' + cacheScale;
     const cached = roomFloorCache.get(room.id);
-    if (cached && cached.sig === sig) return cached;
+    if (cached && cached.sig === sig) {
+      roomFloorCache.delete(room.id);
+      roomFloorCache.set(room.id, cached);
+      return cached;
+    }
 
     const bounds = computeRoomBounds(room);
     const originX = bounds.pxMinX - 8;
@@ -846,6 +924,21 @@
     }
 
     const entry = { sig, canvas: off, bounds, originX, originY, spanW, spanH, cacheScale };
+    const prevEntry = roomFloorCache.get(room.id);
+    if (prevEntry && prevEntry.canvas) {
+      prevEntry.canvas.width = 0;
+      prevEntry.canvas.height = 0;
+    }
+    roomFloorCache.delete(room.id);
+    while (roomFloorCache.size >= 2) {
+      const oldestKey = roomFloorCache.keys().next().value;
+      const oldest = roomFloorCache.get(oldestKey);
+      if (oldest && oldest.canvas) {
+        oldest.canvas.width = 0;
+        oldest.canvas.height = 0;
+      }
+      roomFloorCache.delete(oldestKey);
+    }
     roomFloorCache.set(room.id, entry);
     return entry;
   }
@@ -5659,7 +5752,7 @@
 
     ctx.save();
     ctx.font = '700 9.5px "Segoe UI", system-ui, -apple-system, sans-serif';
-    const tw = Math.ceil(ctx.measureText(label).width);
+    const tw = Math.ceil(measureTextCached(ctx, label));
     const rawPw = Math.max(28, tw + 12);
     const pw = (rawPw % 2 === 0) ? rawPw : (rawPw + 1);
     const ph = 15;
@@ -5699,20 +5792,31 @@
         return false;
       };
       if (hasOverlap(px, py)) {
-        const dyCandidates = [12, 17, -12, -17, 29, 34, -29, -34, 46, 51];
+        const dxCandidates = [4, -4, 8, -8, 12, -12, 16, -16, 22, -22];
         let resolved = false;
-        for (let k = 0; k < dyCandidates.length; k++) {
-          const candY = Math.round(clamp(origPy + dyCandidates[k], minPy, maxPy));
-          if (!hasOverlap(origPx, candY)) {
-            py = candY;
+        for (let k = 0; k < dxCandidates.length; k++) {
+          const candX = Math.round(clamp(origPx + dxCandidates[k], minPx, maxPx));
+          if (!hasOverlap(candX, origPy)) {
+            px = candX;
             resolved = true;
             break;
           }
         }
         if (!resolved) {
-          const dxCandidates = [Math.round(pw * 0.65), -Math.round(pw * 0.65)];
-          for (let k = 0; k < dxCandidates.length; k++) {
-            const candX = Math.round(clamp(origPx + dxCandidates[k], minPx, maxPx));
+          const dyCandidates = [12, 17, -12, -17, 29, 34, -29, -34, 46, 51];
+          for (let k = 0; k < dyCandidates.length; k++) {
+            const candY = Math.round(clamp(origPy + dyCandidates[k], minPy, maxPy));
+            if (!hasOverlap(origPx, candY)) {
+              py = candY;
+              resolved = true;
+              break;
+            }
+          }
+        }
+        if (!resolved) {
+          const wideDx = [Math.round(pw * 0.65), -Math.round(pw * 0.65)];
+          for (let k = 0; k < wideDx.length; k++) {
+            const candX = Math.round(clamp(origPx + wideDx[k], minPx, maxPx));
             if (!hasOverlap(candX, origPy)) {
               px = candX;
               resolved = true;
@@ -5729,16 +5833,8 @@
       : (meta.isHighlightedNpc ? '#fbbf24' : (meta.accent || 'rgba(148, 163, 184, 0.65)'));
     const lineW = (meta.isPlayer || meta.isHighlightedNpc) ? 1.25 : 1.1;
 
-    ctx.shadowColor = 'rgba(2, 6, 23, 0.5)';
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 1;
+    fillRoundRect(ctx, px, py + 1, pw, ph, 4.5, 'rgba(2, 6, 23, 0.5)', null, 0);
     fillRoundRect(ctx, px, py, pw, ph, 4.5, bgCol, borderCol, lineW);
-
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     ctx.fillStyle = '#f8fafc';
     ctx.textAlign = 'center';
@@ -5773,11 +5869,42 @@
 
     const placedNameRects = Array.isArray(occupiedRectsOut) ? occupiedRectsOut : [];
     const seen = new Set();
+    const metas = [];
     entityMetaMap.forEach(function (meta) {
-      if (!meta || seen.has(meta)) return;
+      if (!meta || seen.has(meta) || meta.showName === false || !meta.label) return;
       seen.add(meta);
-      drawEntityLabel(ctx, meta, bounds, placedNameRects);
+      metas.push(meta);
     });
+
+    // Sort by Y first, then cluster same-row entities (within 12px) left-to-right
+    metas.sort(function (a, b) {
+      if (a.anchorY !== b.anchorY) return a.anchorY - b.anchorY;
+      return a.anchorX - b.anchorX;
+    });
+    const ordered = [];
+    let idx = 0;
+    while (idx < metas.length) {
+      const rowBaseY = metas[idx].anchorY;
+      let end = idx + 1;
+      while (end < metas.length && (metas[end].anchorY - rowBaseY) <= 12) {
+        end++;
+      }
+      if (end - idx > 1) {
+        const rowSlice = metas.slice(idx, end);
+        rowSlice.sort(function (a, b) {
+          if (a.anchorX !== b.anchorX) return a.anchorX - b.anchorX;
+          return a.anchorY - b.anchorY;
+        });
+        for (let r = 0; r < rowSlice.length; r++) ordered.push(rowSlice[r]);
+      } else {
+        ordered.push(metas[idx]);
+      }
+      idx = end;
+    }
+
+    for (let i = 0; i < ordered.length; i++) {
+      drawEntityLabel(ctx, ordered[i], bounds, placedNameRects);
+    }
   }
 
   // ============================================================================
@@ -5891,21 +6018,21 @@
     const pctStr = pctText || '';
     let fontSize = 9;
     ctx.font = 'bold ' + fontSize + 'px system-ui, -apple-system, sans-serif';
-    let leftW = ctx.measureText(cleanLeft).width;
-    let pctW = pctStr ? ctx.measureText(pctStr).width : 0;
+    let leftW = measureTextCached(ctx, cleanLeft);
+    let pctW = pctStr ? measureTextCached(ctx, pctStr) : 0;
     let rowW = leftW + (pctW > 0 ? pctW + 6 : 0);
 
     if (Math.ceil(rowW) + 18 > maxW) {
       fontSize = 8.5;
       ctx.font = 'bold ' + fontSize + 'px system-ui, -apple-system, sans-serif';
-      leftW = ctx.measureText(cleanLeft).width;
-      pctW = pctStr ? ctx.measureText(pctStr).width : 0;
+      leftW = measureTextCached(ctx, cleanLeft);
+      pctW = pctStr ? measureTextCached(ctx, pctStr) : 0;
       rowW = leftW + (pctW > 0 ? pctW + 6 : 0);
     }
     const maxLeftAvail = maxW - 18 - (pctW > 0 ? pctW + 6 : 0);
     if (leftW > maxLeftAvail && maxLeftAvail > 12) {
       cleanLeft = fitLabelNoEllipsis(ctx, cleanLeft, maxLeftAvail);
-      leftW = ctx.measureText(cleanLeft).width;
+      leftW = measureTextCached(ctx, cleanLeft);
       rowW = leftW + (pctW > 0 ? pctW + 6 : 0);
     }
 
@@ -5929,13 +6056,8 @@
       }
     }
 
-    if (cfg.glowCol) {
-      ctx.shadowColor = cfg.glowCol;
-      ctx.shadowBlur = cfg.shadowBlur || 9;
-    }
+    fillRoundRect(ctx, bx, by + 1, finalW, barH, 6, 'rgba(2, 6, 23, 0.5)', null, 0);
     fillRoundRect(ctx, bx, by, finalW, barH, 6, 'rgba(15, 23, 42, 0.94)', cfg.borderCol || '#38bdf8', 1.4);
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
 
     if (occupiedRectsOut) occupiedRectsOut.push({ bx, by, bw: finalW, bh: barH });
 
@@ -6120,13 +6242,78 @@
     }, occupiedRectsOut);
   }
 
+  const NPC_SKIP_BREAK_KINDS = new Set([
+    'breather', 'socialize', 'review_lab_book', 'coffee', 'tea',
+    'gaming', 'lunch', 'packed_lunch', 'smoke_break', 'aoe2_event'
+  ]);
+
+  function isSkippedNpcPersonalBreak(rxn, cleanTitle) {
+    if (!rxn) return false;
+    const k = String(rxn.kind || '').toLowerCase();
+    if (NPC_SKIP_BREAK_KINDS.has(k)) return true;
+    if (k === 'workup' && cleanTitle) {
+      if (/^(taking a breather|reviewing lab book|coffee at gordon|brewing yorkshire tea|3f aoe2|aoe2|chatting with|having lunch|packed lunch|smoke break)/i.test(cleanTitle)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function formatCompactNpcTaskTag(rxn, targetObj, cleanTitle) {
+    const k = String((rxn && rxn.kind) || '').toLowerCase();
+    const stType = String((rxn && (rxn.stationType || rxn.objType)) || (targetObj && targetObj.type) || '').toLowerCase();
+    const title = cleanTitle || '';
+    if (k === 'weekly_report' || /weekly\s*report/i.test(title)) return 'Report';
+    if (k === 'manuscript_draft' || /manuscript/i.test(title)) return 'Manuscript';
+    if (stType === 'biotage' || /biotage|flash\s*column|\bcolumn\b/i.test(title)) return 'Column';
+    if (stType === 'buchi' || /rotavap|b[uü]chi|evap/i.test(title)) return 'Rotavap';
+    if (stType === 'gel_tank' || /\bgel\b|sds-?page/i.test(title)) return 'Gel';
+    if (stType === 'tlc_station' || /\btlc\b/i.test(title)) return 'TLC';
+    if (stType === 'lcms_unit' || /lc-?ms|uplc/i.test(title)) return 'LC-MS';
+    if (stType === 'maldi_unit' || /maldi/i.test(title)) return 'MALDI';
+    if (stType === 'nmr_magnet' || /\bnmr\b/i.test(title)) return 'NMR';
+    if (stType === 'centrifuge' || /centrifug|desalt|vivaspin/i.test(title)) return 'Spin';
+    if (stType === 'heatblock' || /thermomixer|heat\s*block|shaker/i.test(title)) return 'Shaker';
+    if (stType === 'balance_table' || /balanc|weigh/i.test(title)) return 'Balance';
+    if (stType === 'ph_probe' || /\bph\b/i.test(title)) return 'pH';
+    if (stType === 'syringe_pump' || /syringe\s*pump|pump/i.test(title)) return 'Pump';
+    if (stType === 'tcep_bench' || /tcep|rebridg/i.test(title)) return 'TCEP';
+    if (stType === 'drying_oven' || /oven/i.test(title)) return 'Oven';
+    if (stType === 'base_bath' || /bleach|base\s*bath/i.test(title)) return 'Quench';
+    if (stType === 'argon_cyl' || /argon/i.test(title)) return 'Argon';
+    if (stType === 'writeup_desk' || stType === 'pc_terminal' || /write-?up|slides|lit\s*review|data\s*review/i.test(title)) return 'Write-Up';
+    if (stType === 'fumehood') return 'Hood';
+    if (stType === 'lab_bench') return 'Bench';
+    if (stType === 'sink') return 'Sink';
+    if (stType === 'waste_bin') return 'Waste';
+    if (stType === 'chem_cupboard') return 'Reagents';
+    if (stType === 'fridge_4c') return '4C Fridge';
+    if (stType === 'freezer_20c') return '-20C';
+    if (title) return title.split(/\s+/)[0];
+    return 'Active';
+  }
+
   function drawNpcReactionBadgesOverlay(ctx, room, npcReactions, activeReactions, surfaceParentMap, nowSec, occupiedRectsOut) {
     if (!npcReactions) return;
     const list = Array.isArray(npcReactions) ? npcReactions : Object.values(npcReactions);
     if (!list.length) return;
 
-    const objs = room.objects || [];
     const castById = (window.KLB && window.KLB.CAST_BY_ID) ? window.KLB.CAST_BY_ID : {};
+    const renderState = (activeReactions && typeof activeReactions === 'object' && !Array.isArray(activeReactions) &&
+      ('room' in activeReactions || 'roomId' in activeReactions || 'npcs' in activeReactions ||
+       'highlightedNpcId' in activeReactions || 'hoveredNpcId' in activeReactions ||
+       '_activeHoverNpcId' in activeReactions || 'followedNpcId' in activeReactions ||
+       'followNpcId' in activeReactions || 'spectatorFollowId' in activeReactions))
+      ? activeReactions
+      : null;
+
+    const npcById = new Map();
+    if (renderState && renderState.npcs) {
+      const nList = Array.isArray(renderState.npcs) ? renderState.npcs : Object.values(renderState.npcs);
+      for (let i = 0; i < nList.length; i++) {
+        if (nList[i]) npcById.set(nList[i].id || nList[i].charId, nList[i]);
+      }
+    }
 
     const playerRxnObjIds = new Set();
     const pList = getStationJobList(activeReactions);
@@ -6144,6 +6331,9 @@
       if (!rxn) continue;
       const rxnRoom = rxn.roomId || rxn.room;
       if (rxnRoom && rxnRoom !== room.id) continue;
+
+      const cleanTitle = stripBubbleEmojis(rxn.shortLabel || rxn.title || rxn.label || '');
+      if (isSkippedNpcPersonalBreak(rxn, cleanTitle)) continue;
 
       const targetObj = findTargetStationObj(room, rxn);
       if (!targetObj && (typeof rxn.x !== 'number' || typeof rxn.y !== 'number')) continue;
@@ -6167,23 +6357,78 @@
         rxn.ownerName ||
         (ownerId ? ownerId.split('_')[0].replace(/^./, function (c) { return c.toUpperCase(); }) : '')
       );
-      const cleanTitle = stripBubbleEmojis(rxn.shortLabel || rxn.title || rxn.label || '');
-      const rawBadge = (ownerLabel && cleanTitle)
-        ? (ownerLabel + ': ' + cleanTitle)
-        : (ownerLabel || cleanTitle || 'Active Rxn');
+
+      const st = classifyReactionStatus(rxn, targetObj);
+      const isUrgent = (st === 'overcooking' || st === 'sweet_spot' || st === 'ready');
+      const npcEnt = ownerId ? npcById.get(ownerId) : null;
+      const isHighlighted = Boolean(
+        rxn.highlighted || rxn.isHighlighted ||
+        (renderState && (
+          (renderState.highlightedNpcId && ownerId && renderState.highlightedNpcId === ownerId) ||
+          (renderState.highlightedNpc && renderState.highlightedNpc.id === ownerId) ||
+          (targetObj && (renderState.highlightedObjId === targetObj.id ||
+            (renderState.highlightedObj && renderState.highlightedObj.id === targetObj.id)))
+        ))
+      );
+      const isHovered = Boolean(
+        rxn.hovered || rxn.isHovered ||
+        (renderState && (
+          (renderState.hoveredNpcId && ownerId && renderState.hoveredNpcId === ownerId) ||
+          (renderState._activeHoverNpcId && ownerId && renderState._activeHoverNpcId === ownerId) ||
+          (renderState.hoveredNpc && renderState.hoveredNpc.id === ownerId) ||
+          (targetObj && (renderState.hoveredObjId === targetObj.id ||
+            renderState._activeHoverObjId === targetObj.id ||
+            (renderState.hoveredObj && renderState.hoveredObj.id === targetObj.id)))
+        ))
+      );
+      const isFollowed = Boolean(
+        rxn.followed || rxn.isFollowed ||
+        (npcEnt && (npcEnt.followed || npcEnt.isFollowed)) ||
+        (renderState && (
+          (renderState.followedNpcId && ownerId && renderState.followedNpcId === ownerId) ||
+          (renderState.followNpcId && ownerId && renderState.followNpcId === ownerId) ||
+          (renderState.spectatorFollowId && ownerId && renderState.spectatorFollowId === ownerId) ||
+          (renderState.cameraTarget && ownerId && renderState.cameraTarget.npcId === ownerId)
+        ))
+      );
+      const showExtended = isUrgent || isHighlighted || isHovered || isFollowed;
 
       const hasProgressBar = (typeof rxn.targetMins === 'number' && rxn.targetMins > 0) || typeof rxn.progress === 'number';
-      const badgeH = hasProgressBar ? 22 : 17;
+      const showBar = showExtended && hasProgressBar;
+      const badgeH = showBar ? 22 : 18;
+      const maxBadgeW = showExtended ? 136 : 104;
+
+      const compactOwner = ownerLabel ? ownerLabel.split(' ')[0] : '';
+      const compactTask = formatCompactNpcTaskTag(rxn, targetObj, cleanTitle);
+      let rawBadge = '';
+      if (isUrgent) {
+        const urgentTag = st === 'overcooking' ? 'OVERCOOK!' : (st === 'sweet_spot' ? 'QUENCH' : 'READY');
+        rawBadge = ownerLabel ? (ownerLabel + ' \u2022 ' + urgentTag) : urgentTag;
+      } else if (showExtended && cleanTitle) {
+        rawBadge = ownerLabel ? (ownerLabel + ' \u2022 ' + cleanTitle) : cleanTitle;
+      } else {
+        rawBadge = (compactOwner && compactTask)
+          ? (compactOwner + ' \u2022 ' + compactTask)
+          : (compactOwner || compactTask || 'Active');
+      }
+
+      const isDocWriteup = rxn.kind === 'weekly_report' || rxn.kind === 'manuscript_draft' ||
+        (String(rxn.kind || '').toLowerCase() === 'workup' &&
+          (rxn.stationType === 'writeup_desk' || (targetObj && targetObj.type === 'writeup_desk') ||
+           /weekly\s*report|manuscript|write-?up/i.test(cleanTitle)));
 
       ctx.save();
       ctx.font = '600 8.5px "Segoe UI", system-ui, -apple-system, sans-serif';
       let badgeText = rawBadge;
-      if (ctx.measureText(badgeText).width > 116) {
+      if (measureTextCached(ctx, badgeText) > (maxBadgeW - 22)) {
         ctx.font = '600 8px "Segoe UI", system-ui, -apple-system, sans-serif';
       }
-      badgeText = fitLabelNoEllipsis(ctx, badgeText, 128);
-      const textW = ctx.measureText(badgeText).width;
-      const badgeW = Math.max(62, Math.ceil(textW) + 23);
+      if (!showExtended && measureTextCached(ctx, badgeText) > (maxBadgeW - 22)) {
+        ctx.font = '600 7.5px "Segoe UI", system-ui, -apple-system, sans-serif';
+      }
+      badgeText = fitLabelNoEllipsis(ctx, badgeText, maxBadgeW - 22);
+      const textW = measureTextCached(ctx, badgeText);
+      const badgeW = Math.round(clamp(Math.ceil(textW) + 22, 58, maxBadgeW));
       const bobY = Math.sin(nowSec * 3.2 + i) * 1.0;
       const bx = Math.round(cx - badgeW * 0.5);
       let by = Math.round(topY + bobY);
@@ -6204,33 +6449,36 @@
       }
 
       const glowMix = 0.5 + 0.5 * Math.sin(nowSec * 3.0 + i);
-      const borderCol = glowMix > 0.45 ? 'rgba(45, 212, 191, 0.85)' : 'rgba(251, 191, 36, 0.85)';
+      const borderCol = isUrgent
+        ? (st === 'overcooking' ? '#ef4444' : (st === 'sweet_spot' ? '#f59e0b' : '#22c55e'))
+        : (isDocWriteup
+            ? 'rgba(96, 165, 250, 0.80)'
+            : (glowMix > 0.45 ? 'rgba(45, 212, 191, 0.85)' : 'rgba(251, 191, 36, 0.85)'));
       const liqCol = glowMix > 0.45 ? '#f59e0b' : '#14b8a6';
+      const badgeRadius = showBar ? 6.5 : 8.5;
 
-      ctx.shadowColor = glowMix > 0.45 ? 'rgba(20, 184, 166, 0.45)' : 'rgba(245, 158, 11, 0.40)';
-      ctx.shadowBlur = 8;
-      ctx.shadowOffsetY = 2;
-      fillRoundRect(ctx, bx, by, badgeW, badgeH, hasProgressBar ? 6.5 : 8.5, 'rgba(15, 23, 42, 0.90)', borderCol, 1.15);
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
+      fillRoundRect(ctx, bx, by + 1, badgeW, badgeH, badgeRadius, 'rgba(2, 6, 23, 0.5)', null, 0);
+      fillRoundRect(ctx, bx, by, badgeW, badgeH, badgeRadius, 'rgba(15, 23, 42, 0.90)', borderCol, 1.15);
 
       if (occupiedRectsOut) occupiedRectsOut.push({ bx, by, bw: badgeW, bh: badgeH });
 
-      const iconCy = hasProgressBar ? (by + 8.5) : (by + badgeH * 0.5);
-      drawVectorFlaskIcon(ctx, bx + 10.5, iconCy, liqCol, '#5eead4', nowSec * 1.3 + i * 0.37);
+      const iconCy = showBar ? (by + 8.5) : (by + badgeH * 0.5);
+      if (isDocWriteup) {
+        drawVectorDocPenIcon(ctx, bx + 10.5, iconCy, '#60a5fa');
+      } else {
+        drawVectorFlaskIcon(ctx, bx + 10.5, iconCy, liqCol, '#5eead4', nowSec * 1.3 + i * 0.37);
+      }
 
-      ctx.fillStyle = '#e2e8f0';
+      ctx.fillStyle = isUrgent && st === 'overcooking' ? '#fecaca' : '#e2e8f0';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(badgeText, bx + 18, hasProgressBar ? (by + 9) : (by + badgeH * 0.5 + 0.5));
+      ctx.fillText(badgeText, bx + 18, showBar ? (by + 9) : (by + badgeH * 0.5 + 0.5));
 
-      if (hasProgressBar) {
+      if (showBar) {
         const prog = getReactionProgress(rxn);
-        const st = classifyReactionStatus(rxn, targetObj);
         const barCol = st === 'overcooking'
           ? '#ef4444'
-          : (st === 'sweet_spot' ? '#f59e0b' : (st === 'ready' ? '#22c55e' : (isInstrumentOrWorkupJob(rxn, targetObj) ? '#0ea5e9' : '#14b8a6')));
+          : (st === 'sweet_spot' ? '#f59e0b' : (st === 'ready' ? '#22c55e' : (isDocWriteup ? '#60a5fa' : (isInstrumentOrWorkupJob(rxn, targetObj) ? '#0ea5e9' : '#14b8a6'))));
         const trkX = bx + 6;
         const trkY = by + badgeH - 5.5;
         const trkW = badgeW - 12;
@@ -6247,14 +6495,13 @@
   function drawKeycapPromptPill(ctx, cx, cy, promptText, borderColor, badgeBg, occupiedRectsOut) {
     ctx.save();
     ctx.font = 'bold 10px system-ui, -apple-system, sans-serif';
-    const textW = ctx.measureText(promptText).width;
+    const textW = measureTextCached(ctx, promptText);
     const pillW = Math.ceil(textW + 30);
     const pillH = 20;
     const px = Math.round(cx - pillW * 0.5);
     const py = Math.round(cy - pillH * 0.5);
 
-    ctx.shadowColor = 'rgba(15, 23, 42, 0.55)';
-    ctx.shadowBlur = 6;
+    fillRoundRect(ctx, px, py + 1, pillW, pillH, 5, 'rgba(2, 6, 23, 0.5)', null, 0);
     fillRoundRect(ctx, px, py, pillW, pillH, 5, 'rgba(15, 23, 42, 0.92)', borderColor, 1.4);
     ctx.restore();
 
@@ -6387,7 +6634,7 @@
       ctx.save();
       ctx.font = '600 9.5px "Segoe UI", system-ui, -apple-system, sans-serif';
       const cleanTip = fitLabelNoEllipsis(ctx, tipText, 210);
-      const tw = ctx.measureText(cleanTip).width;
+      const tw = measureTextCached(ctx, cleanTip);
       const pw = Math.ceil(tw + 14);
       const ph = 17;
       const px = Math.round(tipCx - pw * 0.5);
@@ -6429,7 +6676,7 @@
       ctx.save();
       ctx.font = 'bold 8.5px system-ui, -apple-system, sans-serif';
       const txt = stripBubbleEmojis(label);
-      const tw = ctx.measureText(txt).width;
+      const tw = measureTextCached(ctx, txt);
       const pw = Math.ceil(tw + 10);
       const bx = Math.round(cx - pw * 0.5);
       const by = y - 30;
@@ -6598,7 +6845,7 @@
       if (cleanLabel) {
         ctx.save();
         ctx.font = 'bold 8.5px system-ui, -apple-system, sans-serif';
-        const pw = Math.ceil(ctx.measureText(cleanLabel).width + 10);
+        const pw = Math.ceil(measureTextCached(ctx, cleanLabel) + 10);
         ctx.restore();
         boxW = Math.max(16, pw);
         boxH = 31;
@@ -6660,7 +6907,7 @@
         const rawLabel = getWayfindingTargetLabel(item.t);
         const fittedLabel = fitLabelNoEllipsis(ctx, rawLabel, 136);
         const fullText = arrow + ' ' + fittedLabel;
-        const tw = ctx.measureText(fullText).width;
+        const tw = measureTextCached(ctx, fullText);
         const pillW = Math.ceil(tw + 16);
 
         const minBx = margin;
@@ -6692,21 +6939,17 @@
         placedCompassRects.push({ bx, by, bw: pillW, bh: pillH });
 
         const compColor = item.isEvac ? '#34d399' : '#fbbf24';
-        const compGlow = item.isEvac ? 'rgba(16, 185, 129, 0.55)' : 'rgba(251, 191, 36, 0.50)';
 
         ctx.save();
-        ctx.shadowColor = compGlow;
-        ctx.shadowBlur = 7;
+        fillRoundRect(ctx, bx, by + 1, pillW, pillH, 6, 'rgba(2, 6, 23, 0.5)', null, 0);
         fillRoundRect(ctx, bx, by, pillW, pillH, 6, 'rgba(15, 23, 42, 0.93)', compColor, 1.4);
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
 
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         const textCy = by + pillH * 0.5 + 0.5;
         ctx.fillStyle = compColor;
         ctx.fillText(arrow, bx + 8, textCy);
-        const arrowW = ctx.measureText(arrow + ' ').width;
+        const arrowW = measureTextCached(ctx, arrow + ' ');
         ctx.fillStyle = item.isEvac ? '#dcfce7' : '#fef3c7';
         ctx.fillText(fittedLabel, bx + 8 + arrowW, textCy);
         ctx.restore();
@@ -6757,7 +7000,7 @@
   }
 
   function breakWordToFit(ctx, word, maxWidth) {
-    if (ctx.measureText(word).width <= maxWidth) return [word];
+    if (measureTextCached(ctx, word) <= maxWidth) return [word];
 
     const hyphenParts = [];
     let start = 0;
@@ -6773,21 +7016,21 @@
     let buf = '';
     for (let i = 0; i < hyphenParts.length; i++) {
       const part = hyphenParts[i];
-      if (buf && ctx.measureText(buf + part).width <= maxWidth) {
+      if (buf && measureTextCached(ctx, buf + part) <= maxWidth) {
         buf += part;
       } else {
         if (buf) {
           pieces.push(buf);
           buf = '';
         }
-        if (ctx.measureText(part).width <= maxWidth) {
+        if (measureTextCached(ctx, part) <= maxWidth) {
           buf = part;
         } else {
           let charBuf = '';
           const chars = Array.from(part);
           for (let c = 0; c < chars.length; c++) {
             const ch = chars[c];
-            if (charBuf && ctx.measureText(charBuf + ch).width > maxWidth) {
+            if (charBuf && measureTextCached(ctx, charBuf + ch) > maxWidth) {
               pieces.push(charBuf);
               charBuf = ch;
             } else {
@@ -6820,7 +7063,7 @@
       if (!word) continue;
       let activeLimit = lines.length === 0 ? firstLimitW : limitW;
       const candidate = cur ? (cur + ' ' + word) : word;
-      if (ctx.measureText(candidate).width <= activeLimit) {
+      if (measureTextCached(ctx, candidate) <= activeLimit) {
         cur = candidate;
         continue;
       }
@@ -6829,13 +7072,13 @@
         cur = '';
         activeLimit = lines.length === 0 ? firstLimitW : limitW;
       }
-      if (ctx.measureText(word).width <= activeLimit) {
+      if (measureTextCached(ctx, word) <= activeLimit) {
         cur = word;
       } else {
         let rem = word;
         while (rem) {
           const curLimit = lines.length === 0 ? firstLimitW : limitW;
-          if (ctx.measureText(rem).width <= curLimit) {
+          if (measureTextCached(ctx, rem) <= curLimit) {
             cur = rem;
             rem = '';
           } else {
@@ -7050,27 +7293,57 @@
     // 2. Measure & wrap text cleanly (maxWidth = 216, max 4 lines, zero speaker name prefix inside bubbles)
     const visSpanW = (visMaxX - visMinX) - edgePad * 2;
     const wrapMaxW = visSpanW > 64 ? Math.min(216, Math.floor(visSpanW - 24)) : 216;
-    ctx.save();
-    ctx.font = '400 11px "Segoe UI", system-ui, -apple-system, sans-serif';
+    const bubbleFont = '400 11px "Segoe UI", system-ui, -apple-system, sans-serif';
+    let fontSaved = false;
     for (let i = 0; i < rawItems.length; i++) {
       const it = rawItems[i];
-      it.lines = wrapBubbleText(ctx, it.sourceText, wrapMaxW, 0);
-      if (it.lines.length > 4) it.lines = it.lines.slice(0, 4);
-      if (!it.lines.length) continue;
-
-      let maxRenderedLineWidth = 0;
-      for (let l = 0; l < it.lines.length; l++) {
-        const w = ctx.measureText(it.lines[l]).width;
-        if (w > maxRenderedLineWidth) maxRenderedLineWidth = w;
+      const layoutCache = it.b && it.b._layout;
+      if (layoutCache &&
+          layoutCache.text === it.sourceText &&
+          layoutCache.wrapMaxW === wrapMaxW &&
+          layoutCache.font === bubbleFont) {
+        it.lines = layoutCache.lines;
+        it.bw = layoutCache.bw;
+        it.bh = layoutCache.bh;
+      } else {
+        if (!fontSaved) {
+          ctx.save();
+          ctx.font = bubbleFont;
+          fontSaved = true;
+        }
+        let lines = wrapBubbleText(ctx, it.sourceText, wrapMaxW, 0);
+        if (lines.length > 4) lines = lines.slice(0, 4);
+        it.lines = lines;
+        if (lines.length) {
+          let maxRenderedLineWidth = 0;
+          for (let l = 0; l < lines.length; l++) {
+            const w = measureTextCached(ctx, lines[l]);
+            if (w > maxRenderedLineWidth) maxRenderedLineWidth = w;
+          }
+          it.bw = Math.max(92, Math.ceil(maxRenderedLineWidth) + 24);
+          it.bh = lines.length * 14 + 16;
+        } else {
+          it.bw = 92;
+          it.bh = 30;
+        }
+        if (it.b && typeof it.b === 'object') {
+          it.b._layout = {
+            text: it.sourceText,
+            wrapMaxW,
+            font: bubbleFont,
+            lines: it.lines,
+            bw: it.bw,
+            bh: it.bh
+          };
+        }
       }
-      it.bw = Math.max(92, Math.ceil(maxRenderedLineWidth) + 24);
-      it.bh = it.lines.length * 14 + 16;
+      if (!it.lines.length) continue;
 
       const minBx = visMinX + edgePad;
       const maxBx = Math.max(minBx, visMaxX - edgePad - it.bw);
       it.bx = Math.round(clamp(it.anchorX - it.bw * 0.5, minBx, maxBx));
     }
-    ctx.restore();
+    if (fontSaved) ctx.restore();
 
     // 3. Front-to-back vertical stack de-overlap (only against other simultaneous speech bubbles)
     const validItems = rawItems.filter(function (it) { return it.lines.length > 0; });
@@ -7118,18 +7391,13 @@
       }
 
       ctx.save();
-      drawSpeechBubblePath(ctx, bx, by, bw, bh, 8, tailX, tipX, tipY);
-      ctx.shadowColor = 'rgba(2, 6, 23, 0.55)';
-      ctx.shadowBlur = 12;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 4;
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+      drawSpeechBubblePath(ctx, bx, by + 1, bw, bh, 8, tailX, tipX, tipY + 1);
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.5)';
       ctx.fill();
 
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
+      drawSpeechBubblePath(ctx, bx, by, bw, bh, 8, tailX, tipX, tipY);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+      ctx.fill();
       ctx.strokeStyle = it.clusterSize >= 2 ? it.accent : 'rgba(148, 163, 184, 0.35)';
       ctx.lineWidth = it.clusterSize >= 2 ? 1.15 : 1;
       ctx.stroke();
@@ -7549,22 +7817,14 @@
     const label = 'PAUSED — Press Space to Resume';
     ctx.save();
     ctx.font = '600 11.5px "Segoe UI", system-ui, -apple-system, sans-serif';
-    const tw = ctx.measureText(label).width;
+    const tw = measureTextCached(ctx, label);
     const pillH = 28;
     const pillW = Math.ceil(tw + 40);
     const px = Math.max(8, Math.round(viewW - 14 - pillW));
     const py = 14;
 
-    ctx.shadowColor = 'rgba(2, 6, 23, 0.45)';
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 3;
+    fillRoundRect(ctx, px, py + 1, pillW, pillH, 14, 'rgba(2, 6, 23, 0.5)', null, 0);
     fillRoundRect(ctx, px, py, pillW, pillH, 14, 'rgba(15, 23, 42, 0.86)', 'rgba(148, 163, 184, 0.35)', 1);
-
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     // Subtle two-bar vector pause icon
     const barY = py + (pillH - 10) * 0.5;
@@ -7846,6 +8106,29 @@
     };
   }
 
+  const bgGradCacheByCtx = typeof WeakMap === 'function' ? new WeakMap() : null;
+  let fallbackBgGradCache = { ctx: null, viewW: -1, viewH: -1, grad: null };
+
+  function getCachedBgGrad(ctx, viewW, viewH) {
+    let entry = bgGradCacheByCtx ? bgGradCacheByCtx.get(ctx) : (fallbackBgGradCache.ctx === ctx ? fallbackBgGradCache : null);
+    if (entry && entry.viewW === viewW && entry.viewH === viewH && entry.grad) {
+      return entry.grad;
+    }
+    const grad = ctx.createRadialGradient(
+      viewW * 0.5, viewH * 0.5, 40,
+      viewW * 0.5, viewH * 0.5, Math.max(viewW, viewH) * 0.75
+    );
+    grad.addColorStop(0, '#131c2e');
+    grad.addColorStop(1, '#090d16');
+    const nextEntry = { ctx, viewW, viewH, grad };
+    if (bgGradCacheByCtx) {
+      bgGradCacheByCtx.set(ctx, nextEntry);
+    } else {
+      fallbackBgGradCache = nextEntry;
+    }
+    return grad;
+  }
+
   function ensureCanvasPointerTracker(canvas) {
     if (!canvas || typeof canvas.addEventListener !== 'function') return null;
     if (canvasTrackerMap.has(canvas)) return canvasTrackerMap.get(canvas);
@@ -7854,7 +8137,16 @@
       clientX: 0,
       clientY: 0,
       hoveredObjId: null,
-      hoveredNpcId: null
+      hoveredNpcId: null,
+      _hoverValid: false,
+      _hoverMouseX: NaN,
+      _hoverMouseY: NaN,
+      _hoverCamX: NaN,
+      _hoverCamY: NaN,
+      _hoverZoom: NaN,
+      _hoverRoomId: null,
+      _hoverViewW: NaN,
+      _hoverViewH: NaN
     };
     canvas.addEventListener('mousemove', function (e) {
       tracker.active = true;
@@ -7865,6 +8157,7 @@
       tracker.active = false;
       tracker.hoveredObjId = null;
       tracker.hoveredNpcId = null;
+      tracker._hoverValid = false;
     }, { passive: true });
     canvasTrackerMap.set(canvas, tracker);
     return tracker;
@@ -7932,12 +8225,33 @@
     // Resolve passive mouse hover target without allocating a new renderState object
     const tracker = ensureCanvasPointerTracker(canvas);
     if (tracker && tracker.active) {
-      const hov = screenToGrid(canvas, tracker.clientX, tracker.clientY, state);
-      tracker.hoveredNpcId = hov.npcId;
-      tracker.hoveredObjId = hov.npcId ? null : hov.objId;
+      const rId = room.id || '';
+      if (!tracker._hoverValid ||
+          tracker._hoverMouseX !== tracker.clientX ||
+          tracker._hoverMouseY !== tracker.clientY ||
+          tracker._hoverCamX !== cam.camX ||
+          tracker._hoverCamY !== cam.camY ||
+          tracker._hoverZoom !== cam.zoom ||
+          tracker._hoverRoomId !== rId ||
+          tracker._hoverViewW !== viewW ||
+          tracker._hoverViewH !== viewH) {
+        const hov = screenToGrid(canvas, tracker.clientX, tracker.clientY, state);
+        tracker.hoveredNpcId = hov.npcId;
+        tracker.hoveredObjId = hov.npcId ? null : hov.objId;
+        tracker._hoverMouseX = tracker.clientX;
+        tracker._hoverMouseY = tracker.clientY;
+        tracker._hoverCamX = cam.camX;
+        tracker._hoverCamY = cam.camY;
+        tracker._hoverZoom = cam.zoom;
+        tracker._hoverRoomId = rId;
+        tracker._hoverViewW = viewW;
+        tracker._hoverViewH = viewH;
+        tracker._hoverValid = true;
+      }
       state._activeHoverNpcId = tracker.hoveredNpcId;
       state._activeHoverObjId = tracker.hoveredObjId;
     } else {
+      if (tracker) tracker._hoverValid = false;
       state._activeHoverNpcId = null;
       state._activeHoverObjId = null;
     }
@@ -7948,13 +8262,7 @@
     ctx.setTransform(scaleRatioX, 0, 0, scaleRatioY, 0, 0);
 
     // ---- PASS 0: DEEP POKÉMON INDOOR VOID BACKGROUND ----
-    const bgGrad = ctx.createRadialGradient(
-      viewW * 0.5, viewH * 0.5, 40,
-      viewW * 0.5, viewH * 0.5, Math.max(viewW, viewH) * 0.75
-    );
-    bgGrad.addColorStop(0, '#131c2e');
-    bgGrad.addColorStop(1, '#090d16');
-    ctx.fillStyle = bgGrad;
+    ctx.fillStyle = getCachedBgGrad(ctx, viewW, viewH);
     ctx.fillRect(0, 0, viewW, viewH);
 
     // Apply 2.5D Camera Transform (snapped to physical device pixels!)
@@ -8318,10 +8626,21 @@
 
   Renderer25D.invalidateRoomCache = function (roomId) {
     if (roomId) {
+      const old = roomFloorCache.get(roomId);
+      if (old && old.canvas) {
+        old.canvas.width = 0;
+        old.canvas.height = 0;
+      }
       roomFloorCache.delete(roomId);
       windowBayCache.delete(roomId);
       surfaceParentCache.delete(roomId);
     } else {
+      roomFloorCache.forEach(function (entry) {
+        if (entry && entry.canvas) {
+          entry.canvas.width = 0;
+          entry.canvas.height = 0;
+        }
+      });
       roomFloorCache.clear();
       windowBayCache.clear();
       surfaceParentCache.clear();

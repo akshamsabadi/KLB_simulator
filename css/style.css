@@ -73,8 +73,8 @@ h5 {
 
 .pixel-art,
 img.pixel-art {
-  image-rendering: pixelated;
   image-rendering: crisp-edges;
+  image-rendering: pixelated;
 }
 
 :focus-visible {
@@ -116,6 +116,12 @@ img.pixel-art {
   flex-shrink: 0;
 }
 
+svg,
+.hud-btn > span,
+.pause-btn > span {
+  pointer-events: none;
+}
+
 .mono-muted {
   font-family: 'Consolas', monospace;
   font-size: 11.5px;
@@ -138,6 +144,18 @@ img.pixel-art {
 ::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.3);
   border-radius: 3px;
+}
+
+#wa-feed,
+#pane-labbook,
+.labbook-scroll,
+#reactions-list,
+#subtask-list,
+#subtask-checklist,
+#title-screen,
+#modal-box {
+  scrollbar-width: thin;
+  scrollbar-color: #314266 rgba(9, 13, 22, 0.45);
 }
 
 button {
@@ -834,7 +852,10 @@ select.ui-select::picker-icon {
   border: 1px solid rgba(96, 165, 250, 0.36);
   color: #bfdbfe;
   font-weight: 600;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .hud-room-badge {
   padding: 0 10px;
@@ -868,7 +889,7 @@ select.ui-select::picker-icon {
 .spec-speed-bar {
   display: inline-flex;
   align-items: center;
-  height: 29px;
+  min-height: 30px;
   padding: 2px;
   gap: 2px;
   border-radius: 999px;
@@ -878,7 +899,8 @@ select.ui-select::picker-icon {
   flex-shrink: 0;
 }
 .spec-speed-btn {
-  height: 23px;
+  min-height: 24px;
+  height: 24px;
   padding: 0 8px;
   border-radius: 999px;
   border: 1px solid transparent;
@@ -953,6 +975,37 @@ select.ui-select::picker-icon {
   width: 176px;
   max-width: 190px;
   flex-shrink: 0;
+}
+@media (max-width: 1440px) {
+  #top-hud-bar {
+    height: auto;
+    min-height: 44px;
+    padding: 6px 10px;
+    gap: 6px 10px;
+    flex-wrap: wrap;
+  }
+  .hud-room-cluster {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  #hud-char-badge,
+  .hud-char-badge {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hud-toolbar {
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  }
+  .spectator-room-wrap {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
 }
 @media (max-width: 1360px) {
   #select-travel {
@@ -1084,7 +1137,8 @@ select.ui-select::picker-icon {
 #live-alert-banner.hidden {
   display: none;
 }
-#canvas-stage:has(.celebration-banner:not(.hidden)) #live-alert-banner {
+#canvas-stage:has(.celebration-banner:not(.hidden)) #live-alert-banner,
+#canvas-stage.has-celebration #live-alert-banner {
   top: 58px;
   z-index: 22;
 }
@@ -1483,27 +1537,28 @@ select.ui-select::picker-icon {
 }
 
 /* Tasks, Sub-Tasks & Active Equipment Timers */
-.reactions-section {
-  padding: 7px 12px;
+.reactions-section,
+#reactions-panel {
+  padding: 6px 12px;
   background: #11192b;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
   flex: 0 0 auto;
   overflow: visible;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 .pinned-objective {
   background: rgba(15, 23, 42, 0.56);
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 8px;
-  padding: 7px 9px;
+  padding: 6px 8px;
   font-size: 11.5px;
   color: var(--text-secondary);
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 .pinned-objective.done {
   border-color: rgba(34, 197, 94, 0.4);
@@ -1620,11 +1675,17 @@ select.ui-select::picker-icon {
   display: none;
 }
 
+#reactions-list {
+  max-height: 132px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
 .rxn-card {
   background: rgba(25, 36, 59, 0.72);
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 6px;
-  padding: 5px 8px;
+  padding: 4px 7px;
   margin-bottom: 4px;
   font-size: 11px;
   box-shadow: none;
@@ -1684,6 +1745,9 @@ select.ui-select::picker-icon {
   border-color: rgba(34, 197, 94, 0.48);
 }
 
+.subtask-row.clickable {
+  min-height: 24px;
+}
 .subtask-row.clickable,
 .rxn-card.clickable,
 .deliverable-row.clickable {
@@ -1761,6 +1825,10 @@ select.ui-select::picker-icon {
   border-bottom-color: var(--accent-primary);
   background: rgba(59, 130, 246, 0.08);
 }
+.deck-tab:hover:not(.active) {
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.45);
+}
 #tab-lbl-whatsapp.klbchat-active,
 .deck-tab.klbchat-active {
   color: #6ee7b7;
@@ -1784,7 +1852,7 @@ select.ui-select::picker-icon {
 
 .deck-pane {
   flex: 1 1 0;
-  min-height: 140px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2045,10 +2113,25 @@ select.ui-select::picker-icon {
   box-shadow: var(--shadow-sm);
 }
 
+@media (max-height: 820px) {
+  #reactions-list {
+    max-height: 108px;
+  }
+}
+
+@media (max-height: 800px) {
+  #subtask-list,
+  #subtask-checklist {
+    max-height: 136px;
+    overflow-y: auto;
+  }
+}
+
 @media (max-height: 780px) {
   .deck-clock-card,
   .meters-section,
   .reactions-section,
+  #reactions-panel,
   .weekly-deliverables-section {
     padding: 4px 10px;
     gap: 4px;
@@ -2071,15 +2154,11 @@ select.ui-select::picker-icon {
   .continue-run-banner {
     padding: 7px 12px;
   }
-  #reactions-list {
-    max-height: 112px;
-    overflow-y: auto;
-  }
   .deck-tabs {
     height: 29px;
   }
   .deck-pane {
-    min-height: 120px;
+    min-height: 160px;
   }
   .wa-feed {
     padding: 6px 8px;
@@ -2333,6 +2412,14 @@ select.ui-select::picker-icon {
   font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.45;
+  user-select: text;
+}
+
+.klb-modal-body,
+.ev-modal-desc,
+.dossier-body,
+.wa-text {
+  user-select: text;
 }
 
 .klb-modal-footer {
@@ -2691,7 +2778,7 @@ select.ui-select::picker-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #94a3b8;
   flex-shrink: 0;
   transition: color 0.14s ease, transform 0.14s ease;
 }
@@ -3260,6 +3347,7 @@ input[type="range"].klb-volume-slider::-moz-range-thumb:hover {
   .deck-clock-card,
   .meters-section,
   .reactions-section,
+  #reactions-panel,
   .weekly-deliverables-section {
     padding: 6px 10px;
   }
@@ -3423,6 +3511,8 @@ input[type="range"].klb-volume-slider::-moz-range-thumb:hover {
   .deck-pane {
     flex: 1 0 auto;
     min-height: 180px;
+    max-height: 360px;
+    overflow: hidden;
   }
 
   .labbook-controls,

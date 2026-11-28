@@ -18,7 +18,7 @@
   <meta name="twitter:title" content="KLB Simulator — UCL Chemistry Lab Simulation" />
   <meta name="twitter:description" content="Run bioconjugation reactions, dodge Safety Sweeps, survive Vijay &amp; Jamie's Friday 09:00 Audit, and banter with the Big-Chuds in 2.5D." />
   <meta name="twitter:image" content="https://akshamsabadi.github.io/KLB_simulator/assets/og_preview.jpg" />
-  <link rel="stylesheet" href="css/style.css?v=20261128d" />
+  <link rel="stylesheet" href="css/style.css?v=20261128e" />
 </head>
 <body>
 
@@ -115,7 +115,7 @@
               <button type="button" class="spec-speed-btn" data-speed="2" title="Observer speed 2x (Key 2)">2x</button>
               <button type="button" class="spec-speed-btn" data-speed="4" title="Observer speed 4x (Key 3)">4x</button>
             </div>
-            <span id="spec-follow-badge" class="spec-follow-badge hidden"></span>
+            <span id="spec-follow-badge" class="spec-follow-badge hidden" tabindex="0" role="button"></span>
           </div>
 
           <select id="select-zoom" class="ui-select compact" aria-label="Camera Zoom" title="Camera zoom">
@@ -304,7 +304,7 @@
           <div class="meter-track"><div id="bar-manuscript" class="meter-fill manuscript"></div></div>
         </div>
 
-        <div class="deliverable-row" id="row-slide-deck" title="Curate your 4-slide Friday presentation in Lab Book before Friday 09:00">
+        <div class="deliverable-row" id="row-slide-deck" tabindex="0" role="button" title="Curate your 4-slide Friday presentation in Lab Book before Friday 09:00">
           <div class="meter-lbl">
             <span class="meter-name">
               <span class="icon-inline" data-lucide="presentation" data-size="12"></span>
@@ -319,23 +319,23 @@
 
       <!-- 3-Tab Bottom Panel -->
       <nav class="deck-tabs" role="tablist" aria-label="Command Deck Panels">
-        <button type="button" class="deck-tab active" role="tab" aria-selected="true" data-tab="whatsapp">
+        <button id="tab-whatsapp" type="button" class="deck-tab active" role="tab" aria-selected="true" aria-controls="pane-whatsapp" data-tab="whatsapp">
           <span class="icon-inline" data-lucide="message-square" data-size="14"></span>
           <span id="tab-lbl-whatsapp">Big-Chuds</span>
           <span id="wa-unread-count" class="unread-num hidden">0</span>
         </button>
-        <button type="button" class="deck-tab" role="tab" aria-selected="false" data-tab="labbook">
+        <button id="tab-labbook" type="button" class="deck-tab" role="tab" aria-selected="false" aria-controls="pane-labbook" data-tab="labbook">
           <span class="icon-inline" data-lucide="book-open" data-size="14"></span>
           <span id="tab-lbl-labbook">Lab Book</span>
         </button>
-        <button type="button" class="deck-tab" role="tab" aria-selected="false" data-tab="archive">
+        <button id="tab-archive" type="button" class="deck-tab" role="tab" aria-selected="false" aria-controls="pane-archive" data-tab="archive">
           <span class="icon-inline" data-lucide="archive" data-size="14"></span>
           <span>Archive</span>
         </button>
       </nav>
 
       <!-- Pane 1: Live Big-Chuds WhatsApp -->
-      <section id="pane-whatsapp" class="deck-pane">
+      <section id="pane-whatsapp" class="deck-pane" role="tabpanel" aria-labelledby="tab-whatsapp">
         <div id="wa-feed" class="wa-feed"></div>
         <div class="wa-actions">
           <select id="select-wa-action" class="ui-select" aria-label="Big-Chuds WhatsApp Action">
@@ -352,12 +352,12 @@
       </section>
 
       <!-- Pane 2: Lab Book (or Live Autonomous Roster in Spectator Mode) -->
-      <section id="pane-labbook" class="deck-pane hidden">
+      <section id="pane-labbook" class="deck-pane hidden" role="tabpanel" aria-labelledby="tab-labbook">
         <div id="labbook-scroll" class="labbook-scroll"></div>
       </section>
 
       <!-- Pane 3: KLB Archive Logbook -->
-      <section id="pane-archive" class="deck-pane hidden">
+      <section id="pane-archive" class="deck-pane hidden" role="tabpanel" aria-labelledby="tab-archive">
         <div id="archive-scroll" class="labbook-scroll"></div>
       </section>
     </aside>
@@ -369,15 +369,15 @@
   </div>
 
   <!-- Ordered Classic Scripts (Zero file:// CORS issues, zero build step) -->
-  <script defer src="js/ui/icons.js?v=20261128d"></script>
-  <script defer src="js/data/world_data.js?v=20261128d"></script>
-  <script defer src="js/data/cast_data.js?v=20261128d"></script>
-  <script defer src="js/data/campaigns_data.js?v=20261128d"></script>
-  <script defer src="js/data/events_data.js?v=20261128d"></script>
-  <script defer src="js/engine/audio.js?v=20261128d"></script>
-  <script defer src="js/engine/renderer_25d.js?v=20261128d"></script>
-  <script defer src="js/chemistry/spectra_and_minigames.js?v=20261128d"></script>
-  <script defer src="js/engine/sim_and_ai.js?v=20261128d"></script>
-  <script defer src="js/main.js?v=20261128d"></script>
+  <script defer src="js/ui/icons.js?v=20261128e"></script>
+  <script defer src="js/data/world_data.js?v=20261128e"></script>
+  <script defer src="js/data/cast_data.js?v=20261128e"></script>
+  <script defer src="js/data/campaigns_data.js?v=20261128e"></script>
+  <script defer src="js/data/events_data.js?v=20261128e"></script>
+  <script defer src="js/engine/audio.js?v=20261128e"></script>
+  <script defer src="js/engine/renderer_25d.js?v=20261128e"></script>
+  <script defer src="js/chemistry/spectra_and_minigames.js?v=20261128e"></script>
+  <script defer src="js/engine/sim_and_ai.js?v=20261128e"></script>
+  <script defer src="js/main.js?v=20261128e"></script>
 </body>
 </html>

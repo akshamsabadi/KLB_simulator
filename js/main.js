@@ -13,6 +13,7 @@ window.KLB = window.KLB || {};
 
   let modalDismissable = true;
   let modalEscapeHandler = null;
+  let lastFocusedEl = null;
   let currentTab = 'whatsapp';
   let lastWaMsgId = null;
   let lastWaCount = 0;
@@ -22,6 +23,15 @@ window.KLB = window.KLB || {};
   let lastTravelRoomSig = '';
   let lastTaskPanelSig = '';
   let lastReactionsSig = '';
+  let lastPauseUiSig = '';
+  let lastMuteUiSig = '';
+  let lastSpecFollowSig = '';
+  let lastAlertBannerSig = '';
+  let lastHoverHintText = '';
+  let lastDossierSpriteKey = '';
+  let lastCanvasRenderTs = 0;
+  let lastRenderModalPaused = false;
+  let discardResetTimer = null;
   let stepSfxCooldown = 0;
   let bumpSfxCooldown = 0;
   let specSpeed = 1;
@@ -50,7 +60,27 @@ window.KLB = window.KLB || {};
   }
 
   function clamp(v, lo, hi) {
-    return Math.max(lo, Math.min(hi, v));
+    const num = Number(v);
+    if (!Number.isFinite(num)) return lo;
+    return Math.max(lo, Math.min(hi, num));
+  }
+
+  function addFavours(delta) {
+    if (!state) return 0;
+    const cur = Number(state.favours);
+    const base = Number.isFinite(cur) ? cur : 0;
+    const next = clamp(base + (Number(delta) || 0), 0, 6);
+    state.favours = next;
+    return next;
+  }
+
+  function getMonotonicSimMins(st = state) {
+    if (!st) return 0;
+    if (typeof st.totalElapsedMins === 'number' && Number.isFinite(st.totalElapsedMins)) {
+      return st.totalElapsedMins;
+    }
+    const weekOffset = ((Number(st.weekNum) || 1) - 1) * 7 * 1440;
+    return weekOffset + ((Number(st.dayIdx) || 0) * 1440) + (Number(st.timeMins) || 0);
   }
 
   function stripDiacritics(str) {
@@ -433,7 +463,7 @@ window.KLB = window.KLB || {};
       const cats = [
         ['Yield & Steps ', b.yieldScore ?? 0, 2.0],
         ['Homogeneity   ', b.homogeneityScore ?? 0, 2.0],
-        ['Rigor         ', b.rigorScore ?? 0, 2.0],
+        ['Rigour        ', b.rigorScore ?? 0, 2.0],
         ['Manuscript    ', b.manuscriptScore ?? 0, 1.5],
         ['Slide Hygiene ', b.hygieneScore ?? 0, 1.5],
         ['Citizenship   ', b.citizenshipScore ?? 0, 1.0]
@@ -475,6 +505,7 @@ window.KLB = window.KLB || {};
     if (!stage) return;
     let banner = el('celebration-banner');
     const shouldShow = Boolean(state && !state.spectatorMode && state.postAuditCelebration && !state.gameOver);
+    stage.classList.toggle('has-celebration', shouldShow);
     if (!shouldShow) {
       if (banner) banner.remove();
       return;
@@ -531,6 +562,8 @@ window.KLB = window.KLB || {};
     const badge = el('spec-follow-badge');
     if (!badge) return;
     if (!state?.spectatorMode || !specFollowNpcId) {
+      if (lastSpecFollowSig === 'none') return;
+      lastSpecFollowSig = 'none';
       badge.classList.add('hidden');
       badge.innerHTML = '';
       badge.onclick = null;
@@ -540,6 +573,9 @@ window.KLB = window.KLB || {};
     const shortName = meta?.shortName || meta?.name || specFollowNpcId;
     const npc = state.npcs?.[specFollowNpcId];
     const isOffsite = Boolean(!npc || !npc.roomId || npc.roomId === 'offsite');
+    const sig = `${specFollowNpcId}:${isOffsite ? 1 : 0}`;
+    if (sig === lastSpecFollowSig) return;
+    lastSpecFollowSig = sig;
     const offsiteTag = isOffsite ? ' (Offsite)' : '';
     badge.classList.remove('hidden');
     badge.title = 'Click to stop following';
@@ -589,6 +625,13 @@ window.KLB = window.KLB || {};
   function prepareModalBox(modalClass = 'klb-modal', sfxName = 'modal_open', themeClass = '') {
     const box = el('modal-box');
     if (!box) return null;
+    const activeEl = document.activeElement;
+    if (activeEl && activeEl !== document.body && !box.contains(activeEl)) {
+      lastFocusedEl = activeEl;
+    }
+    if (activeEl && typeof activeEl.blur === 'function' && !box.contains(activeEl)) {
+      activeEl.blur();
+    }
     box.classList.remove('ev-modal', 'klb-modal', 'klb-modal-sm');
     Array.from(box.classList).forEach(cls => {
       if (cls.startsWith('ev-theme-') || cls.startsWith('klb-theme-')) {
@@ -605,6 +648,7 @@ window.KLB = window.KLB || {};
 
   function staggerNpcExchange(roomId, speakers, turns, convoId, opts = {}) {
     if (!state) return;
+    const capturedSeed = state.runSeed;
     const normalized = (turns || []).map(t => ({
       speakerId: t.speakerId,
       text: t.text != null ? t.text : (t.line || '')
@@ -619,7 +663,7 @@ window.KLB = window.KLB || {};
         window.KLB.Sim.pushBubble(state, turn.speakerId, roomId, turn.text, ttl);
       } else {
         setTimeout(() => {
-          if (state && state.player && !state.gameOver) {
+          if (state && state.runSeed === capturedSeed && state.player && !state.gameOver) {
             window.KLB.Sim.pushBubble(state, turn.speakerId, roomId, turn.text, ttl);
           }
         }, idx * 1400);
@@ -631,6 +675,9 @@ window.KLB = window.KLB || {};
     const btn = el('btn-mute');
     if (!btn) return;
     const muted = Boolean(window.KLB.Audio?.isMuted?.());
+    const sig = muted ? '1' : '0';
+    if (sig === lastMuteUiSig) return;
+    lastMuteUiSig = sig;
     btn.classList.toggle('muted', muted);
     btn.setAttribute('aria-pressed', muted ? 'true' : 'false');
     btn.innerHTML = `${icon(muted ? 'volume-x' : 'volume-2', 15)}<span id="lbl-mute">${muted ? 'Muted' : 'Audio'}</span>`;
@@ -667,7 +714,7 @@ window.KLB = window.KLB || {};
     const rawList = window.KLB.MUTATORS || [
       { id: 'vijays_not_in', name: '#VijaysNotIn', desc: 'No surprise bench rounds before Friday' },
       { id: 'lcms_chaos', name: '50% LC-MS Chaos', desc: 'Kersti instrument gremlins doubled' },
-      { id: 'eternal_heatwave', name: '30 C May Heatwave', desc: 'Lab 230 stuck at 30 C all week' },
+      { id: 'eternal_heatwave', name: '30 °C May Heatwave', desc: 'Lab 230 stuck at 30 °C all week' },
       { id: 'infinite_espresso', name: 'Double Espresso', desc: 'Slower Energy drain' },
       { id: 'strict_coshh', name: 'Strict COSHH Audit', desc: '2x safety inspection frequency & fines' }
     ];
@@ -689,6 +736,10 @@ window.KLB = window.KLB || {};
 
   function renderTitleScreen() {
     if (window.KLB.Audio?.stopAllAmbience) window.KLB.Audio.stopAllAmbience();
+    if (discardResetTimer) {
+      clearTimeout(discardResetTimer);
+      discardResetTimer = null;
+    }
     hideAlertBanner();
     archive = window.KLB.Sim.loadArchive();
     state = null;
@@ -696,6 +747,19 @@ window.KLB = window.KLB || {};
     specFollowNpcId = null;
     specCameraPos = null;
     specDrag = null;
+    lastLabBookSig = '';
+    lastArchiveSig = '';
+    lastTravelRoomSig = '';
+    lastTaskPanelSig = '';
+    lastReactionsSig = '';
+    lastPauseUiSig = '';
+    lastMuteUiSig = '';
+    lastSpecFollowSig = '';
+    lastAlertBannerSig = '';
+    lastHoverHintText = '';
+    lastDossierSpriteKey = '';
+    lastCanvasRenderTs = 0;
+    lastRenderModalPaused = false;
     el('world-canvas')?.classList.remove('spec-pannable', 'spec-dragging');
     el('title-screen').classList.remove('hidden');
     el('game-shell').classList.add('hidden');
@@ -747,7 +811,6 @@ window.KLB = window.KLB || {};
         `;
         el('btn-continue-save').onclick = () => resumeSavedRun(snap);
         let discardArmed = false;
-        let discardResetTimer = null;
         el('btn-discard-save').onclick = () => {
           if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
           const btn = el('btn-discard-save');
@@ -768,7 +831,10 @@ window.KLB = window.KLB || {};
             }, 3500);
             return;
           }
-          if (discardResetTimer) clearTimeout(discardResetTimer);
+          if (discardResetTimer) {
+            clearTimeout(discardResetTimer);
+            discardResetTimer = null;
+          }
           clearActiveRunSnapshot();
           bannerEl.classList.add('hidden');
           bannerEl.innerHTML = '';
@@ -882,6 +948,7 @@ window.KLB = window.KLB || {};
     `;
 
     el('btn-launch-campaign').onclick = () => startNewRun(selectedCharId, false);
+    lastDossierSpriteKey = '';
     drawDossierSprite();
   }
 
@@ -889,18 +956,26 @@ window.KLB = window.KLB || {};
   function drawDossierSprite() {
     const cv = el('dossier-sprite-canvas');
     if (!cv) return;
-    const ctx = cv.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, 64, 96);
     if (!spritePreviewCache[selectedCharId]) {
       const im = new Image();
+      im.onload = () => {
+        lastDossierSpriteKey = '';
+        drawDossierSprite();
+      };
       im.src = `assets/sprites/${selectedCharId}.png`;
       spritePreviewCache[selectedCharId] = im;
     }
     const img = spritePreviewCache[selectedCharId];
-    if (img.complete && img.naturalWidth > 0) {
-      const dirRow = Math.floor(dossierAnimTimer / 1.6) % 4;
-      const frameCol = Math.floor(dossierAnimTimer * 5) % 4;
+    const loaded = Boolean(img.complete && img.naturalWidth > 0);
+    const dirRow = Math.floor(dossierAnimTimer / 1.6) % 4;
+    const frameCol = Math.floor(dossierAnimTimer * 5) % 4;
+    const key = `${selectedCharId}:${dirRow}:${frameCol}:${loaded ? 1 : 0}`;
+    if (key === lastDossierSpriteKey) return;
+    lastDossierSpriteKey = key;
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, 64, 96);
+    if (loaded) {
       ctx.drawImage(img, frameCol * 64, dirRow * 96, 64, 96, 0, 0, 64, 96);
     }
   }
@@ -934,6 +1009,12 @@ window.KLB = window.KLB || {};
     state.fridayFinalAuditDone = false;
     state._pendingChoiceEventId = null;
     state._alexEncounteredToday = false;
+    state._proofreadReportUsed = false;
+    state._proofreadMsUsed = false;
+    state._benchTcepTriedSteps = {};
+    state._lastCoffeeBreakMins = null;
+    state._lastTeaBreakMins = null;
+    state._lastGamingBreakMins = null;
     state.prep = state.prep || {};
     state.prep.ph_calibrated = false;
     state._stepPrepCredit = {};
@@ -955,6 +1036,20 @@ window.KLB = window.KLB || {};
     lastTravelRoomSig = '';
     lastTaskPanelSig = '';
     lastReactionsSig = '';
+    lastPauseUiSig = '';
+    lastMuteUiSig = '';
+    lastSpecFollowSig = '';
+    lastAlertBannerSig = '';
+    lastHoverHintText = '';
+    lastCanvasRenderTs = 0;
+    lastRenderModalPaused = false;
+    const waFeedEl = el('wa-feed');
+    if (waFeedEl) waFeedEl.textContent = '';
+    const lbPaneEl = el('labbook-scroll');
+    if (lbPaneEl) {
+      delete lbPaneEl.dataset.specRosterWeek;
+      lbPaneEl.textContent = '';
+    }
     specSpeed = 1;
     specFollowNpcId = null;
     specCameraPos = null;
@@ -990,7 +1085,7 @@ window.KLB = window.KLB || {};
       );
     } else {
       setPaused(false);
-      showAlertBanner('Autonomous Lab Observer active — watch all 10 Big-Chuds, Archie & neighbours run KLB.', 4200, false);
+      showAlertBanner('Autonomous Lab Observer active: watch all 10 Big-Chuds, Archie & neighbours run KLB.', 4200, false);
     }
   }
 
@@ -1007,6 +1102,24 @@ window.KLB = window.KLB || {};
     state.gameOver = false;
     state.victory = false;
     state.postAuditCelebration = false;
+    state.weekNum = Number.isFinite(Number(state.weekNum)) ? Math.max(1, Math.round(Number(state.weekNum))) : 1;
+    state.dayIdx = Number.isFinite(Number(state.dayIdx)) ? clamp(Math.round(Number(state.dayIdx)), 0, 4) : 0;
+    state.timeMins = Number.isFinite(Number(state.timeMins)) ? clamp(Number(state.timeMins), 0, 24 * 60) : 540;
+    state.energy = Number.isFinite(Number(state.energy)) ? clamp(Number(state.energy), 0, 100) : 92;
+    state.morale = Number.isFinite(Number(state.morale)) ? clamp(Number(state.morale), 0, 100) : 50;
+    state.social = Number.isFinite(Number(state.social)) ? clamp(Number(state.social), 0, 100) : 84;
+    state.patience = Number.isFinite(Number(state.patience)) ? clamp(Number(state.patience), 0, 100) : 82;
+    const condRaw = Number.isFinite(Number(state.labCondition))
+      ? Number(state.labCondition)
+      : (Number.isFinite(Number(state.safety)) ? Number(state.safety) : 95);
+    state.labCondition = clamp(condRaw, 0, 100);
+    state.safety = state.labCondition;
+    state.favours = Number.isFinite(Number(state.favours)) ? clamp(Math.floor(Number(state.favours)), 0, 6) : 1;
+    state.tempC = Number.isFinite(Number(state.tempC)) ? Number(state.tempC) : 21.0;
+    state.weeklyReportProgress = Number.isFinite(Number(state.weeklyReportProgress)) ? clamp(Number(state.weeklyReportProgress), 0, 100) : 0;
+    state.manuscriptProgress = Number.isFinite(Number(state.manuscriptProgress)) ? clamp(Number(state.manuscriptProgress), 0, 100) : 0;
+    state.campaignStepIdx = Number.isFinite(Number(state.campaignStepIdx)) ? clamp(Math.floor(Number(state.campaignStepIdx)), 0, 5) : 0;
+    state.campaignSubTaskIdx = Number.isFinite(Number(state.campaignSubTaskIdx)) ? Math.max(0, Math.floor(Number(state.campaignSubTaskIdx))) : 0;
     state.activeStationJobs = Array.isArray(state.activeStationJobs) ? state.activeStationJobs : [];
     state.activeReactions = state.activeStationJobs;
     state.completedSteps = Array.isArray(state.completedSteps) ? state.completedSteps : [];
@@ -1021,9 +1134,16 @@ window.KLB = window.KLB || {};
     }
     state.mutators = state.mutators || {};
     state._stepPrepCredit = state._stepPrepCredit || {};
+    state._proofreadReportUsed = Boolean(state._proofreadReportUsed);
+    state._proofreadMsUsed = Boolean(state._proofreadMsUsed);
+    state._benchTcepTriedSteps = state._benchTcepTriedSteps && typeof state._benchTcepTriedSteps === 'object' ? state._benchTcepTriedSteps : {};
     state.slideDeck = state.slideDeck || { ready: false, framing: 'mechanistic', fig1Id: null, fig2Id: null, honestDisclosure: true };
     state.fireAlarm = state.fireAlarm || { active: false, remainingMins: 0, elapsedMins: 0 };
+    state.fireAlarm.remainingMins = Number.isFinite(Number(state.fireAlarm.remainingMins)) ? Math.max(0, Number(state.fireAlarm.remainingMins)) : 0;
+    state.fireAlarm.elapsedMins = Number.isFinite(Number(state.fireAlarm.elapsedMins)) ? Math.max(0, Number(state.fireAlarm.elapsedMins)) : 0;
     state.safetySweep = state.safetySweep || { active: false, countdownSec: 0, countdownMins: 0 };
+    state.safetySweep.countdownSec = Number.isFinite(Number(state.safetySweep.countdownSec)) ? Math.max(0, Number(state.safetySweep.countdownSec)) : 0;
+    state.safetySweep.countdownMins = Number.isFinite(Number(state.safetySweep.countdownMins)) ? Math.max(0, Number(state.safetySweep.countdownMins)) : 0;
     state.doorPls = state.doorPls && typeof state.doorPls === 'object'
       ? Object.assign({ active: false, requesterId: null, expireMins: 0 }, state.doorPls)
       : { active: false, requesterId: null, expireMins: 0 };
@@ -1045,8 +1165,20 @@ window.KLB = window.KLB || {};
     if (typeof state.fridayFinalAuditDone !== 'boolean') {
       state.fridayFinalAuditDone = false;
     }
+    if (!window.KLB.WORLD_MAPS?.rooms?.[state.player.roomId]) {
+      state.player.roomId = 'klb_2f';
+    }
+    const pSpawnFallback = window.KLB.ROOM_META?.[state.player.roomId]?.entrySpawn || { x: 27, y: 12 };
+    if (!Number.isFinite(Number(state.player.x))) state.player.x = pSpawnFallback.x;
+    if (!Number.isFinite(Number(state.player.y))) state.player.y = pSpawnFallback.y;
     for (const npc of Object.values(state.npcs || {})) {
-      if (npc?.sim) {
+      if (!npc) continue;
+      if (npc.roomId && npc.roomId !== 'offsite') {
+        const nSpawn = window.KLB.ROOM_META?.[npc.roomId]?.entrySpawn || { x: 10, y: 10 };
+        if (!Number.isFinite(Number(npc.x))) npc.x = nSpawn.x;
+        if (!Number.isFinite(Number(npc.y))) npc.y = nSpawn.y;
+      }
+      if (npc.sim) {
         npc.sim.activeRxn = npc.sim.activeJob || null;
       }
     }
@@ -1058,23 +1190,33 @@ window.KLB = window.KLB || {};
     state.player.autoPath = null;
     state.player.walkTarget = null;
     state.player.pendingInteract = null;
-    if (!window.KLB.WORLD_MAPS?.rooms?.[state.player.roomId]) {
-      state.player.roomId = 'klb_2f';
-    }
     selectedCharId = state.player.id;
     const activeMutKey = Object.keys(state.mutators || {}).find(k => state.mutators[k]);
     selectedMutator = activeMutKey || 'none';
     populateMutatorSelect();
 
-    const lastWa = state.whatsapp[state.whatsapp.length - 1];
-    lastWaMsgId = lastWa ? lastWa.id : null;
-    lastWaCount = state.whatsapp.length;
+    lastWaMsgId = null;
+    lastWaCount = 0;
     unreadWaCount = 0;
     lastLabBookSig = '';
     lastArchiveSig = '';
     lastTravelRoomSig = '';
     lastTaskPanelSig = '';
     lastReactionsSig = '';
+    lastPauseUiSig = '';
+    lastMuteUiSig = '';
+    lastSpecFollowSig = '';
+    lastAlertBannerSig = '';
+    lastHoverHintText = '';
+    lastCanvasRenderTs = 0;
+    lastRenderModalPaused = false;
+    const waFeedEl = el('wa-feed');
+    if (waFeedEl) waFeedEl.textContent = '';
+    const lbPaneEl = el('labbook-scroll');
+    if (lbPaneEl) {
+      delete lbPaneEl.dataset.specRosterWeek;
+      lbPaneEl.textContent = '';
+    }
     specSpeed = 1;
     specFollowNpcId = null;
     specCameraPos = null;
@@ -1097,10 +1239,10 @@ window.KLB = window.KLB || {};
     syncPauseButtonUI();
     syncMuteButtonUI();
     setActiveDeckTab('whatsapp', { silent: true });
-    syncAllHUD(true);
 
     const meta = window.KLB.CAST_BY_ID[state.player.id];
     showAlertBanner(`Resumed ${meta.shortName}'s shift (${window.KLB.Sim.formatClock(state.dayIdx, state.timeMins)}).`, 3600, false);
+    syncAllHUD(true);
 
     if (state._pendingChoiceEventId) {
       const pendingEv = (window.KLB.RANDOM_EVENTS || []).find(e => e.id === state._pendingChoiceEventId);
@@ -1111,7 +1253,7 @@ window.KLB = window.KLB || {};
       }
     } else if (state.dayIdx === 4 && !state.fridayAuditDone && state.timeMins >= 9 * 60 && state.timeMins <= 585) {
       triggerFridayMorningWelcome();
-    } else if (state.dayIdx === 4 && state.timeMins >= 18 * 60) {
+    } else if (state.dayIdx === 4 && (state.fridayFinalAuditDone || state.timeMins >= 18 * 60)) {
       endCurrentDay(false);
     }
   }
@@ -1246,7 +1388,7 @@ window.KLB = window.KLB || {};
               <ul>
                 <li><code>WASD / Arrows / Drag</code> Pan camera across the room</li>
                 <li><code>Click Character</code> Follow researcher across rooms</li>
-                <li><code>1 / 2 / 3</code> Switch simulation speed (1x / 2x / 3x)</li>
+                <li><code>1 / 2 / 3</code> Switch simulation speed (1x / 2x / 4x)</li>
                 <li><code>Space</code> Pause / Resume &middot; <code>M</code> Mute Audio</li>
               </ul>
             </section>
@@ -1388,6 +1530,9 @@ window.KLB = window.KLB || {};
     const btn = el('btn-pause-toggle');
     if (!btn || !state) return;
     const paused = Boolean(state.paused || state.isPaused);
+    const sig = paused ? '1' : '0';
+    if (sig === lastPauseUiSig) return;
+    lastPauseUiSig = sig;
     btn.classList.toggle('paused', paused);
     btn.innerHTML = `${icon(paused ? 'play' : 'pause', 14)}<span>${paused ? 'Resume' : 'Pause'}</span>`;
   }
@@ -1405,8 +1550,10 @@ window.KLB = window.KLB || {};
       },
       onSweepAlert: () => {
         if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('sweep_alert');
+        if (window.KLB.Sim?.loadArchive) archive = window.KLB.Sim.loadArchive();
       },
       onSpecialEvent: (type) => {
+        if (window.KLB.Sim?.loadArchive) archive = window.KLB.Sim.loadArchive();
         if (state?.spectatorMode) return;
         if (type === 'fire_alarm_test') {
           syncAudioAmbience();
@@ -1419,6 +1566,7 @@ window.KLB = window.KLB || {};
         }
       },
       onChoiceEvent: ev => {
+        if (window.KLB.Sim?.loadArchive) archive = window.KLB.Sim.loadArchive();
         if (!state?.spectatorMode) openRandomEventChoiceModal(ev);
       },
       onJobStatusChange: (job, prev, next) => {
@@ -1465,6 +1613,7 @@ window.KLB = window.KLB || {};
   let lastWarningSfxTs = 0;
   function showAlertBanner(text, ms = 4200, danger = false) {
     const b = el('live-alert-banner');
+    lastAlertBannerSig = '';
     b.className = danger ? 'danger' : '';
     b.innerHTML = `${icon(danger ? 'alert-triangle' : 'alert-circle', 14)}<span>${escHtml(text)}</span>`;
     b.classList.remove('hidden');
@@ -1488,6 +1637,7 @@ window.KLB = window.KLB || {};
       clearTimeout(alertTimeout);
       alertTimeout = null;
     }
+    lastAlertBannerSig = '';
     const b = el('live-alert-banner');
     if (b) {
       delete b.dataset.sticky;
@@ -1514,8 +1664,11 @@ window.KLB = window.KLB || {};
     if (!state || !state.activePlayerAction) return;
     const act = state.activePlayerAction;
     state.activePlayerAction = null;
-    if (act.kind === 'repurify_figure' && act.favourCost) {
-      state.favours = (Number(state.favours) || 0) + act.favourCost;
+    const refundCost = (act.kind === 'repurify_figure' || act.kind === 'fix_lcms')
+      ? (Number(act.favourCost) || (act.kind === 'repurify_figure' ? 2 : (act.priorityFlush ? 1 : 0)))
+      : 0;
+    if (refundCost > 0) {
+      addFavours(refundCost);
     }
     if (!silent) {
       if (act.kind === 'weekly_report') {
@@ -1523,7 +1676,9 @@ window.KLB = window.KLB || {};
       } else if (act.kind === 'manuscript_draft') {
         showAlertBanner(`Paused Manuscript Draft (${Math.round(state.manuscriptProgress || 0)}% saved).`, 2400, false);
       } else if (act.kind === 'repurify_figure') {
-        showAlertBanner(`Cancelled re-purification (refunded ${act.favourCost || 2} Favours).`, 2600, false);
+        showAlertBanner(`Cancelled re-purification (refunded ${refundCost || 2} Favours).`, 2600, false);
+      } else if (act.kind === 'fix_lcms' && refundCost > 0) {
+        showAlertBanner(`Cancelled priority LC-MS flush (refunded ${refundCost} Favour).`, 2600, false);
       } else {
         showAlertBanner(`Cancelled ${act.label || 'action'}.`, 2200, false);
       }
@@ -1942,15 +2097,15 @@ window.KLB = window.KLB || {};
     if (npc.id === 'marco_sabatini' && !state.prep.sabatini_tlc_jar) {
       actions.push({
         label: hasFavour
-          ? '[1] Borrow Sabatini Jar (1 Favour)'
-          : '[1] Borrow Sabatini Jar (Requires 1 Favour)',
+          ? "[1] Borrow Marco's Heirloom TLC Jar (1 Favour)"
+          : "[1] Borrow Marco's Heirloom TLC Jar (Requires 1 Favour)",
         primary: hasFavour,
         disabled: !hasFavour,
-        disabledTitle: 'Requires 1 Favour to borrow Sabatini Jar',
+        disabledTitle: "Requires 1 Favour to borrow Marco's heirloom TLC jar",
         onClick: () => {
           if ((Number(state.favours) || 0) < 1) return;
           if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
-          state.favours -= 1;
+          addFavours(-1);
           state.prep.sabatini_spritz = true;
           state.prep.sabatini_tlc_jar = true;
           state.prep.tlc_check = true;
@@ -1981,7 +2136,7 @@ window.KLB = window.KLB || {};
         onClick: () => {
           if ((Number(state.favours) || 0) < 1) return;
           if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
-          state.favours -= 1;
+          addFavours(-1);
           if (needLcmsHelp) state.lcmsBroken = false;
           state.prep.dry_solvent = true;
           const pLine = 'Dan, can I borrow dry stock and a favour?';
@@ -2090,7 +2245,7 @@ window.KLB = window.KLB || {};
             ],
             'max_tcep_borrow'
           );
-          showDialogue(npc.id, meta.name, 'Classic Max refusing to weigh TCEP. Here is 100 uL fresh pH 8.0 BBS-buffered 10 mM TCEP.', [{ label: '[1] Cheers', primary: true, onClick: closeDialogue }], true);
+          showDialogue(npc.id, meta.name, 'Classic Max refusing to weigh TCEP. Here is 100 µL fresh pH 8.0 BBS-buffered 10 mM TCEP.', [{ label: '[1] Cheers', primary: true, onClick: closeDialogue }], true);
           syncAllHUD(true);
         }
       });
@@ -2112,7 +2267,7 @@ window.KLB = window.KLB || {};
             state.player.roomId,
             [state.player.id, npc.id],
             [
-              { speakerId: state.player.id, line: 'Need a quick salve and Band-Aid.' },
+              { speakerId: state.player.id, line: 'Need a quick salve and plaster.' },
               { speakerId: npc.id, line: 'Sorted — shout on WhatsApp if you get stuck late!' }
             ],
             'nafsika_salve'
@@ -2132,7 +2287,7 @@ window.KLB = window.KLB || {};
           onClick: () => {
             if ((Number(state.favours) || 0) < 1) return;
             if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
-            state.favours -= 1;
+            addFavours(-1);
             state.prep.dry_solvent = true;
             staggerNpcExchange(
               state.player.roomId,
@@ -2167,10 +2322,11 @@ window.KLB = window.KLB || {};
             showAlertBanner('Finish or step away from your current action first.', 3000, false);
             return;
           }
-          state.favours -= 1;
+          addFavours(-1);
           state.activePlayerAction = {
             kind: 'fix_lcms',
             priorityFlush: true,
+            favourCost: 1,
             roomId: 'cib_lg11_ms',
             objId: 'obj_kersti_desk',
             x: npc.x,
@@ -2196,6 +2352,7 @@ window.KLB = window.KLB || {};
           state.activePlayerAction = {
             kind: 'fix_lcms',
             priorityFlush: false,
+            favourCost: 0,
             roomId: 'cib_lg11_ms',
             objId: 'obj_kersti_desk',
             x: npc.x,
@@ -2222,7 +2379,7 @@ window.KLB = window.KLB || {};
         onClick: () => {
           if ((Number(state.favours) || 0) < 1) return;
           if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
-          state.favours -= 1;
+          addFavours(-1);
           state.abilFineOwed = false;
           showDialogue(npc.id, meta.name, 'Fine waived. Take your tube from the Sample Fridge in the NMR room.', [{ label: '[1] Thanks Dr Aliev', primary: true, onClick: closeDialogue }], true);
           syncAllHUD(true);
@@ -2326,6 +2483,11 @@ window.KLB = window.KLB || {};
     if (state.prep?.tlc_check && !state._stepPrepCredit.tlc_check) {
       baseQuality += 3;
       state._stepPrepCredit.tlc_check = true;
+    }
+    if (state.prep?.sabatini_tlc_jar && state.prep?.tlc_check && !state._stepPrepCredit.sabatini_tlc_jar) {
+      baseQuality += 3;
+      baseYield += 3;
+      state._stepPrepCredit.sabatini_tlc_jar = true;
     }
     if (state.prep?.ph_calibrated && !state._stepPrepCredit.ph_calibrated) {
       baseQuality += 3;
@@ -2577,6 +2739,7 @@ window.KLB = window.KLB || {};
       const onTimeMS = state.dayIdx < 4 || (state.dayIdx === 4 && state.timeMins < 18 * 60);
       showAlertBanner(onTimeMS ? 'Manuscript Draft reached 100%! Ready ahead of Fri 18:00.' : 'Manuscript Draft reached 100%!', 3600, false);
     } else if (act.kind === 'gaming') {
+      state._lastGamingBreakMins = getMonotonicSimMins(state);
       const res = window.KLB.Sim.applyBreakEffects(state, 'gaming', hasColleaguesInRoom(state.player.roomId), state.timeMins);
       if (window.KLB.Audio) window.KLB.Audio.playSfx('lan_blip');
       const ggSender = state.player.id === 'maximillian_lee' ? 'peter_szijj' : 'maximillian_lee';
@@ -2588,13 +2751,14 @@ window.KLB = window.KLB || {};
       if (act.quartet) {
         state._quartetJoinedWindowKey = act.quartetWinKey || getCoffeeQuartetWindowKey(state);
         const isJoao = state.player.id === 'joao_nogueira';
+        const isMorningQuartet = act.quartetWinId === 'morning' || String(act.quartetWinKey || '').endsWith('_morning');
         const extraMorale = isJoao ? 16 : 0;
-        const favourGain = isJoao ? 2 : 1;
+        const favourGain = (isJoao && isMorningQuartet) ? 2 : 1;
         if (extraMorale > 0) {
           state.morale = Math.min(100, (Number(state.morale) || 0) + extraMorale);
         }
         state.patience = Math.min(100, state.patience + 6);
-        state.favours += favourGain;
+        addFavours(favourGain);
         const totalMoraleShown = (res.moraleDelta || 0) + extraMorale;
         const vijayOut = Boolean(state.mutators?.vijays_not_in);
         const quartetLead = vijayOut ? 'nafsika_forte' : 'vijay_chudasama';
@@ -2611,6 +2775,7 @@ window.KLB = window.KLB || {};
         );
         showAlertBanner(`Joined Coffee Quartet (+${res.energyDelta} Energy, +${totalMoraleShown} Morale, +${res.socialDelta} Social, +6 Patience, +${favourGain} Favour${favourGain > 1 ? 's' : ''}).`, 4200, false);
       } else {
+        state._lastCoffeeBreakMins = getMonotonicSimMins(state);
         showAlertBanner(`Gordon's coffee (+${res.energyDelta} Energy, +${res.moraleDelta} Morale, +${res.socialDelta} Social).`, 3400, false);
       }
       if (window.KLB.Audio) window.KLB.Audio.playSfx('sip');
@@ -2625,6 +2790,7 @@ window.KLB = window.KLB || {};
       if (window.KLB.Audio) window.KLB.Audio.playSfx('sip');
       showAlertBanner(`Ate packed lunch on 3F (+${res.energyDelta} Energy, +${res.moraleDelta} Morale, +${res.socialDelta} Social).`, 3400, false);
     } else if (act.kind === 'tea') {
+      state._lastTeaBreakMins = getMonotonicSimMins(state);
       const withCol = hasColleaguesInRoom('klb_3f');
       const res = window.KLB.Sim.applyBreakEffects(state, 'tea', withCol, state.timeMins);
       if (window.KLB.Audio) window.KLB.Audio.playSfx('sip');
@@ -2647,7 +2813,7 @@ window.KLB = window.KLB || {};
     } else if (act.kind === 'fix_lcms') {
       state.lcmsBroken = false;
       if (!act.priorityFlush) {
-        state.favours += 1;
+        addFavours(1);
       }
       if (window.KLB.Audio) window.KLB.Audio.playSfx('success');
       showAlertBanner(
@@ -2695,7 +2861,7 @@ window.KLB = window.KLB || {};
       state.prep.tcep_buffered = true;
       const grantFavour = !state._tcepFavourToday;
       state._tcepFavourToday = true;
-      if (grantFavour) state.favours += 1;
+      if (grantFavour) addFavours(1);
       if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('pipette');
       window.KLB.Sim.pushWhatsApp(state, state.player.id, 'Fresh 10 mM TCEP in pH 8.0 BBS + EDTA on the TCEP bench.');
       showAlertBanner(grantFavour ? 'Prepared fresh buffered TCEP (+1 Favour).' : 'Prepared fresh buffered TCEP.', 3400, false);
@@ -2991,8 +3157,12 @@ window.KLB = window.KLB || {};
                 onClick: () => {
                   if ((Number(state.favours) || 0) < 1) return;
                   if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('bay_swap');
-                  state.favours = Math.max(0, (Number(state.favours) || 0) - 1);
+                  addFavours(-1);
                   occupier.busyObjId = null;
+                  if (occupier.sim) {
+                    occupier.sim.currentAction = null;
+                    occupier.sim.pendingJobStart = null;
+                  }
                   closeDialogue();
                   showAlertBanner(`${occMeta.shortName} swapped bays with you (-1 Favour).`, 3200, false);
                   syncAllHUD(true);
@@ -3020,6 +3190,10 @@ window.KLB = window.KLB || {};
               window.KLB.Sim.spendWhatsAppMinutes(state, 5, simCallbacks());
               if (!state || state.dayIdx !== startDayIdx || state.fridayFinalAuditDone || state.gameOver || state.victory) return;
               occupier.busyObjId = null;
+              if (occupier.sim) {
+                occupier.sim.currentAction = null;
+                occupier.sim.pendingJobStart = null;
+              }
               showAlertBanner(`Waited 5m for your turn at ${obj.label || niceStationName(obj.type)} (0 Favours).`, 3200, false);
               syncAllHUD(true);
               launchWaitJob(step, sub, obj);
@@ -3035,7 +3209,35 @@ window.KLB = window.KLB || {};
     }
   }
 
-  function launchWaitJob(step, sub, obj) {
+  function launchWaitJob(step, sub, obj, opts = {}) {
+    const isUnbufferedMaxTcep = Boolean(
+      state.player.id === 'maximillian_lee' &&
+      !state.prep.tcep_buffered &&
+      (obj.type === 'tcep_bench' || /rebridg|tcep|stapling/i.test(`${sub.label} ${step.title}`))
+    );
+    if (isUnbufferedMaxTcep && !opts.confirmedUnbufferedTcep) {
+      showDialogue(
+        'maximillian_lee',
+        'Unbuffered Bench TCEP Warning',
+        'Your bench TCEP stock is unbuffered (pH ~5). Running this step now will cost -15 Quality and -14% Yield. Ask a labmate for buffered 10 mM TCEP first, or proceed anyway?',
+        [
+          {
+            label: '[1] Proceed with unbuffered bench TCEP (-15 Quality)',
+            onClick: () => {
+              closeDialogue();
+              launchWaitJob(step, sub, obj, Object.assign({}, opts, { confirmedUnbufferedTcep: true }));
+            }
+          },
+          {
+            label: '[2] Cancel & ask a labmate first',
+            primary: true,
+            onClick: closeDialogue
+          }
+        ]
+      );
+      return;
+    }
+
     prepareSubTaskExecution(step, sub, obj, () => {
       if (state.activePlayerAction) {
         showAlertBanner('Finish or step away from your current action first.', 3200, false);
@@ -3044,7 +3246,7 @@ window.KLB = window.KLB || {};
       let blueDyeMishap = false;
       if (state.player.id === 'peter_szijj' && state.energy < 30 && ['gel_tank', 'heatblock', 'tcep_bench'].includes(obj.type) && Math.random() < 0.45) {
         blueDyeMishap = true;
-        window.KLB.Sim.pushWhatsApp(state, 'peter_szijj', 'Noo I just pipetted 2 uL of blue SDS loading buffer into pure Fab stock at <30 Energy.');
+        window.KLB.Sim.pushWhatsApp(state, 'peter_szijj', 'Noo I just pipetted 2 µL of blue SDS loading buffer into pure Fab stock at <30 Energy.');
       }
 
       let tcepPenalty = false;
@@ -3057,7 +3259,7 @@ window.KLB = window.KLB || {};
       if (state.player.id === 'andre_shamsabadi' && obj.type === 'biotage') durMult = 0.8;
       else if (state.player.id === 'maximillian_lee' && obj.type === 'gel_tank') durMult = 0.5;
       else if (state.player.id === 'antoine_maruani' && (obj.type === 'centrifuge' || obj.type === 'biotage')) durMult = 0.75;
-      const sweetMult = state.mutators?.eternal_heatwave ? 0.8 : 1.0;
+      const sweetMult = (state.weatherMode === 'heatwave' || state.mutators?.eternal_heatwave) ? 0.8 : 1.0;
       const snap = calcStepMetrics(step, {
         blueDyeMishap,
         tcepPenalty,
@@ -3167,7 +3369,7 @@ window.KLB = window.KLB || {};
           const reqMeta = window.KLB.CAST_BY_ID?.[state.doorPls.requesterId];
           state.doorPls.active = false;
           if (reqMeta) {
-            state.favours += 1;
+            addFavours(1);
             state.morale = Math.min(100, state.morale + 6);
             if (window.KLB.Audio) window.KLB.Audio.playSfx('door_buzz');
             window.KLB.Sim.pushWhatsApp(state, reqMeta.id, `Cheers @${window.KLB.CAST_BY_ID[state.player.id].shortName} — thanks for buzzing the door (+1 Favour).`);
@@ -3300,9 +3502,10 @@ window.KLB = window.KLB || {};
         } else if (npcNmr.length) {
           queueLine = `TopSpin IconNMR queue: ${npcNmr.length} colleague tube${npcNmr.length === 1 ? '' : 's'} running across 400–700 MHz magnets.`;
         }
+        const rackGroup = state.player.id === 'archie_wall' ? 'Baker' : 'Chudasama';
         const fridgeNote = state.abilFineOwed
-          ? 'Notice: Uncollected tube logged in the LG1b Sample Fridge (check the Sample Fridge or speak with Dr Aliev).'
-          : 'Sample Fridge clear (no overdue Chudasama tubes).';
+          ? 'Notice: Uncollected tube logged in the LG1b Sample Fridge (speak with Dr Abil Aliev at his desk to release it).'
+          : `Sample Fridge clear (no overdue ${rackGroup} tubes).`;
         const heading = t === 'writeup_desk' ? "Dr Abil Aliev's Desk — CIB LG1b" : 'TopSpin 700 MHz Queue (LG1b)';
         showDialogue(
           'abil_aliev',
@@ -3319,24 +3522,17 @@ window.KLB = window.KLB || {};
     }
 
     if (obj.id === 'obj_nmr_fridge' || (state.player.roomId === 'cib_lg1b_nmr' && t === 'fridge_4c')) {
+      const rackGroup = state.player.id === 'archie_wall' ? 'Baker' : 'Chudasama';
       const readyNmrJob = (state.activeStationJobs || []).find(j => j.roomId === 'cib_lg1b_nmr' && (j.status === 'ready' || j.status === 'sweet'));
       if (state.abilFineOwed) {
-        state.abilFineOwed = false;
-        if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('success');
-        if (readyNmrJob) {
-          showAlertBanner('Collected held NMR tube from LG1b Sample Fridge (Abil fine cleared) and processed ready run!', 4000, false);
-          handleActiveStationJob(readyNmrJob);
-        } else {
-          showDialogue(
-            'abil_aliev',
-            'LG1b Sample Fridge — Tube Collected',
-            'Retrieved your overdue 5 mm NMR tube from the Chudasama rack and ticked the log sheet. Abil fine cleared.',
-            [{ label: '[1] Sorted', primary: true, onClick: closeDialogue }],
-            true,
-            'Sample Fridge Cleared'
-          );
-          syncAllHUD(true);
-        }
+        showDialogue(
+          'abil_aliev',
+          'LG1b Sample Fridge — Tube Held',
+          `Your uncollected NMR tube is locked in the ${rackGroup} rack (£130 fine). Speak with Dr Abil Aliev at his desk in LG1b first to waive or settle the fine.`,
+          [{ label: '[1] Speak to Abil', primary: true, onClick: closeDialogue }],
+          true,
+          'Fine Owed: Talk to Dr Aliev'
+        );
         return;
       }
       if (readyNmrJob) {
@@ -3346,7 +3542,7 @@ window.KLB = window.KLB || {};
       showDialogue(
         'abil_aliev',
         'LG1b Sample Fridge',
-        'Racks of capped 5 mm Wilmad NMR tubes sorted by group. Your Chudasama rack is tidy with no overdue tubes held by Dr Aliev.',
+        `Racks of capped 5 mm Wilmad NMR tubes sorted by group. Your ${rackGroup} rack is tidy with no overdue tubes held by Dr Aliev.`,
         [{ label: '[1] Close', primary: true, onClick: closeDialogue }],
         true,
         'CIB LG1b NMR Tube Storage'
@@ -3687,13 +3883,31 @@ window.KLB = window.KLB || {};
           }
         });
       }
+      const stepKey = String(state.campaignStepIdx ?? 0);
+      const benchTcepTried = Boolean(state._benchTcepTriedSteps?.[stepKey]);
       actions.push({
-        label: `[${actions.length + 1}] Check Unlabelled Bench Tube`,
+        label: benchTcepTried
+          ? `[${actions.length + 1}] Check Unlabelled Bench Tube (Already Checked This Step)`
+          : `[${actions.length + 1}] Check Unlabelled Bench Tube (5m)`,
+        disabled: benchTcepTried,
+        disabledTitle: 'Already checked the unlabelled bench tube during this step',
         onClick: () => {
+          if (state._benchTcepTriedSteps?.[stepKey]) return;
+          closeDialogue();
+          const startDayIdx = state.dayIdx;
+          window.KLB.Sim.spendWhatsAppMinutes(state, 5, simCallbacks());
+          if (!state || state.dayIdx !== startDayIdx || state.fridayFinalAuditDone || state.gameOver || state.victory) return;
+          state._benchTcepTriedSteps = state._benchTcepTriedSteps || {};
+          state._benchTcepTriedSteps[stepKey] = true;
           const ok = Math.random() < 0.78;
           state.prep.tcep_buffered = ok;
-          closeDialogue();
-          showAlertBanner(ok ? 'Unlabelled bench TCEP checked out at pH 8.0.' : 'Unbuffered TCEP (pH 5)! Re-prep or ask a labmate.', 3800, !ok);
+          showAlertBanner(
+            ok
+              ? 'Unlabelled bench TCEP checked out at pH 8.0 (-5m).'
+              : 'Unbuffered TCEP (pH 5)! Re-prep or ask a labmate (-5m).',
+            3800,
+            !ok
+          );
           syncAllHUD(true);
         }
       });
@@ -3974,11 +4188,18 @@ window.KLB = window.KLB || {};
       showAlertBanner('Finish or step away from your current action first.', 3000, false);
       return;
     }
+    const nowMono = getMonotonicSimMins(state);
+    const teaRem = (state._lastTeaBreakMins != null && nowMono >= state._lastTeaBreakMins && (nowMono - state._lastTeaBreakMins) < 60)
+      ? Math.max(1, Math.ceil(60 - (nowMono - state._lastTeaBreakMins)))
+      : 0;
     const actions = [
       {
-        label: '[1] Brew Yorkshire Tea',
-        primary: true,
+        label: teaRem > 0 ? `[1] Brew Yorkshire Tea (Cooldown ${teaRem}m)` : '[1] Brew Yorkshire Tea',
+        primary: teaRem <= 0,
+        disabled: teaRem > 0,
+        disabledTitle: teaRem > 0 ? `Yorkshire Tea break on cooldown (${teaRem}m left)` : '',
         onClick: () => {
+          if (teaRem > 0) return;
           closeDialogue();
           state.activePlayerAction = {
             kind: 'tea',
@@ -4173,7 +4394,7 @@ window.KLB = window.KLB || {};
       showAlertBanner('Finish or step away from your current action first.', 3000, false);
       return false;
     }
-    state.favours -= 2;
+    addFavours(-2);
     state.activePlayerAction = {
       kind: 'repurify_figure',
       figureId: fig.id,
@@ -4227,7 +4448,7 @@ window.KLB = window.KLB || {};
       </header>
       <div class="klb-modal-body">
         <div style="background:#070b12;border:1px solid var(--border-subtle);border-radius:8px;padding:10px;display:flex;justify-content:center;">
-          <canvas id="spectrum-modal-canvas" width="680" height="300" style="width:100%;max-width:680px;height:300px;"></canvas>
+          <canvas id="spectrum-modal-canvas" width="680" height="300" style="width:100%;max-width:680px;aspect-ratio:680/300;height:auto;"></canvas>
         </div>
         <p style="font-size:12.5px;color:#cbd5e1;">
           Notes: ${escHtml(item.notes || 'Recorded.')}
@@ -4422,11 +4643,22 @@ window.KLB = window.KLB || {};
       : 23;
     const camp = window.KLB.getCampaign(state.player.id);
     const hasFavour = (Number(state.favours) || 0) >= 1;
-    const proofreadTarget = (state.dayIdx <= 3 && wrPct < 100)
-      ? { key: 'weekly_report', name: 'Weekly Report' }
-      : (msPct < 100
-          ? { key: 'manuscript_draft', name: 'Manuscript Draft' }
-          : (wrPct < 100 ? { key: 'weekly_report', name: 'Weekly Report' } : null));
+    const nowMono = getMonotonicSimMins(state);
+    const gamingRem = (state._lastGamingBreakMins != null && nowMono >= state._lastGamingBreakMins && (nowMono - state._lastGamingBreakMins) < 60)
+      ? Math.max(1, Math.ceil(60 - (nowMono - state._lastGamingBreakMins)))
+      : 0;
+    const canProofReport = wrPct < 100 && !state._proofreadReportUsed;
+    const canProofMs = msPct < 100 && !state._proofreadMsUsed;
+    let proofreadTarget = null;
+    if (state.dayIdx <= 3 && wrPct < 100) {
+      proofreadTarget = canProofReport
+        ? { key: 'weekly_report', name: 'Weekly Report', used: false }
+        : (canProofMs ? { key: 'manuscript_draft', name: 'Manuscript Draft', used: false } : { key: 'weekly_report', name: 'Weekly Report', used: true });
+    } else if (msPct < 100) {
+      proofreadTarget = { key: 'manuscript_draft', name: 'Manuscript Draft', used: Boolean(state._proofreadMsUsed) };
+    } else if (wrPct < 100) {
+      proofreadTarget = { key: 'weekly_report', name: 'Weekly Report', used: Boolean(state._proofreadReportUsed) };
+    }
 
     const deskCards = [
       {
@@ -4436,7 +4668,8 @@ window.KLB = window.KLB || {};
         subline: wrPct >= 100 ? 'Submitted at 100%' : 'Full draft est: ~74m quiet / ~88m normal',
         tagText: wrPct >= 100 ? 'Complete' : `${wrPct}% | Due Thu 18:00`,
         tagCls: wrPct >= 100 ? 'good' : 'info',
-        disabled: wrPct >= 100
+        disabled: wrPct >= 100,
+        disabledTitle: 'Already completed at 100%'
       },
       {
         id: 'desk-manuscript',
@@ -4445,18 +4678,23 @@ window.KLB = window.KLB || {};
         subline: msPct >= 100 ? 'Complete at 100%' : 'Full draft est: ~94m quiet / ~114m normal',
         tagText: msPct >= 100 ? 'Complete' : `${msPct}% | Due Fri 18:00`,
         tagCls: msPct >= 100 ? 'good' : 'info',
-        disabled: msPct >= 100
+        disabled: msPct >= 100,
+        disabledTitle: 'Already completed at 100%'
       }
     ];
     if (proofreadTarget) {
+      const prDisabled = proofreadTarget.used || !hasFavour;
       deskCards.push({
         id: 'desk-peer-proofread',
         icon: 'sparkles',
         label: `Peer Proofread: ${proofreadTarget.name} (+18%, 0m)`,
-        subline: 'Have a labmate red-pen your schemes, tables, and experimental wording instantly.',
-        tagText: hasFavour ? '1 Favour' : 'Needs 1 Favour',
-        tagCls: hasFavour ? 'warn' : 'danger',
-        disabled: !hasFavour
+        subline: proofreadTarget.used
+          ? 'Already peer-proofread once this week (1x limit per document).'
+          : 'Have a labmate red-pen your schemes, tables, and experimental wording instantly.',
+        tagText: proofreadTarget.used ? 'Used (1/1)' : (hasFavour ? '1 Favour' : 'Needs 1 Favour'),
+        tagCls: proofreadTarget.used ? 'good' : (hasFavour ? 'warn' : 'danger'),
+        disabled: prDisabled,
+        disabledTitle: proofreadTarget.used ? 'Already peer-proofread this document once this week' : 'Requires 1 Favour for Peer Proofread'
       });
     }
     deskCards.push(
@@ -4465,9 +4703,10 @@ window.KLB = window.KLB || {};
         icon: 'gamepad-2',
         label: aoe2Active ? 'Join 17:00 AoE2 / Worms Lobby' : 'Play Video Game Break (AoE2 / Worms)',
         subline: '',
-        tagText: `${gamingMins}m`,
-        tagCls: aoe2Active ? 'good' : 'info',
-        disabled: false
+        tagText: gamingRem > 0 ? `Cooldown ${gamingRem}m` : `${gamingMins}m`,
+        tagCls: gamingRem > 0 ? 'warn' : (aoe2Active ? 'good' : 'info'),
+        disabled: gamingRem > 0,
+        disabledTitle: gamingRem > 0 ? `Gaming break on cooldown (${gamingRem}m left)` : ''
       },
       {
         id: 'desk-slides',
@@ -4480,14 +4719,16 @@ window.KLB = window.KLB || {};
       }
     );
     if (lunchWindow) {
+      const hadLunch = Boolean(state.hadLunchToday);
       deskCards.push({
         id: 'desk-packed-lunch',
         icon: 'utensils',
-        label: 'Eat Packed Lunch',
+        label: hadLunch ? 'Eat Packed Lunch (Already Had Lunch Today)' : 'Eat Packed Lunch',
         subline: '',
-        tagText: '19m',
+        tagText: hadLunch ? 'Done Today' : '19m',
         tagCls: 'good',
-        disabled: false
+        disabled: hadLunch,
+        disabledTitle: hadLunch ? 'Already had lunch today' : ''
       });
     }
     if (needClicker) {
@@ -4503,9 +4744,7 @@ window.KLB = window.KLB || {};
     }
 
     const cardsHtml = deskCards.map((c, idx) => {
-      const disTitle = c.disabled
-        ? (c.id === 'desk-peer-proofread' ? 'Requires 1 Favour for Peer Proofread' : 'Already completed at 100%')
-        : '';
+      const disTitle = c.disabled ? (c.disabledTitle || 'Unavailable') : '';
       return `
       <button id="${escHtml(c.id)}" type="button" class="ev-choice-card" data-hotkey="${idx + 1}" ${c.disabled ? `disabled title="${escHtml(disTitle)}"` : ''}>
         <div class="ev-choice-top">
@@ -4590,13 +4829,15 @@ window.KLB = window.KLB || {};
 
     if (proofreadTarget && el('desk-peer-proofread') && !el('desk-peer-proofread').disabled) {
       el('desk-peer-proofread').onclick = () => {
-        if ((Number(state.favours) || 0) < 1) return;
-        state.favours -= 1;
+        if ((Number(state.favours) || 0) < 1 || proofreadTarget.used) return;
+        addFavours(-1);
         let updatedPct = 0;
         if (proofreadTarget.key === 'weekly_report') {
+          state._proofreadReportUsed = true;
           state.weeklyReportProgress = clamp((state.weeklyReportProgress || 0) + 18, 0, 100);
           updatedPct = Math.round(state.weeklyReportProgress);
         } else {
+          state._proofreadMsUsed = true;
           state.manuscriptProgress = clamp((state.manuscriptProgress || 0) + 18, 0, 100);
           updatedPct = Math.round(state.manuscriptProgress);
         }
@@ -4615,29 +4856,32 @@ window.KLB = window.KLB || {};
       };
     }
 
-    el('desk-gaming').onclick = () => {
-      closeModal();
-      setPaused(false);
-      state.activePlayerAction = {
-        kind: 'gaming',
-        roomId: room,
-        objId: targetObj.id,
-        x: targetObj.x,
-        y: targetObj.y,
-        label: aoe2Active ? '17:00 AoE2 Lobby' : 'AoE2 Match',
-        shortLabel: 'AoE2 / Worms',
-        elapsedMins: 0,
-        targetMins: gamingMins
+    if (el('desk-gaming') && !el('desk-gaming').disabled) {
+      el('desk-gaming').onclick = () => {
+        closeModal();
+        setPaused(false);
+        state.activePlayerAction = {
+          kind: 'gaming',
+          roomId: room,
+          objId: targetObj.id,
+          x: targetObj.x,
+          y: targetObj.y,
+          label: aoe2Active ? '17:00 AoE2 Lobby' : 'AoE2 Match',
+          shortLabel: 'AoE2 / Worms',
+          elapsedMins: 0,
+          targetMins: gamingMins
+        };
+        if (window.KLB.Audio) window.KLB.Audio.playSfx('lan_blip');
+        showAlertBanner(aoe2Active ? `Joined 17:00 AoE2 / Worms lobby (${gamingMins}m).` : 'Playing AoE2 / Worms match (23m).', 2800, false);
+        syncAllHUD(true);
       };
-      if (window.KLB.Audio) window.KLB.Audio.playSfx('lan_blip');
-      showAlertBanner(aoe2Active ? `Joined 17:00 AoE2 / Worms lobby (${gamingMins}m).` : 'Playing AoE2 / Worms match (23m).', 2800, false);
-      syncAllHUD(true);
-    };
+    }
 
-    el('desk-slides').onclick = () => { closeModal(); openSlideBuilderOverlay(); };
+    el('desk-slides').onclick = () => { closeModal(); setPaused(false); openSlideBuilderOverlay(); };
 
-    if (el('desk-packed-lunch')) {
+    if (el('desk-packed-lunch') && !el('desk-packed-lunch').disabled) {
       el('desk-packed-lunch').onclick = () => {
+        if (state.hadLunchToday) return;
         closeModal();
         setPaused(false);
         state.activePlayerAction = {
@@ -4676,9 +4920,11 @@ window.KLB = window.KLB || {};
     }
     const targetObj = obj || { id: 'obj_uq590yz', x: 10, y: 1 };
     if (kind === 'coffee' && isQuartet) {
+      const qWin = window.KLB.Sim.isCoffeeQuartetWindow ? window.KLB.Sim.isCoffeeQuartetWindow(state) : null;
       state.activePlayerAction = {
         kind: 'coffee',
         quartet: true,
+        quartetWinId: qWin?.id || ((state.timeMins || 0) < 13 * 60 ? 'morning' : 'afternoon'),
         quartetWinKey: getCoffeeQuartetWindowKey(state),
         roomId: 'gordons_cafe',
         objId: targetObj.id,
@@ -4691,6 +4937,12 @@ window.KLB = window.KLB || {};
       };
       showAlertBanner("Sitting with Coffee Quartet at Gordon's Café (15m).", 3000, false);
     } else if (kind === 'coffee') {
+      const nowMono = getMonotonicSimMins(state);
+      if (state._lastCoffeeBreakMins != null && nowMono >= state._lastCoffeeBreakMins && (nowMono - state._lastCoffeeBreakMins) < 60) {
+        const rem = Math.max(1, Math.ceil(60 - (nowMono - state._lastCoffeeBreakMins)));
+        showAlertBanner(`Coffee break on cooldown (${rem}m left).`, 2800, false);
+        return;
+      }
       state.activePlayerAction = {
         kind: 'coffee',
         quartet: false,
@@ -4705,6 +4957,10 @@ window.KLB = window.KLB || {};
       };
       showAlertBanner("Having espresso at Gordon's Café (10m).", 2800, false);
     } else if (kind === 'lunch') {
+      if (state.hadLunchToday) {
+        showAlertBanner('Already had lunch today.', 2600, false);
+        return;
+      }
       state.activePlayerAction = {
         kind: 'lunch',
         roomId: 'gordons_cafe',
@@ -4738,35 +4994,51 @@ window.KLB = window.KLB || {};
     const quartetWinKey = quartetWin ? getCoffeeQuartetWindowKey(state) : '';
     const quartetJoined = quartetHere && state._quartetJoinedWindowKey === quartetWinKey;
     const lunchHours = hour >= 11.0 && hour <= 15.0;
+    const nowMono = getMonotonicSimMins(state);
+    const coffeeRem = (state._lastCoffeeBreakMins != null && nowMono >= state._lastCoffeeBreakMins && (nowMono - state._lastCoffeeBreakMins) < 60)
+      ? Math.max(1, Math.ceil(60 - (nowMono - state._lastCoffeeBreakMins)))
+      : 0;
 
     const menuItems = [];
     if (quartetHere) {
       const isJoao = state.player.id === 'joao_nogueira';
+      const isJoaoMorning = isJoao && quartetWin?.id === 'morning';
+      const cqNames = [
+        { id: 'joao_nogueira', name: 'João' },
+        { id: 'nafsika_forte', name: 'Nafsika' }
+      ];
+      if (!state.mutators?.vijays_not_in) cqNames.push({ id: 'vijay_chudasama', name: 'Vijay' });
+      cqNames.push({ id: 'faiza_javaid', name: 'Faiza' });
+      const otherNames = cqNames.filter(m => m.id !== state.player.id).map(m => m.name);
+      const cqListText = otherNames.length > 1
+        ? `${otherNames.slice(0, -1).join(', ')} & ${otherNames[otherNames.length - 1]}`
+        : (otherNames[0] || 'the crew');
+      const quartetPills = [
+        { text: '+Energy', icon: 'zap' },
+        { text: isJoao ? '+2x Morale' : '+Morale', icon: 'smile' },
+        { text: '+Social', icon: 'users' },
+        { text: '+6 Patience', icon: 'gauge' },
+        { text: isJoaoMorning ? '+2 Favours' : '+1 Favour', icon: 'award' }
+      ];
       menuItems.push({
         id: 'cafe-quartet',
         icon: 'coffee',
-        label: state.mutators?.vijays_not_in
-          ? 'Join Coffee Quartet (João, Nafsika & Faiza)'
-          : 'Join Coffee Quartet (João, Nafsika, Vijay & Faiza)',
+        label: `Join Coffee Quartet (${cqListText})`,
         duration: quartetJoined ? 'Joined' : '15m',
         durCls: quartetJoined ? 'good' : 'warn',
         disabled: quartetJoined,
-        pills: [
-          { text: '+Energy', icon: 'zap' },
-          { text: '+2x Morale', icon: 'smile' },
-          { text: '+Social', icon: 'users' },
-          { text: '+6 Patience', icon: 'gauge' },
-          { text: isJoao ? '+2 Favours' : '+1 Favour', icon: 'award' }
-        ]
+        disabledTitle: quartetJoined ? 'Already joined this Coffee Quartet session' : '',
+        pills: quartetPills
       });
     }
     menuItems.push({
       id: 'cafe-coffee',
       icon: 'coffee',
       label: 'Have Coffee (Double Flat White / Espresso)',
-      duration: '10m',
-      durCls: 'info',
-      disabled: false,
+      duration: coffeeRem > 0 ? `Cooldown ${coffeeRem}m` : '10m',
+      durCls: coffeeRem > 0 ? 'warn' : 'info',
+      disabled: coffeeRem > 0,
+      disabledTitle: coffeeRem > 0 ? `Coffee break on cooldown (${coffeeRem}m left)` : '',
       pills: [
         { text: '+Energy', icon: 'zap' },
         { text: '+Morale', icon: 'smile' },
@@ -4774,13 +5046,15 @@ window.KLB = window.KLB || {};
       ]
     });
     if (lunchHours) {
+      const hadLunch = Boolean(state.hadLunchToday);
       menuItems.push({
         id: 'cafe-lunch',
         icon: 'utensils',
-        label: 'Have Lunch (Warm Panini & Pastry)',
-        duration: '23m',
+        label: hadLunch ? 'Have Lunch (Already Had Lunch Today)' : 'Have Lunch (Warm Panini & Pastry)',
+        duration: hadLunch ? 'Done Today' : '23m',
         durCls: 'good',
-        disabled: false,
+        disabled: hadLunch,
+        disabledTitle: hadLunch ? 'Already had lunch today' : '',
         pills: [
           { text: '+Energy', icon: 'zap' },
           { text: '+Morale', icon: 'smile' },
@@ -4790,7 +5064,7 @@ window.KLB = window.KLB || {};
     }
 
     const menuHtml = menuItems.map((m, idx) => `
-      <button id="${escHtml(m.id)}" type="button" class="ev-choice-card" data-hotkey="${idx + 1}" ${m.disabled ? 'disabled title="Already joined this Coffee Quartet session"' : ''}>
+      <button id="${escHtml(m.id)}" type="button" class="ev-choice-card" data-hotkey="${idx + 1}" ${m.disabled ? `disabled title="${escHtml(m.disabledTitle || '')}"` : ''}>
         <div class="ev-choice-top">
           <div class="ev-choice-left">
             <span class="ev-choice-key">${idx + 1}</span>
@@ -4798,7 +5072,7 @@ window.KLB = window.KLB || {};
             <span class="ev-choice-label">${escHtml(m.label)}</span>
           </div>
           <span class="ev-choice-right">
-            <span class="klb-tag ${escHtml(m.durCls)}">${icon(m.duration === 'Joined' ? 'check-circle' : 'clock', 10)}<span>${escHtml(m.duration)}</span></span>
+            <span class="klb-tag ${escHtml(m.durCls)}">${icon(m.duration === 'Joined' || m.duration === 'Done Today' ? 'check-circle' : 'clock', 10)}<span>${escHtml(m.duration)}</span></span>
             <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
           </span>
         </div>
@@ -4836,14 +5110,17 @@ window.KLB = window.KLB || {};
       };
     }
 
-    el('cafe-coffee').onclick = () => {
-      closeModal();
-      setPaused(false);
-      startGordonAction('coffee', false, targetObj);
-    };
+    if (el('cafe-coffee') && !el('cafe-coffee').disabled) {
+      el('cafe-coffee').onclick = () => {
+        closeModal();
+        setPaused(false);
+        startGordonAction('coffee', false, targetObj);
+      };
+    }
 
-    if (el('cafe-lunch')) {
+    if (el('cafe-lunch') && !el('cafe-lunch').disabled) {
       el('cafe-lunch').onclick = () => {
+        if (state.hadLunchToday) return;
         closeModal();
         setPaused(false);
         startGordonAction('lunch', false, targetObj);
@@ -4856,12 +5133,69 @@ window.KLB = window.KLB || {};
     modalDismissable = true;
     modalEscapeHandler = () => { closeModal(); setPaused(false); };
 
+    if (state.postAuditCelebration) {
+      const curRoom = state.player.roomId;
+      const box = prepareModalBox('klb-modal', 'modal_open', 'klb-theme-directory');
+      box.innerHTML = `
+        <header class="klb-modal-header">
+          <div>
+            <h3>Week ${state.weekNum} Complete — Gordon's Café</h3>
+            <p class="mono-muted" style="margin-top:2px;">Final Friday Audit is wrapped. Start Week ${state.weekNum + 1} or stay and chat at Gordon's.</p>
+          </div>
+          <button id="btn-close-bloom" class="hud-btn">${icon('x', 14)}<span>Close</span></button>
+        </header>
+        <div class="klb-modal-body">
+          <div id="bloom-errands" class="ev-choices-list" style="margin-top:0;">
+            <button id="btn-bloom-next-week" type="button" class="ev-choice-card" data-hotkey="1">
+              <div class="ev-choice-top">
+                <div class="ev-choice-left">
+                  <span class="ev-choice-key">1</span>
+                  <span class="dir-icon-badge meeting">${icon('play', 16)}</span>
+                  <span class="ev-choice-label" style="color:#86efac;">Start Week ${state.weekNum + 1} (Monday)</span>
+                </div>
+                <span class="ev-choice-right">
+                  <span class="klb-tag good">Next Week</span>
+                  <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+                </span>
+              </div>
+            </button>
+            <button id="btn-bloom-stay-gordons" type="button" class="ev-choice-card" data-hotkey="2">
+              <div class="ev-choice-top">
+                <div class="ev-choice-left">
+                  <span class="ev-choice-key">2</span>
+                  <span class="dir-icon-badge cafe">${icon('coffee', 16)}</span>
+                  <span class="ev-choice-label">Stay at Gordon's</span>
+                </div>
+                <span class="ev-choice-right">
+                  <span class="klb-tag info">Continue</span>
+                  <span class="ev-choice-chevron">${icon('chevron-right', 14)}</span>
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+        <footer class="klb-modal-footer">
+          <span>Press 1–2 to choose</span>
+          <span class="modal-footer-pill">${icon('map-pin', 11)}<span>Current Room: ${escHtml(window.KLB.ROOM_META?.[curRoom]?.shortName || curRoom)}</span></span>
+        </footer>
+      `;
+      el('modal-backdrop').classList.remove('hidden');
+      el('btn-close-bloom').onclick = modalEscapeHandler;
+      el('btn-bloom-stay-gordons').onclick = modalEscapeHandler;
+      el('btn-bloom-next-week').onclick = () => {
+        closeModal();
+        setPaused(false);
+        startNextWeek();
+      };
+      return;
+    }
+
     const hour = state.timeMins / 60;
     const curRoom = state.player.roomId;
     const curSub = getCurrentSubTask();
     const quartetHere = Boolean(window.KLB.Sim.isCoffeeQuartetWindow(state));
     const lunchHighlight = hour >= 11.5 && hour <= 14.5 && !state.hadLunchToday;
-    const canEndDay = state.timeMins >= 18 * 60;
+    const canEndDay = !state.postAuditCelebration && state.timeMins >= 18 * 60;
     const errands = (window.KLB.BLOOMSBURY_ERRANDS || []).filter(er => er.targetRoom !== 'klb_3f');
 
     const dirBadgeMap = {
@@ -5071,7 +5405,7 @@ window.KLB = window.KLB || {};
         setPaused(false);
 
         if (readyCibJob) {
-          state.favours -= 1;
+          addFavours(-1);
           const job = removeStationJob(readyCibJob.id);
           const camp = window.KLB.getCampaign(state.player.id);
           const step = camp?.steps?.[job.stepIdx];
@@ -5107,7 +5441,7 @@ window.KLB = window.KLB || {};
             || { id: 'cib_remote', type: curSubNow.stationTypes?.[0] || 'nmr_magnet', x: 7, y: 8 };
           prepareSubTaskExecution(curStepNow, curSubNow, stationObj, () => {
             if ((Number(state.favours) || 0) < 1) return;
-            state.favours -= 1;
+            addFavours(-1);
             if (curSubNow.mode === 'wait') {
               const snap = calcStepMetrics(curStepNow, { stationType: stationObj.type });
               const job = {
@@ -5374,7 +5708,10 @@ window.KLB = window.KLB || {};
 
       const deltaEntries = [];
       deltaSpecs.forEach(([key, label, iconName]) => {
-        const val = Number(ch[key]) || 0;
+        let val = Number(ch[key]) || 0;
+        if (key === 'safetyDelta' && val < 0 && state.mutators?.strict_coshh) {
+          val = Math.round(val * 1.5);
+        }
         if (val) deltaEntries.push({ val, label, iconName });
       });
       deltaEntries.sort((a, bItem) => (bItem.val > 0 ? 1 : 0) - (a.val > 0 ? 1 : 0));
@@ -5404,7 +5741,7 @@ window.KLB = window.KLB || {};
         closeModal();
         setPaused(false);
         if (cost > 0) {
-          state.favours = Math.max(0, (Number(state.favours) || 0) - cost);
+          addFavours(-cost);
         }
         const mDelta = (ch.moraleDelta || 0) < 0 && state.player.id === 'calise_bahou' ? Math.round(ch.moraleDelta * 0.5) : (ch.moraleDelta || 0);
         const sDelta = (ch.safetyDelta || 0) < 0 && state.mutators?.strict_coshh ? Math.round(ch.safetyDelta * 1.5) : (ch.safetyDelta || 0);
@@ -5413,7 +5750,7 @@ window.KLB = window.KLB || {};
         state.energy = clamp(state.energy + (ch.energyDelta || 0), 0, 100);
         state.social = clamp((state.social ?? 84) + (ch.socialDelta || 0), 0, 100);
         state.patience = clamp(state.patience + (ch.patienceDelta || 0), 0, 100);
-        state.favours = Math.max(0, state.favours + (ch.favourDelta || 0));
+        addFavours(ch.favourDelta || 0);
         if (ch.clearsLcmsBroken) state.lcmsBroken = false;
         if (ch.setsAbilFine) state.abilFineOwed = true;
         if (ch.setsPrep && typeof ch.setsPrep === 'object') {
@@ -5514,7 +5851,7 @@ window.KLB = window.KLB || {};
 
   function triggerFridayMorningWelcome() {
     if (!state || state.spectatorMode || state.dayIdx !== 4 || state.fridayAuditDone) return;
-    state.activePlayerAction = null;
+    cancelActivePlayerAction(true);
     if (!el('modal-backdrop').classList.contains('hidden')) {
       window.KLB.Minigames?.abortActive?.();
       closeModal();
@@ -5642,10 +5979,11 @@ window.KLB = window.KLB || {};
       state.morningAuditResult = res;
     } else {
       state.fridayFinalAuditDone = true;
+      clearActiveRunSnapshot();
     }
     state.lastAuditResult = res;
 
-    if (res.passed && !continueMidFriday) {
+    if (res.passed && !continueMidFriday && (Number(state.patience) || 0) > 0) {
       archive = reconcileArchiveSafe(a => {
         a.clearedChars = a.clearedChars || {};
         const prev = a.clearedChars[state.player.id] || 0;
@@ -5667,7 +6005,7 @@ window.KLB = window.KLB || {};
     const auditMetrics = [
       { key: 'yieldScore', title: 'Yield & Steps', max: 2.0 },
       { key: 'homogeneityScore', title: 'Homogeneity', max: 2.0 },
-      { key: 'rigorScore', title: 'Analytical Rigor', max: 2.0 },
+      { key: 'rigorScore', title: 'Analytical Rigour', max: 2.0 },
       { key: 'manuscriptScore', title: 'Manuscript & Report', max: 1.5 },
       { key: 'hygieneScore', title: 'Slide Hygiene', max: 1.5 },
       { key: 'citizenshipScore', title: 'Citizenship', max: 1.0 }
@@ -5752,6 +6090,8 @@ window.KLB = window.KLB || {};
       el('btn-audit-gordons').onclick = () => {
         closeModal();
         setPaused(false);
+        window.KLB.Sim.checkPermadeath(state, simCallbacks());
+        if (state.gameOver) return;
         launchGordonsVictoryScene(res);
       };
     }
@@ -5759,12 +6099,13 @@ window.KLB = window.KLB || {};
       el('btn-audit-week-wrap').onclick = () => {
         closeModal();
         setPaused(false);
+        window.KLB.Sim.checkPermadeath(state, simCallbacks());
+        if (state.gameOver) return;
         launchGordonsVictoryScene(res);
       };
     }
 
     syncAllHUD(true);
-    window.KLB.Sim.checkPermadeath(state, simCallbacks());
   }
 
   function openAuditScoreCardReviewModal(res) {
@@ -5781,7 +6122,7 @@ window.KLB = window.KLB || {};
     const auditMetrics = [
       { key: 'yieldScore', title: 'Yield & Steps', max: 2.0 },
       { key: 'homogeneityScore', title: 'Homogeneity', max: 2.0 },
-      { key: 'rigorScore', title: 'Analytical Rigor', max: 2.0 },
+      { key: 'rigorScore', title: 'Analytical Rigour', max: 2.0 },
       { key: 'manuscriptScore', title: 'Manuscript & Report', max: 1.5 },
       { key: 'hygieneScore', title: 'Slide Hygiene', max: 1.5 },
       { key: 'citizenshipScore', title: 'Citizenship', max: 1.0 }
@@ -5893,6 +6234,19 @@ window.KLB = window.KLB || {};
     state._prevAoe2UsedToday = false;
     state._seenEventsThisWeek = {};
     state._weeklySigDone = {};
+    state._lastWeeklySigMins = -999;
+    state._lastWeeklySigDay = -1;
+    state._suppressWeatherRoll = false;
+    state.speechBubbles = [];
+    state._queuedBubbles = [];
+    state._queuedWaReplies = [];
+    state._proofreadReportUsed = false;
+    state._proofreadMsUsed = false;
+    state._benchTcepTriedSteps = {};
+    state._lastCoffeeBreakMins = null;
+    state._lastTeaBreakMins = null;
+    state._lastGamingBreakMins = null;
+    state.favours = Math.min(2, Math.max(0, Number(state.favours) || 0));
     state._sampleAskCooldowns = {};
     state.vijayRound = { active: false, checkedPlayer: false };
     state.doorPls = { active: false, requesterId: null, expireMins: 0 };
@@ -5905,9 +6259,10 @@ window.KLB = window.KLB || {};
     state.prep.oven_flask = false;
     state.prep.argon_balloon = false;
     state.prep.dry_solvent = false;
+    state.prep.bleach_bath = false;
     state.prep.tlc_check = false;
     state.prep.ph_calibrated = false;
-    state.prep.has_clicker = false;
+    state.prep.has_clicker = state.player.id !== 'andre_shamsabadi';
     state.prep.tcep_buffered = state.player.id !== 'maximillian_lee';
     state.prep.thiol_dirty = false;
     state.prep.uncapped_waste = false;
@@ -5979,6 +6334,13 @@ window.KLB = window.KLB || {};
       if (!npc) return;
       const spot = cafeSpots[idx % cafeSpots.length];
       npc.pendingRoomTravel = null;
+      npc.busyObjId = null;
+      npc.huddleLockTimer = 0;
+      npc.huddleTarget = null;
+      if (npc.sim) {
+        npc.sim.currentAction = null;
+        npc.sim.pendingJobStart = null;
+      }
       npc.roomId = 'gordons_cafe';
       npc.x = spot[0];
       npc.y = spot[1];
@@ -6124,7 +6486,7 @@ window.KLB = window.KLB || {};
     }
     if (state.gameOver) return;
     if (state.activePlayerAction) {
-      state.activePlayerAction = null;
+      cancelActivePlayerAction(true);
     }
 
     const prevRoom = navOpts?.fromRoom || state.player.roomId;
@@ -6138,7 +6500,7 @@ window.KLB = window.KLB || {};
       if (sampleRes?.asked) {
         state.social = clamp((state.social ?? 84) + 5, 0, 100);
         if (sampleRes.gaveSample) {
-          state.favours = (Number(state.favours) || 0) + 1;
+          addFavours(1);
           sampleBannerMsg = `${sampleRes.askLine} | ${sampleRes.responderName}: "${sampleRes.replyLine}" (+5 Social, +1 Favour)`;
         } else {
           sampleBannerMsg = `${sampleRes.askLine} | ${sampleRes.responderName}: "${sampleRes.replyLine}" (+5 Social)`;
@@ -6174,7 +6536,7 @@ window.KLB = window.KLB || {};
 
   function endCurrentDay(forcedCurfew = false) {
     if (!state || state.gameOver) return;
-    state.activePlayerAction = null;
+    cancelActivePlayerAction(true);
     state._pendingChoiceEventId = null;
     closeDialogue({ skipUnpause: true });
     if (!el('modal-backdrop').classList.contains('hidden')) {
@@ -6267,6 +6629,13 @@ window.KLB = window.KLB || {};
         state.weeklyReportChecked = false;
         state.manuscriptProgress = 0;
         state.manuscriptChecked = false;
+        state._seenEventsThisWeek = {};
+        state._weeklySigDone = {};
+        state._lastWeeklySigMins = -999;
+        state._lastWeeklySigDay = -1;
+        state.speechBubbles = [];
+        state._queuedBubbles = [];
+        state._queuedWaReplies = [];
         window.KLB.Sim.resetBigChudsWeeklySims?.(state);
       }
     } else {
@@ -6283,6 +6652,9 @@ window.KLB = window.KLB || {};
       state._salveToday = false;
       state._speakersMoraleToday = false;
       state._tcepFavourToday = false;
+      state._lastCoffeeBreakMins = null;
+      state._lastTeaBreakMins = null;
+      state._lastGamingBreakMins = null;
       state.npcChatCooldowns = {};
       state.prep = state.prep || {};
       state.prep.ph_calibrated = false;
@@ -6413,6 +6785,7 @@ window.KLB = window.KLB || {};
   }
 
   function closeModal() {
+    try { window.KLB.Minigames?.abortActive?.(); } catch (_) {}
     el('modal-backdrop').classList.add('hidden');
     const b = el('modal-box');
     if (b) {
@@ -6426,6 +6799,11 @@ window.KLB = window.KLB || {};
     }
     modalDismissable = true;
     modalEscapeHandler = null;
+    const focusTarget = lastFocusedEl;
+    lastFocusedEl = null;
+    if (focusTarget && typeof focusTarget.focus === 'function' && focusTarget.isConnected && !focusTarget.closest('.hidden')) {
+      focusTarget.focus();
+    }
   }
 
   function toggleSpecs() {
@@ -6568,7 +6946,7 @@ window.KLB = window.KLB || {};
       const viewRoom = getViewRoom();
       const rMeta = window.KLB.ROOM_META[viewRoom] || {};
       const sig = `spec:${viewRoom}`;
-      if (!force && sig === lastTaskPanelSig) return;
+      if (sig === lastTaskPanelSig) return;
       lastTaskPanelSig = sig;
       pin.className = 'pinned-objective';
       pin.innerHTML = `
@@ -6587,8 +6965,8 @@ window.KLB = window.KLB || {};
     const jobs = state.activeStationJobs || [];
 
     if (!curStep) {
-      const sig = `done:${Math.round(state.manuscriptProgress || 0)}:${state.slideDeck.ready ? 1 : 0}`;
-      if (!force && sig === lastTaskPanelSig) return;
+      const sig = `done:${Math.round(state.weeklyReportProgress || 0)}:${Math.round(state.manuscriptProgress || 0)}:${state.slideDeck.ready ? 1 : 0}`;
+      if (sig === lastTaskPanelSig) return;
       lastTaskPanelSig = sig;
       pin.className = 'pinned-objective done';
       pin.innerHTML = `
@@ -6616,7 +6994,7 @@ window.KLB = window.KLB || {};
       Array.from(activeJobMap.entries()).map(([id, j]) => `${id}:${j.status}`).join(',')
     ];
     const sig = sigParts.join('|');
-    if (!force && sig === lastTaskPanelSig) return;
+    if (sig === lastTaskPanelSig) return;
     lastTaskPanelSig = sig;
 
     pin.className = 'pinned-objective';
@@ -6670,7 +7048,7 @@ window.KLB = window.KLB || {};
         : '';
 
       return `
-        <li class="${rowCls}" data-subtask-idx="${idx}" ${(!isDone && (isActive || isRunning)) ? 'title="Click to auto-walk to this station"' : ''}>
+        <li class="${rowCls}" data-subtask-idx="${idx}" ${(!isDone && (isActive || isRunning)) ? 'tabindex="0" role="button" title="Click to auto-walk to this station"' : ''}>
           <div class="subtask-row-main">
             <span class="subtask-row-label">${icon(stIcon, 12)}<span>${escHtml(s.label)}</span></span>
             <span class="subtask-row-meta" data-subtask-meta="${escHtml(s.id)}">${escHtml(metaTxt)}</span>
@@ -6712,7 +7090,8 @@ window.KLB = window.KLB || {};
 
     const items = [];
     if (state.spectatorMode) {
-      const visRxns = window.KLB.Sim.getVisibleNPCReactions(state, viewRoom);
+      const visRxns = (window.KLB.Sim.getVisibleNPCReactions(state, viewRoom) || [])
+        .filter(r => !r.isAction && r.kind !== 'workup' && !String(r.id || '').startsWith('npc_act_'));
       visRxns.forEach(r => items.push(Object.assign({ _source: 'npc' }, r)));
     } else {
       (state.activeStationJobs || []).forEach(j => items.push(Object.assign({ _source: 'job' }, j)));
@@ -6740,10 +7119,12 @@ window.KLB = window.KLB || {};
     }
 
     el('active-timers-wrap')?.classList.toggle('hidden', items.length === 0);
+    el('reactions-panel')?.classList.toggle('hidden', items.length === 0);
 
     const sig = `${state.spectatorMode ? 'S' : 'P'}:${viewRoom}:` + items.map(it => `${it.id}:${it.status || 'running'}`).join('|');
-    if (!force && sig === lastReactionsSig) return;
+    if (sig === lastReactionsSig) return;
     lastReactionsSig = sig;
+    const prevScrollTop = rList.scrollTop;
 
     countLbl.textContent = `${items.length} running`;
     if (!items.length) {
@@ -6770,7 +7151,7 @@ window.KLB = window.KLB || {};
       const bg = r.status === 'overcooked' ? '#ef4444' : (r.status === 'sweet' || r.status === 'ready') ? '#22c55e' : '#3b82f6';
       const clickableCls = !state.spectatorMode && r._source === 'job' ? ' clickable' : '';
       return `
-        <div class="rxn-card ${cls}${clickableCls}" data-timer-id="${escHtml(r.id)}" ${clickableCls ? 'title="Click to auto-walk to this station"' : ''}>
+        <div class="rxn-card ${cls}${clickableCls}" data-timer-id="${escHtml(r.id)}" ${clickableCls ? 'tabindex="0" role="button" title="Click to auto-walk to this station"' : ''}>
           <div class="rxn-card-top">
             <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ownerTag)}${escHtml(r.title || r.label)}</span>
             <span class="mono-muted" data-timer-status="${escHtml(r.id)}" style="font-size:10.5px;flex-shrink:0;">${escHtml(statusTxt)}</span>
@@ -6790,6 +7171,7 @@ window.KLB = window.KLB || {};
         };
       });
     }
+    rList.scrollTop = prevScrollTop;
   }
 
   function renderWeeklyDeliverables() {
@@ -6855,6 +7237,8 @@ window.KLB = window.KLB || {};
       if (deckRow) {
         deckRow.classList.add('clickable');
         deckRow.classList.toggle('ready', isFullReady);
+        if (!deckRow.hasAttribute('tabindex')) deckRow.setAttribute('tabindex', '0');
+        if (!deckRow.hasAttribute('role')) deckRow.setAttribute('role', 'button');
       }
       if (deckLbl) {
         deckLbl.textContent = deck.ready ? `Ready ${slidesCount}/4` : `${slidesCount}/4 Ready`;
@@ -6936,7 +7320,8 @@ window.KLB = window.KLB || {};
       renderWeeklyDeliverables();
     } else {
       const viewRoom = getViewRoom();
-      const visRxns = window.KLB.Sim.getVisibleNPCReactions(state, viewRoom);
+      const visRxns = (window.KLB.Sim.getVisibleNPCReactions(state, viewRoom) || [])
+        .filter(r => !r.isAction && r.kind !== 'workup' && !String(r.id || '').startsWith('npc_act_'));
       for (const r of visRxns) {
         const pct = getProgressPct(r);
         const bar = document.querySelector(`[data-timer-bar="${r.id}"]`);
@@ -6994,16 +7379,25 @@ window.KLB = window.KLB || {};
       const sweepText = state.player.roomId !== 'klb_2f'
         ? `SAFETY SWEEP IN LAB 230 (${secs}s) — Lab Condition: ${cond}%`
         : `SAFETY SWEEP IN ${secs}s — Specs: ${state.player.specsOn ? 'ON' : 'OFF'} | Headphones: ${state.player.headphonesOn ? 'ON' : 'OFF'} | Lab Condition: ${cond}%`;
-      b.className = 'danger';
-      b.dataset.sticky = '1';
-      b.innerHTML = `${icon('shield-check', 14)}<span>${escHtml(sweepText)}</span>`;
-      b.classList.remove('hidden');
+      const bannerSig = `sweep:${sweepText}`;
+      if (bannerSig !== lastAlertBannerSig) {
+        lastAlertBannerSig = bannerSig;
+        b.className = 'danger';
+        b.dataset.sticky = '1';
+        b.innerHTML = `${icon('shield-check', 14)}<span>${escHtml(sweepText)}</span>`;
+        b.classList.remove('hidden');
+      }
     } else if (!state.spectatorMode && state.fireAlarm?.active && (viewRoom === 'klb_2f' || viewRoom === 'klb_3f')) {
       const b = el('live-alert-banner');
-      b.className = 'danger';
-      b.dataset.sticky = '1';
-      b.innerHTML = `${icon('flame', 14)}<span>FIRE ALARM (${Math.ceil(state.fireAlarm.remainingMins)}m left) — Evacuate via the left fire exit!</span>`;
-      b.classList.remove('hidden');
+      const remMins = Math.ceil(state.fireAlarm.remainingMins);
+      const bannerSig = `fire:${remMins}`;
+      if (bannerSig !== lastAlertBannerSig) {
+        lastAlertBannerSig = bannerSig;
+        b.className = 'danger';
+        b.dataset.sticky = '1';
+        b.innerHTML = `${icon('flame', 14)}<span>FIRE ALARM (${remMins}m left) — Evacuate via the left fire exit!</span>`;
+        b.classList.remove('hidden');
+      }
     } else {
       const b = el('live-alert-banner');
       if (b && b.dataset.sticky === '1') {
@@ -7121,22 +7515,45 @@ window.KLB = window.KLB || {};
         const newNonSelfCount = newMsgs.filter(m => !m.isSelf).length;
         unreadWaCount += newNonSelfCount;
       }
+      const feed = el('wa-feed');
+      const nearBottom = feed ? (feed.scrollHeight - feed.scrollTop - feed.clientHeight) <= 48 : true;
+      const canAppend = Boolean(
+        feed &&
+        lastWaMsgId !== null &&
+        lastWaCount > 0 &&
+        waList.length > lastWaCount &&
+        feed.childElementCount === lastWaCount &&
+        waList[lastWaCount - 1]?.id === lastWaMsgId
+      );
+      const msgsToRender = canAppend ? waList.slice(lastWaCount) : waList;
+      const addedSelf = msgsToRender.some(m => m.isSelf);
+      if (feed) {
+        const frag = document.createDocumentFragment();
+        for (const m of msgsToRender) {
+          const row = document.createElement('div');
+          row.className = `wa-msg${m.isSelf ? ' self' : ''}`;
+          row.innerHTML = `
+            <img class="wa-avatar pixel-art" src="assets/portraits/${escHtml(m.senderId)}.png" onerror="this.style.display='none'" alt="" />
+            <div class="wa-bubble">
+              <div class="wa-meta">
+                <span style="color:${escHtml(m.color)}">${escHtml(m.senderName)}</span>
+                <span class="wa-time">${escHtml(m.timeStr)}</span>
+              </div>
+              <div>${escHtml(m.text)}</div>
+            </div>
+          `;
+          frag.appendChild(row);
+        }
+        if (!canAppend) {
+          feed.textContent = '';
+        }
+        feed.appendChild(frag);
+        if (!canAppend || nearBottom || force || addedSelf) {
+          feed.scrollTop = feed.scrollHeight;
+        }
+      }
       lastWaMsgId = latestId;
       lastWaCount = waList.length;
-      const feed = el('wa-feed');
-      feed.innerHTML = waList.map(m => `
-        <div class="wa-msg ${m.isSelf ? 'self' : ''}">
-          <img class="wa-avatar pixel-art" src="assets/portraits/${m.senderId}.png" onerror="this.style.display='none'" alt="" />
-          <div class="wa-bubble">
-            <div class="wa-meta">
-              <span style="color:${m.color}">${escHtml(m.senderName)}</span>
-              <span class="wa-time">${escHtml(m.timeStr)}</span>
-            </div>
-            <div>${escHtml(m.text)}</div>
-          </div>
-        </div>
-      `).join('');
-      feed.scrollTop = feed.scrollHeight;
     }
 
     const unreadEl = el('wa-unread-count');
@@ -7161,71 +7578,101 @@ window.KLB = window.KLB || {};
         return true;
       });
       const roster = rosterIds.map(id => ({ meta: window.KLB.CAST_BY_ID?.[id], npc: state.npcs?.[id] })).filter(x => x.meta && x.npc);
-      const sig = `spec:${specFollowNpcId || ''}:` + roster.map(x => `${x.npc.roomId}:${x.npc.currentTaskText || ''}:${x.npc.sim?.completedSteps?.length || ''}:${Math.round(x.npc.sim?.manuscriptProgress || 0)}:${Math.round(x.npc.sim?.weeklyReportProgress || 0)}:${Math.round(x.npc.sim?.energy || 0)}:${x.npc.sim?.auditResult?.total || ''}`).join('|');
-      if (!force && sig === lastLabBookSig) return;
+      const sig = `spec:${state.weekNum}:${specFollowNpcId || ''}:` + roster.map(x => `${x.npc.roomId}:${x.npc.currentTaskText || ''}:${x.npc.sim?.completedSteps?.length || ''}:${Math.round(x.npc.sim?.manuscriptProgress || 0)}:${Math.round(x.npc.sim?.weeklyReportProgress || 0)}:${Math.round(x.npc.sim?.energy || 0)}:${x.npc.sim?.auditResult?.total || ''}`).join('|');
+      if (sig === lastLabBookSig) return;
       lastLabBookSig = sig;
       const prevScrollTop = pane.scrollTop;
 
-      pane.innerHTML = `
-        <div class="sec-hdr"><h4>Autonomous Campus Roster</h4><span class="mono-muted">Click to Follow | Week ${state.weekNum}</span></div>
-        <ol class="step-list">
-          ${roster.map(({ meta, npc }) => {
-            const s = npc.sim || null;
-            const hasCampaignSim = Boolean(meta.playable && s && Array.isArray(s.completedSteps));
-            const auditTxt = hasCampaignSim && s.auditResult ? ` | Audit: ${s.auditResult.total.toFixed(1)}/10 (${s.auditResult.passed ? 'Pass' : 'Fail'})` : '';
-            const isFollowing = specFollowNpcId === npc.id;
-            const isOffsite = !npc.roomId || npc.roomId === 'offsite';
-            const roomLbl = isOffsite ? 'Offsite' : (window.KLB.ROOM_META[npc.roomId]?.shortName || npc.roomId);
-            const roleShort = (meta.role?.split('•')[1] || meta.role || 'Campus Staff').trim();
-            const statsLine = hasCampaignSim
-              ? `Steps: ${s.completedSteps.length}/5 | WR: ${Math.round(s.weeklyReportProgress || 0)}% | Ms: ${Math.round(s.manuscriptProgress || 0)}% | E: ${Math.round(s.energy ?? 80)} S: ${Math.round(s.social ?? 84)}${auditTxt}`
-              : roleShort;
-            return `
-              <li class="step-item spec-roster-card clickable ${hasCampaignSim && s.auditResult?.passed ? 'done' : ''} ${isFollowing ? 'following' : ''}" data-spec-npc="${escHtml(npc.id)}" title="Click to follow ${escHtml(meta.shortName)}">
-                <div style="flex:1;min-width:0;">
-                  <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                    <span>${escHtml(meta.name)} (${escHtml(roomLbl)})</span>
-                    ${isFollowing ? `<span class="klb-tag info">${icon('eye', 11)}<span>Following</span></span>` : ''}
+      const isMounted = pane.dataset.specRosterWeek === String(state.weekNum) && Boolean(pane.querySelector('[data-spec-npc]'));
+      if (!isMounted) {
+        pane.dataset.specRosterWeek = String(state.weekNum);
+        pane.innerHTML = `
+          <div class="sec-hdr"><h4>Autonomous Campus Roster</h4><span class="mono-muted">Click to Follow | Week ${state.weekNum}</span></div>
+          <ol class="step-list">
+            ${roster.map(({ meta, npc }) => {
+              const s = npc.sim || null;
+              const hasCampaignSim = Boolean(meta.playable && s && Array.isArray(s.completedSteps));
+              const auditTxt = hasCampaignSim && s.auditResult ? ` | Audit: ${s.auditResult.total.toFixed(1)}/10 (${s.auditResult.passed ? 'Pass' : 'Fail'})` : '';
+              const isFollowing = specFollowNpcId === npc.id;
+              const isOffsite = !npc.roomId || npc.roomId === 'offsite';
+              const roomLbl = isOffsite ? 'Offsite' : (window.KLB.ROOM_META[npc.roomId]?.shortName || npc.roomId);
+              const roleShort = (meta.role?.split('•')[1] || meta.role || 'Campus Staff').trim();
+              const statsLine = hasCampaignSim
+                ? `Steps: ${s.completedSteps.length}/5 | WR: ${Math.round(s.weeklyReportProgress || 0)}% | Ms: ${Math.round(s.manuscriptProgress || 0)}% | E: ${Math.round(s.energy ?? 80)} S: ${Math.round(s.social ?? 84)}${auditTxt}`
+                : roleShort;
+              return `
+                <li class="step-item spec-roster-card clickable ${hasCampaignSim && s.auditResult?.passed ? 'done' : ''} ${isFollowing ? 'following' : ''}" data-spec-npc="${escHtml(npc.id)}" tabindex="0" role="button" title="Click to follow ${escHtml(meta.shortName)}">
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                      <span data-spec-name="${escHtml(npc.id)}">${escHtml(meta.name)} (${escHtml(roomLbl)})</span>
+                      <span class="klb-tag info${isFollowing ? '' : ' hidden'}" data-spec-follow="${escHtml(npc.id)}">${icon('eye', 11)}<span>Following</span></span>
+                    </div>
+                    <div class="mono-muted" data-spec-task="${escHtml(npc.id)}" style="font-size:10.5px;">${escHtml(npc.currentTaskText || (isOffsite ? 'Offsite' : 'On campus'))}</div>
+                    <div class="mono-muted" data-spec-stats="${escHtml(npc.id)}" style="font-size:10.5px;">${escHtml(statsLine)}</div>
                   </div>
-                  <div class="mono-muted" style="font-size:10.5px;">${escHtml(npc.currentTaskText || (isOffsite ? 'Offsite' : 'On campus'))}</div>
-                  <div class="mono-muted" style="font-size:10.5px;">${escHtml(statsLine)}</div>
-                </div>
-              </li>
-            `;
-          }).join('')}
-        </ol>
-      `;
+                </li>
+              `;
+            }).join('')}
+          </ol>
+        `;
 
-      pane.querySelectorAll('[data-spec-npc]').forEach(cardEl => {
-        cardEl.onclick = () => {
-          const nid = cardEl.dataset.specNpc;
-          const npc = state.npcs?.[nid];
-          const meta = window.KLB.CAST_BY_ID?.[nid];
-          if (!npc) return;
-          if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
-          specFollowNpcId = nid;
-          if (npc.roomId && npc.roomId !== 'offsite' && window.KLB.WORLD_MAPS?.rooms?.[npc.roomId]) {
-            state.cameraRoomId = npc.roomId;
-            specCameraPos = { x: npc.x, y: npc.y };
-            if (window.KLB.Sim?.syncVisibleReactionsCache) {
-              window.KLB.Sim.syncVisibleReactionsCache(state);
+        pane.querySelectorAll('[data-spec-npc]').forEach(cardEl => {
+          cardEl.onclick = () => {
+            const nid = cardEl.dataset.specNpc;
+            const npc = state.npcs?.[nid];
+            const meta = window.KLB.CAST_BY_ID?.[nid];
+            if (!npc) return;
+            if (window.KLB.Audio?.playSfx) window.KLB.Audio.playSfx('ui_click');
+            specFollowNpcId = nid;
+            if (npc.roomId && npc.roomId !== 'offsite' && window.KLB.WORLD_MAPS?.rooms?.[npc.roomId]) {
+              state.cameraRoomId = npc.roomId;
+              specCameraPos = { x: npc.x, y: npc.y };
+              if (window.KLB.Sim?.syncVisibleReactionsCache) {
+                window.KLB.Sim.syncVisibleReactionsCache(state);
+              }
+              syncAudioAmbience();
+            } else {
+              showAlertBanner(`${meta?.shortName || nid} is currently offsite — camera will follow once on campus.`, 3000, false);
             }
-            syncAudioAmbience();
-          } else {
-            showAlertBanner(`${meta?.shortName || nid} is currently offsite — camera will follow once on campus.`, 3000, false);
-          }
-          syncSpecFollowBadge();
-          syncAllHUD(true);
-        };
-      });
+            syncSpecFollowBadge();
+            syncAllHUD(true);
+          };
+        });
+      } else {
+        for (const { meta, npc } of roster) {
+          const cardEl = pane.querySelector(`[data-spec-npc="${npc.id}"]`);
+          if (!cardEl) continue;
+          const s = npc.sim || null;
+          const hasCampaignSim = Boolean(meta.playable && s && Array.isArray(s.completedSteps));
+          const auditTxt = hasCampaignSim && s.auditResult ? ` | Audit: ${s.auditResult.total.toFixed(1)}/10 (${s.auditResult.passed ? 'Pass' : 'Fail'})` : '';
+          const isFollowing = specFollowNpcId === npc.id;
+          const isOffsite = !npc.roomId || npc.roomId === 'offsite';
+          const roomLbl = isOffsite ? 'Offsite' : (window.KLB.ROOM_META[npc.roomId]?.shortName || npc.roomId);
+          const roleShort = (meta.role?.split('•')[1] || meta.role || 'Campus Staff').trim();
+          const statsLine = hasCampaignSim
+            ? `Steps: ${s.completedSteps.length}/5 | WR: ${Math.round(s.weeklyReportProgress || 0)}% | Ms: ${Math.round(s.manuscriptProgress || 0)}% | E: ${Math.round(s.energy ?? 80)} S: ${Math.round(s.social ?? 84)}${auditTxt}`
+            : roleShort;
+          cardEl.classList.toggle('done', Boolean(hasCampaignSim && s.auditResult?.passed));
+          cardEl.classList.toggle('following', isFollowing);
+          const nameEl = cardEl.querySelector(`[data-spec-name="${npc.id}"]`);
+          if (nameEl) nameEl.textContent = `${meta.name} (${roomLbl})`;
+          const followEl = cardEl.querySelector(`[data-spec-follow="${npc.id}"]`);
+          if (followEl) followEl.classList.toggle('hidden', !isFollowing);
+          const taskEl = cardEl.querySelector(`[data-spec-task="${npc.id}"]`);
+          if (taskEl) taskEl.textContent = npc.currentTaskText || (isOffsite ? 'Offsite' : 'On campus');
+          const statsEl = cardEl.querySelector(`[data-spec-stats="${npc.id}"]`);
+          if (statsEl) statsEl.textContent = statsLine;
+        }
+      }
 
       pane.scrollTop = prevScrollTop;
       return;
     }
 
+    delete pane.dataset.specRosterWeek;
     const camp = window.KLB.getCampaign(state.player.id);
-    const sig = `${state.campaignStepIdx}:${state.completedSteps.join(',')}:${state.favours}:${state.labBook.map(f => `${f.id}:${Math.round(f.quality || 0)}`).join(',')}`;
-    if (!force && sig === lastLabBookSig) return;
+    const sig = `${state.player.id}:${state.campaignStepIdx}:${state.completedSteps.join(',')}:${state.favours}:${state.labBook.map(f => `${f.id}:${Math.round(f.quality || 0)}`).join(',')}`;
+    if (sig === lastLabBookSig) return;
     lastLabBookSig = sig;
     const prevScrollTop = pane.scrollTop;
 
@@ -7301,13 +7748,13 @@ window.KLB = window.KLB || {};
   function renderArchivePane(force = false) {
     const pane = el('archive-scroll');
     if (!pane || el('pane-archive').classList.contains('hidden')) return;
-    archive = window.KLB.Sim.loadArchive();
+    if (!archive) archive = window.KLB.Sim.loadArchive();
     const cleared = Object.entries(archive.clearedChars || {});
     const discoveredMap = archive.discoveredEvents || {};
     const discoveredIds = Object.keys(discoveredMap).sort();
     const totalEvents = (window.KLB.RANDOM_EVENTS || []).length || 32;
-    const sig = `${archive.totalRuns}:${archive.bestScore}:${cleared.length}:${discoveredIds.map(k => `${k}:${discoveredMap[k]}`).join(',')}`;
-    if (!force && sig === lastArchiveSig) return;
+    const sig = `${archive.totalRuns}:${archive.bestScore}:${cleared.map(([k, v]) => `${k}:${v}`).join(',')}:${discoveredIds.map(k => `${k}:${discoveredMap[k]}`).join(',')}`;
+    if (sig === lastArchiveSig) return;
     lastArchiveSig = sig;
     const prevScrollTop = pane.scrollTop;
 
@@ -7342,7 +7789,7 @@ window.KLB = window.KLB || {};
           const sc = archive.clearedChars?.[c.id];
           return `<li class="step-item ${sc !== undefined ? 'done' : ''}" style="justify-content:space-between;">
             <span>${escHtml(c.name)}</span>
-            <span class="mono-muted" style="color:${sc !== undefined ? '#86efac' : '#64748b'};">${sc !== undefined ? `${sc.toFixed(1)}/10` : 'Pending'}</span>
+            <span class="mono-muted" style="color:${sc !== undefined ? '#86efac' : '#94a3b8'};">${sc !== undefined ? `${sc.toFixed(1)}/10` : 'Pending'}</span>
           </li>`;
         }).join('')}
       </ol>
@@ -7380,9 +7827,13 @@ window.KLB = window.KLB || {};
       }
     }
 
-    if (roomId === 'meeting_room' && state.dayIdx === 4 && !state.fridayAuditDone) {
-      const proj = rm.objects.find(o => o.type === 'projector');
-      if (proj) pushTarget(proj, 'quest');
+    if (roomId === 'meeting_room' && state.dayIdx === 4 && !state.fridayFinalAuditDone) {
+      const morningWindow = !state.fridayAuditDone && state.timeMins <= 585;
+      const canWrapWeek = state.timeMins >= 16 * 60 || ((state.manuscriptProgress || 0) >= 100 && (state.completedSteps || []).length >= 5);
+      if (morningWindow || canWrapWeek) {
+        const proj = rm.objects.find(o => o.type === 'projector');
+        if (proj) pushTarget(proj, 'quest');
+      }
     }
 
     const curStep = getCurrentCampaignStep();
@@ -7444,6 +7895,8 @@ window.KLB = window.KLB || {};
       unreadWaCount = 0;
       const feed = el('wa-feed');
       if (feed) feed.scrollTop = feed.scrollHeight;
+    } else if (currentTab === 'archive' && window.KLB.Sim?.loadArchive) {
+      archive = window.KLB.Sim.loadArchive();
     }
     if (!opts.silent && window.KLB.Audio?.playSfx) {
       window.KLB.Audio.playSfx('slide_click');
@@ -7452,20 +7905,51 @@ window.KLB = window.KLB || {};
   }
 
   function bindGlobalEvents() {
-    document.querySelectorAll('select').forEach(sel => {
-      sel.addEventListener('change', () => sel.blur());
-    });
-
     el('select-mutator').onchange = () => {
       selectedMutator = el('select-mutator').value || 'none';
       if (window.KLB.Audio) window.KLB.Audio.playSfx('interact');
     };
     el('btn-spectator-mode').onclick = () => startNewRun('spectator', true);
 
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ' && e.code !== 'Space') return;
+      const target = e.target;
+      if (!target || ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable) return;
+      const roleBtn = target.closest?.('[role="button"]');
+      if (!roleBtn || roleBtn.getAttribute('aria-disabled') === 'true') return;
+      e.preventDefault();
+      roleBtn.click();
+    });
+
     window.addEventListener('keydown', e => {
       const modalOpen = !el('modal-backdrop').classList.contains('hidden');
       const activeTag = document.activeElement?.tagName;
       const titleVisible = !el('title-screen').classList.contains('hidden');
+
+      if (modalOpen && e.key === 'Tab') {
+        const modalBox = el('modal-box');
+        if (modalBox) {
+          const focusables = Array.from(modalBox.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+          )).filter(node => node.offsetParent !== null || node === document.activeElement);
+          if (focusables.length > 0) {
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey) {
+              if (document.activeElement === first || !modalBox.contains(document.activeElement)) {
+                e.preventDefault();
+                last.focus();
+              }
+            } else if (document.activeElement === last || !modalBox.contains(document.activeElement)) {
+              e.preventDefault();
+              first.focus();
+            }
+          } else {
+            e.preventDefault();
+          }
+        }
+        return;
+      }
 
       if (titleVisible && !modalOpen && (e.code === 'Enter' || e.code === 'NumpadEnter')) {
         if (!['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(activeTag) && !document.activeElement?.isContentEditable) {
@@ -7525,8 +8009,9 @@ window.KLB = window.KLB || {};
       if (!state || !el('title-screen').classList.contains('hidden')) return;
 
       if (e.code === 'Space' && !modalOpen) {
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'BUTTON' || ae.getAttribute?.('role') === 'button')) return;
         e.preventDefault();
-        if (document.activeElement?.tagName === 'SELECT') document.activeElement.blur();
         togglePause();
         return;
       }
@@ -7547,13 +8032,17 @@ window.KLB = window.KLB || {};
       el('world-canvas')?.classList.remove('spec-dragging');
     });
     window.addEventListener('beforeunload', () => {
+      window.KLB.Sim?.flushDialogueHistory?.();
       if (state && !state.spectatorMode && !state.gameOver && !state.postAuditCelebration) {
         saveActiveRunSnapshot(true);
       }
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden && state && !state.spectatorMode && !state.gameOver && !state.postAuditCelebration) {
-        saveActiveRunSnapshot(true);
+      if (document.hidden) {
+        window.KLB.Sim?.flushDialogueHistory?.();
+        if (state && !state.spectatorMode && !state.gameOver && !state.postAuditCelebration) {
+          saveActiveRunSnapshot(true);
+        }
       }
     });
 
@@ -7608,8 +8097,22 @@ window.KLB = window.KLB || {};
       };
     }
 
-    document.querySelectorAll('.deck-tab').forEach(tab => {
+    const deckTabs = Array.from(document.querySelectorAll('.deck-tab'));
+    deckTabs.forEach((tab, idx) => {
       tab.onclick = () => setActiveDeckTab(tab.dataset.tab);
+      tab.addEventListener('keydown', ev => {
+        if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const nextIdx = ev.key === 'ArrowRight'
+          ? (idx + 1) % deckTabs.length
+          : (idx - 1 + deckTabs.length) % deckTabs.length;
+        const nextTab = deckTabs[nextIdx];
+        if (nextTab) {
+          setActiveDeckTab(nextTab.dataset.tab);
+          nextTab.focus();
+        }
+      });
     });
 
     el('btn-wa-send').onclick = () => {
@@ -7687,13 +8190,13 @@ window.KLB = window.KLB || {};
         }
         const job = (state.activeStationJobs || []).find(j => j.canOvercook);
         if (!job) {
-          showAlertBanner('No quenchable reaction running to fridge (instrument runs cannot be pulled into 4 C).', 3400, false);
+          showAlertBanner('No quenchable reaction running to fridge (instrument runs cannot be pulled into 4 °C).', 3400, false);
           return;
         }
-        state.favours -= 1;
+        addFavours(-1);
         removeStationJob(job.id);
-        window.KLB.Sim.pushWhatsApp(state, state.player.id, '@Nafsika stuck offsite — can you pull my flask into the 4 C fridge?');
-        window.KLB.Sim.pushWhatsApp(state, 'nafsika_forte', 'Nafsika got it — pulled and tucked onto the 4 C shelf for you.');
+        window.KLB.Sim.pushWhatsApp(state, state.player.id, '@Nafsika stuck offsite — can you pull my flask into the 4 °C fridge?');
+        window.KLB.Sim.pushWhatsApp(state, 'nafsika_forte', 'Nafsika got it — pulled and tucked onto the 4 °C shelf for you.');
         const camp = window.KLB.getCampaign(state.player.id);
         const step = camp?.steps?.[job.stepIdx];
         const sub = step?.subTasks?.[job.subTaskIdx];
@@ -7704,7 +8207,7 @@ window.KLB = window.KLB || {};
             stationType: job.stationType,
             bonusQuality: bonusQ,
             bonusYield: Math.round(bonusQ * 0.8),
-            forceFlawNote: 'Remotely quenched and refrigerated at 4 C by Nafsika Forte.'
+            forceFlawNote: 'Remotely quenched and refrigerated at 4 °C by Nafsika Forte.'
           });
           state.curStepPerf = m;
           const moraleDelta = window.KLB.Sim.applyExperimentOutcomeToMorale(state, m.quality, m.yieldPct);
@@ -7930,99 +8433,103 @@ window.KLB = window.KLB || {};
   let hudTimer = 0;
   let fastBarTimer = 0;
   function masterLoop(now) {
-    const dt = Math.min(0.08, Math.max(0.001, (now - lastFrameTs) / 1000));
-    lastFrameTs = now;
+    try {
+      const dt = Math.min(0.08, Math.max(0.001, (now - lastFrameTs) / 1000));
+      lastFrameTs = now;
 
-    if (!el('title-screen').classList.contains('hidden')) {
-      dossierAnimTimer += dt;
-      drawDossierSprite();
-    } else if (state) {
-      const waCountBefore = (state.whatsapp || []).length;
-      if (state.spectatorMode) {
-        updateSpectatorCamera(dt);
-        let remDt = dt * Math.max(1, specSpeed);
-        const cbs = simCallbacks();
-        while (remDt > 1e-6 && state && !state.paused && !state.isPaused && !state.gameOver && !state.victory) {
-          const stepDt = Math.min(0.08, remDt);
-          window.KLB.Sim.tickRealTime(state, stepDt, cbs);
-          remDt -= stepDt;
+      if (!el('title-screen').classList.contains('hidden')) {
+        dossierAnimTimer += dt;
+        drawDossierSprite();
+      } else if (state) {
+        if (state.spectatorMode) {
+          updateSpectatorCamera(dt);
+          let remDt = dt * Math.max(1, specSpeed);
+          const cbs = simCallbacks();
+          while (remDt > 1e-6 && state && !state.paused && !state.isPaused && !state.gameOver && !state.victory) {
+            const stepDt = Math.min(0.08, remDt);
+            window.KLB.Sim.tickRealTime(state, stepDt, cbs);
+            remDt -= stepDt;
+          }
+        } else {
+          updatePlayerMovement(dt);
+          window.KLB.Sim.tickRealTime(state, dt, simCallbacks());
+          if (!state.paused && !state.isPaused && !state.gameOver && !state.postAuditCelebration) {
+            saveActiveRunSnapshot(false);
+          }
         }
-      } else {
-        updatePlayerMovement(dt);
-        window.KLB.Sim.tickRealTime(state, dt, simCallbacks());
-        if (!state.paused && !state.isPaused && !state.gameOver && !state.postAuditCelebration) {
-          saveActiveRunSnapshot(false);
+
+        const viewRoom = getViewRoom();
+        const target = getFacingTarget();
+        const hintText = state.spectatorMode
+          ? `Observing ${window.KLB.ROOM_META[viewRoom]?.shortName || viewRoom}${specSpeed > 1 ? ` (${specSpeed}x)` : ''}`
+          : target.npc
+            ? `Talk: ${window.KLB.CAST_BY_ID[target.npc.id]?.shortName || target.npc.id} [E]`
+            : target.obj
+              ? `Use: ${target.obj.label || (target.obj.type === 'chair' ? (viewRoom === 'meeting_room' ? 'Seminar Chair' : 'Desk Chair') : niceStationName(target.obj.type))} [E]`
+              : (window.KLB.ROOM_META[viewRoom]?.shortName || 'KLB');
+        if (hintText !== lastHoverHintText) {
+          lastHoverHintText = hintText;
+          el('hud-hover-hint').textContent = hintText;
+        }
+
+        const canvas = el('world-canvas');
+        if (window.KLB.Renderer25D?.render) {
+          const modalOpen = !el('modal-backdrop').classList.contains('hidden');
+          const isPausedNow = Boolean(state.paused || state.isPaused);
+          const throttleCanvas = modalOpen && isPausedNow;
+          const shouldRenderCanvas = !throttleCanvas || !lastRenderModalPaused || (now - lastCanvasRenderTs >= 66);
+          lastRenderModalPaused = throttleCanvas;
+          if (shouldRenderCanvas) {
+            lastCanvasRenderTs = now;
+            const roomJobs = state.spectatorMode ? [] : (state.activeStationJobs || []).filter(r => r.roomId === viewRoom);
+            const npcActivity = Array.isArray(state.npcReactions) ? state.npcReactions : [];
+
+            window.KLB.Renderer25D.render(canvas, {
+              room: window.KLB.WORLD_MAPS.rooms[viewRoom],
+              roomId: viewRoom,
+              timeMins: state.timeMins,
+              weather: state.weatherMode,
+              paused: isPausedNow,
+              modalOpen,
+              fireAlarmActive: state.fireAlarm.active,
+              lotrPlaying: state.lotrPlaying,
+              thiolDirty: Boolean(state.prep?.thiol_dirty),
+              phCalibrated: state.spectatorMode ? true : Boolean(state.prep?.ph_calibrated),
+              carryingProp: getPlayerCarryingProp(),
+              cameraTarget: state.spectatorMode ? specCameraPos : null,
+              player: state.spectatorMode ? null : state.player,
+              npcs: Object.values(state.npcs).filter(n => n.roomId === viewRoom),
+              activeStationJobs: roomJobs,
+              activeReactions: roomJobs,
+              activePlayerAction: state.spectatorMode ? null : state.activePlayerAction,
+              npcReactions: npcActivity,
+              highlightedObjId: state.spectatorMode ? null : (target.obj?.id || null),
+              highlightedNpcId: state.spectatorMode ? null : (target.npc?.id || null),
+              walkTarget: state.spectatorMode ? null : (state.player.walkTarget || null),
+              questTargetObjIds: computeWayfindingTargets(),
+              cameraZoom,
+              speechBubbles: state.speechBubbles.filter(b => b.roomId === viewRoom)
+            });
+          }
+        }
+
+        fastBarTimer += dt;
+        if (fastBarTimer >= 0.10) {
+          fastBarTimer = 0;
+          syncProgressBarsLightweight();
+        }
+
+        hudTimer += dt;
+        if (hudTimer >= 0.25) {
+          hudTimer = 0;
+          syncAllHUD(false);
         }
       }
-      const waListNow = state.whatsapp || [];
-      if (!state.spectatorMode && waListNow.length > waCountBefore) {
-        const addedWa = waListNow.slice(waCountBefore);
-        if (addedWa.some(m => !m.isSelf) && window.KLB.Audio?.playSfx) {
-          window.KLB.Audio.playSfx('whatsapp');
-        }
-      }
-
-      const viewRoom = getViewRoom();
-      const target = getFacingTarget();
-      el('hud-hover-hint').textContent = state.spectatorMode
-        ? `Observing ${window.KLB.ROOM_META[viewRoom]?.shortName || viewRoom}${specSpeed > 1 ? ` (${specSpeed}x)` : ''}`
-        : target.npc
-          ? `Talk: ${window.KLB.CAST_BY_ID[target.npc.id]?.shortName || target.npc.id} [E]`
-          : target.obj
-            ? `Use: ${target.obj.label || (target.obj.type === 'chair' ? (viewRoom === 'meeting_room' ? 'Seminar Chair' : 'Desk Chair') : niceStationName(target.obj.type))} [E]`
-            : (window.KLB.ROOM_META[viewRoom]?.shortName || 'KLB');
-
-      const canvas = el('world-canvas');
-      if (window.KLB.Renderer25D?.render) {
-        const modalOpen = !el('modal-backdrop').classList.contains('hidden');
-        const roomJobs = state.spectatorMode ? [] : (state.activeStationJobs || []).filter(r => r.roomId === viewRoom);
-        const npcRxns = window.KLB.Sim.getVisibleNPCReactions(state, viewRoom);
-        const npcActs = window.KLB.Sim.getVisibleNPCActions(state, viewRoom);
-        const seenNpcKeys = new Set(npcRxns.map(r => `${r.npcId || r.ownerId}:${r.objId || r.id}`));
-        const mergedNpcActivity = npcRxns.concat(npcActs.filter(a => !seenNpcKeys.has(`${a.npcId || a.ownerId}:${a.objId || a.id}`)));
-
-        window.KLB.Renderer25D.render(canvas, {
-          room: window.KLB.WORLD_MAPS.rooms[viewRoom],
-          roomId: viewRoom,
-          timeMins: state.timeMins,
-          weather: state.weatherMode,
-          paused: Boolean(state.paused || state.isPaused),
-          modalOpen,
-          fireAlarmActive: state.fireAlarm.active,
-          lotrPlaying: state.lotrPlaying,
-          thiolDirty: Boolean(state.prep?.thiol_dirty),
-          phCalibrated: Boolean(state.prep?.ph_calibrated),
-          carryingProp: getPlayerCarryingProp(),
-          cameraTarget: state.spectatorMode ? specCameraPos : null,
-          player: state.spectatorMode ? null : state.player,
-          npcs: Object.values(state.npcs).filter(n => n.roomId === viewRoom),
-          activeStationJobs: roomJobs,
-          activeReactions: roomJobs,
-          activePlayerAction: state.spectatorMode ? null : state.activePlayerAction,
-          npcReactions: mergedNpcActivity,
-          highlightedObjId: state.spectatorMode ? null : (target.obj?.id || null),
-          highlightedNpcId: state.spectatorMode ? null : (target.npc?.id || null),
-          walkTarget: state.spectatorMode ? null : (state.player.walkTarget || null),
-          questTargetObjIds: computeWayfindingTargets(),
-          cameraZoom,
-          speechBubbles: state.speechBubbles.filter(b => b.roomId === viewRoom)
-        });
-      }
-
-      fastBarTimer += dt;
-      if (fastBarTimer >= 0.10) {
-        fastBarTimer = 0;
-        syncProgressBarsLightweight();
-      }
-
-      hudTimer += dt;
-      if (hudTimer >= 0.25) {
-        hudTimer = 0;
-        syncAllHUD(false);
-      }
+    } catch (err) {
+      console.error('[KLB masterLoop]', err);
+    } finally {
+      requestAnimationFrame(masterLoop);
     }
-
-    requestAnimationFrame(masterLoop);
   }
 
   window.addEventListener('DOMContentLoaded', boot);

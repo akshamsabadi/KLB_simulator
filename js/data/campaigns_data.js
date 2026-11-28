@@ -307,7 +307,7 @@ window.KLB.CAMPAIGNS = {
               yieldMod: -7,
               purityMod: -9,
               safetyMod: -2,
-              outcomeText: 'Warm DCM causes partial transesterification.'
+              outcomeText: 'MeOH on silica causes partial methanolysis.'
             },
             {
               label: 'Dry MeCN at 21 °C; 0.5% AcOH/DCM silica run',
@@ -468,7 +468,7 @@ window.KLB.CAMPAIGNS = {
         id: 'dan_step_4',
         dayHint: 'Thu',
         title: 'Coat Gold Nanoparticles',
-        desc: 'Adsorb Cu-free BSA-TCO onto 40 nm gold and check mobility shift.',
+        desc: 'Adsorb Cu-free BSA-N3 onto 40 nm gold and check mobility shift.',
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
@@ -493,7 +493,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'dan_4_2',
-            label: 'Coat gold with BSA-TCO',
+            label: 'Coat gold with BSA-N3',
             roomId: 'klb_2f',
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
@@ -533,7 +533,7 @@ window.KLB.CAMPAIGNS = {
             canOvercook: false,
             triggersChoice: false,
             minigame: 'gel_load',
-            minigameConfig: { laneLabels: ['Ladder', 'Bare AuNP', 'PBS Fail', 'BSA-TCO'], gelMode: 'aunp_ruby' },
+            minigameConfig: { laneLabels: ['Ladder', 'Bare AuNP', 'PBS Fail', 'BSA-N3'], gelMode: 'aunp_ruby' },
             viewOutput: null,
             requiresJobFromPrev: false
           },
@@ -557,7 +557,7 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you coat 40 nm gold without aggregation?',
           options: [
             {
-              label: 'EDTA-treated BSA-TCO in 20 mM MES pH 5.2',
+              label: 'EDTA-treated BSA-N3 in 20 mM MES pH 5.2',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 10,
@@ -565,7 +565,7 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Ruby salt-stable particles with clean gel shift.'
             },
             {
-              label: 'EDTA-treated BSA-TCO in 20 mM MES pH 5.8',
+              label: 'EDTA-treated BSA-N3 in 20 mM MES pH 5.8',
               isOptimal: false,
               yieldMod: 3,
               purityMod: -5,
@@ -573,15 +573,15 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Slightly above pI lowers corona packing density.'
             },
             {
-              label: 'Untreated BSA-TCO in 10 mM citrate pH 5.2',
+              label: 'Untreated BSA-N3 in 10 mM citrate pH 5.2',
               isOptimal: false,
               yieldMod: -7,
               purityMod: -9,
               safetyMod: -2,
-              outcomeText: 'Trace metal ions slowly isomerise strained TCO.'
+              outcomeText: 'Trace divalent ions destabilise BSA-N3 corona.'
             },
             {
-              label: 'Untreated BSA-TCO in 1x PBS pH 7.4',
+              label: 'Untreated BSA-N3 in 1x PBS pH 7.4',
               isOptimal: false,
               yieldMod: -14,
               purityMod: -15,
@@ -589,12 +589,12 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'High ionic strength collapses citrate double layer.'
             }
           ],
-          askChudsHint: 'Peter: Coat just near BSA isoelectric pH with low ionic strength and chelate trace metals off TCO.',
-          antoineHint: 'Antoine: Low-salt MES right above pH 5 packs BSA densely while EDTA protects the trans-cyclooctene.'
+          askChudsHint: 'Peter: Coat just near BSA isoelectric pH with low ionic strength and chelate trace metals before SPAAC.',
+          antoineHint: 'Antoine: Low-salt MES right above pH 5 packs BSA-N3 densely while EDTA chelates stray metal ions.'
         },
         dataOutput: {
           type: 'gel',
-          label: 'Colloidal Mobility Shift Gel: 40 nm AuNP-BSA-TCO25',
+          label: 'Colloidal Mobility Shift Gel: 40 nm AuNP-BSA-N3',
           productPeak: 'Crisp ruby-red corona band (529 nm, zero well aggregation)',
           metricLabel: '52.2 nm Z-avg, salt-stable crimson AuNPs'
         }
@@ -604,7 +604,7 @@ window.KLB.CAMPAIGNS = {
         id: 'dan_step_5',
         dayHint: 'Thu/Fri',
         title: 'Assemble Lateral Flow Strips',
-        desc: 'Click Fab-BCN onto gold particles and run HER2 test strips.',
+        desc: 'Click FabHER2-BCN onto AuNP-BSA-N3 via SPAAC and run HER2 strips.',
         locationRoom: 'klb_2f',
         stationTypes: ['fridge_4c'],
         prepRequired: [],
@@ -629,7 +629,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'dan_5_2',
-            label: 'Click Fab onto gold',
+            label: 'SPAAC click Fab-BCN to AuNP-N3',
             roomId: 'klb_2f',
             stationTypes: ['tcep_bench'],
             cupboardHint: null,
@@ -1628,7 +1628,7 @@ window.KLB.CAMPAIGNS = {
         dataOutput: {
           type: 'nmr',
           label: 'Bruker 600 MHz 1H/13C NMR (CDCl3): Asymmetric Astra-PD',
-          productPeak: '4.92 ppm (d, 2H, propargyl), 2.34 ppm (t, 1H) and 98.8 ppm C=C',
+          productPeak: '4.92 ppm (d, 2H, propargyl), 2.34 ppm (t, 1H) and 98.8 ppm C≡C',
           metricLabel: '81% yield, orthogonal alkynes intact'
         }
       },
@@ -1763,7 +1763,7 @@ window.KLB.CAMPAIGNS = {
         dataOutput: {
           type: 'tlc',
           label: 'Ellman DTNB Audit & PDAR Check: Astra-PD Herceptin',
-          productPeak: 'Clean conjugated spot Rf = 0.45 (0.0 free -SH, A412 = 0.002)',
+          productPeak: 'A412 = 0.002 (0.0 free -SH, PDAR = 4.0)',
           metricLabel: 'PDAR = 4.0, zero free cysteines'
         }
       },
@@ -3577,7 +3577,7 @@ window.KLB.CAMPAIGNS = {
         dataOutput: {
           type: 'lcms',
           label: 'UPLC-MS Sialidase Cleavage Assay: CiTE vs BiTE',
-          productPeak: '309.1 Da free Neu5Ac release (92% desialylation)',
+          productPeak: '308.1 m/z [M-H]- free Neu5Ac release (92% desialylation)',
           metricLabel: '92% desialylation, active CiTE'
         }
       }
@@ -6289,7 +6289,7 @@ window.KLB.CAMPAIGNS = {
         dataOutput: {
           type: 'gel',
           label: 'Reducing SDS-PAGE: Regioselective HC Dha Antibody',
-          productPeak: 'Selective HC CH1 Cys to Dha with intact LC (DAR 6)',
+          productPeak: 'Selective HC interchain Cys (CH1 + hinge) to Dha with intact LC (DAR 6)',
           metricLabel: 'Safe CDMP Dha, regioselective DAR 6'
         }
       },
@@ -6419,7 +6419,7 @@ window.KLB.CAMPAIGNS = {
             }
           ],
           askChudsHint: 'Calise: Deprotonated thiolate drives sub-10-second gelation at pH 8, so pipette rapidly and verify thiol triggers.',
-          antoineHint: 'Antoine: Fast 2 s vortex/mix at pH 7.4-8.0 beats the 8 s gel point, and cysteamine proves 5DiH reversibility.'
+          antoineHint: 'Antoine: Fast 2 s vortex/mix at pH 7.4-8.0 beats the 8 s gel point, and cysteamine proves 5DiBr reversibility.'
         },
         dataOutput: {
           type: 'lcms',
@@ -7136,21 +7136,21 @@ window.KLB.CAMPAIGNS = {
   },
 
   // =========================================================================
-  // 11. ARCHIE WALL - Baker Group N-Aryl Dibromomaleimide HSA Cys34 Conjugates
+  // 11. ARCHIE WALL - Baker Group N-Aryl Maleimide HSA Cys34 Conjugates
   // =========================================================================
   archie_wall: {
     charId: 'archie_wall',
-    title: 'Site-Selective Dibromomaleimide HSA-Drug Conjugate Platform',
-    manuscriptTopic: 'Thiol-Selective Dibromomaleimide Conjugation on Human Serum Albumin Cys34',
-    paperRef: 'Wall, Nicholls, Caspersen, Skrivergaard, Howard, Karu, Chudasama & Baker, Org. Biomol. Chem. 2019, 17, 7870 (DOI: 10.1039/c9ob00721k); Smith, Schumacher, Ryan, Tedaldi, Papaioannou, Waksman, Caddick & Baker, J. Am. Chem. Soc. 2010, 132, 1960 (DOI: 10.1021/ja908610s)',
-    overview: 'Build an N-aryl dibromomaleimide linker, conjugate HSA Cys34 with balanced-rotor desalting, and verify plasma thiol stability.',
+    title: 'Site-Selective N-Aryl Maleimide HSA-Drug Conjugate Platform',
+    manuscriptTopic: 'Thiol-Selective N-Aryl Maleimide Conjugation on Human Serum Albumin Cys34',
+    paperRef: 'Wall, Nicholls, Caspersen, Skrivergaard, Howard, Karu, Chudasama & Baker, Org. Biomol. Chem. 2019, 17, 7870 (DOI: 10.1039/c9ob00721k)',
+    overview: 'Build an N-aryl maleimide linker, conjugate HSA Cys34 with balanced-rotor desalting, and lock the ring by hydrolysis.',
     steps: [
       {
         index: 0,
         id: 'archie_step_1',
         dayHint: 'Mon',
-        title: 'N-Aryl Dibromomaleimide Linker Synthesis',
-        desc: 'Condense dibromomaleic anhydride with arylamine in AcOH, strip solvent on Büchi, and run 1H NMR.',
+        title: 'N-Aryl Maleimide Linker Synthesis',
+        desc: 'Condense maleic anhydride with arylamine in AcOH, strip solvent on Büchi, and run 1H NMR.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
@@ -7251,7 +7251,7 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you form N-aryl dibromomaleimide cleanly?',
+          prompt: 'How do you form N-aryl maleimide cleanly?',
           options: [
             {
               label: 'Reflux AcOH 3 h, then toluene azeotrope dry',
@@ -7259,7 +7259,7 @@ window.KLB.CAMPAIGNS = {
               yieldMod: 10,
               purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Quantitative ring closure with both Br intact.'
+              outcomeText: 'Quantitative ring closure with 6.85 ppm alkene.'
             },
             {
               label: 'Reflux AcOH 1 h, then quick rotary strip',
@@ -7275,25 +7275,25 @@ window.KLB.CAMPAIGNS = {
               yieldMod: -6,
               purityMod: -9,
               safetyMod: -2,
-              outcomeText: 'Basic amine triggers nucleophilic debromination.'
+              outcomeText: 'Base triggers Michael polymerisation of maleimide.'
             },
             {
-              label: 'Heat aniline + DBM neat at 150 °C in open vial',
+              label: 'Heat aniline + maleic anhydride neat at 150 °C',
               isOptimal: false,
               yieldMod: -13,
               purityMod: -15,
               safetyMod: -5,
-              outcomeText: 'Thermal charring and HBr loss ruin maleimide.'
+              outcomeText: 'Thermal charring and side-polymer ruin maleimide.'
             }
           ],
-          askChudsHint: 'Nafsika: Glacial acetic acid drives imide ring closure smoothly, and co-evaporating with toluene removes trace acid without base.',
-          antoineHint: 'Antoine: Keep tertiary amines out during condensation so nucleophilic addition never strips the vinyl bromides.'
+          askChudsHint: 'Nafsika: Glacial acetic acid drives maleamic acid ring closure smoothly, and co-evaporating with toluene removes trace acid without base.',
+          antoineHint: 'Antoine: Keep nucleophilic bases out during cyclisation so the strained maleimide double bond never polymerises.'
         },
         dataOutput: {
           type: 'nmr',
-          label: '1H NMR (400 MHz, CDCl3): N-Aryl Dibromomaleimide',
-          productPeak: '7.36 ppm (d, 2H, Ar-H), 7.04 ppm (d, 2H, Ar-H), 3.68 ppm (t, 2H)',
-          metricLabel: '84% yield, 100% dibromo ring intact'
+          label: '1H NMR (400 MHz, CDCl3): N-Aryl Maleimide',
+          productPeak: '6.85 ppm (s, 2H, maleimide CH=CH), 7.36 ppm (d, 2H, Ar-H), 7.04 ppm (d, 2H, Ar-H)',
+          metricLabel: '84% yield, clean 6.85 ppm maleimide singlet'
         }
       },
       {
@@ -7301,7 +7301,7 @@ window.KLB.CAMPAIGNS = {
         id: 'archie_step_2',
         dayHint: 'Tue',
         title: 'Biotage Flash Isolation & Maleimide Stability Check',
-        desc: 'Purify the N-aryl dibromomaleimide linker on Biotage and audit pH 7.4 integrity by LC-MS.',
+        desc: 'Purify the N-aryl maleimide linker on Biotage and audit pH 7.4 integrity by LC-MS.',
         locationRoom: 'klb_2f',
         stationTypes: ['chem_cupboard'],
         prepRequired: [],
@@ -7401,7 +7401,7 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you isolate and stock the N-aryl dibromomaleimide?',
+          prompt: 'How do you isolate and stock the N-aryl maleimide?',
           options: [
             {
               label: 'Hexane/EtOAc Biotage; dry DMSO stock at -20 °C',
@@ -7409,7 +7409,7 @@ window.KLB.CAMPAIGNS = {
               yieldMod: 9,
               purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Pure 1:2:1 Br2 linker with zero pre-hydrolysis.'
+              outcomeText: 'Pure N-aryl maleimide with zero pre-hydrolysis.'
             },
             {
               label: 'Hexane/EtOAc Biotage; 1:1 MeCN/PBS bench stock',
@@ -7425,7 +7425,7 @@ window.KLB.CAMPAIGNS = {
               yieldMod: -7,
               purityMod: -10,
               safetyMod: -2,
-              outcomeText: 'Triethylamine and methanol displace maleimide Br.'
+              outcomeText: 'Triethylamine and methanol open the maleimide.'
             },
             {
               label: 'Silica plug in wet MeOH/H2O; store at 37 °C',
@@ -7437,12 +7437,12 @@ window.KLB.CAMPAIGNS = {
             }
           ],
           askChudsHint: 'Richard: Keep flash elution aprotic without amine modifiers, and store reactive maleimide stocks strictly dry in DMSO.',
-          antoineHint: 'Antoine: Neutral hexane/EtOAc silica chromatography isolates the intact dibromomaleimide cleanly before protein work.'
+          antoineHint: 'Antoine: Neutral hexane/EtOAc silica chromatography isolates the intact N-aryl maleimide cleanly before protein work.'
         },
         dataOutput: {
           type: 'lcms',
-          label: 'Waters UPLC-MS: N-Aryl Dibromomaleimide Linker',
-          productPeak: '515.0 Da [M+H]+ (1:2:1 Br2 cluster, >98% UV purity)',
+          label: 'Waters UPLC-MS: N-Aryl Maleimide Linker',
+          productPeak: '357.1 Da [M+H]+ (clean single isotope envelope, >98% UV purity)',
           metricLabel: '98% UV purity, zero hydrolysed ring'
         }
       },
@@ -7601,8 +7601,8 @@ window.KLB.CAMPAIGNS = {
         index: 3,
         id: 'archie_step_4',
         dayHint: 'Thu',
-        title: 'Site-Selective HSA-Maleimide Coupling & Ring-Open Hydrolysis',
-        desc: 'Conjugate HSA Cys34 with linker, promote ring-opening hydrolysis, desalt, and verify +18 Da lock by MS.',
+        title: 'HSA Cys34 Thiosuccinimide Coupling & Ring-Open Lock',
+        desc: 'Conjugate HSA Cys34 with N-aryl maleimide to thiosuccinimide (~67 kDa), hydrolyse (+18 Da) in pH 8.0 Tris to succinamic acid, and verify by MS.',
         locationRoom: 'klb_2f',
         stationTypes: ['tcep_bench'],
         prepRequired: [],
@@ -7627,7 +7627,7 @@ window.KLB.CAMPAIGNS = {
           },
           {
             id: 'arc_4_2',
-            label: 'Incubate coupling & hydrolysis',
+            label: 'Incubate coupling & Tris hydrolysis',
             roomId: 'klb_2f',
             stationTypes: ['heatblock'],
             cupboardHint: null,
@@ -7687,26 +7687,26 @@ window.KLB.CAMPAIGNS = {
           }
         ],
         choice: {
-          prompt: 'How do you lock HSA-maleimide inside the Cys34 crevice?',
+          prompt: 'How do you lock the HSA Cys34 thiosuccinimide?',
           options: [
             {
-              label: '3 eq linker pH 7.4; hydrolyse pH 8.5 at 37 °C',
+              label: 'Couple pH 7.4; pH 8.0 Tris 37 °C ring-open',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
               safetyMod: 2,
-              outcomeText: 'Quantitative +18 Da hydrolysed 1:1 HSA conjugate.'
+              outcomeText: '+18 Da succinamic acid lock on ~67 kDa HSA.'
             },
             {
-              label: '3 eq linker pH 7.4, keep pH 7.0 at 21 °C only',
+              label: 'Couple pH 7.4; keep pH 7.0 PBS at 21 °C only',
               isOptimal: false,
               yieldMod: 3,
               purityMod: -5,
               safetyMod: 0,
-              outcomeText: 'Steric Cys34 crevice slows ring opening below 35%.'
+              outcomeText: 'Closed thiosuccinimide hydrolyses below 35%.'
             },
             {
-              label: '15 eq linker pH 8.5 directly for 6 h at 37 °C',
+              label: '15 eq linker in pH 8.5 buffer for 6 h at 37 °C',
               isOptimal: false,
               yieldMod: -6,
               purityMod: -9,
@@ -7714,30 +7714,30 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Excess maleimide cross-reacts with surface Lys.'
             },
             {
-              label: '3 eq linker pH 10.5 carbonate buffer, 50 °C',
+              label: '3 eq linker in pH 10.5 carbonate at 50 °C',
               isOptimal: false,
               yieldMod: -12,
               purityMod: -15,
               safetyMod: -4,
-              outcomeText: 'Harsh base hydrolyses linker pre-coupling.'
+              outcomeText: 'Harsh base hydrolyses maleimide pre-coupling.'
             }
           ],
-          askChudsHint: 'Calise: The Cys34 pocket sterically shields the succinimide ring from neutral hydrolysis, so step gently to pH 8.5 after coupling.',
-          antoineHint: 'Antoine: Couple selectively at pH 7.4 with 3 equivalents first, then promote +18 Da maleamic acid ring-opening at pH 8.5.'
+          askChudsHint: 'Calise: N-aryl maleimides form a ~67 kDa Cys34 thiosuccinimide that hydrolyses cleanly in pH 8.0 Tris buffer to a stable succinamic acid.',
+          antoineHint: 'Antoine: Couple selectively at pH 7.4 first, then incubate in pH 8.0 Tris at 37 °C for the +18 Da succinamic acid ring-open lock.'
         },
         dataOutput: {
           type: 'lcms',
-          label: 'Q-TOF MaxEnt1 MS: Hydrolysed HSA Cys34 Conjugate',
-          productPeak: '66,890 Da Hydrolysed HSA-Maleimide (+18 Da ring-open, DAR 1.0)',
-          metricLabel: '96% 1:1 Cys34 conjugate, +18 Da locked'
+          label: 'Q-TOF MaxEnt1 MS: Ring-Opened HSA Cys34 Conjugate',
+          productPeak: '66,890 Da Succinamic Acid Lock (~67 kDa, +18 Da vs thiosuccinimide, DAR 1.0)',
+          metricLabel: '96% 1:1 Cys34 succinamic acid, +18 Da locked'
         }
       },
       {
         index: 4,
         id: 'archie_step_5',
         dayHint: 'Thu/Fri',
-        title: 'Human Plasma Thiol-Exchange Audit & Orthogonal NMR/MS',
-        desc: 'Challenge hydrolysed HSA conjugate in human plasma vs GSH and confirm zero thiol exchange by MS.',
+        title: '20 mM GSH Plasma Thiol-Exchange Audit & MS',
+        desc: 'Challenge ring-opened succinamic acid HSA conjugate in plasma with 20 mM GSH and verify zero retro-Michael loss by MS.',
         locationRoom: 'klb_2f',
         stationTypes: ['freezer_20c'],
         prepRequired: [],
@@ -7825,15 +7825,15 @@ window.KLB.CAMPAIGNS = {
           prompt: 'How do you prove irreversible plasma Cys34 linkage?',
           options: [
             {
-              label: '37 °C plasma + GSH vs closed-ring ctrl, 7 d MS',
+              label: '37 °C plasma + 20 mM GSH vs closed ctrl, 7 d',
               isOptimal: true,
               yieldMod: 10,
               purityMod: 12,
               safetyMod: 2,
-              outcomeText: '97% hydrolysed conjugate intact vs 41% closed loss.'
+              outcomeText: '97% succinamic acid intact vs 41% closed loss.'
             },
             {
-              label: '37 °C plasma 7 d by MS; omit closed-ring ctrl',
+              label: '37 °C plasma + 20 mM GSH 7 d; omit closed ctrl',
               isOptimal: false,
               yieldMod: 3,
               purityMod: -5,
@@ -7846,10 +7846,10 @@ window.KLB.CAMPAIGNS = {
               yieldMod: -6,
               purityMod: -9,
               safetyMod: -2,
-              outcomeText: 'Cold low-thiol PBS masks slow albumin transfer.'
+              outcomeText: 'Cold low-thiol PBS masks slow retro-Michael loss.'
             },
             {
-              label: '4 °C plasma 7 d; inject whole plasma unspun',
+              label: '4 °C plasma + 20 mM GSH; inject unspun on LC-MS',
               isOptimal: false,
               yieldMod: -13,
               purityMod: -15,
@@ -7857,14 +7857,14 @@ window.KLB.CAMPAIGNS = {
               outcomeText: 'Raw plasma fouls C18 guard and stalls LG11 MS.'
             }
           ],
-          askChudsHint: 'Faiza: Run the unhydrolysed closed-ring maleimide alongside your hydrolysed conjugate in 37 °C plasma and crash proteins before MS.',
-          antoineHint: 'Antoine: Benchmarking 7-day 37 °C plasma and GSH challenge against closed-ring maleimide proves the ring-open lock prevents thiol exchange.'
+          askChudsHint: 'Faiza: Run the unhydrolysed closed thiosuccinimide alongside your succinamic acid conjugate in 20 mM GSH plasma at 37 °C.',
+          antoineHint: 'Antoine: Benchmarking 7-day 37 °C plasma with 20 mM GSH against closed thiosuccinimide proves the succinamic acid lock stops retro-Michael exchange.'
         },
         dataOutput: {
           type: 'lcms',
-          label: 'Waters Q-TOF MS: 7-Day Plasma & GSH Thiol-Exchange Audit',
-          productPeak: '66,890 Da Hydrolysed HSA (97% intact vs 41% closed-ring loss)',
-          metricLabel: '97% plasma stability, zero thiol transfer'
+          label: 'Waters Q-TOF MS: 7-Day 20 mM GSH & Plasma Stability Audit',
+          productPeak: '66,890 Da Succinamic Acid HSA (97% intact in 20 mM GSH vs 41% closed loss)',
+          metricLabel: '97% plasma/GSH stability, zero retro-Michael'
         }
       }
     ]

@@ -383,7 +383,7 @@ window.KLB.RANDOM_EVENTS = [
         resultText: 'Abil waives the £130 fine outright and sets your NMR tubes aside safely.'
       },
       {
-        label: 'Spritz Sabatini cologne and chat NOE shimming',
+        label: 'Spritz Sabatini cologne and chat Z-axis shimming and NOESY',
         moraleDelta: 10,
         safetyDelta: 2,
         energyDelta: -4,
@@ -785,7 +785,7 @@ window.KLB.RANDOM_EVENTS = [
         socialDelta: 6,
         favourDelta: 1,
         timeCostMins: 10,
-        resultText: 'Sabatini shares fresh molecular sieves from Cupboard 14 in return.'
+        resultText: 'Marco shares fresh molecular sieves from Cupboard 14 in return.'
       }
     ]
   },
@@ -1674,6 +1674,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 9,
     minHour: 7.5,
     maxHour: 12,
+    dayOnly: 0,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1696,6 +1697,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 9,
     minHour: 7.5,
     maxHour: 12,
+    dayOnly: 0,
     context: 'commute_late',
     vibe: 'monday'
   },
@@ -1928,6 +1930,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 19,
     minHour: 18,
     maxHour: 21,
+    dayOnly: 3,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -2005,6 +2008,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 18,
     minHour: 17.5,
     maxHour: 21,
+    dayOnly: 3,
     context: 'gone_home',
     vibe: 'evening'
   },
@@ -2137,6 +2141,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 13,
     minHour: 11.4,
     maxHour: 14.25,
+    dayOnly: 3,
     context: 'lunch_call',
     vibe: 'midday'
   },
@@ -2557,6 +2562,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 18,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 4,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2568,6 +2574,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 17,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 3,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2579,6 +2586,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 17,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 4,
     context: 'pub_call',
     vibe: 'late_week'
   },
@@ -2634,6 +2642,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 17,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 3,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -2679,6 +2688,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 17,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 4,
     context: 'pub_call',
     vibe: 'evening'
   },
@@ -3521,6 +3531,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 17,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 4,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3533,6 +3544,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 17,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 3,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3581,6 +3593,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 18,
     minHour: 16.5,
     maxHour: 20.5,
+    dayOnly: 4,
     context: 'pub_call',
     vibe: 'late_week',
     klbchatOnly: true
@@ -3725,6 +3738,7 @@ window.KLB.WHATSAPP_BANTER = [
     hourHint: 14.5,
     minHour: 11.5,
     maxHour: 15.75,
+    dayOnly: 4,
     context: 'facility_alert',
     vibe: 'late_week',
     klbchatOnly: true

@@ -560,12 +560,14 @@ window.KLB = window.KLB || {};
       { title: 'Rotary Evaporator Workup', roomId: 'klb_2f', stationTypes: ['buchi'], group: 'none', mins: 22 },
       { title: 'Sheppard Bench Write-Up', roomId: 'klb_2f', stationTypes: ['writeup_desk'], group: 'sheppard', mins: 30 },
       { title: 'Sheppard 3F Report & Lit Review', roomId: 'klb_3f', stationTypes: ['writeup_desk'], group: 'none', mins: 34 },
-      { title: 'Gordon Afternoon Break', roomId: 'gordons_cafe', stationTypes: ['cafe_table', 'cafe_counter'], group: 'none', mins: 23 }
+      { title: 'Gordon Coffee Break', roomId: 'gordons_cafe', stationTypes: ['cafe_table', 'cafe_counter'], group: 'none', mins: 23 }
     ]
   };
 
   function clamp(v, lo, hi) {
-    return Math.max(lo, Math.min(hi, v));
+    const n = Number(v);
+    if (Number.isNaN(n)) return lo;
+    return Math.max(lo, Math.min(hi, n));
   }
 
   function getBigChudsIds() {
@@ -650,6 +652,18 @@ window.KLB = window.KLB || {};
     return arch;
   }
 
+  const SNAPSHOT_STRIP_KEYS = new Set([
+    '_activeCallbacks',
+    '_tickingRealTime',
+    'npcReactions',
+    'npcActions',
+    'speechBubbles',
+    '_queuedBubbles',
+    '_weeklyAudits',
+    '_weeklyReportRecords',
+    '_manuscriptRecords'
+  ]);
+
   function saveRunSnapshot(state) {
     if (!state || state.spectatorMode || state.gameOver || state._headlessVerify) return false;
     const storage = getStorage();
@@ -659,18 +673,42 @@ window.KLB = window.KLB || {};
     try {
       const copy = {};
       for (const [k, v] of Object.entries(state)) {
-        if (k === '_activeCallbacks' || k === '_tickingRealTime' || typeof v === 'function') continue;
+        if (SNAPSHOT_STRIP_KEYS.has(k) || typeof v === 'function') continue;
         copy[k] = v;
       }
+      const npcsClone = {};
+      for (const [nid, npc] of Object.entries(state.npcs || {})) {
+        if (!npc || typeof npc !== 'object') continue;
+        npcsClone[nid] = { ...npc, path: [] };
+      }
+      copy.npcs = npcsClone;
       copy.charId = charId;
       copy.version = 1;
       copy.savedAt = Date.now();
-      const serialized = JSON.stringify(copy, (key, val) => {
-        if (key === '_activeCallbacks' || key === '_tickingRealTime' || typeof val === 'function') return undefined;
+      const serializeSnap = obj => JSON.stringify(obj, (key, val) => {
+        if (SNAPSHOT_STRIP_KEYS.has(key) || typeof val === 'function') return undefined;
         return val;
       });
-      storage.setItem(ACTIVE_RUN_KEY, serialized);
-      return true;
+      const serialized = serializeSnap(copy);
+      try {
+        storage.setItem(ACTIVE_RUN_KEY, serialized);
+        return true;
+      } catch (err) {
+        const isQuota = err && (
+          err.name === 'QuotaExceededError' ||
+          err.code === 22 ||
+          err.code === 1014 ||
+          /quota/i.test(String(err.message || ''))
+        );
+        if (isQuota && Array.isArray(copy.whatsapp) && copy.whatsapp.length > 30) {
+          try {
+            copy.whatsapp = copy.whatsapp.slice(-30);
+            storage.setItem(ACTIVE_RUN_KEY, serializeSnap(copy));
+            return true;
+          } catch (_) {}
+        }
+        return false;
+      }
     } catch (_) {
       return false;
     }
@@ -708,7 +746,12 @@ window.KLB = window.KLB || {};
       if (!Array.isArray(snap.activeStationJobs)) {
         snap.activeStationJobs = snap.activeReactions;
       }
+      snap.speechBubbles = Array.isArray(snap.speechBubbles) ? snap.speechBubbles : [];
+      snap._queuedBubbles = Array.isArray(snap._queuedBubbles) ? snap._queuedBubbles : [];
+      snap.npcReactions = Array.isArray(snap.npcReactions) ? snap.npcReactions : [];
+      snap.npcActions = Array.isArray(snap.npcActions) ? snap.npcActions : [];
       for (const npc of Object.values(snap.npcs || {})) {
+        if (npc && !Array.isArray(npc.path)) npc.path = [];
         if (npc?.sim) {
           npc.sim.activeRxn = npc.sim.activeJob || null;
         }
@@ -731,7 +774,11 @@ window.KLB = window.KLB || {};
   }
 
   const DIALOGUE_HISTORY_KEY = 'klb_dialogue_history_v1';
+  const DIALOGUE_HISTORY_DEBOUNCE_MS = 5000;
   let _dialogueHistoryCache = null;
+  let _dialogueHistoryDirty = false;
+  let _dialogueHistoryLastFlushMs = 0;
+  let _dialogueHistoryFlushTimer = null;
 
   function getDialogueStorage() {
     try {
@@ -761,20 +808,67 @@ window.KLB = window.KLB || {};
     return _dialogueHistoryCache;
   }
 
+  function flushDialogueHistory() {
+    if (_dialogueHistoryFlushTimer) {
+      clearTimeout(_dialogueHistoryFlushTimer);
+      _dialogueHistoryFlushTimer = null;
+    }
+    if (!_dialogueHistoryDirty || !_dialogueHistoryCache) return false;
+    try {
+      const storage = getDialogueStorage();
+      storage?.setItem?.(DIALOGUE_HISTORY_KEY, JSON.stringify(_dialogueHistoryCache));
+      _dialogueHistoryDirty = false;
+      _dialogueHistoryLastFlushMs = Date.now();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   function saveDialogueHistory(hist) {
     const normalized = (hist && typeof hist === 'object') ? hist : { pools: {} };
     if (!normalized.pools || typeof normalized.pools !== 'object') {
       normalized.pools = {};
     }
     _dialogueHistoryCache = normalized;
-    try {
-      const storage = getDialogueStorage();
-      storage?.setItem?.(DIALOGUE_HISTORY_KEY, JSON.stringify(normalized));
-    } catch (_) {}
+    _dialogueHistoryDirty = true;
+    const now = Date.now();
+    if (now - _dialogueHistoryLastFlushMs >= DIALOGUE_HISTORY_DEBOUNCE_MS) {
+      flushDialogueHistory();
+      return;
+    }
+    if (!_dialogueHistoryFlushTimer) {
+      if (typeof setTimeout === 'function') {
+        const delay = Math.max(50, DIALOGUE_HISTORY_DEBOUNCE_MS - (now - _dialogueHistoryLastFlushMs));
+        _dialogueHistoryFlushTimer = setTimeout(() => {
+          _dialogueHistoryFlushTimer = null;
+          flushDialogueHistory();
+        }, delay);
+      } else {
+        flushDialogueHistory();
+      }
+    }
+  }
+
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window.__klbDialogueFlushBound) {
+    window.__klbDialogueFlushBound = true;
+    window.addEventListener('pagehide', flushDialogueHistory);
+    window.addEventListener('beforeunload', flushDialogueHistory);
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushDialogueHistory();
+      });
+    }
   }
 
   function resetDialogueHistory() {
     _dialogueHistoryCache = null;
+    _dialogueHistoryDirty = false;
+    _dialogueHistoryLastFlushMs = 0;
+    if (_dialogueHistoryFlushTimer) {
+      clearTimeout(_dialogueHistoryFlushTimer);
+      _dialogueHistoryFlushTimer = null;
+    }
     try {
       const storage = getDialogueStorage();
       storage?.removeItem?.(DIALOGUE_HISTORY_KEY);
@@ -872,10 +966,10 @@ window.KLB = window.KLB || {};
     return parts.join(' ');
   }
 
-  const RX_GATE_MORNING = /\b(morning train|tube in|northern line|just got in|commute in|coming in late|before noon|this morning|start of the day|morning espresso|powering my morning|ten twenty-seven|before ten thirty|ten-fifteen|before the afternoon rush)\b/i;
-  const RX_GATE_LUNCH = /\b(lunchtime|grab lunch|off to lunch|pret|gordon's lunch|lunch break)\b/i;
+  const RX_GATE_MORNING = /\b(morning train|tube in|(?:morning\s+)?northern line\s+(?:in|into|commute|this morning|rush)|just got in|commute in|coming in late|before noon|this morning|start of the day|morning espresso|powering my morning|ten twenty-seven|before ten thirty|ten-fifteen|before the afternoon rush)\b/i;
+  const RX_GATE_LUNCH = /\b(lunchtime|grab lunch|off to lunch|pret\s+(?:lunch|baguette|soup|wrap|sandwich|queue|for lunch)|gordon's lunch|lunch break)\b/i;
   const RX_GATE_THREE_PM = /\b(three pm|three o'clock|half three|3 pm|3 o'clock)\b/i;
-  const RX_GATE_AFTERWORK = /\b(after work|pint later|down the pub|institute of education bar|head home|heading home|going home|packing up|called it a day|see you tomorrow|tonight|this evening)\b|\b(?:past three|after 3)(?!(?:\s*(?:hours?|hrs?|mins?|minutes?|days?|weeks?|%|°|\.\d)))\b/i;
+  const RX_GATE_AFTERWORK = /\b(after work|pint later|down the pub|institute of education bar|head home|heading home|going home|packing up\s+(?:for the day|for home|to go home|to leave|early|before)|called it a day|see you tomorrow|tonight|this evening)\b|\b(?:past three|after 3)(?!(?:\s*(?:hours?|hrs?|mins?|minutes?|days?|weeks?|%|°|\.\d)))\b/i;
   const RX_GATE_CURFEW = /\b(?:curfew|building closes|locking up|late shift)\b|\bpast (?:5|five)(?!(?:\s*(?:mins?|minutes?|secs?|seconds?|hours?|hrs?|days?|weeks?|%|°|\.\d)))\b/i;
 
   function isDialogueAllowedAtTime(itemOrText, hourDecimal, dayIdx = null) {
@@ -892,6 +986,7 @@ window.KLB = window.KLB || {};
         if (itemOrText.minDay != null && d < Number(itemOrText.minDay)) return false;
         if (itemOrText.maxDay != null && d > Number(itemOrText.maxDay)) return false;
       }
+      if (itemOrText.minHour != null || itemOrText.maxHour != null) return true;
     }
 
     const txt = extractDialogueText(itemOrText);
@@ -2166,10 +2261,19 @@ window.KLB = window.KLB || {};
     return state.npcs?.[entityId] || null;
   }
 
+  function sanitizeBubbleText(str) {
+    return String(str || '')
+      .replace(/[\p{Extended_Pictographic}\u{1F000}-\u{1FAFF}\u{231A}-\u{23FA}\u{2600}-\u{27BF}\u{2B05}-\u{2B55}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}]/gu, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function pushBubble(state, entityId, roomId, text, ttlSec = null, meta = null) {
     if (!state || !entityId || !roomId || !text) return;
+    const cleanText = sanitizeBubbleText(text);
+    if (!cleanText) return;
     const resolvedTtl = (ttlSec == null || !Number.isFinite(Number(ttlSec)))
-      ? calcBubbleTtl(text)
+      ? calcBubbleTtl(cleanText)
       : Number(ttlSec);
     const convoId = meta?.convoId || null;
     const partnerIds = Array.isArray(meta?.partnerIds) ? meta.partnerIds.slice() : null;
@@ -2183,7 +2287,7 @@ window.KLB = window.KLB || {};
     state.speechBubbles.push({
       entityId,
       roomId,
-      text,
+      text: cleanText,
       ttlSec: resolvedTtl,
       convoId,
       partnerIds
@@ -2519,6 +2623,10 @@ window.KLB = window.KLB || {};
       const slot = (!inPlace && !preserveDeskAction && chosenSlot) ? chosenSlot : { x: npc.x, y: npc.y };
       if (!preserveDeskAction) {
         npc.busyObjId = null;
+        if (npc.sim) {
+          npc.sim.currentAction = null;
+          npc.sim.pendingJobStart = null;
+        }
       }
       npc.huddleLockTimer = lockDur;
       npc.huddleTarget = {
@@ -2562,6 +2670,7 @@ window.KLB = window.KLB || {};
           firstEnt.currentTaskSpeech = vt.text;
         }
       } else {
+        if (state._queuedBubbles.length >= 24) state._queuedBubbles.shift();
         state._queuedBubbles.push({
           delaySec: vt.delaySec,
           entityId: vt.speakerId,
@@ -2930,6 +3039,8 @@ window.KLB = window.KLB || {};
     const npc = state.npcs?.[npcId];
     if (!player || !npc) return null;
     const convRoomId = roomId || player.roomId || npc.roomId;
+    if (!convRoomId || convRoomId === 'offsite') return null;
+    if (window.KLB.WORLD_MAPS?.rooms && !window.KLB.WORLD_MAPS.rooms[convRoomId]) return null;
 
     if (!state.spectatorMode && state.player && pId === state.player.id) {
       endPlayerConversations(state, npcId);
@@ -2943,9 +3054,19 @@ window.KLB = window.KLB || {};
     }
     if (npc.pendingRoomTravel && !isNpcEvacuating(state, npc)) {
       npc.pendingRoomTravel = null;
+      npc.busyObjId = null;
+      if (npc.sim) {
+        npc.sim.currentAction = null;
+        npc.sim.pendingJobStart = null;
+      }
     }
     if ((state.spectatorMode || player !== state.player) && player.pendingRoomTravel && !isNpcEvacuating(state, player)) {
       player.pendingRoomTravel = null;
+      player.busyObjId = null;
+      if (player.sim) {
+        player.sim.currentAction = null;
+        player.sim.pendingJobStart = null;
+      }
     }
     if (!npc.pendingRoomTravel?.isFireEvac) {
       npc.path = [];
@@ -3093,6 +3214,7 @@ window.KLB = window.KLB || {};
     const huddleMatches = [];
     for (const h of huddlePool) {
       if (!h) continue;
+      if (h.notHeatwave && state?.weatherMode === 'heatwave') continue;
       if (!isDialogueAllowedAtTime(h, curHour, dayIdx)) continue;
       const rawTurns = h.lines || h.turns || h.exchanges || [];
       if (rawTurns.length < 2) continue;
@@ -3443,6 +3565,7 @@ window.KLB = window.KLB || {};
 
     const candidates = pool.filter(h => {
       if (!h || h.roomId !== viewRoom) return false;
+      if (h.notHeatwave && state?.weatherMode === 'heatwave') return false;
       if (!isDialogueAllowedAtTime(h, curHour, dayIdx)) return false;
       const { lines, spkIds } = extractSpkIds(h);
       if (lines.length < 2) return false;
@@ -3467,9 +3590,10 @@ window.KLB = window.KLB || {};
       return true;
     });
 
-    const deskChatCandidates = candidates.filter(h => Boolean(h.deskChat));
-    const freshDeskChats = deskChatCandidates.filter(h => !h.id || !recent.slice(0, 6).includes(h.id));
-    const seatedDeskCandidates = candidates.filter(h => areAllDeskSeatedClose(extractSpkIds(h).spkIds));
+    const recentSet = new Set(recent.slice(0, 18));
+    const nonRecent = candidates.filter(h => !h.id || !recentSet.has(h.id));
+    const freshDeskChats = nonRecent.filter(h => Boolean(h.deskChat));
+    const freshSeatedDesk = nonRecent.filter(h => areAllDeskSeatedClose(extractSpkIds(h).spkIds));
     const curVibe = getCurrentDialogueVibe(state);
 
     const launchChosenHuddle = (chosen, isInPlaceDesk) => {
@@ -3516,33 +3640,22 @@ window.KLB = window.KLB || {};
       if (wsig && wsig.triggered) return true;
     }
 
-    if (deskChatCandidates.length > 0) {
-      const pickedDesk = pickFromShuffleBag(
-        state,
-        'huddles_' + viewRoom,
-        deskChatCandidates,
-        h => h.id || (h.turns || h.lines || h.exchanges)?.[0]?.text,
-        { preferFn: h => Boolean(curVibe && h.vibe === curVibe) }
-      );
-      if (launchChosenHuddle(pickedDesk, true)) return true;
-    }
-
-    if (seatedDeskCandidates.length > 0) {
+    if (freshSeatedDesk.length > 0) {
       const pickedSeated = pickFromShuffleBag(
         state,
         'huddles_' + viewRoom,
-        seatedDeskCandidates,
+        freshSeatedDesk,
         h => h.id || (h.turns || h.lines || h.exchanges)?.[0]?.text,
         { preferFn: h => Boolean(curVibe && h.vibe === curVibe) }
       );
       if (launchChosenHuddle(pickedSeated, true)) return true;
     }
 
-    if (!candidates.length) return false;
+    if (!nonRecent.length) return false;
     const chosen = pickFromShuffleBag(
       state,
       'huddles_' + viewRoom,
-      candidates,
+      nonRecent,
       h => h.id || (h.turns || h.lines || h.exchanges)?.[0]?.text,
       { preferFn: h => Boolean(curVibe && h.vibe === curVibe) }
     );
@@ -3864,6 +3977,10 @@ window.KLB = window.KLB || {};
       npc.huddleLockTimer = 0;
       npc.huddleTarget = null;
       npc.specsOn = false;
+      if (npc.sim) {
+        npc.sim.currentAction = null;
+        npc.sim.pendingJobStart = null;
+      }
       if (travel.isFireEvac) {
         npc.currentTaskText = 'Evacuated outside KLB (Fire Alarm)';
       }
@@ -3944,6 +4061,7 @@ window.KLB = window.KLB || {};
 
   function moveNpcToRoomAndPoint(state, npc, targetRoom, tx, ty, teleport = false) {
     const prevRoom = npc.roomId;
+    npc.busyObjId = null;
 
     if (teleport) {
       npc.pendingRoomTravel = null;
@@ -4224,27 +4342,29 @@ window.KLB = window.KLB || {};
     if (res.passed) sim.weeklyStats.auditsPassed += 1;
     else sim.weeklyStats.auditsFailed += 1;
 
-    state._weeklyAudits = state._weeklyAudits || [];
-    const npcMeta = window.KLB.CAST_BY_ID?.[npc.id];
-    const supervisorId = npcMeta?.supervisorId || (npc.id === 'archie_wall' ? 'jamie_baker' : 'vijay_chudasama');
-    const group = npcMeta?.group || (npc.id === 'archie_wall' ? 'baker' : 'chudasama');
-    state._weeklyAudits.push({
-      weekNum: state.weekNum,
-      charId: npc.id,
-      supervisorId,
-      group,
-      auditTimeMins: state.timeMins,
-      total: res.total,
-      passed: res.passed,
-      patienceDelta: pDelta,
-      avgQuality: res.avgQuality ?? 0,
-      avgYield: res.avgYield ?? 0,
-      steps: sim.completedSteps.length,
-      weeklyReportProgress: Math.round(sim.weeklyReportProgress),
-      manuscriptProgress: Math.round(sim.manuscriptProgress),
-      labCondition: Math.round(getLabCondition(sim)),
-      failures: sim.failures.slice()
-    });
+    if (state._headlessVerify) {
+      state._weeklyAudits = state._weeklyAudits || [];
+      const npcMeta = window.KLB.CAST_BY_ID?.[npc.id];
+      const supervisorId = npcMeta?.supervisorId || (npc.id === 'archie_wall' ? 'jamie_baker' : 'vijay_chudasama');
+      const group = npcMeta?.group || (npc.id === 'archie_wall' ? 'baker' : 'chudasama');
+      state._weeklyAudits.push({
+        weekNum: state.weekNum,
+        charId: npc.id,
+        supervisorId,
+        group,
+        auditTimeMins: state.timeMins,
+        total: res.total,
+        passed: res.passed,
+        patienceDelta: pDelta,
+        avgQuality: res.avgQuality ?? 0,
+        avgYield: res.avgYield ?? 0,
+        steps: sim.completedSteps.length,
+        weeklyReportProgress: Math.round(sim.weeklyReportProgress),
+        manuscriptProgress: Math.round(sim.manuscriptProgress),
+        labCondition: Math.round(getLabCondition(sim)),
+        failures: sim.failures.slice()
+      });
+    }
   }
 
   // ==================== 7. DEADLINES (THU 18:00 WEEKLY REPORT & FRI 18:00 MANUSCRIPT) ====================
@@ -4293,19 +4413,21 @@ window.KLB = window.KLB || {};
         sim.weeklyStats.weeklyReportsMissed += 1;
       }
       sim.weeklyReportChecked = true;
-      const npcMeta = window.KLB.CAST_BY_ID?.[npc.id];
-      const supervisorId = npcMeta?.supervisorId || (npc.id === 'archie_wall' ? 'jamie_baker' : 'vijay_chudasama');
-      const group = npcMeta?.group || (npc.id === 'archie_wall' ? 'baker' : 'chudasama');
-      state._weeklyReportRecords = state._weeklyReportRecords || [];
-      state._weeklyReportRecords.push({
-        weekNum: state.weekNum,
-        charId: npc.id,
-        supervisorId,
-        group,
-        progress: Math.round(pct),
-        onTime: pct >= 100,
-        patienceDelta: delta
-      });
+      if (state._headlessVerify) {
+        const npcMeta = window.KLB.CAST_BY_ID?.[npc.id];
+        const supervisorId = npcMeta?.supervisorId || (npc.id === 'archie_wall' ? 'jamie_baker' : 'vijay_chudasama');
+        const group = npcMeta?.group || (npc.id === 'archie_wall' ? 'baker' : 'chudasama');
+        state._weeklyReportRecords = state._weeklyReportRecords || [];
+        state._weeklyReportRecords.push({
+          weekNum: state.weekNum,
+          charId: npc.id,
+          supervisorId,
+          group,
+          progress: Math.round(pct),
+          onTime: pct >= 100,
+          patienceDelta: delta
+        });
+      }
     }
   }
 
@@ -4354,19 +4476,21 @@ window.KLB = window.KLB || {};
         sim.weeklyStats.manuscriptsMissed += 1;
       }
       sim.manuscriptChecked = true;
-      const npcMeta = window.KLB.CAST_BY_ID?.[npc.id];
-      const supervisorId = npcMeta?.supervisorId || (npc.id === 'archie_wall' ? 'jamie_baker' : 'vijay_chudasama');
-      const group = npcMeta?.group || (npc.id === 'archie_wall' ? 'baker' : 'chudasama');
-      state._manuscriptRecords = state._manuscriptRecords || [];
-      state._manuscriptRecords.push({
-        weekNum: state.weekNum,
-        charId: npc.id,
-        supervisorId,
-        group,
-        progress: Math.round(pct),
-        onTime: pct >= 100,
-        patienceDelta: delta
-      });
+      if (state._headlessVerify) {
+        const npcMeta = window.KLB.CAST_BY_ID?.[npc.id];
+        const supervisorId = npcMeta?.supervisorId || (npc.id === 'archie_wall' ? 'jamie_baker' : 'vijay_chudasama');
+        const group = npcMeta?.group || (npc.id === 'archie_wall' ? 'baker' : 'chudasama');
+        state._manuscriptRecords = state._manuscriptRecords || [];
+        state._manuscriptRecords.push({
+          weekNum: state.weekNum,
+          charId: npc.id,
+          supervisorId,
+          group,
+          progress: Math.round(pct),
+          onTime: pct >= 100,
+          patienceDelta: delta
+        });
+      }
     }
   }
 
@@ -4519,6 +4643,11 @@ window.KLB = window.KLB || {};
         if (npc?.pendingRoomTravel?.isFireEvac) {
           npc.pendingRoomTravel = null;
           npc.path = [];
+          npc.busyObjId = null;
+          if (npc.sim) {
+            npc.sim.currentAction = null;
+            npc.sim.pendingJobStart = null;
+          }
         }
       }
       const sender = pickNonPlayerBigChud(state, 'marcos_fernandez', 'daniel_richards');
@@ -4564,8 +4693,18 @@ window.KLB = window.KLB || {};
       }
 
       const act = sim.currentAction;
+      const actRoom = act ? (act.roomId || npc.roomId) : null;
+      const inHuddleAwayFromDesk = Boolean((npc.huddleLockTimer || 0) > 0 && !npc.huddleTarget?.preserveDeskAction);
       const atActionStation = Boolean(
-        act && (act.kind === 'smoke_break' || (!npc._retryTarget && distToActionTarget(npc, act) <= 2.4))
+        act &&
+        npc.roomId === actRoom &&
+        !inHuddleAwayFromDesk &&
+        (act.kind === 'smoke_break' || (
+          !npc._retryTarget &&
+          (act.objId
+            ? (npc.busyObjId === act.objId && distToActionTarget(npc, act) <= 1.85)
+            : distToActionTarget(npc, act) <= 2.4)
+        ))
       );
       if (act && atActionStation && !npc.pendingRoomTravel && (!npc.path || npc.path.length === 0)) {
         act.elapsedMins = (act.elapsedMins || 0) + deltaMins;
@@ -5260,7 +5399,12 @@ window.KLB = window.KLB || {};
 
     // 3b. Post-Audit Celebration holds Big-Chuds in Gordon's Café
     if (state.postAuditCelebration) {
+      npc.huddleLockTimer = 0;
+      npc.huddleTarget = null;
+      sim.currentAction = null;
+      sim.pendingJobStart = null;
       if (npc.roomId !== 'gordons_cafe') {
+        npc.busyObjId = null;
         const cPicked = pickStationForStep(state, npc, 'gordons_cafe', ['cafe_table', 'cafe_counter'], 'none', { allowShared: true });
         if (cPicked) moveNpcToRoomAndObj(state, npc, 'gordons_cafe', cPicked.obj, false, cPicked.adj);
         else moveNpcToRoomAndPoint(state, npc, 'gordons_cafe', 8, 10, false);
@@ -6134,6 +6278,11 @@ window.KLB = window.KLB || {};
         if (npc?.pendingRoomTravel?.isFireEvac) {
           npc.pendingRoomTravel = null;
           npc.path = [];
+          npc.busyObjId = null;
+          if (npc.sim) {
+            npc.sim.currentAction = null;
+            npc.sim.pendingJobStart = null;
+          }
         }
       }
     }
@@ -6230,11 +6379,21 @@ window.KLB = window.KLB || {};
           npc.pendingRoomTravel = null;
           npc.roomId = 'offsite';
           npc.busyObjId = null;
+          npc.huddleLockTimer = 0;
+          npc.huddleTarget = null;
           npc.path = [];
+          if (npc.sim) {
+            npc.sim.currentAction = null;
+            npc.sim.pendingJobStart = null;
+          }
         } else if (!npc.pendingRoomTravel || npc.pendingRoomTravel.finalRoom !== 'offsite' || !npc.pendingRoomTravel.isFireEvac) {
           npc.busyObjId = null;
           npc.huddleLockTimer = 0;
           npc.huddleTarget = null;
+          if (npc.sim) {
+            npc.sim.currentAction = null;
+            npc.sim.pendingJobStart = null;
+          }
           moveNpcToRoomAndPoint(state, npc, 'offsite', 0, 0, false);
         }
         continue;
@@ -6263,7 +6422,13 @@ window.KLB = window.KLB || {};
           npc.pendingRoomTravel = null;
           npc.roomId = 'offsite';
           npc.busyObjId = null;
+          npc.huddleLockTimer = 0;
+          npc.huddleTarget = null;
           npc.path = [];
+          if (npc.sim) {
+            npc.sim.currentAction = null;
+            npc.sim.pendingJobStart = null;
+          }
         }
         continue;
       }
@@ -6287,15 +6452,24 @@ window.KLB = window.KLB || {};
     }
   }
 
+  const TRIVIAL_BREAK_ACTION_KINDS = new Set([
+    'breather', 'socialize', 'coffee', 'tea', 'gaming', 'lunch', 'packed_lunch', 'smoke_break', 'aoe2_event'
+  ]);
+
   function getVisibleNPCActions(state, roomId) {
     if (!state || !state.npcs) return [];
     const out = [];
     for (const npc of Object.values(state.npcs)) {
       const act = npc?.sim?.currentAction;
       if (!act) continue;
-      if (npc.pendingRoomTravel || (npc.path && npc.path.length > 0)) continue;
+      if (npc.roomId === 'offsite') continue;
+      if (npc.pendingRoomTravel || (npc.path && npc.path.length > 0) || npc._retryTarget) continue;
+      if ((npc.huddleLockTimer || 0) > 0 && !npc.huddleTarget?.preserveDeskAction) continue;
       const actRoom = act.roomId || npc.roomId;
+      if (npc.roomId !== actRoom) continue;
       if (roomId && actRoom !== roomId) continue;
+      if (act.objId && npc.busyObjId !== act.objId) continue;
+      if (act.kind !== 'smoke_break' && distToActionTarget(npc, act) > 1.85) continue;
       const meta = window.KLB.CAST_BY_ID?.[npc.id];
       const targetMins = Number(act.targetMins) || 0;
       const elapsedMins = Number(act.elapsedMins) || 0;
@@ -6306,8 +6480,9 @@ window.KLB = window.KLB || {};
         npcName: meta?.shortName || npc.id,
         ownerName: meta?.shortName || npc.id,
         kind: act.kind,
+        isAction: true,
         roomId: actRoom,
-        objId: act.objId || npc.busyObjId || null,
+        objId: act.objId || null,
         x: act.x != null ? act.x : npc.x,
         y: act.y != null ? act.y : npc.y,
         title: act.label,
@@ -6345,6 +6520,7 @@ window.KLB = window.KLB || {};
         objId: job.objId,
         stationType: job.stationType,
         kind: job.kind || (job.canOvercook ? 'reaction' : 'instrument'),
+        isAction: false,
         x: job.x,
         y: job.y,
         title: job.title || job.label,
@@ -6359,8 +6535,10 @@ window.KLB = window.KLB || {};
 
     for (const actEntry of getVisibleNPCActions(state, roomId)) {
       if (actEntry.objId && seenNpcObj.has(`${actEntry.npcId}:${actEntry.objId}`)) continue;
+      if (TRIVIAL_BREAK_ACTION_KINDS.has(actEntry.kind)) continue;
       out.push({
         ...actEntry,
+        isAction: true,
         kind: 'workup'
       });
     }
@@ -6651,7 +6829,8 @@ window.KLB = window.KLB || {};
     if (!state._lcmsHazardToday && !state.lcmsBroken && !state.fireAlarm?.active) {
       const minsInWin = overlapWindowMins(prevHour, curHour, 9.0, 17.0);
       if (minsInWin > 0) {
-        const pLcms = 1 - Math.exp(-(RATE_LCMS_PER_MIN * lcmsMut) * minsInWin);
+        const danielMult = (!state.spectatorMode && state.player?.id === 'daniel_richards') ? 0.6 : 1.0;
+        const pLcms = 1 - Math.exp(-(RATE_LCMS_PER_MIN * lcmsMut * danielMult) * minsInWin);
         if (Math.random() < pLcms) {
           triggerLcmsDownHazard(state, callbacks);
         }
@@ -6736,7 +6915,7 @@ window.KLB = window.KLB || {};
         state.morale = Math.max(0, state.morale - 10);
         const senderFail = pickNonPlayerBigChud(state, 'daniel_richards', 'marcos_fernandez');
         pushWhatsApp(state, senderFail, `Safety Inspector logged infractions: ${playerViolations.join('; ')}.`, callbacks);
-        if (state.player?.roomId === 'klb_2f' && callbacks.onToast) {
+        if (callbacks.onToast) {
           callbacks.onToast(`Safety Inspection Penalty (-${pen} Lab Condition, -10 Patience, -10 Morale): ${playerViolations[0]}`);
         }
       }
@@ -6833,6 +7012,7 @@ window.KLB = window.KLB || {};
         const effectiveReplyId = resolveBigChudsSender(state, item.replySenderId, effectiveSenderId);
         if (effectiveReplyId && effectiveReplyId !== playerId && effectiveReplyId !== effectiveSenderId) {
           state._queuedWaReplies = state._queuedWaReplies || [];
+          if (state._queuedWaReplies.length >= 12) state._queuedWaReplies.shift();
           state._queuedWaReplies.push({
             delayMins: 1,
             senderId: effectiveReplyId,
@@ -7067,9 +7247,14 @@ window.KLB = window.KLB || {};
         npc.sim = fresh;
       } else if (NEIGHBOUR_WORKFLOWS[npc.id]) {
         const arriveMins = Math.round((meta?.arriveHour || 9.0) * 60);
+        npc.busyObjId = null;
         npc.sim.hadLunchToday = false;
         npc.sim.lastPreferredBreakMins = arriveMins;
         npc.sim._quartetDoneKey = null;
+        npc.sim.activeJob = null;
+        npc.sim.activeRxn = null;
+        npc.sim.currentAction = null;
+        npc.sim.pendingJobStart = null;
         npc.sim.energy = 90;
         npc.sim.morale = 50;
         npc.sim.social = 84;
@@ -7144,6 +7329,10 @@ window.KLB = window.KLB || {};
     };
     (state.activeStationJobs || []).forEach(overcookJob);
     (state.activeReactions || []).forEach(overcookJob);
+
+    state.speechBubbles = [];
+    state._queuedBubbles = [];
+    state._queuedWaReplies = [];
 
     if (!state.spectatorMode) {
       state.activePlayerAction = null;
@@ -7562,13 +7751,13 @@ window.KLB = window.KLB || {};
             state.speechBubbles = [];
           }
         }
-        if (state.spectatorMode) {
-          const headlessDt = deltaMins / CLOCK_MINS_PER_REAL_SEC;
-          for (const b of state.speechBubbles || []) b.ttlSec -= headlessDt;
-          state.speechBubbles = (state.speechBubbles || []).filter(b => b.ttlSec > 0);
-          for (const qb of state._queuedBubbles || []) qb.delaySec -= headlessDt;
-          state._queuedBubbles = (state._queuedBubbles || []).filter(qb => qb.delaySec > 0);
-        }
+      }
+      if (!state._tickingRealTime) {
+        const headlessDt = deltaMins / CLOCK_MINS_PER_REAL_SEC;
+        for (const b of state.speechBubbles || []) b.ttlSec -= headlessDt;
+        state.speechBubbles = (state.speechBubbles || []).filter(b => b.ttlSec > 0);
+        for (const qb of state._queuedBubbles || []) qb.delaySec -= headlessDt;
+        state._queuedBubbles = (state._queuedBubbles || []).filter(qb => qb.delaySec > 0);
       }
       syncVisibleReactionsCache(state);
 
@@ -7627,6 +7816,15 @@ window.KLB = window.KLB || {};
       else delete state._activeCallbacks;
     }
   }
+
+  const AOE2_DEFAULT_BANTER_LINES = [
+    'GGs on Black Forest, somebody check my woodline!',
+    'Walling the choke point now before the scout rush lands.',
+    'Castle drop on the gold pile, classic late-afternoon chaos.',
+    'Who stole my two boars before Feudal Age?',
+    'Five minutes of booming and then straight to Imperial Paladins.',
+    'Someone pause the lobby if a flask starts bumping downstairs!'
+  ];
 
   const AOE2_BANTER_LINES = {
     peter_szijj: [
@@ -7734,7 +7932,7 @@ window.KLB = window.KLB || {};
             const rot = avail.filter(n => n.id !== state._lastAoe2SpeakerId);
             const pool = rot.length ? rot : avail;
             const spk = pool[Math.floor(Math.random() * pool.length)];
-            const lines = AOE2_BANTER_LINES[spk.id] || ['GGs on Black Forest!'];
+            const lines = AOE2_BANTER_LINES[spk.id] || AOE2_DEFAULT_BANTER_LINES;
             const line = pickFromShuffleBag(state, 'aoe2_' + spk.id, lines, s => s) || lines[0];
             const partnerIds = gamingNpcs.map(n => n.id).concat(playerHere ? [state.player.id] : []);
             pushBubble(state, spk.id, viewRoom, line, calcBubbleTtl(line), { convoId: 'aoe2_lobby', partnerIds });
@@ -8534,6 +8732,7 @@ window.KLB = window.KLB || {};
     rollDailyWeather,
     loadDialogueHistory,
     saveDialogueHistory,
+    flushDialogueHistory,
     resetDialogueHistory,
     getCurrentDialogueVibe,
     getTimeHours,
@@ -8597,6 +8796,7 @@ window.KLB = window.KLB || {};
     triggerRandomKLBEvent,
     getVisibleNPCReactions,
     getVisibleNPCActions,
+    syncVisibleReactionsCache,
     syncNPCSchedules,
     checkPermadeath,
     runAutonomousVerification

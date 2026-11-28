@@ -367,17 +367,30 @@
   }
 
   function createMuffledOutput(normalCutoff, headphoneCutoff = 420) {
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = ambienceState.headphonesOn ? headphoneCutoff : normalCutoff;
-    lp.connect(ensureAmbienceBusGain() || masterGain);
-    lp._isOneShotMuffle = true;
-    lp._activeTones = 0;
-    return lp;
+    return {
+      _isLazyMuffle: true,
+      normalCutoff,
+      headphoneCutoff,
+      node: null
+    };
   }
 
   function playAmbientTone(dest, type, freqStart, freqEnd, startTime, duration, peakGain) {
-    if (!ctx || !dest || peakGain <= 0.0001) return;
+    if (!ctx || !dest || !Number.isFinite(peakGain) || peakGain <= 0.0001) return;
+    let targetNode = dest;
+    if (dest._isLazyMuffle) {
+      if (!dest.node) {
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = ambienceState.headphonesOn ? dest.headphoneCutoff : dest.normalCutoff;
+        lp.connect(ensureAmbienceBusGain() || masterGain);
+        lp._isOneShotMuffle = true;
+        lp._activeTones = 0;
+        dest.node = lp;
+      }
+      targetNode = dest.node;
+    }
+
     const osc = ctx.createOscillator();
     osc.type = type;
     osc.frequency.setValueAtTime(Math.max(20, freqStart), startTime);
@@ -392,16 +405,19 @@
     env.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
     osc.connect(env);
-    env.connect(dest);
-    if (dest._isOneShotMuffle) {
-      dest._activeTones = (dest._activeTones || 0) + 1;
+    env.connect(targetNode);
+    if (targetNode._isOneShotMuffle) {
+      targetNode._activeTones = (targetNode._activeTones || 0) + 1;
     }
     osc.onended = () => {
       disconnectNodes([osc, env]);
-      if (dest._isOneShotMuffle) {
-        dest._activeTones = Math.max(0, (dest._activeTones || 1) - 1);
-        if (dest._activeTones === 0) {
-          disconnectNodes([dest]);
+      if (targetNode._isOneShotMuffle) {
+        targetNode._activeTones = Math.max(0, (targetNode._activeTones || 1) - 1);
+        if (targetNode._activeTones === 0) {
+          disconnectNodes([targetNode]);
+          if (dest._isLazyMuffle && dest.node === targetNode) {
+            dest.node = null;
+          }
         }
       }
     };
